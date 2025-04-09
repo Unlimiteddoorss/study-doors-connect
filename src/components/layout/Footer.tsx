@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import Logo from '../shared/Logo';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
@@ -43,6 +44,9 @@ const Footer = () => {
               </li>
               <li>
                 <Link to="/contact" className="hover:text-unlimited-light-blue transition-colors">تواصل معنا</Link>
+              </li>
+              <li>
+                <Link to="/apply" className="hover:text-unlimited-light-blue transition-colors">تقديم طلب التحاق</Link>
               </li>
             </ul>
           </div>

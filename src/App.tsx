@@ -18,6 +18,7 @@ import ManageStudents from "./pages/admin/ManageStudents";
 import ManageAgents from "./pages/admin/ManageAgents";
 import ManageUniversities from "./pages/admin/ManageUniversities";
 import ManageApplications from "./pages/admin/ManageApplications";
+import ManagePrograms from "./pages/admin/ManagePrograms";
 import AgentDashboard from "./pages/agent/AgentDashboard";
 import UserMessages from "./pages/messaging/UserMessages";
 
@@ -46,6 +47,7 @@ const App = () => (
           <Route path="/admin/agents" element={<ManageAgents />} />
           <Route path="/admin/universities" element={<ManageUniversities />} />
           <Route path="/admin/applications" element={<ManageApplications />} />
+          <Route path="/admin/programs" element={<ManagePrograms />} />
           
           {/* صفحات الوكلاء */}
           <Route path="/agent" element={<AgentDashboard />} />

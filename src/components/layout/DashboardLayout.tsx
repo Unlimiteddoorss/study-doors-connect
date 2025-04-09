@@ -1,6 +1,7 @@
 
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
+import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 
@@ -26,12 +27,36 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
       { label: 'لوحة التحكم', href: '/dashboard' },
       { label: 'طلباتي', href: '/dashboard/applications' },
     ];
+  } else if (pathname === '/admin') {
+    title = 'لوحة التحكم الإدارية';
+    breadcrumbs = [{ label: 'الرئيسية', href: '/' }, { label: 'لوحة التحكم الإدارية', href: '/admin' }];
+  } else if (pathname === '/admin/students') {
+    title = 'إدارة الطلاب';
+    breadcrumbs = [
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم الإدارية', href: '/admin' },
+      { label: 'إدارة الطلاب', href: '/admin/students' },
+    ];
+  } else if (pathname === '/admin/applications') {
+    title = 'إدارة طلبات التسجيل';
+    breadcrumbs = [
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم الإدارية', href: '/admin' },
+      { label: 'إدارة طلبات التسجيل', href: '/admin/applications' },
+    ];
+  } else if (pathname === '/admin/programs') {
+    title = 'إدارة البرامج الدراسية';
+    breadcrumbs = [
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم الإدارية', href: '/admin' },
+      { label: 'إدارة البرامج الدراسية', href: '/admin/programs' },
+    ];
   }
   // Add more conditions for different paths
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar userRole={userRole} />
+      {userRole === 'admin' ? <AdminSidebar /> : <Sidebar userRole={userRole} />}
       
       <div className="flex flex-col flex-1 lg:pr-[250px] transition-all duration-300">
         <DashboardHeader userRole={userRole} />
