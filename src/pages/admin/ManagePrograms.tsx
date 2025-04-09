@@ -20,7 +20,8 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
-  BookOpen
+  BookOpen,
+  Building
 } from 'lucide-react';
 import {
   Card,
