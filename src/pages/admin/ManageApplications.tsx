@@ -661,47 +661,25 @@ const ApplicationsTable = ({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        
-                        {application.status !== 'processing' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'processing')}>
-                            <Clock className="h-4 w-4 mr-2" />
-                            بدء المعالجة
-                          </DropdownMenuItem>
-                        )}
-                        
                         {application.status !== 'approved' && (
                           <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'approved')}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
+                            <CheckCircle className="h-4 w-4 mr-2 text-unlimited-success" />
                             قبول الطلب
                           </DropdownMenuItem>
                         )}
-                        
                         {application.status !== 'rejected' && (
                           <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'rejected')}>
-                            <X className="h-4 w-4 mr-2" />
+                            <X className="h-4 w-4 mr-2 text-unlimited-danger" />
                             رفض الطلب
                           </DropdownMenuItem>
                         )}
-                        
-                        {application.status !== 'completed' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'completed')}>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            إكمال الطلب
-                          </DropdownMenuItem>
-                        )}
-                        
                         {application.status !== 'archived' && (
                           <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'archived')}>
                             <Archive className="h-4 w-4 mr-2" />
                             أرشفة الطلب
                           </DropdownMenuItem>
                         )}
-                        
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" />
-                          تحرير
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-unlimited-danger focus:text-unlimited-danger"
                           onClick={() => handleDeleteApplication(application.id)}

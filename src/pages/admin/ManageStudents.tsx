@@ -44,82 +44,84 @@ type Student = {
   name: string;
   email: string;
   phone: string;
-  country: string;
-  applications: number;
-  status: 'active' | 'inactive' | 'pending';
+  nationality: string;
+  program: string;
+  university: string;
+  status: 'active' | 'inactive' | 'pending' | 'graduated';
   registrationDate: string;
+  agentName?: string;
 };
 
 const initialStudents: Student[] = [
   {
     id: 'STD-001',
     name: 'أحمد محمد',
-    email: 'ahmad@example.com',
+    email: 'ahmed@example.com',
     phone: '+966 50 123 4567',
-    country: 'السعودية',
-    applications: 3,
+    nationality: 'سعودي',
+    program: 'الطب البشري',
+    university: 'جامعة إسطنبول',
     status: 'active',
     registrationDate: '2023-01-15',
+    agentName: 'محمد العلي',
   },
   {
     id: 'STD-002',
     name: 'سارة عبدالله',
     email: 'sara@example.com',
-    phone: '+971 55 123 4567',
-    country: 'الإمارات',
-    applications: 1,
+    phone: '+966 55 987 6543',
+    nationality: 'سعودية',
+    program: 'طب الأسنان',
+    university: 'جامعة وارسو',
     status: 'active',
     registrationDate: '2023-02-20',
   },
   {
     id: 'STD-003',
-    name: 'محمد عبدالرحمن',
-    email: 'mohammad@example.com',
-    phone: '+965 60 123 4567',
-    country: 'الكويت',
-    applications: 2,
-    status: 'pending',
+    name: 'خالد عمر',
+    email: 'khaled@example.com',
+    phone: '+971 50 222 3333',
+    nationality: 'إماراتي',
+    program: 'هندسة البرمجيات',
+    university: 'جامعة براغ',
+    status: 'inactive',
     registrationDate: '2023-03-05',
+    agentName: 'خالد الأحمد',
   },
   {
     id: 'STD-004',
     name: 'فاطمة علي',
     email: 'fatima@example.com',
-    phone: '+974 33 123 4567',
-    country: 'قطر',
-    applications: 0,
-    status: 'inactive',
+    phone: '+965 90 111 2222',
+    nationality: 'كويتية',
+    program: 'علوم الحاسوب',
+    university: 'جامعة بودابست',
+    status: 'active',
     registrationDate: '2023-03-15',
   },
   {
     id: 'STD-005',
-    name: 'خالد أحمد',
-    email: 'khalid@example.com',
-    phone: '+973 35 123 4567',
-    country: 'البحرين',
-    applications: 1,
-    status: 'active',
-    registrationDate: '2023-04-01',
+    name: 'محمد أحمد',
+    email: 'mohammed@example.com',
+    phone: '+20 10 555 6666',
+    nationality: 'مصري',
+    program: 'الصيدلة',
+    university: 'جامعة أنقرة',
+    status: 'graduated',
+    registrationDate: '2022-09-10',
+    agentName: 'سارة المحمود',
   },
   {
     id: 'STD-006',
     name: 'نورة سعيد',
     email: 'noura@example.com',
-    phone: '+968 99 123 4567',
-    country: 'عمان',
-    applications: 2,
-    status: 'active',
-    registrationDate: '2023-04-10',
-  },
-  {
-    id: 'STD-007',
-    name: 'عمر حسن',
-    email: 'omar@example.com',
-    phone: '+962 77 123 4567',
-    country: 'الأردن',
-    applications: 1,
+    phone: '+962 77 888 9999',
+    nationality: 'أردنية',
+    program: 'إدارة الأعمال',
+    university: 'جامعة إسطنبول',
     status: 'pending',
-    registrationDate: '2023-04-15',
+    registrationDate: '2023-04-01',
+    agentName: 'فهد الراشد',
   },
 ];
 
@@ -127,11 +129,13 @@ const statusConfig = {
   active: { label: 'نشط', color: 'bg-unlimited-success text-white' },
   inactive: { label: 'غير نشط', color: 'bg-unlimited-gray text-white' },
   pending: { label: 'قيد التفعيل', color: 'bg-unlimited-warning text-white' },
+  graduated: { label: 'خريج', color: 'bg-unlimited-blue text-white' },
 };
 
 const ManageStudents = () => {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [searchQuery, setSearchQuery] = useState('');
+  const [nationalityFilter, setNationalityFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
@@ -143,10 +147,14 @@ const ManageStudents = () => {
       student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.id.toLowerCase().includes(searchQuery.toLowerCase());
       
+    const matchesNationality = nationalityFilter === 'all' || student.nationality === nationalityFilter;
     const matchesStatus = statusFilter === 'all' || student.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesNationality && matchesStatus;
   });
+
+  // Get unique nationalities for filters
+  const nationalities = Array.from(new Set(students.map(student => student.nationality)));
 
   const handleAddStudent = () => {
     // محاكاة إضافة طالب جديد
@@ -182,27 +190,6 @@ const ManageStudents = () => {
     });
   };
 
-  const toggleStudentStatus = (id: string) => {
-    setStudents(
-      students.map((student) =>
-        student.id === id
-          ? {
-              ...student,
-              status: student.status === 'active' ? 'inactive' : 'active',
-            }
-          : student
-      )
-    );
-    
-    const student = students.find((s) => s.id === id);
-    if (student) {
-      toast({
-        title: "تم تغيير الحالة",
-        description: `تم تغيير حالة الطالب ${student.name} بنجاح`,
-      });
-    }
-  };
-
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
@@ -217,7 +204,7 @@ const ManageStudents = () => {
                   إضافة طالب
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>إضافة طالب جديد</DialogTitle>
                   <DialogDescription>
@@ -238,7 +225,19 @@ const ManageStudents = () => {
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الدولة</label>
+                    <label className="text-right col-span-1">الجنسية</label>
+                    <Input className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">البرنامج</label>
+                    <Input className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">الجامعة</label>
+                    <Input className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">الوكيل</label>
                     <Input className="col-span-3" />
                   </div>
                 </div>
@@ -304,17 +303,32 @@ const ManageStudents = () => {
             />
           </div>
           
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="الحالة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">جميع الحالات</SelectItem>
-              <SelectItem value="active">نشط</SelectItem>
-              <SelectItem value="inactive">غير نشط</SelectItem>
-              <SelectItem value="pending">قيد التفعيل</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-row gap-2 items-center">
+            <Select value={nationalityFilter} onValueChange={setNationalityFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="الجنسية" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الجنسيات</SelectItem>
+                {nationalities.map((nationality) => (
+                  <SelectItem key={nationality} value={nationality}>{nationality}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="active">نشط</SelectItem>
+                <SelectItem value="inactive">غير نشط</SelectItem>
+                <SelectItem value="pending">قيد التفعيل</SelectItem>
+                <SelectItem value="graduated">خريج</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         <div className="rounded-md border">
@@ -323,10 +337,11 @@ const ManageStudents = () => {
               <TableRow>
                 <TableHead className="w-[100px]">رقم الطالب</TableHead>
                 <TableHead>الاسم</TableHead>
-                <TableHead>البريد الإلكتروني</TableHead>
-                <TableHead className="hidden md:table-cell">الهاتف</TableHead>
-                <TableHead className="hidden md:table-cell">الدولة</TableHead>
-                <TableHead className="hidden md:table-cell">طلبات</TableHead>
+                <TableHead className="hidden md:table-cell">البريد الإلكتروني</TableHead>
+                <TableHead className="hidden lg:table-cell">الهاتف</TableHead>
+                <TableHead className="hidden lg:table-cell">الجنسية</TableHead>
+                <TableHead className="hidden lg:table-cell">البرنامج</TableHead>
+                <TableHead className="hidden md:table-cell">الجامعة</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead className="text-left">الإجراءات</TableHead>
               </TableRow>
@@ -334,7 +349,7 @@ const ManageStudents = () => {
             <TableBody>
               {filteredStudents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center h-40 text-unlimited-gray">
+                  <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
                     لا توجد بيانات متطابقة مع البحث
                   </TableCell>
                 </TableRow>
@@ -342,11 +357,19 @@ const ManageStudents = () => {
                 filteredStudents.map((student) => (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.id}</TableCell>
-                    <TableCell>{student.name}</TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell className="hidden md:table-cell">{student.phone}</TableCell>
-                    <TableCell className="hidden md:table-cell">{student.country}</TableCell>
-                    <TableCell className="hidden md:table-cell">{student.applications}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p>{student.name}</p>
+                        {student.agentName && (
+                          <p className="text-xs text-unlimited-gray">وكيل: {student.agentName}</p>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">{student.email}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{student.phone}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{student.nationality}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{student.program}</TableCell>
+                    <TableCell className="hidden md:table-cell">{student.university}</TableCell>
                     <TableCell>
                       <Badge className={statusConfig[student.status].color}>
                         {statusConfig[student.status].label}
@@ -369,11 +392,9 @@ const ManageStudents = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>خيارات الطالب</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => toggleStudentStatus(student.id)}>
-                              {student.status === 'active' ? 'تعطيل الحساب' : 'تفعيل الحساب'}
-                            </DropdownMenuItem>
+                            <DropdownMenuItem>عرض التفاصيل</DropdownMenuItem>
+                            <DropdownMenuItem>عرض الطلبات</DropdownMenuItem>
                             <DropdownMenuItem>إرسال رسالة</DropdownMenuItem>
-                            <DropdownMenuItem>إعادة تعيين كلمة المرور</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-unlimited-danger focus:text-unlimited-danger"

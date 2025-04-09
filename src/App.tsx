@@ -41,7 +41,7 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/messages" element={<UserMessages />} />
           
-          {/* صفحات الإدارة */}
+          {/* Admin routes */}
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/students" element={<ManageStudents />} />
           <Route path="/admin/agents" element={<ManageAgents />} />
@@ -49,7 +49,7 @@ const App = () => (
           <Route path="/admin/applications" element={<ManageApplications />} />
           <Route path="/admin/programs" element={<ManagePrograms />} />
           
-          {/* صفحات الوكلاء */}
+          {/* Agent routes */}
           <Route path="/agent" element={<AgentDashboard />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

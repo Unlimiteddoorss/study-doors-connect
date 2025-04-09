@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { CheckCircle, Download, Edit, Eye, Globe, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
+import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -42,125 +42,89 @@ import { useToast } from '@/hooks/use-toast';
 type University = {
   id: string;
   name: string;
+  nameAr: string;
   country: string;
   city: string;
   website: string;
-  programs: number;
-  students: number;
+  programsCount: number;
+  studentsCount: number;
   ranking: number;
-  featured: boolean;
   status: 'active' | 'inactive';
 };
 
 const initialUniversities: University[] = [
   {
     id: 'UNI-001',
-    name: 'جامعة أكسفورد',
-    country: 'المملكة المتحدة',
-    city: 'أكسفورد',
-    website: 'https://www.ox.ac.uk',
-    programs: 45,
-    students: 87,
-    ranking: 5,
-    featured: true,
+    name: 'Istanbul University',
+    nameAr: 'جامعة إسطنبول',
+    country: 'Turkey',
+    city: 'Istanbul',
+    website: 'https://www.istanbul.edu.tr',
+    programsCount: 42,
+    studentsCount: 156,
+    ranking: 500,
     status: 'active',
   },
   {
     id: 'UNI-002',
-    name: 'جامعة هارفارد',
-    country: 'الولايات المتحدة',
-    city: 'كامبريدج',
-    website: 'https://www.harvard.edu',
-    programs: 52,
-    students: 120,
-    ranking: 2,
-    featured: true,
+    name: 'Warsaw University',
+    nameAr: 'جامعة وارسو',
+    country: 'Poland',
+    city: 'Warsaw',
+    website: 'https://www.uw.edu.pl',
+    programsCount: 28,
+    studentsCount: 87,
+    ranking: 320,
     status: 'active',
   },
   {
     id: 'UNI-003',
-    name: 'جامعة تورنتو',
-    country: 'كندا',
-    city: 'تورنتو',
-    website: 'https://www.utoronto.ca',
-    programs: 38,
-    students: 65,
-    ranking: 18,
-    featured: false,
+    name: 'Budapest University',
+    nameAr: 'جامعة بودابست',
+    country: 'Hungary',
+    city: 'Budapest',
+    website: 'https://www.elte.hu',
+    programsCount: 35,
+    studentsCount: 103,
+    ranking: 450,
     status: 'active',
   },
   {
     id: 'UNI-004',
-    name: 'جامعة ملبورن',
-    country: 'أستراليا',
-    city: 'ملبورن',
-    website: 'https://www.unimelb.edu.au',
-    programs: 42,
-    students: 54,
-    ranking: 32,
-    featured: false,
-    status: 'active',
+    name: 'Prague University',
+    nameAr: 'جامعة براغ',
+    country: 'Czech Republic',
+    city: 'Prague',
+    website: 'https://cuni.cz',
+    programsCount: 22,
+    studentsCount: 65,
+    ranking: 380,
+    status: 'inactive',
   },
   {
     id: 'UNI-005',
-    name: 'جامعة طوكيو',
-    country: 'اليابان',
-    city: 'طوكيو',
-    website: 'https://www.u-tokyo.ac.jp',
-    programs: 30,
-    students: 42,
-    ranking: 23,
-    featured: false,
+    name: 'Ankara University',
+    nameAr: 'جامعة أنقرة',
+    country: 'Turkey',
+    city: 'Ankara',
+    website: 'https://www.ankara.edu.tr',
+    programsCount: 30,
+    studentsCount: 92,
+    ranking: 550,
     status: 'active',
   },
-  {
-    id: 'UNI-006',
-    name: 'جامعة السوربون',
-    country: 'فرنسا',
-    city: 'باريس',
-    website: 'https://www.sorbonne-universite.fr',
-    programs: 35,
-    students: 48,
-    ranking: 45,
-    featured: true,
-    status: 'active',
-  },
-  {
-    id: 'UNI-007',
-    name: 'جامعة برلين الحرة',
-    country: 'ألمانيا',
-    city: 'برلين',
-    website: 'https://www.fu-berlin.de',
-    programs: 28,
-    students: 36,
-    ranking: 86,
-    featured: false,
-    status: 'inactive',
-  },
-];
-
-const countryOptions = [
-  'الولايات المتحدة',
-  'المملكة المتحدة',
-  'كندا',
-  'أستراليا',
-  'ألمانيا',
-  'فرنسا',
-  'اليابان',
-  'الصين',
-  'سنغافورة',
-  'هولندا',
 ];
 
 const statusConfig = {
-  active: { label: 'نشطة', color: 'bg-unlimited-success text-white' },
-  inactive: { label: 'غير نشطة', color: 'bg-unlimited-gray text-white' },
+  active: { label: 'نشط', color: 'bg-unlimited-success text-white' },
+  inactive: { label: 'غير نشط', color: 'bg-unlimited-gray text-white' },
 };
 
 const ManageUniversities = () => {
   const [universities, setUniversities] = useState<University[]>(initialUniversities);
   const [searchQuery, setSearchQuery] = useState('');
   const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -168,13 +132,17 @@ const ManageUniversities = () => {
   const filteredUniversities = universities.filter((university) => {
     const matchesSearch = 
       university.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      university.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      university.id.toLowerCase().includes(searchQuery.toLowerCase());
+      university.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      university.country.toLowerCase().includes(searchQuery.toLowerCase());
       
     const matchesCountry = countryFilter === 'all' || university.country === countryFilter;
+    const matchesStatus = statusFilter === 'all' || university.status === statusFilter;
     
-    return matchesSearch && matchesCountry;
+    return matchesSearch && matchesCountry && matchesStatus;
   });
+
+  // Get unique countries for filters
+  const countries = Array.from(new Set(universities.map(university => university.country)));
 
   const handleAddUniversity = () => {
     // محاكاة إضافة جامعة جديدة
@@ -226,28 +194,7 @@ const ManageUniversities = () => {
     if (university) {
       toast({
         title: "تم تغيير الحالة",
-        description: `تم تغيير حالة جامعة ${university.name} بنجاح`,
-      });
-    }
-  };
-
-  const toggleFeatured = (id: string) => {
-    setUniversities(
-      universities.map((university) =>
-        university.id === id
-          ? {
-              ...university,
-              featured: !university.featured,
-            }
-          : university
-      )
-    );
-    
-    const university = universities.find((u) => u.id === id);
-    if (university) {
-      toast({
-        title: university.featured ? "تم إلغاء تمييز الجامعة" : "تم تمييز الجامعة",
-        description: `تم تحديث حالة جامعة ${university.name} بنجاح`,
+        description: `تم تغيير حالة الجامعة ${university.name} بنجاح`,
       });
     }
   };
@@ -266,7 +213,7 @@ const ManageUniversities = () => {
                   إضافة جامعة
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
+              <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                   <DialogTitle>إضافة جامعة جديدة</DialogTitle>
                   <DialogDescription>
@@ -275,21 +222,16 @@ const ManageUniversities = () => {
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">اسم الجامعة</label>
+                    <label className="text-right col-span-1">الاسم (بالإنجليزية)</label>
+                    <Input className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">الاسم (بالعربية)</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">الدولة</label>
-                    <Select>
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder="اختر دولة" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {countryOptions.map((country) => (
-                          <SelectItem key={country} value={country}>{country}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">المدينة</label>
@@ -297,11 +239,22 @@ const ManageUniversities = () => {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">الموقع الإلكتروني</label>
-                    <Input className="col-span-3" placeholder="https://" />
+                    <Input type="url" className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">التصنيف العالمي</label>
                     <Input type="number" className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">شعار الجامعة</label>
+                    <div className="col-span-3">
+                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+                        <Button variant="outline" className="w-full">
+                          <Upload className="h-4 w-4 mr-2" />
+                          اختر ملفاً
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <DialogFooter>
@@ -366,17 +319,30 @@ const ManageUniversities = () => {
             />
           </div>
           
-          <Select value={countryFilter} onValueChange={setCountryFilter}>
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="الدولة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">جميع الدول</SelectItem>
-              {countryOptions.map((country) => (
-                <SelectItem key={country} value={country}>{country}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex flex-row gap-2 items-center">
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="الدولة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الدول</SelectItem>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>{country}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="active">نشط</SelectItem>
+                <SelectItem value="inactive">غير نشط</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
         
         <div className="rounded-md border">
@@ -384,13 +350,12 @@ const ManageUniversities = () => {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">رقم الجامعة</TableHead>
-                <TableHead>الاسم</TableHead>
+                <TableHead>اسم الجامعة</TableHead>
                 <TableHead className="hidden md:table-cell">الدولة</TableHead>
-                <TableHead className="hidden md:table-cell">المدينة</TableHead>
-                <TableHead className="hidden lg:table-cell">البرامج</TableHead>
-                <TableHead className="hidden lg:table-cell">الطلاب</TableHead>
+                <TableHead className="hidden lg:table-cell">المدينة</TableHead>
+                <TableHead className="hidden lg:table-cell">عدد البرامج</TableHead>
+                <TableHead className="hidden md:table-cell">عدد الطلاب</TableHead>
                 <TableHead className="hidden md:table-cell">التصنيف</TableHead>
-                <TableHead>مميزة</TableHead>
                 <TableHead>الحالة</TableHead>
                 <TableHead className="text-left">الإجراءات</TableHead>
               </TableRow>
@@ -398,7 +363,7 @@ const ManageUniversities = () => {
             <TableBody>
               {filteredUniversities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center h-40 text-unlimited-gray">
+                  <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
                     لا توجد بيانات متطابقة مع البحث
                   </TableCell>
                 </TableRow>
@@ -406,17 +371,17 @@ const ManageUniversities = () => {
                 filteredUniversities.map((university) => (
                   <TableRow key={university.id}>
                     <TableCell className="font-medium">{university.id}</TableCell>
-                    <TableCell>{university.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">{university.country}</TableCell>
-                    <TableCell className="hidden md:table-cell">{university.city}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{university.programs}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{university.students}</TableCell>
-                    <TableCell className="hidden md:table-cell">{university.ranking}</TableCell>
                     <TableCell>
-                      <Badge variant={university.featured ? "default" : "outline"}>
-                        {university.featured ? 'نعم' : 'لا'}
-                      </Badge>
+                      <div>
+                        <p className="font-medium">{university.nameAr}</p>
+                        <p className="text-xs text-unlimited-gray">{university.name}</p>
+                      </div>
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">{university.country}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{university.city}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{university.programsCount}</TableCell>
+                    <TableCell className="hidden md:table-cell">{university.studentsCount}</TableCell>
+                    <TableCell className="hidden md:table-cell">{university.ranking}</TableCell>
                     <TableCell>
                       <Badge className={statusConfig[university.status].color}>
                         {statusConfig[university.status].label}
@@ -430,14 +395,6 @@ const ManageUniversities = () => {
                         <Button variant="ghost" size="icon" className="h-8 w-8">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => window.open(university.website, '_blank')}
-                        >
-                          <Globe className="h-4 w-4" />
-                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -450,11 +407,9 @@ const ManageUniversities = () => {
                             <DropdownMenuItem onClick={() => toggleUniversityStatus(university.id)}>
                               {university.status === 'active' ? 'تعطيل الجامعة' : 'تفعيل الجامعة'}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toggleFeatured(university.id)}>
-                              {university.featured ? 'إلغاء تمييز الجامعة' : 'تمييز الجامعة'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>إدارة برامج الجامعة</DropdownMenuItem>
-                            <DropdownMenuItem>عرض طلبات الجامعة</DropdownMenuItem>
+                            <DropdownMenuItem>عرض البرامج</DropdownMenuItem>
+                            <DropdownMenuItem>عرض الطلاب</DropdownMenuItem>
+                            <DropdownMenuItem>زيارة الموقع الرسمي</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-unlimited-danger focus:text-unlimited-danger"
