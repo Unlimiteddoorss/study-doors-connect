@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 const CTASection = () => {
@@ -10,7 +11,7 @@ const CTASection = () => {
             <Link to="/register">إنشاء حساب</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-            <Link to="/contact" className="\u0627\u062C\u0639\u0644 \u0644\u0648\u0646 \u0627\u0644\u0645\u0633\u062A\u0637\u064A\u0644 \u0623\u0628\u064A\u0636 \u0645\u062B\u0644 \u0644\u0648\u0646 \u0647\u0630\u0647 \u0627\u0644\u0645\u0633\u062A\u0637\u064A\u0644  \u0625\u0646\u0634\u0627\u0621 \u062D\u0633\u0627\u0628">تحدث مع مستشار</Link>
+            <Link to="/contact">تحدث مع مستشار</Link>
           </Button>
         </div>
       </div>
