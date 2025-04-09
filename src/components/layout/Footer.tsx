@@ -1,19 +1,14 @@
-
 import { Link } from 'react-router-dom';
 import Logo from '../shared/Logo';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
-
 const Footer = () => {
-  return (
-    <footer className="bg-unlimited-dark-blue text-white pt-12 pb-6">
+  return <footer className="bg-unlimited-dark-blue text-white pt-12 pb-6">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo and About */}
           <div>
             <Logo />
-            <p className="mt-4 text-unlimited-light-blue/80">
-              منصة "أبواب غير محدودة" هي بوابتك للدراسة في الخارج، نقدم خدمات متكاملة للطلاب الراغبين بالدراسة في الجامعات العالمية.
-            </p>
+            <p className="mt-4 text-unlimited-light-blue/80">منصة &quot;أبواب بلا حدود&quot; هي بوابتك للدراسة في الخارج، نقدم خدمات متكاملة للطلاب الراغبين بالدراسة في الجامعات العالمية.</p>
             <div className="flex mt-4 space-x-4 rtl:space-x-reverse">
               <a href="#" className="text-white hover:text-unlimited-light-blue">
                 <Facebook size={20} />
@@ -104,8 +99,6 @@ const Footer = () => {
           <p>© {new Date().getFullYear()} أبواب غير محدودة. جميع الحقوق محفوظة.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
