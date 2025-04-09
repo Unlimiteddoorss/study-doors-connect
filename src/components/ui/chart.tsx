@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -353,6 +354,194 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+// Create wrapper components for the different chart types
+const AreaChart = ({ 
+  data, 
+  index, 
+  categories, 
+  colors, 
+  valueFormatter, 
+  className,
+  ...props
+}: {
+  data: any[]
+  index: string
+  categories: string[]
+  colors?: string[]
+  valueFormatter?: (value: number) => string
+  className?: string
+} & Omit<React.ComponentPropsWithoutRef<typeof ChartContainer>, "config" | "children">) => {
+  const config = categories.reduce<ChartConfig>((acc, category, i) => {
+    acc[category] = { 
+      color: colors?.[i % (colors?.length || 1)],
+      label: category 
+    };
+    return acc;
+  }, {});
+
+  return (
+    <ChartContainer config={config} className={className} {...props}>
+      <RechartsPrimitive.AreaChart data={data}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+        <RechartsPrimitive.XAxis dataKey={index} />
+        <RechartsPrimitive.YAxis />
+        <ChartTooltip content={<ChartTooltipContent formatter={(value) => valueFormatter ? valueFormatter(Number(value)) : value} />} />
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Area 
+            key={category}
+            type="monotone" 
+            dataKey={category} 
+            stroke={colors?.[i % (colors?.length || 1)] || "#8884d8"}
+            fill={colors?.[i % (colors?.length || 1)] || "#8884d8"}
+            fillOpacity={0.3}
+          />
+        ))}
+        <ChartLegend content={<ChartLegendContent />} />
+      </RechartsPrimitive.AreaChart>
+    </ChartContainer>
+  );
+};
+
+const BarChart = ({ 
+  data, 
+  index, 
+  categories, 
+  colors, 
+  valueFormatter, 
+  className,
+  ...props
+}: {
+  data: any[]
+  index: string
+  categories: string[]
+  colors?: string[]
+  valueFormatter?: (value: number) => string
+  className?: string
+} & Omit<React.ComponentPropsWithoutRef<typeof ChartContainer>, "config" | "children">) => {
+  const config = categories.reduce<ChartConfig>((acc, category, i) => {
+    acc[category] = { 
+      color: colors?.[i % (colors?.length || 1)],
+      label: category 
+    };
+    return acc;
+  }, {});
+
+  return (
+    <ChartContainer config={config} className={className} {...props}>
+      <RechartsPrimitive.BarChart data={data}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+        <RechartsPrimitive.XAxis dataKey={index} />
+        <RechartsPrimitive.YAxis />
+        <ChartTooltip content={<ChartTooltipContent formatter={(value) => valueFormatter ? valueFormatter(Number(value)) : value} />} />
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Bar 
+            key={category}
+            dataKey={category} 
+            fill={colors?.[i % (colors?.length || 1)] || "#8884d8"} 
+          />
+        ))}
+        <ChartLegend content={<ChartLegendContent />} />
+      </RechartsPrimitive.BarChart>
+    </ChartContainer>
+  );
+};
+
+const LineChart = ({ 
+  data, 
+  index, 
+  categories, 
+  colors, 
+  valueFormatter, 
+  className,
+  ...props
+}: {
+  data: any[]
+  index: string
+  categories: string[]
+  colors?: string[]
+  valueFormatter?: (value: number) => string
+  className?: string
+} & Omit<React.ComponentPropsWithoutRef<typeof ChartContainer>, "config" | "children">) => {
+  const config = categories.reduce<ChartConfig>((acc, category, i) => {
+    acc[category] = { 
+      color: colors?.[i % (colors?.length || 1)],
+      label: category 
+    };
+    return acc;
+  }, {});
+
+  return (
+    <ChartContainer config={config} className={className} {...props}>
+      <RechartsPrimitive.LineChart data={data}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+        <RechartsPrimitive.XAxis dataKey={index} />
+        <RechartsPrimitive.YAxis />
+        <ChartTooltip content={<ChartTooltipContent formatter={(value) => valueFormatter ? valueFormatter(Number(value)) : value} />} />
+        {categories.map((category, i) => (
+          <RechartsPrimitive.Line 
+            key={category}
+            type="monotone" 
+            dataKey={category} 
+            stroke={colors?.[i % (colors?.length || 1)] || "#8884d8"} 
+          />
+        ))}
+        <ChartLegend content={<ChartLegendContent />} />
+      </RechartsPrimitive.LineChart>
+    </ChartContainer>
+  );
+};
+
+const PieChart = ({ 
+  data, 
+  index, 
+  category,
+  colors, 
+  valueFormatter, 
+  className,
+  ...props
+}: {
+  data: any[]
+  index: string
+  category: string
+  colors?: string[]
+  valueFormatter?: (value: number) => string
+  className?: string
+} & Omit<React.ComponentPropsWithoutRef<typeof ChartContainer>, "config" | "children">) => {
+  const config = data.reduce<ChartConfig>((acc, item, i) => {
+    const name = String(item[index]);
+    acc[name] = { 
+      color: colors?.[i % (colors?.length || 1)],
+      label: name 
+    };
+    return acc;
+  }, {});
+
+  return (
+    <ChartContainer config={config} className={className} {...props}>
+      <RechartsPrimitive.PieChart>
+        <ChartTooltip content={<ChartTooltipContent formatter={(value) => valueFormatter ? valueFormatter(Number(value)) : value} />} />
+        <RechartsPrimitive.Pie
+          data={data}
+          nameKey={index}
+          dataKey={category}
+          cx="50%"
+          cy="50%"
+          outerRadius={80}
+          fill="#8884d8"
+        >
+          {data.map((entry, i) => (
+            <RechartsPrimitive.Cell 
+              key={`cell-${i}`} 
+              fill={colors?.[i % (colors?.length || 1)] || `#${Math.floor(Math.random()*16777215).toString(16)}`} 
+            />
+          ))}
+        </RechartsPrimitive.Pie>
+        <ChartLegend content={<ChartLegendContent />} />
+      </RechartsPrimitive.PieChart>
+    </ChartContainer>
+  );
+};
+
 export {
   ChartContainer,
   ChartTooltip,
@@ -360,4 +549,8 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  AreaChart,
+  BarChart,
+  LineChart,
+  PieChart
 }

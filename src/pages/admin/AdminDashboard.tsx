@@ -85,7 +85,6 @@ const AdminDashboard = () => {
                   <div className="flex space-x-2 rtl:space-x-reverse">
                     <TabsTrigger
                       value="daily"
-                      variant="outline"
                       onClick={() => setPeriod('daily')}
                       className={period === 'daily' ? 'bg-unlimited-blue text-white' : ''}
                     >
@@ -93,7 +92,6 @@ const AdminDashboard = () => {
                     </TabsTrigger>
                     <TabsTrigger
                       value="weekly"
-                      variant="outline"
                       onClick={() => setPeriod('weekly')}
                       className={period === 'weekly' ? 'bg-unlimited-blue text-white' : ''}
                     >
@@ -101,7 +99,6 @@ const AdminDashboard = () => {
                     </TabsTrigger>
                     <TabsTrigger
                       value="monthly"
-                      variant="outline"
                       onClick={() => setPeriod('monthly')}
                       className={period === 'monthly' ? 'bg-unlimited-blue text-white' : ''}
                     >

@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, User, Search, MoreVertical, Paperclip, Image, File, X } from 'lucide-react';
+import { Send, User, Search, MoreVertical, Paperclip, Image, File, X, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -490,7 +490,7 @@ const UserMessages = () => {
             <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
               <div className="text-center">
                 <div className="bg-unlimited-light-blue rounded-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
-                  <MessageCircle className="h-12 w-12 text-unlimited-blue" />
+                  <MessageSquare className="h-12 w-12 text-unlimited-blue" />
                 </div>
                 <h3 className="text-xl font-medium text-unlimited-dark-blue mb-2">اختر محادثة</h3>
                 <p className="text-unlimited-gray max-w-md">
@@ -591,3 +591,4 @@ const UserMessages = () => {
 };
 
 export default UserMessages;
+
