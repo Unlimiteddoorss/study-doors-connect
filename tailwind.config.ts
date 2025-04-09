@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom colors
+				"unlimited-blue": "#1677CA", 
+				"unlimited-dark-blue": "#0A2B5E", 
+				"unlimited-light-blue": "#EBF5FF",
+				"unlimited-gray": "#4A5568",
+				"unlimited-light-gray": "#F8FAFC",
+				"unlimited-success": "#10B981",
+				"unlimited-warning": "#F59E0B",
+				"unlimited-danger": "#EF4444",
+				"unlimited-info": "#3B82F6",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -89,6 +100,10 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			fontFamily: {
+				montserrat: ['Montserrat', 'sans-serif'],
+				roboto: ['Roboto', 'sans-serif']
 			}
 		}
 	},
