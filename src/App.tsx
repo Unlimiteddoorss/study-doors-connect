@@ -21,6 +21,8 @@ import ManageApplications from "./pages/admin/ManageApplications";
 import ManagePrograms from "./pages/admin/ManagePrograms";
 import AgentDashboard from "./pages/agent/AgentDashboard";
 import UserMessages from "./pages/messaging/UserMessages";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AdminNotifications from "./pages/admin/AdminNotifications";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,8 @@ const App = () => (
           <Route path="/admin/universities" element={<ManageUniversities />} />
           <Route path="/admin/applications" element={<ManageApplications />} />
           <Route path="/admin/programs" element={<ManagePrograms />} />
+          <Route path="/admin/messages" element={<AdminMessages />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
           
           {/* Agent routes */}
           <Route path="/agent" element={<AgentDashboard />} />

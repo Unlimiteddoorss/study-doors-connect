@@ -10,9 +10,11 @@ import {
   MessageSquare,
   Settings,
   Users,
-  UserCog
+  UserCog,
+  Bell
 } from 'lucide-react';
 import Logo from '../shared/Logo';
+import { Badge } from '../ui/badge';
 
 const AdminSidebar = () => {
   const { pathname } = useLocation();
@@ -103,6 +105,42 @@ const AdminSidebar = () => {
 
           <div className="pt-4 mt-4 border-t border-gray-200">
             <h3 className="px-3 text-xs font-semibold text-unlimited-gray uppercase tracking-wider">
+              التواصل والإشعارات
+            </h3>
+          </div>
+          
+          <Link
+            to="/admin/messages"
+            className={`flex items-center justify-between px-3 py-2 rounded-md ${
+              isActive('/admin/messages')
+                ? 'bg-unlimited-blue text-white'
+                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
+            }`}
+          >
+            <div className="flex items-center">
+              <MessageSquare className="h-5 w-5 ml-2" />
+              <span>نظام المراسلات</span>
+            </div>
+            <Badge className="bg-unlimited-warning text-white">12</Badge>
+          </Link>
+          
+          <Link
+            to="/admin/notifications"
+            className={`flex items-center justify-between px-3 py-2 rounded-md ${
+              isActive('/admin/notifications')
+                ? 'bg-unlimited-blue text-white'
+                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
+            }`}
+          >
+            <div className="flex items-center">
+              <Bell className="h-5 w-5 ml-2" />
+              <span>الإشعارات</span>
+            </div>
+            <Badge className="bg-unlimited-danger text-white">5</Badge>
+          </Link>
+          
+          <div className="pt-4 mt-4 border-t border-gray-200">
+            <h3 className="px-3 text-xs font-semibold text-unlimited-gray uppercase tracking-wider">
               إضافي
             </h3>
           </div>
@@ -117,18 +155,6 @@ const AdminSidebar = () => {
           >
             <BarChart3 className="h-5 w-5 ml-2" />
             <span>التقارير والإحصائيات</span>
-          </Link>
-          
-          <Link
-            to="/admin/messages"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/messages')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <MessageSquare className="h-5 w-5 ml-2" />
-            <span>نظام المراسلات</span>
           </Link>
           
           <Link
