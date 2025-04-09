@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
@@ -572,6 +573,7 @@ const StudentApplicationForm = () => {
                                     onSelect={field.onChange}
                                     disabled={(date) => date > new Date()}
                                     initialFocus
+                                    className="p-3 pointer-events-auto"
                                   />
                                 </PopoverContent>
                               </Popover>
@@ -611,6 +613,7 @@ const StudentApplicationForm = () => {
                                     onSelect={field.onChange}
                                     disabled={(date) => date < new Date()}
                                     initialFocus
+                                    className="p-3 pointer-events-auto"
                                   />
                                 </PopoverContent>
                               </Popover>
@@ -652,6 +655,7 @@ const StudentApplicationForm = () => {
                                       date > new Date() || date > new Date(new Date().setFullYear(new Date().getFullYear() - 14))
                                     }
                                     initialFocus
+                                    className="p-3 pointer-events-auto"
                                   />
                                 </PopoverContent>
                               </Popover>
@@ -909,4 +913,609 @@ const StudentApplicationForm = () => {
                       <div className="flex items-center justify-between">
                         <h3 className="text-md font-semibold">كشف العلامات</h3>
                         <Button
-                          type="
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('transcript-upload')?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          إضافة ملف
+                        </Button>
+                      </div>
+                      <input
+                        id="transcript-upload"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        multiple
+                        onChange={handleDocumentChange('transcripts')}
+                        className="hidden"
+                      />
+                      
+                      <div className="border rounded-md p-4 bg-gray-50 min-h-[120px]">
+                        {documents.transcripts.length > 0 ? (
+                          <ul className="space-y-2">
+                            {documents.transcripts.map((doc, index) => (
+                              <li key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                                <div className="flex items-center">
+                                  <FileText className="h-5 w-5 text-unlimited-blue mr-2" />
+                                  <span className="text-sm truncate max-w-[200px]">{doc.name}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeDocument('transcripts', index)}
+                                >
+                                  <X className="h-4 w-4 text-unlimited-danger" />
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full py-4">
+                            <p className="text-unlimited-gray text-sm">لم يتم إضافة ملفات بعد</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Passport */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-md font-semibold">صورة جواز السفر*</h3>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('passport-upload')?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          إضافة ملف
+                        </Button>
+                      </div>
+                      <input
+                        id="passport-upload"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        multiple
+                        onChange={handleDocumentChange('passport')}
+                        className="hidden"
+                      />
+                      
+                      <div className="border rounded-md p-4 bg-gray-50 min-h-[120px]">
+                        {documents.passport.length > 0 ? (
+                          <ul className="space-y-2">
+                            {documents.passport.map((doc, index) => (
+                              <li key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                                <div className="flex items-center">
+                                  <FileText className="h-5 w-5 text-unlimited-blue mr-2" />
+                                  <span className="text-sm truncate max-w-[200px]">{doc.name}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeDocument('passport', index)}
+                                >
+                                  <X className="h-4 w-4 text-unlimited-danger" />
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full py-4">
+                            <p className="text-unlimited-gray text-sm text-red-500 font-semibold">مطلوب*</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Language Certificates */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-md font-semibold">شهادات اللغة</h3>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById('language-upload')?.click()}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          إضافة ملف
+                        </Button>
+                      </div>
+                      <input
+                        id="language-upload"
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        multiple
+                        onChange={handleDocumentChange('languageCertificates')}
+                        className="hidden"
+                      />
+                      
+                      <div className="border rounded-md p-4 bg-gray-50 min-h-[120px]">
+                        {documents.languageCertificates.length > 0 ? (
+                          <ul className="space-y-2">
+                            {documents.languageCertificates.map((doc, index) => (
+                              <li key={index} className="flex items-center justify-between bg-white p-2 rounded border">
+                                <div className="flex items-center">
+                                  <FileText className="h-5 w-5 text-unlimited-blue mr-2" />
+                                  <span className="text-sm truncate max-w-[200px]">{doc.name}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeDocument('languageCertificates', index)}
+                                >
+                                  <X className="h-4 w-4 text-unlimited-danger" />
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full py-4">
+                            <p className="text-unlimited-gray text-sm">لم يتم إضافة ملفات بعد</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {/* Step 3: Education Information */}
+          {currentStep === 3 && (
+            <div className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold">المعلومات التعليمية</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="educationInfo.degree"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>المؤهل التعليمي*</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر المؤهل التعليمي" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="high_school">ثانوية عامة</SelectItem>
+                              <SelectItem value="diploma">دبلوم</SelectItem>
+                              <SelectItem value="bachelor">بكالوريوس</SelectItem>
+                              <SelectItem value="master">ماجستير</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="educationInfo.highSchoolName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>اسم المدرسة/الجامعة*</FormLabel>
+                          <FormControl>
+                            <Input placeholder="أدخل اسم المدرسة أو الجامعة" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="educationInfo.gpa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>المعدل الدراسي</FormLabel>
+                          <FormControl>
+                            <Input placeholder="أدخل المعدل الدراسي" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="educationInfo.highSchoolCountry"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>بلد التخرج*</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر بلد التخرج" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="algeria">الجزائر</SelectItem>
+                              <SelectItem value="egypt">مصر</SelectItem>
+                              <SelectItem value="jordan">الأردن</SelectItem>
+                              <SelectItem value="lebanon">لبنان</SelectItem>
+                              <SelectItem value="morocco">المغرب</SelectItem>
+                              <SelectItem value="palestine">فلسطين</SelectItem>
+                              <SelectItem value="syria">سوريا</SelectItem>
+                              <SelectItem value="tunisia">تونس</SelectItem>
+                              <SelectItem value="other">أخرى</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="educationInfo.englishLevel"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>مستوى اللغة الإنجليزية*</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر مستوى اللغة الإنجليزية" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="beginner">مبتدئ</SelectItem>
+                              <SelectItem value="intermediate">متوسط</SelectItem>
+                              <SelectItem value="advanced">متقدم</SelectItem>
+                              <SelectItem value="native">لغة أم</SelectItem>
+                              <SelectItem value="certified">معتمد (توفل/آيلتس)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <h3 className="font-medium">معلومات إضافية</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <FormField
+                        control={form.control}
+                        name="educationInfo.isTransferStudent"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 rtl:space-x-reverse">
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-4 w-4 mt-1"
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>طالب منقول</FormLabel>
+                              <p className="text-xs text-unlimited-gray">
+                                هل أنت طالب منقول من جامعة أخرى؟
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="educationInfo.hasBlueCard"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 rtl:space-x-reverse">
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-4 w-4 mt-1"
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>امتلاك البطاقة الزرقاء</FormLabel>
+                              <p className="text-xs text-unlimited-gray">
+                                هل تمتلك بطاقة زرقاء؟
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                      
+                      <FormField
+                        control={form.control}
+                        name="educationInfo.hasResidencePermit"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 rtl:space-x-reverse">
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={field.value}
+                                onChange={field.onChange}
+                                className="h-4 w-4 mt-1"
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel>تصريح إقامة</FormLabel>
+                              <p className="text-xs text-unlimited-gray">
+                                هل لديك تصريح إقامة في البلد المضيف؟
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {/* Step 4: Program Preferences */}
+          {currentStep === 4 && (
+            <div className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold">تفاصيل البرنامج</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="programPreferences.preferredProgram"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>البرنامج المفضل*</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر البرنامج المفضل" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="medicine">الطب البشري</SelectItem>
+                              <SelectItem value="dentistry">طب الأسنان</SelectItem>
+                              <SelectItem value="pharmacy">الصيدلة</SelectItem>
+                              <SelectItem value="engineering">الهندسة</SelectItem>
+                              <SelectItem value="business">إدارة الأعمال</SelectItem>
+                              <SelectItem value="computer_science">علوم الحاسوب</SelectItem>
+                              <SelectItem value="other">أخرى</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="programPreferences.preferredUniversity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الجامعة المفضلة</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر الجامعة المفضلة (اختياري)" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="istanbul">جامعة اسطنبول</SelectItem>
+                              <SelectItem value="ankara">جامعة أنقرة</SelectItem>
+                              <SelectItem value="marmara">جامعة مرمرة</SelectItem>
+                              <SelectItem value="bogazici">جامعة بوغازيتشي</SelectItem>
+                              <SelectItem value="other">أخرى</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="programPreferences.preferredCountry"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>البلد المفضل*</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="اختر البلد المفضل" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="turkey">تركيا</SelectItem>
+                              <SelectItem value="hungary">المجر</SelectItem>
+                              <SelectItem value="poland">بولندا</SelectItem>
+                              <SelectItem value="czechia">التشيك</SelectItem>
+                              <SelectItem value="cyprus">قبرص</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="pt-4 border-t border-gray-200">
+                    <FormField
+                      control={form.control}
+                      name="additionalInfo.comments"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>ملاحظات إضافية</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="أي ملاحظات أو استفسارات إضافية تود إضافتها..."
+                              {...field}
+                              className="resize-none h-32"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {/* Step 5: Review and Submit */}
+          {currentStep === 5 && (
+            <div className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg font-bold">مراجعة وإرسال الطلب</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div>
+                        <h3 className="text-unlimited-dark-blue font-semibold mb-4">المعلومات الشخصية</h3>
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">الاسم الكامل:</p>
+                            <p className="font-medium">{form.getValues().personalInfo.firstName} {form.getValues().personalInfo.lastName}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">البريد الإلكتروني:</p>
+                            <p className="font-medium">{form.getValues().personalInfo.email}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">رقم الهاتف:</p>
+                            <p className="font-medium">{form.getValues().personalInfo.phone}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">الجنسية:</p>
+                            <p className="font-medium">{form.getValues().personalInfo.nationality}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <h3 className="text-unlimited-dark-blue font-semibold mb-4">تفاصيل البرنامج</h3>
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">البرنامج المفضل:</p>
+                            <p className="font-medium">{form.getValues().programPreferences.preferredProgram}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">الجامعة المفضلة:</p>
+                            <p className="font-medium">{form.getValues().programPreferences.preferredUniversity || "لم يتم التحديد"}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <p className="text-unlimited-gray">البلد المفضل:</p>
+                            <p className="font-medium">{form.getValues().programPreferences.preferredCountry}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-6 mt-6">
+                      <h3 className="text-unlimited-dark-blue font-semibold mb-4">المستندات المرفقة</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-unlimited-gray mb-2">صورة شخصية:</p>
+                          {photoPreview ? (
+                            <img src={photoPreview} alt="صورة الطالب" className="w-20 h-20 object-cover rounded-md" />
+                          ) : (
+                            <p className="text-red-500">لم يتم إرفاق صورة شخصية</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <p className="text-unlimited-gray mb-2">جواز السفر:</p>
+                          {documents.passport.length > 0 ? (
+                            <p className="text-unlimited-success">{documents.passport.length} ملفات مرفقة</p>
+                          ) : (
+                            <p className="text-red-500">لم يتم إرفاق جواز السفر</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <p className="text-unlimited-gray mb-2">شهادة الثانوية:</p>
+                          {documents.diplomas.length > 0 ? (
+                            <p className="text-unlimited-success">{documents.diplomas.length} ملفات مرفقة</p>
+                          ) : (
+                            <p className="text-red-500">لم يتم إرفاق شهادة الثانوية</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t pt-6 mt-6">
+                      <div className="flex flex-col items-center justify-center space-y-4">
+                        <p className="text-unlimited-gray text-center">
+                          بالضغط على زر "إرسال الطلب"، أنت توافق على سياسة الخصوصية وشروط الخدمة الخاصة بنا.
+                        </p>
+                        
+                        <div className="w-full max-w-md">
+                          <Button 
+                            type="submit"
+                            className="w-full"
+                            size="lg"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                جاري إرسال الطلب...
+                              </>
+                            ) : (
+                              'إرسال الطلب'
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+          
+          {/* Navigation Buttons */}
+          {currentStep < 5 && (
+            <div className="flex justify-between mt-8">
+              {currentStep > 1 ? (
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex items-center"
+                >
+                  <ChevronRight className="h-4 w-4 mr-2 rtl:rotate-180" />
+                  الخطوة السابقة
+                </Button>
+              ) : (
+                <div />
+              )}
+              
+              <Button 
+                type="button"
+                onClick={nextStep}
+                className="flex items-center"
+              >
+                الخطوة التالية
+                <ChevronLeft className="h-4 w-4 ml-2 rtl:rotate-180" />
+              </Button>
+            </div>
+          )}
+        </form>
+      </Form>
+    </div>
+  );
+};
+
+export default StudentApplicationForm;
