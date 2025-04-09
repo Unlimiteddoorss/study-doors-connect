@@ -61,25 +61,25 @@ const programs = [
 
 const StudentApplication = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
-  const [selectedLevel, setSelectedLevel] = useState('');
-  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('all_countries');
+  const [selectedLevel, setSelectedLevel] = useState('all_levels');
+  const [selectedLanguage, setSelectedLanguage] = useState('all_languages');
 
   const filteredPrograms = programs.filter((program) => {
     const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          program.university.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCountry = selectedCountry === '' || program.country === selectedCountry;
-    const matchesLevel = selectedLevel === '' || program.level === selectedLevel;
-    const matchesLanguage = selectedLanguage === '' || program.language === selectedLanguage;
+    const matchesCountry = selectedCountry === 'all_countries' || program.country === selectedCountry;
+    const matchesLevel = selectedLevel === 'all_levels' || program.level === selectedLevel;
+    const matchesLanguage = selectedLanguage === 'all_languages' || program.language === selectedLanguage;
     
     return matchesSearch && matchesCountry && matchesLevel && matchesLanguage;
   });
 
   const resetFilters = () => {
     setSearchQuery('');
-    setSelectedCountry('');
-    setSelectedLevel('');
-    setSelectedLanguage('');
+    setSelectedCountry('all_countries');
+    setSelectedLevel('all_levels');
+    setSelectedLanguage('all_languages');
   };
 
   return (
@@ -127,7 +127,7 @@ const StudentApplication = () => {
                         <SelectValue placeholder="البلد" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">جميع البلدان</SelectItem>
+                        <SelectItem value="all_countries">جميع البلدان</SelectItem>
                         <SelectItem value="تركيا">تركيا</SelectItem>
                         <SelectItem value="المجر">المجر</SelectItem>
                         <SelectItem value="بولندا">بولندا</SelectItem>
@@ -141,7 +141,7 @@ const StudentApplication = () => {
                         <SelectValue placeholder="المستوى الدراسي" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">جميع المستويات</SelectItem>
+                        <SelectItem value="all_levels">جميع المستويات</SelectItem>
                         <SelectItem value="بكالوريوس">بكالوريوس</SelectItem>
                         <SelectItem value="ماجستير">ماجستير</SelectItem>
                         <SelectItem value="دكتوراه">دكتوراه</SelectItem>
@@ -153,7 +153,7 @@ const StudentApplication = () => {
                         <SelectValue placeholder="لغة الدراسة" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">جميع اللغات</SelectItem>
+                        <SelectItem value="all_languages">جميع اللغات</SelectItem>
                         <SelectItem value="الإنجليزية">الإنجليزية</SelectItem>
                         <SelectItem value="التركية">التركية</SelectItem>
                         <SelectItem value="العربية">العربية</SelectItem>
