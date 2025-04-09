@@ -96,7 +96,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-unlimited-blue/30 mt-8 pt-6 text-center">
-          <p>© {new Date().getFullYear()} أبواب غير محدودة. جميع الحقوق محفوظة.</p>
+          <p>© {new Date().getFullYear()} أبواب بلا حدود. جميع الحقوق محفوظة.</p>
         </div>
       </div>
     </footer>;
