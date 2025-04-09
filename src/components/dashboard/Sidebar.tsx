@@ -110,11 +110,11 @@ const Sidebar = ({ userRole = 'student' }: SidebarProps) => {
             {!collapsed && (
               <Link to="/" className="flex items-center gap-2">
                 <img 
-                  src="/lovable-uploads/6e0c99ef-ce91-48b1-b3c8-49e2ef5a454a.png" 
-                  alt="Logo" 
+                  src="/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png" 
+                  alt="Unlimited Doors Logo" 
                   className="h-8 w-auto"
                 />
-                <span className="text-lg font-bold">أبواب غير محدودة</span>
+                <span className="text-lg font-bold">أبواب بلا حدود</span>
               </Link>
             )}
             <Button

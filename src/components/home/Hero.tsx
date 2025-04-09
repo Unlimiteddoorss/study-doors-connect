@@ -1,6 +1,8 @@
+
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Search } from 'lucide-react';
+import { Search, GraduationCap, School, FileText, MessageSquare } from 'lucide-react';
+
 const Hero = () => {
   return <section className="bg-gradient-to-r from-unlimited-dark-blue to-unlimited-blue text-white py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -17,8 +19,28 @@ const Hero = () => {
                 <Link to="/programs">استكشف البرامج</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                <Link to="/contact" className="\u063A\u064A\u0631\u0644\u064A \u062E\u0644\u0641\u064A\u0629 \u0647\u0627\u0644\u0646\u0635 \u0644\u062A\u0638\u0647\u0631">تواصل معنا</Link>
+                <Link to="/apply">تقديم طلب التسجيل</Link>
               </Button>
+            </div>
+            
+            {/* Quick Access Features */}
+            <div className="mt-8 grid grid-cols-2 gap-4">
+              <Link to="/apply" className="flex items-center gap-2 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
+                <FileText className="h-5 w-5 text-unlimited-light-blue" />
+                <span>طلب التسجيل</span>
+              </Link>
+              <Link to="/dashboard" className="flex items-center gap-2 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
+                <GraduationCap className="h-5 w-5 text-unlimited-light-blue" />
+                <span>متابعة الطلب</span>
+              </Link>
+              <Link to="/universities" className="flex items-center gap-2 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
+                <School className="h-5 w-5 text-unlimited-light-blue" />
+                <span>الجامعات</span>
+              </Link>
+              <Link to="/messages" className="flex items-center gap-2 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
+                <MessageSquare className="h-5 w-5 text-unlimited-light-blue" />
+                <span>تواصل معنا</span>
+              </Link>
             </div>
           </div>
           <div className="w-full md:w-1/2 flex justify-center">
@@ -58,7 +80,7 @@ const Hero = () => {
                 </select>
               </div>
               <Button className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90">
-                <Search className="h-4 w-4 mr-2" />
+                <Search className="h-4 w-4 ml-2" />
                 <span>بحث</span>
               </Button>
             </div>
@@ -67,4 +89,5 @@ const Hero = () => {
       </div>
     </section>;
 };
+
 export default Hero;

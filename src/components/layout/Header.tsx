@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, User, LogOut } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -17,6 +17,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const isLoggedIn = false; // Will be replaced with auth state
+  // This would be determined by user role in a real app
+  const isAdmin = true; // Demo: Setting to true to show admin options
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -28,6 +30,7 @@ const Header = () => {
     { name: 'الجامعات', href: '/universities' },
     { name: 'من نحن', href: '/about' },
     { name: 'تواصل معنا', href: '/contact' },
+    { name: 'طلب التسجيل', href: '/apply' },
   ];
 
   return (
@@ -37,7 +40,7 @@ const Header = () => {
           <Logo />
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8 items-center">
+          <nav className="hidden md:flex space-x-8 items-center rtl:space-x-reverse">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -52,7 +55,7 @@ const Header = () => {
           </nav>
 
           {/* Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -69,6 +72,29 @@ const Header = () => {
                   <DropdownMenuItem>
                     <Link to="/profile" className="w-full">الملف الشخصي</Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem>
+                        <Link to="/admin" className="w-full flex items-center">
+                          <LayoutDashboard className="h-4 w-4 mr-2" />
+                          <span>لوحة الإدارة</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link to="/admin/students" className="w-full">إدارة الطلاب</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link to="/admin/agents" className="w-full">إدارة الوكلاء</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link to="/admin/universities" className="w-full">إدارة الجامعات</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <Link to="/admin/applications" className="w-full">طلبات التسجيل</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="text-red-500">
                     <LogOut className="h-4 w-4 mr-2" />
@@ -123,6 +149,32 @@ const Header = () => {
                 <Button asChild className="bg-unlimited-blue hover:bg-unlimited-blue/90">
                   <Link to="/register">إنشاء حساب</Link>
                 </Button>
+              </div>
+            )}
+            {isLoggedIn && isAdmin && (
+              <div className="pt-2 border-t border-white/20 mt-2">
+                <p className="text-unlimited-light-blue font-semibold py-2">لوحات الإدارة</p>
+                <Link
+                  to="/admin"
+                  className="block py-2 px-3 rounded-md hover:bg-blue-900/30"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  لوحة الإدارة الرئيسية
+                </Link>
+                <Link
+                  to="/admin/students"
+                  className="block py-2 px-3 rounded-md hover:bg-blue-900/30"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  إدارة الطلاب
+                </Link>
+                <Link
+                  to="/admin/agents"
+                  className="block py-2 px-3 rounded-md hover:bg-blue-900/30"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  إدارة الوكلاء
+                </Link>
               </div>
             )}
           </nav>
