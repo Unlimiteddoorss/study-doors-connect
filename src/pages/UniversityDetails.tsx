@@ -1,99 +1,83 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, MapPin, Globe, School, Calendar, Building, GraduationCap } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from "@/components/ui/badge";
-import { turkishUniversities, dummyPrograms } from '@/data/programsData';
-import ProgramCard from '@/components/programs/ProgramCard';
+import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
+import { turkishUniversities } from '@/data/programsData';
+import { getUniversityPrograms } from '@/data/universityPrograms';
 import { useToast } from '@/hooks/use-toast';
 
-// ترجمة أسماء الدول إلى العربية
-const countryTranslations: Record<string, string> = {
+import MainLayout from '@/components/layout/MainLayout';
+import SectionTitle from '@/components/shared/SectionTitle';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import UniversityPrograms from '@/components/universities/UniversityPrograms';
+
+// ترجمة أسماء المدن والدول إلى العربية
+const translations: Record<string, string> = {
   'Turkey': 'تركيا',
   'Istanbul': 'إسطنبول',
   'Ankara': 'أنقرة',
   'Antalya': 'أنطاليا',
+  'Izmir': 'إزمير',
+  'Bursa': 'بورصة',
+  'Konya': 'قونيا',
+  'Adana': 'أضنة',
+  'Gaziantep': 'غازي عنتاب',
+  'Mersin': 'مرسين',
+  'Kayseri': 'قيصري',
   'Alanya': 'ألانيا',
+  'Eskisehir': 'إسكي شهير',
+  'Trabzon': 'طرابزون',
+  'Samsun': 'سامسون',
+  'Sakarya': 'سكاريا',
+  'Cyprus': 'قبرص',
+  'Kyrenia': 'كيرينيا',
+  'Nicosia': 'نيقوسيا',
+  'Famagusta': 'فماغوستا',
   'Private': 'خاصة',
-  'Public': 'حكومية',
+  'Public': 'حكومية'
 };
 
 const UniversityDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
-  const [university, setUniversity] = useState<any>(null);
-  const [universityPrograms, setUniversityPrograms] = useState<any[]>([]);
-  const [isApplying, setIsApplying] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    nationality: '',
-    program: '',
-    message: ''
-  });
+  const [activeTab, setActiveTab] = useState('overview');
   
+  // التحقق من معرف الجامعة وإيجادها
+  const universityId = id ? parseInt(id) : -1;
+  const university = turkishUniversities.find(uni => uni.id === universityId);
+  
+  // الحصول على برامج الجامعة
+  const programs = getUniversityPrograms(universityId);
+  
+  // التحقق من وجود الجامعة
   useEffect(() => {
-    if (id) {
-      const uni = turkishUniversities.find(u => u.id === parseInt(id));
-      setUniversity(uni);
-      
-      // Filter programs by university name
-      if (uni) {
-        const programs = dummyPrograms.filter(
-          p => p.university.includes(uni.name) || 
-               // Fallback to match by location if exact university name isn't found
-               (p.location.includes('Turkey') && Math.random() > 0.7)
-        );
-        setUniversityPrograms(programs.length > 0 ? programs : dummyPrograms.slice(0, 3));
-      }
+    if (!university) {
+      toast({
+        title: "لم يتم العثور على الجامعة",
+        description: "الجامعة التي تبحث عنها غير موجودة",
+        variant: "destructive"
+      });
     }
-  }, [id]);
+  }, [university, toast]);
 
-  // ترجمة الكلمات والمواقع إلى العربية
+  // ترجمة النص
   const translate = (text: string): string => {
-    return countryTranslations[text] || text;
+    return translations[text] || text;
   };
 
-  const handleApplyNow = () => {
-    setIsApplying(true);
-  };
-  
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // في تطبيق حقيقي، هنا سنرسل البيانات إلى الخادم
-    toast({
-      title: "تم إرسال طلبك بنجاح",
-      description: "سيقوم أحد مستشارينا بالتواصل معك قريبًا",
-    });
-    setIsApplying(false);
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      nationality: '',
-      program: '',
-      message: ''
-    });
-  };
-  
   if (!university) {
     return (
       <MainLayout>
-        <div className="container mx-auto px-4 py-12 text-center">
-          <h2 className="text-2xl font-bold mb-4">جاري تحميل بيانات الجامعة...</h2>
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="text-2xl font-bold mb-4">الجامعة غير موجودة</h1>
+          <p className="mb-8">لا يمكن العثور على الجامعة التي تبحث عنها.</p>
+          <Button asChild className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
+            <Link to="/universities">عرض جميع الجامعات</Link>
+          </Button>
         </div>
       </MainLayout>
     );
@@ -101,467 +85,421 @@ const UniversityDetails = () => {
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12">
-        {/* University Header */}
-        <div className="relative">
-          <div className="h-64 md:h-80 overflow-hidden rounded-lg">
+      <div className="container mx-auto px-4 py-8">
+        {/* صورة الغلاف والمعلومات الأساسية */}
+        <div className="relative mb-8">
+          <div className="h-[300px] w-full bg-gray-300 overflow-hidden rounded-lg">
             <img 
               src={university.image} 
-              alt={university.name} 
+              alt={university.nameAr || university.name} 
               className="w-full h-full object-cover"
             />
           </div>
           
-          <div className="bg-white shadow-lg rounded-lg p-6 max-w-4xl mx-auto -mt-24 relative z-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h1 className="text-3xl font-bold">{university.name}</h1>
-                <div className="flex items-center text-unlimited-gray mt-2">
-                  <MapPin className="h-4 w-4 ml-2" />
-                  <span>{translate(university.location)}، {translate('Turkey')}</span>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={handleApplyNow}
-                className="bg-unlimited-blue hover:bg-unlimited-dark-blue"
-              >
-                تواصل مع مستشار
-              </Button>
+          <div className="absolute bottom-4 right-8 bg-white p-4 rounded-lg shadow-lg">
+            <div className="flex items-center gap-2">
+              {university.type === 'Private' ? (
+                <Badge className="bg-unlimited-blue">جامعة خاصة</Badge>
+              ) : (
+                <Badge className="bg-unlimited-dark-blue">جامعة حكومية</Badge>
+              )}
+              {university.isFeatured && <Badge className="bg-green-600">جامعة مميزة</Badge>}
+            </div>
+            <h1 className="text-2xl md:text-4xl font-bold mt-2">{university.nameAr || university.name}</h1>
+            <div className="flex items-center gap-2 text-gray-600 mt-2">
+              <MapPin className="h-4 w-4" />
+              <span>{translate(university.city)}، {translate(university.country)}</span>
             </div>
           </div>
         </div>
         
-        {/* University Details */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="md:col-span-2">
-            <Tabs defaultValue="about" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="about">عن الجامعة</TabsTrigger>
-                <TabsTrigger value="programs">البرامج الدراسية</TabsTrigger>
-                <TabsTrigger value="facilities">المرافق</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="about" className="mt-6 space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-4">نبذة عن الجامعة</h2>
-                  <p className="text-unlimited-gray leading-relaxed">
-                    تعد {university.name} واحدة من أفضل الجامعات في تركيا، حيث تأسست عام {university.founded} وتقع في {translate(university.location)}. 
-                    توفر الجامعة بيئة أكاديمية متميزة وبنية تحتية حديثة تدعم أكثر من {university.programs} برنامجاً دراسياً في مختلف التخصصات.
-                  </p>
-                  <p className="text-unlimited-gray leading-relaxed mt-4">
-                    تتميز الجامعة بمناهج دراسية متطورة تجمع بين الجانب النظري والعملي، وتضم نخبة من أعضاء هيئة التدريس ذوي الخبرة والكفاءة العالية.
-                    كما تحرص الجامعة على توفير بيئة تعليمية محفزة للإبداع والابتكار، وتشجع على البحث العلمي والمشاركة في المؤتمرات والندوات العلمية.
-                  </p>
-                  <p className="text-unlimited-gray leading-relaxed mt-4">
-                    تتمتع شهادات {university.name} باعتراف دولي واسع النطاق، وتعمل الجامعة على بناء شراكات استراتيجية مع جامعات ومؤسسات علمية 
-                    رائدة حول العالم، مما يتيح لطلابها فرصاً للتبادل الطلابي والتدريب العملي في أفضل المؤسسات العالمية.
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Card>
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <Calendar className="h-10 w-10 text-unlimited-blue mb-2" />
-                      <h3 className="font-semibold">سنة التأسيس</h3>
-                      <p>{university.founded}</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <Building className="h-10 w-10 text-unlimited-blue mb-2" />
-                      <h3 className="font-semibold">نوع الجامعة</h3>
-                      <p>{translate(university.type)}</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <GraduationCap className="h-10 w-10 text-unlimited-blue mb-2" />
-                      <h3 className="font-semibold">عدد البرامج</h3>
-                      <p>{university.programs}+</p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 flex flex-col items-center text-center">
-                      <Globe className="h-10 w-10 text-unlimited-blue mb-2" />
-                      <h3 className="font-semibold">الموقع الإلكتروني</h3>
-                      <a href={university.website} target="_blank" rel="noopener noreferrer" className="text-unlimited-blue hover:underline">
-                        زيارة الموقع
-                      </a>
-                    </CardContent>
-                  </Card>
-                </div>
-                
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-bold mb-4">التصنيفات والاعتمادات</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-2">التصنيفات العالمية</h4>
-                      <ul className="space-y-2">
-                        <li className="flex justify-between">
-                          <span>تصنيف QS العالمي</span>
-                          <Badge>700-750</Badge>
-                        </li>
-                        <li className="flex justify-between">
-                          <span>تصنيف التايمز للتعليم العالي</span>
-                          <Badge>800+</Badge>
-                        </li>
-                        <li className="flex justify-between">
-                          <span>تصنيف شنغهاي الأكاديمي</span>
-                          <Badge>800-900</Badge>
-                        </li>
-                      </ul>
+        {/* إحصائيات سريعة */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <div className="text-unlimited-blue">
+                <Book className="mx-auto h-8 w-8 mb-2" />
+              </div>
+              <div className="text-2xl font-bold">{university.programs}</div>
+              <div className="text-gray-600">برنامج دراسي</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <div className="text-unlimited-blue">
+                <Award className="mx-auto h-8 w-8 mb-2" />
+              </div>
+              <div className="text-2xl font-bold">
+                {university.ranking ? `#${university.ranking}` : 'غير مصنفة'}
+              </div>
+              <div className="text-gray-600">التصنيف العالمي</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <div className="text-unlimited-blue">
+                <Users className="mx-auto h-8 w-8 mb-2" />
+              </div>
+              <div className="text-2xl font-bold">{university.students.toLocaleString()}+</div>
+              <div className="text-gray-600">طالب</div>
+            </CardContent>
+          </Card>
+          
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <div className="text-unlimited-blue">
+                <Clock className="mx-auto h-8 w-8 mb-2" />
+              </div>
+              <div className="text-2xl font-bold">{new Date().getFullYear() - parseInt(university.founded)}</div>
+              <div className="text-gray-600">سنة من تأسيسها</div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* زر التقديم */}
+        <div className="flex justify-center mb-8">
+          <Button asChild size="lg" className="bg-unlimited-blue hover:bg-unlimited-dark-blue text-lg px-8">
+            <Link to={`/apply?university=${university.id}`}>
+              تقديم طلب للجامعة
+            </Link>
+          </Button>
+        </div>
+        
+        {/* تبويبات المعلومات */}
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab}
+          className="mb-8"
+        >
+          <TabsList className="grid grid-cols-3 w-full max-w-3xl mx-auto mb-8">
+            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+            <TabsTrigger value="programs">البرامج الدراسية</TabsTrigger>
+            <TabsTrigger value="info">معلومات إضافية</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="md:col-span-2">
+                <Card className="h-full">
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                      <InfoIcon className="h-5 w-5 text-unlimited-blue" />
+                      عن الجامعة
+                    </h2>
+                    
+                    <div className="mb-6">
+                      <p className="mb-4 text-gray-600">
+                        تأسست جامعة {university.nameAr || university.name} في عام {university.founded} وهي واحدة من الجامعات {translate(university.type)} الرائدة في {translate(university.city)}، {translate(university.country)}.
+                      </p>
+                      
+                      <p className="mb-4 text-gray-600">
+                        تتميز الجامعة بتقديم أكثر من {university.programs} برنامج دراسي في مختلف التخصصات، وتضم أكثر من {university.students.toLocaleString()} طالب من مختلف أنحاء العالم.
+                      </p>
+                      
+                      <p className="text-gray-600">
+                        تقدم الجامعة برامج باللغات: {university.languages?.map(lang => translate(lang)).join('، ')}، وتتمتع باعتراف عالمي وسمعة متميزة في مجال التعليم العالي.
+                      </p>
                     </div>
-                    <div>
-                      <h4 className="font-semibold mb-2">الاعتمادات الأكاديمية</h4>
-                      <ul className="space-y-2">
-                        <li className="flex items-center gap-2">
-                          <Badge variant="outline" className="p-1">
-                            <School className="h-4 w-4" />
-                          </Badge>
-                          <span>{university.accreditation}</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <Badge variant="outline" className="p-1">
-                            <School className="h-4 w-4" />
-                          </Badge>
-                          <span>ABET (للبرامج الهندسية)</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <Badge variant="outline" className="p-1">
-                            <School className="h-4 w-4" />
-                          </Badge>
-                          <span>ACBSP (لبرامج إدارة الأعمال)</span>
-                        </li>
-                      </ul>
+                    
+                    <h3 className="font-bold mb-2 text-unlimited-blue">الاعتمادات والتصنيفات</h3>
+                    <div className="mb-6 text-gray-600">
+                      <p className="mb-2">- معتمدة من مجلس التعليم العالي التركي (YÖK)</p>
+                      <p className="mb-2">- معترف بها دولياً</p>
+                      {university.ranking && (
+                        <p>- مصنفة عالمياً في المرتبة #{university.ranking}</p>
+                      )}
+                    </div>
+                    
+                    <h3 className="font-bold mb-2 text-unlimited-blue">الميزات</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <School className="h-4 w-4 text-unlimited-blue" />
+                        <span>برامج دراسية متنوعة</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Globe className="h-4 w-4 text-unlimited-blue" />
+                        <span>لغات تدريس متعددة</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Building className="h-4 w-4 text-unlimited-blue" />
+                        <span>مرافق حديثة</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <FileCheck className="h-4 w-4 text-unlimited-blue" />
+                        <span>شهادات معترف بها دولياً</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div>
+                <Card>
+                  <CardContent className="p-6">
+                    <h2 className="text-xl font-bold mb-4">معلومات الاتصال</h2>
+                    
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-2">
+                        <Globe className="h-5 w-5 text-unlimited-blue shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">الموقع الإلكتروني</p>
+                          <a 
+                            href={university.website} 
+                            target="_blank" 
+                            rel="noreferrer" 
+                            className="text-unlimited-blue hover:underline break-all"
+                          >
+                            {university.website}
+                          </a>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-5 w-5 text-unlimited-blue shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">العنوان</p>
+                          <p className="text-gray-600">
+                            {translate(university.city)}، {translate(university.country)}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-2">
+                        <Phone className="h-5 w-5 text-unlimited-blue shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">رقم الهاتف</p>
+                          <p className="text-gray-600">+90 XXX XXX XXXX</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-start gap-2">
+                        <Mail className="h-5 w-5 text-unlimited-blue shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">البريد الإلكتروني</p>
+                          <p className="text-unlimited-blue hover:underline">info@{university.website.replace('https://www.', '')}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Separator className="my-6" />
+                    
+                    <h2 className="text-xl font-bold mb-4">معلومات الدراسة</h2>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <p className="font-semibold">الرسوم الدراسية</p>
+                        <p className="text-gray-600">{university.fees}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="font-semibold">لغات الدراسة</p>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {university.languages?.map((language, index) => (
+                            <Badge key={index} variant="outline">
+                              {translate(language)}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <p className="font-semibold">الاعتمادات</p>
+                        <p className="text-gray-600">{university.accreditation}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="programs">
+            <UniversityPrograms 
+              programs={programs}
+              universityId={university.id}
+              universityName={university.nameAr || university.name}
+            />
+          </TabsContent>
+          
+          <TabsContent value="info">
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-6">معلومات إضافية عن الجامعة</h2>
+                
+                <div className="space-y-8">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-unlimited-blue">الأقسام الأكاديمية</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>كلية الطب والعلوم الصحية</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>كلية الهندسة والتكنولوجيا</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>كلية إدارة الأعمال والاقتصاد</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>كلية العلوم الاجتماعية والإنسانية</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>كلية الفنون والتصميم</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>كلية التربية</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-unlimited-blue">الخدمات الطلابية</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>سكن جامعي</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>مكتبات حديثة</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>مرافق رياضية</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>مراكز ترفيهية</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>عيادات صحية</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>خدمات استشارية</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-unlimited-blue">المنح الدراسية</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="font-medium">منح التفوق الأكاديمي</p>
+                        <p className="text-gray-600">
+                          تقدم الجامعة منح دراسية للطلاب المتميزين أكاديمياً تصل إلى 50% من الرسوم الدراسية.
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium">منح الاحتياجات المالية</p>
+                        <p className="text-gray-600">
+                          تتوفر منح للطلاب ذوي الاحتياجات المالية تتراوح بين 10% و30% من الرسوم الدراسية.
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-medium">منح الرياضة والفنون</p>
+                        <p className="text-gray-600">
+                          منح خاصة للطلاب المتميزين في المجالات الرياضية والفنية.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-unlimited-blue">متطلبات القبول</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>شهادة الثانوية العامة أو ما يعادلها</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>اختبار اللغة الإنجليزية (للبرامج الإنجليزية)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>اختبار اللغة التركية (للبرامج التركية)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>صورة جواز السفر سارية المفعول</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>صور شخصية حديثة</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-unlimited-blue"></div>
+                        <span>السيرة الذاتية (للدراسات العليا)</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="programs" className="mt-6">
-                <h2 className="text-2xl font-bold mb-6">البرامج الدراسية</h2>
-                {/* Program Categories */}
-                <div className="mb-6">
-                  <h3 className="text-xl font-semibold mb-3">أقسام البرامج</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className="bg-unlimited-blue">
-                            <GraduationCap className="h-4 w-4" />
-                          </Badge>
-                          <h4 className="font-semibold">برامج البكالوريوس</h4>
-                        </div>
-                        <p className="text-unlimited-gray text-sm mb-2">مدة الدراسة: 4 سنوات</p>
-                        <p className="text-unlimited-gray text-sm">عدد البرامج: {Math.round(university.programs * 0.6)}+</p>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className="bg-unlimited-blue">
-                            <GraduationCap className="h-4 w-4" />
-                          </Badge>
-                          <h4 className="font-semibold">برامج الماجستير</h4>
-                        </div>
-                        <p className="text-unlimited-gray text-sm mb-2">مدة الدراسة: 2 سنة</p>
-                        <p className="text-unlimited-gray text-sm">عدد البرامج: {Math.round(university.programs * 0.3)}+</p>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge className="bg-unlimited-blue">
-                            <GraduationCap className="h-4 w-4" />
-                          </Badge>
-                          <h4 className="font-semibold">برامج الدكتوراه</h4>
-                        </div>
-                        <p className="text-unlimited-gray text-sm mb-2">مدة الدراسة: 4 سنوات</p>
-                        <p className="text-unlimited-gray text-sm">عدد البرامج: {Math.round(university.programs * 0.1)}+</p>
-                      </CardContent>
-                    </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+        
+        {/* الجامعات المقترحة */}
+        <div className="mt-16">
+          <SectionTitle 
+            title="جامعات مشابهة قد تهمك"
+            subtitle="اكتشف خيارات أخرى للدراسة في جامعات تركية خاصة مميزة"
+          />
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            {turkishUniversities
+              .filter(uni => uni.id !== universityId && uni.city === university.city)
+              .slice(0, 3)
+              .map(uni => (
+                <Card key={uni.id} className="overflow-hidden hover:shadow-lg transition-all">
+                  <div className="h-48 overflow-hidden">
+                    <img 
+                      src={uni.image}
+                      alt={uni.nameAr || uni.name}
+                      className="w-full h-full object-cover transition-transform hover:scale-105"
+                    />
                   </div>
-                </div>
-                
-                {/* Programs */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {universityPrograms.map((program) => (
-                    <ProgramCard key={program.id} program={{
-                      ...program,
-                      location: program.location.replace('Turkey', translate('Turkey'))
-                    }} />
-                  ))}
-                </div>
-                
-                <div className="mt-8 text-center">
-                  <Button asChild className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                    <Link to="/programs" className="flex items-center gap-2">
-                      عرض جميع البرامج <ArrowRight className="h-4 w-4 mr-1" />
-                    </Link>
-                  </Button>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="facilities" className="mt-6">
-                <h2 className="text-2xl font-bold mb-6">مرافق الجامعة</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">المرافق الأكاديمية</h3>
-                    <ul className="list-disc list-inside space-y-2 text-unlimited-gray">
-                      <li>مكتبة حديثة تضم أكثر من 100,000 كتاب ومراجع علمية</li>
-                      <li>مختبرات حاسوب متطورة</li>
-                      <li>مختبرات علمية مجهزة بأحدث التقنيات</li>
-                      <li>قاعات دراسية ذكية</li>
-                      <li>مراكز بحثية متخصصة</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">المرافق الطلابية</h3>
-                    <ul className="list-disc list-inside space-y-2 text-unlimited-gray">
-                      <li>سكن طلابي آمن ومريح</li>
-                      <li>مركز رياضي متكامل</li>
-                      <li>مطاعم وكافيتريات متنوعة</li>
-                      <li>مركز صحي</li>
-                      <li>أماكن للأنشطة الثقافية والترفيهية</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-xl font-semibold mb-3">الأنشطة الطلابية</h3>
-                  <p className="text-unlimited-gray leading-relaxed">
-                    تشجع {university.name} طلابها على المشاركة في مجموعة متنوعة من الأنشطة اللامنهجية من خلال النوادي والجمعيات الطلابية، 
-                    والتي تغطي مجالات متعددة مثل الفنون، والرياضة، والعمل التطوعي، والأنشطة الثقافية والاجتماعية. 
-                    كما تنظم الجامعة فعاليات وورش عمل ومؤتمرات دورية لتعزيز المهارات والخبرات العملية للطلاب.
-                  </p>
-                </div>
-                
-                <div className="mt-8">
-                  <h3 className="text-xl font-semibold mb-3">خدمات الطلاب</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="p-1">
-                            <Building className="h-4 w-4" />
-                          </Badge>
-                          <h4 className="font-semibold">السكن الطلابي</h4>
-                        </div>
-                        <p className="text-unlimited-gray text-sm">
-                          توفر الجامعة سكنًا طلابيًا حديثًا ومريحًا بغرف فردية ومزدوجة، مع خدمات الإنترنت والمرافق المشتركة.
-                          أسعار السكن تبدأ من 200$ شهريًا.
-                        </p>
-                      </CardContent>
-                    </Card>
-                    
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="outline" className="p-1">
-                            <Globe className="h-4 w-4" />
-                          </Badge>
-                          <h4 className="font-semibold">خدمات الطلاب الدوليين</h4>
-                        </div>
-                        <p className="text-unlimited-gray text-sm">
-                          مكتب متخصص لمساعدة الطلاب الدوليين في الإجراءات القانونية، والتأقلم مع البيئة الجديدة،
-                          وتوفير دورات لغوية، وأنشطة ثقافية.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                  <CardContent className="p-4">
+                    <h3 className="font-bold text-xl mb-2">{uni.nameAr || uni.name}</h3>
+                    <div className="flex items-center text-gray-600 mb-3">
+                      <MapPin className="h-4 w-4 ml-1" />
+                      <span>{translate(uni.city)}، {translate(uni.country)}</span>
+                    </div>
+                    <div className="flex justify-between mb-4 text-sm">
+                      <span className="flex items-center">
+                        <Book className="h-4 w-4 ml-1 text-unlimited-blue" />
+                        {uni.programs} برنامج
+                      </span>
+                      <span className="flex items-center">
+                        <Award className="h-4 w-4 ml-1 text-unlimited-blue" />
+                        {uni.ranking ? `#${uni.ranking}` : 'غير مصنفة'}
+                      </span>
+                    </div>
+                    <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
+                      <Link to={`/universities/${uni.id}`}>
+                        عرض التفاصيل
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
           </div>
           
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {!isApplying ? (
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">المميزات الرئيسية</h3>
-                  <ul className="space-y-3">
-                    <li className="flex items-start gap-2">
-                      <div className="bg-unlimited-blue/10 p-1 rounded text-unlimited-blue mt-1">
-                        <School className="h-4 w-4" />
-                      </div>
-                      <span>اعتماد أكاديمي محلي ودولي ({university.accreditation})</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-unlimited-blue/10 p-1 rounded text-unlimited-blue mt-1">
-                        <GraduationCap className="h-4 w-4" />
-                      </div>
-                      <span>برامج معتمدة باللغتين الإنجليزية والتركية</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-unlimited-blue/10 p-1 rounded text-unlimited-blue mt-1">
-                        <Globe className="h-4 w-4" />
-                      </div>
-                      <span>شراكات دولية مع أكثر من 50 جامعة عالمية</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="bg-unlimited-blue/10 p-1 rounded text-unlimited-blue mt-1">
-                        <Building className="h-4 w-4" />
-                      </div>
-                      <span>بنية تحتية حديثة ومتطورة</span>
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-bold mb-4">طلب استشارة</h3>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                      <label htmlFor="name" className="block text-unlimited-gray mb-1">الاسم الكامل</label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="email" className="block text-unlimited-gray mb-1">البريد الإلكتروني</label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="phone" className="block text-unlimited-gray mb-1">رقم الهاتف</label>
-                      <input
-                        type="tel"
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="nationality" className="block text-unlimited-gray mb-1">الجنسية</label>
-                      <input
-                        type="text"
-                        id="nationality"
-                        name="nationality"
-                        value={formData.nationality}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="program" className="block text-unlimited-gray mb-1">البرنامج المطلوب</label>
-                      <select
-                        id="program"
-                        name="program"
-                        value={formData.program}
-                        onChange={handleInputChange}
-                        className="w-full h-10 px-3 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-                        required
-                      >
-                        <option value="">اختر البرنامج</option>
-                        <option value="Bachelor">بكالوريوس</option>
-                        <option value="Master">ماجستير</option>
-                        <option value="Doctorate">دكتوراه</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="message" className="block text-unlimited-gray mb-1">رسالتك (اختياري)</label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleInputChange}
-                        rows={3}
-                        className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-                      ></textarea>
-                    </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        className="flex-1"
-                        onClick={() => setIsApplying(false)}
-                      >
-                        إلغاء
-                      </Button>
-                      <Button 
-                        type="submit" 
-                        className="flex-1 bg-unlimited-blue hover:bg-unlimited-dark-blue"
-                      >
-                        إرسال الطلب
-                      </Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
-            )}
-            
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-4">الرسوم الدراسية</h3>
-                <p className="text-unlimited-gray mb-2">تبدأ الرسوم الدراسية من:</p>
-                <p className="text-2xl font-bold text-unlimited-blue">{university.fees}</p>
-                <p className="text-unlimited-gray text-sm mt-2">تختلف الرسوم حسب البرنامج والتخصص</p>
-                
-                <div className="mt-6">
-                  <Button 
-                    onClick={handleApplyNow}
-                    className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
-                  >
-                    استشارة مجانية
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-4">فرص المنح</h3>
-                <p className="text-unlimited-gray mb-4">توفر الجامعة منح دراسية متنوعة للطلاب المتفوقين تصل إلى:</p>
-                <ul className="space-y-2">
-                  <li className="flex justify-between">
-                    <span>منحة التفوق الأكاديمي</span>
-                    <span className="font-semibold">50%</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>منحة المهارات الخاصة</span>
-                    <span className="font-semibold">25%</span>
-                  </li>
-                  <li className="flex justify-between">
-                    <span>منحة الطلاب الدوليين</span>
-                    <span className="font-semibold">30%</span>
-                  </li>
-                </ul>
-                
-                <div className="mt-6">
-                  <Button asChild variant="outline" className="w-full">
-                    <Link to="/scholarships">تفاصيل المنح</Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="flex justify-center mt-8">
+            <Button asChild variant="outline">
+              <Link to="/turkish-universities">
+                عرض جميع الجامعات التركية
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
