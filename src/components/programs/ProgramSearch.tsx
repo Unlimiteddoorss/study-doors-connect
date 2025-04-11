@@ -2,50 +2,20 @@
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useState } from 'react';
-
-// Country and degree data from the Programs page
-const availableCountries = [
-  'Australia', 'Azerbaijan', 'Bosnia and Herzegovina', 'Czech Republic', 'Egypt', 
-  'Georgia', 'Germany', 'Hungary', 'Ireland', 'Kosovo', 'Macedonia', 'Malaysia', 
-  'Malta', 'Montenegro', 'Northern Cyprus', 'Poland', 'Scotland', 'Serbia', 'Spain', 
-  'Turkey', 'United Kingdom', 'United States'
-];
-
-// Degree types
-const degreeTypes = [
-  'Associate', 'Bachelor', 'Diploma', 'Doctorate', 'Foundation Year', 
-  'Language Course', 'Master', 'Training Course'
-];
-
-// Program specialties (first 20 for this dropdown, the full list will be in the filter)
-const commonSpecialties = [
-  'Accounting and Auditing', 'Architecture', 'Business Administration', 'Computer Science',
-  'Civil Engineering', 'Economics', 'Education', 'Electrical Engineering', 'Law',
-  'Marketing', 'Mathematics', 'Mechanical Engineering', 'Medicine', 'Nursing',
-  'Pharmacy', 'Psychology', 'Physics', 'Political Science', 'Software Engineering', 'Tourism'
-];
+import { availableCountries, degreeTypes, programSpecialties } from '@/data/programsData';
 
 interface ProgramSearchProps {
   searchTerm: string;
-  setSearchTerm: (term: string) => void;
+  setSearchTerm: (value: string) => void;
   selectedCountry: string;
-  setSelectedCountry: (country: string) => void;
+  setSelectedCountry: (value: string) => void;
   selectedDegree: string;
-  setSelectedDegree: (degree: string) => void;
+  setSelectedDegree: (value: string) => void;
   selectedSpecialty: string;
-  setSelectedSpecialty: (specialty: string) => void;
+  setSelectedSpecialty: (value: string) => void;
   handleSearch: (e: React.FormEvent) => void;
   resetFilters: () => void;
+  countryTranslations?: Record<string, string>;
 }
 
 const ProgramSearch = ({
@@ -58,89 +28,83 @@ const ProgramSearch = ({
   selectedSpecialty,
   setSelectedSpecialty,
   handleSearch,
-  resetFilters
+  resetFilters,
+  countryTranslations = {}
 }: ProgramSearchProps) => {
-  const [isAdvancedSearch, setIsAdvancedSearch] = useState(false);
-
-  const toggleAdvancedSearch = () => {
-    setIsAdvancedSearch(!isAdvancedSearch);
-  };
-
   return (
-    <div className="max-w-5xl mx-auto mb-10">
-      <form onSubmit={handleSearch} className="flex flex-col gap-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input 
-            type="text"
-            placeholder="ابحث عن برامج، جامعات، تخصصات..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4"
-          />
-        </div>
-        
-        {/* Always visible quick filters */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <Select value={selectedCountry} onValueChange={(value) => setSelectedCountry(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="اختر الدولة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>الدول</SelectLabel>
-                  <SelectItem value="all">جميع الدول</SelectItem>
-                  {availableCountries.map(country => (
-                    <SelectItem key={country} value={country}>{country}</SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+    <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      <form onSubmit={handleSearch}>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="ابحث عن برنامج..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4"
+            />
           </div>
           
           <div>
-            <Select value={selectedDegree} onValueChange={(value) => setSelectedDegree(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="اختر المستوى الدراسي" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>المستوى الدراسي</SelectLabel>
-                  <SelectItem value="all">جميع المستويات</SelectItem>
-                  {degreeTypes.map(degree => (
-                    <SelectItem key={degree} value={degree}>{degree}</SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <select
+              value={selectedCountry}
+              onChange={(e) => setSelectedCountry(e.target.value)}
+              className="w-full h-10 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue text-unlimited-gray"
+            >
+              <option value="all">جميع الدول</option>
+              {availableCountries.sort().map((country) => (
+                <option key={country} value={country}>
+                  {countryTranslations[country] || country}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>
-            <Select value={selectedSpecialty} onValueChange={(value) => setSelectedSpecialty(value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="اختر التخصص" />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px] overflow-y-auto">
-                <SelectGroup>
-                  <SelectLabel>التخصصات</SelectLabel>
-                  <SelectItem value="all">جميع التخصصات</SelectItem>
-                  {commonSpecialties.map(specialty => (
-                    <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <select
+              value={selectedDegree}
+              onChange={(e) => setSelectedDegree(e.target.value)}
+              className="w-full h-10 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue text-unlimited-gray"
+            >
+              <option value="all">جميع الدرجات العلمية</option>
+              <option value="Bachelor">بكالوريوس</option>
+              <option value="Master">ماجستير</option>
+              <option value="Doctorate">دكتوراه</option>
+            </select>
+          </div>
+          
+          <div>
+            <select
+              value={selectedSpecialty}
+              onChange={(e) => setSelectedSpecialty(e.target.value)}
+              className="w-full h-10 px-4 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-unlimited-blue text-unlimited-gray"
+            >
+              <option value="all">جميع التخصصات</option>
+              <option value="Business">إدارة أعمال</option>
+              <option value="Engineering">هندسة</option>
+              <option value="Medicine">طب</option>
+              <option value="Computer Science">علوم حاسوب</option>
+              <option value="Arts">فنون</option>
+            </select>
           </div>
         </div>
         
-        <div className="flex gap-2 justify-end">
-          <Button type="submit" className="bg-unlimited-blue hover:bg-unlimited-dark-blue">بحث</Button>
-          {(selectedCountry || selectedDegree || selectedSpecialty || searchTerm) && (
-            <Button variant="outline" onClick={resetFilters} type="button">
-              مسح البحث
-            </Button>
-          )}
+        <div className="flex justify-between mt-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={resetFilters}
+          >
+            إعادة ضبط
+          </Button>
+          
+          <Button
+            type="submit"
+            className="bg-unlimited-blue hover:bg-unlimited-dark-blue"
+          >
+            بحث
+          </Button>
         </div>
       </form>
     </div>

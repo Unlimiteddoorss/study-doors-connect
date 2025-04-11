@@ -9,9 +9,20 @@ import { Input } from '@/components/ui/input';
 import { Search, MapPin, School } from 'lucide-react';
 import { turkishUniversities } from '@/data/programsData';
 
+// ترجمة أسماء الدول إلى العربية
+const countryTranslations: Record<string, string> = {
+  'Turkey': 'تركيا',
+  'Istanbul': 'إسطنبول',
+  'Ankara': 'أنقرة',
+  'Antalya': 'أنطاليا',
+  'Alanya': 'ألانيا',
+};
+
 const Universities = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredUniversities, setFilteredUniversities] = useState(turkishUniversities);
+  const [currentPage, setCurrentPage] = useState(1);
+  const universitiesPerPage = 12;
 
   useEffect(() => {
     if (searchTerm) {
@@ -26,6 +37,25 @@ const Universities = () => {
       setFilteredUniversities(turkishUniversities);
     }
   }, [searchTerm]);
+
+  // حساب صفحة العرض الحالية
+  const indexOfLastUniversity = currentPage * universitiesPerPage;
+  const indexOfFirstUniversity = indexOfLastUniversity - universitiesPerPage;
+  const currentUniversities = filteredUniversities.slice(indexOfFirstUniversity, indexOfLastUniversity);
+  const totalPages = Math.ceil(filteredUniversities.length / universitiesPerPage);
+
+  // التنقل بين الصفحات
+  const paginate = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // ترجمة الموقع من الإنجليزية إلى العربية
+  const translateLocation = (location: string): string => {
+    return countryTranslations[location] || location;
+  };
 
   return (
     <MainLayout>
@@ -57,9 +87,9 @@ const Universities = () => {
         </div>
 
         {/* Universities Grid */}
-        {filteredUniversities.length > 0 ? (
+        {currentUniversities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredUniversities.map((university) => (
+            {currentUniversities.map((university) => (
               <Card key={university.id} className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
                 <div className="relative h-48 overflow-hidden">
                   <img 
@@ -73,7 +103,7 @@ const Universities = () => {
                   <h3 className="font-bold text-xl mb-2">{university.name}</h3>
                   <div className="flex items-center text-unlimited-gray">
                     <MapPin className="h-4 w-4 ml-2" />
-                    <span>{university.location}, Turkey</span>
+                    <span>{translateLocation(university.location)}، {translateLocation('Turkey')}</span>
                   </div>
                 </CardHeader>
                 
@@ -85,7 +115,7 @@ const Universities = () => {
                     </div>
                     <div>
                       <p className="text-unlimited-gray">النوع:</p>
-                      <p className="font-medium">{university.type}</p>
+                      <p className="font-medium">{university.type === 'Private' ? 'خاصة' : 'حكومية'}</p>
                     </div>
                     <div>
                       <p className="text-unlimited-gray">البرامج:</p>
@@ -110,6 +140,56 @@ const Universities = () => {
           <div className="text-center py-12">
             <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على جامعات تطابق بحثك</p>
             <Button onClick={() => setSearchTerm("")} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">إعادة ضبط البحث</Button>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {filteredUniversities.length > 0 && (
+          <div className="flex justify-center mt-12">
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="pagination" 
+                onClick={() => paginate(currentPage - 1)} 
+                disabled={currentPage === 1}
+              >
+                <MapPin className="h-4 w-4" />
+              </Button>
+              
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                // إذا كان عدد الصفحات أكثر من 5، نعرض الصفحات المحيطة بالصفحة الحالية
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else {
+                  if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                }
+                
+                return (
+                  <Button 
+                    key={pageNum}
+                    variant="pagination"
+                    aria-current={pageNum === currentPage ? "page" : undefined}
+                    onClick={() => paginate(pageNum)}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+              
+              <Button 
+                variant="pagination" 
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <MapPin className="h-4 w-4 rotate-180" />
+              </Button>
+            </div>
           </div>
         )}
       </div>

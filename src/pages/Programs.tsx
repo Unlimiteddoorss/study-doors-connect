@@ -7,8 +7,35 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ProgramCard from '@/components/programs/ProgramCard';
 import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramFilters from '@/components/programs/ProgramFilters';
-import { dummyPrograms } from '@/data/programsData';
+import { dummyPrograms, availableCountries } from '@/data/programsData';
 import { useToast } from '@/hooks/use-toast';
+
+// ترجمة أسماء الدول إلى العربية
+const countryTranslations: Record<string, string> = {
+  'Australia': 'أستراليا',
+  'Azerbaijan': 'أذربيجان',
+  'Bosnia and Herzegovina': 'البوسنة والهرسك',
+  'Czech Republic': 'جمهورية التشيك',
+  'Egypt': 'مصر',
+  'Georgia': 'جورجيا',
+  'Germany': 'ألمانيا',
+  'Hungary': 'المجر',
+  'Ireland': 'أيرلندا',
+  'Kosovo': 'كوسوفو',
+  'Macedonia': 'مقدونيا',
+  'Malaysia': 'ماليزيا',
+  'Malta': 'مالطا',
+  'Montenegro': 'الجبل الأسود',
+  'Northern Cyprus': 'شمال قبرص',
+  'Poland': 'بولندا',
+  'Scotland': 'اسكتلندا',
+  'Serbia': 'صربيا',
+  'Spain': 'إسبانيا',
+  'Turkey': 'تركيا',
+  'United Kingdom': 'المملكة المتحدة',
+  'United States': 'الولايات المتحدة الأمريكية',
+  'United Arab Emirates': 'الإمارات العربية المتحدة'
+};
 
 const Programs = () => {
   const { toast } = useToast();
@@ -18,6 +45,8 @@ const Programs = () => {
   const [selectedDegree, setSelectedDegree] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [sortOrder, setSortOrder] = useState("relevance");
+  const [currentPage, setCurrentPage] = useState(1);
+  const programsPerPage = 12;
   
   // Filters state
   const [filters, setFilters] = useState({
@@ -93,6 +122,7 @@ const Programs = () => {
     }
     
     setFilteredPrograms(result);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [searchTerm, filters, sortOrder]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -242,6 +272,27 @@ const Programs = () => {
     });
   };
 
+  // حساب الصفحات
+  const indexOfLastProgram = currentPage * programsPerPage;
+  const indexOfFirstProgram = indexOfLastProgram - programsPerPage;
+  const currentPrograms = filteredPrograms.slice(indexOfFirstProgram, indexOfLastProgram);
+  const totalPages = Math.ceil(filteredPrograms.length / programsPerPage);
+
+  // التنقل بين الصفحات
+  const paginate = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // ترجمة البلد من الإنجليزية إلى العربية
+  const translateCountry = (country: string): string => {
+    // استخراج اسم البلد من السلسلة النصية (مثال: "Turkey، إسطنبول")
+    const countryName = country.split('،')[0].trim();
+    return countryTranslations[countryName] || countryName;
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
@@ -262,6 +313,7 @@ const Programs = () => {
           setSelectedSpecialty={handleSpecialtyChange}
           handleSearch={handleSearch}
           resetFilters={resetFilters}
+          countryTranslations={countryTranslations}
         />
 
         {/* Results info and Filters */}
@@ -296,10 +348,16 @@ const Programs = () => {
         </div>
 
         {/* Programs Grid */}
-        {filteredPrograms.length > 0 ? (
+        {currentPrograms.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredPrograms.map((program) => (
-              <ProgramCard key={program.id} program={program} />
+            {currentPrograms.map((program) => (
+              <ProgramCard 
+                key={program.id} 
+                program={{
+                  ...program,
+                  location: translateCountry(program.location)
+                }}
+              />
             ))}
           </div>
         ) : (
@@ -312,15 +370,50 @@ const Programs = () => {
         {/* Pagination */}
         {filteredPrograms.length > 0 && (
           <div className="flex justify-center mt-12">
-            <Button variant="outline" size="icon" disabled className="mr-2">
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="sm" className="mx-1 bg-unlimited-blue text-white">1</Button>
-            <Button variant="outline" size="sm" className="mx-1">2</Button>
-            <Button variant="outline" size="sm" className="mx-1">3</Button>
-            <Button variant="outline" size="icon" className="ml-2">
-              <ArrowRight className="h-4 w-4 rotate-180" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="pagination" 
+                onClick={() => paginate(currentPage - 1)} 
+                disabled={currentPage === 1}
+              >
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+              
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                // إذا كان عدد الصفحات أكثر من 5، نعرض الصفحات المحيطة بالصفحة الحالية
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else {
+                  if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                }
+                
+                return (
+                  <Button 
+                    key={pageNum}
+                    variant="pagination"
+                    aria-current={pageNum === currentPage ? "page" : undefined}
+                    onClick={() => paginate(pageNum)}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
+              
+              <Button 
+                variant="pagination" 
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <ArrowRight className="h-4 w-4 rotate-180" />
+              </Button>
+            </div>
           </div>
         )}
       </div>

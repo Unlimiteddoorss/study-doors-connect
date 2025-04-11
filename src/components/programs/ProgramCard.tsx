@@ -26,6 +26,19 @@ interface ProgramCardProps {
 }
 
 const ProgramCard = ({ program }: ProgramCardProps) => {
+  // حساب نسبة الخصم إذا كان متوفرًا
+  const calculateDiscount = () => {
+    if (program.discount) {
+      const originalPrice = parseFloat(program.fee.replace('$', '').replace(',', ''));
+      const discountedPrice = parseFloat(program.discount.replace('$', '').replace(',', ''));
+      const discountPercentage = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+      return discountPercentage > 0 ? `-${discountPercentage}%` : '';
+    }
+    return '';
+  };
+  
+  const discountTag = calculateDiscount();
+
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
       <div className="relative h-48 overflow-hidden">
@@ -43,6 +56,11 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
         {/* Scholarship badge */}
         {program.scholarshipAvailable && (
           <Badge className="absolute top-2 left-2 bg-green-600">فرصة منحة</Badge>
+        )}
+        
+        {/* Discount badge */}
+        {discountTag && (
+          <Badge className="absolute bottom-2 right-2 bg-red-600">{discountTag}</Badge>
         )}
       </div>
       
