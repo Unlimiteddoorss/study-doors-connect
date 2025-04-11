@@ -1,87 +1,77 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Programs from "./pages/Programs";
-import ProgramDetails from "./pages/ProgramDetails";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Countries from "./pages/Countries";
 import CountryDetails from "./pages/CountryDetails";
+import Programs from "./pages/Programs";
+import ProgramDetails from "./pages/ProgramDetails";
+import Scholarships from "./pages/Scholarships";
+import Universities from "./pages/Universities";
+import UniversityDetails from "./pages/UniversityDetails";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import About from "./pages/About";
-import StudentApplication from "./pages/StudentApplication";
 import NotFound from "./pages/NotFound";
-import Contact from "./pages/Contact";
+import StudentApplication from "./pages/StudentApplication";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageStudents from "./pages/admin/ManageStudents";
 import ManageAgents from "./pages/admin/ManageAgents";
-import ManageUniversities from "./pages/admin/ManageUniversities";
-import ManageApplications from "./pages/admin/ManageApplications";
 import ManagePrograms from "./pages/admin/ManagePrograms";
-import AgentDashboard from "./pages/agent/AgentDashboard";
-import UserMessages from "./pages/messaging/UserMessages";
-import AdminMessages from "./pages/admin/AdminMessages";
+import ManageApplications from "./pages/admin/ManageApplications";
+import ManageUniversities from "./pages/admin/ManageUniversities";
 import AdminNotifications from "./pages/admin/AdminNotifications";
-import StudentMessages from "./pages/students/StudentMessages";
-import Scholarships from "./pages/Scholarships";
-
-// Dashboard pages
+import AdminMessages from "./pages/admin/AdminMessages";
+import AgentDashboard from "./pages/agent/AgentDashboard";
 import StudentApplications from "./pages/dashboard/StudentApplications";
 import StudentProfile from "./pages/dashboard/StudentProfile";
 import StudentNotifications from "./pages/dashboard/StudentNotifications";
+import UserMessages from "./pages/messaging/UserMessages";
+import "./App.css";
 
-const queryClient = new QueryClient();
+function App() {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Index />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/countries" element={<Countries />} />
+      <Route path="/countries/:id" element={<CountryDetails />} />
+      <Route path="/programs" element={<Programs />} />
+      <Route path="/programs/:id" element={<ProgramDetails />} />
+      <Route path="/scholarships" element={<Scholarships />} />
+      <Route path="/universities" element={<Universities />} />
+      <Route path="/universities/:id" element={<UniversityDetails />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/programs" element={<Programs />} />
-          <Route path="/programs/:id" element={<ProgramDetails />} />
-          <Route path="/countries" element={<Countries />} />
-          <Route path="/countries/:id" element={<CountryDetails />} />
-          <Route path="/scholarships" element={<Scholarships />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/apply" element={<StudentApplication />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/messages" element={<UserMessages />} />
-          <Route path="/student/messages" element={<StudentMessages />} />
-          
-          {/* Student Dashboard Routes */}
-          <Route path="/dashboard/applications" element={<StudentApplications />} />
-          <Route path="/dashboard/profile" element={<StudentProfile />} />
-          <Route path="/dashboard/notifications" element={<StudentNotifications />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/students" element={<ManageStudents />} />
-          <Route path="/admin/agents" element={<ManageAgents />} />
-          <Route path="/admin/universities" element={<ManageUniversities />} />
-          <Route path="/admin/applications" element={<ManageApplications />} />
-          <Route path="/admin/programs" element={<ManagePrograms />} />
-          <Route path="/admin/messages" element={<AdminMessages />} />
-          <Route path="/admin/notifications" element={<AdminNotifications />} />
-          
-          {/* Agent routes */}
-          <Route path="/agent" element={<AgentDashboard />} />
-          
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+      {/* Student Routes */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/apply" element={<StudentApplication />} />
+      <Route path="/dashboard/applications" element={<StudentApplications />} />
+      <Route path="/dashboard/profile" element={<StudentProfile />} />
+      <Route path="/dashboard/notifications" element={<StudentNotifications />} />
+      <Route path="/messages" element={<UserMessages />} />
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/students" element={<ManageStudents />} />
+      <Route path="/admin/agents" element={<ManageAgents />} />
+      <Route path="/admin/programs" element={<ManagePrograms />} />
+      <Route path="/admin/applications" element={<ManageApplications />} />
+      <Route path="/admin/universities" element={<ManageUniversities />} />
+      <Route path="/admin/notifications" element={<AdminNotifications />} />
+      <Route path="/admin/messages" element={<AdminMessages />} />
+
+      {/* Agent Routes */}
+      <Route path="/agent" element={<AgentDashboard />} />
+      
+      {/* Not Found */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}
 
 export default App;
