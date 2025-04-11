@@ -25,6 +25,11 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import StudentMessages from "./pages/students/StudentMessages";
 
+// New imports for dashboard pages
+import StudentApplications from "./pages/dashboard/StudentApplications";
+import StudentProfile from "./pages/dashboard/StudentProfile";
+import StudentNotifications from "./pages/dashboard/StudentNotifications";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -44,6 +49,11 @@ const App = () => (
           <Route path="/contact" element={<Contact />} />
           <Route path="/messages" element={<UserMessages />} />
           <Route path="/student/messages" element={<StudentMessages />} />
+          
+          {/* Student Dashboard Routes */}
+          <Route path="/dashboard/applications" element={<StudentApplications />} />
+          <Route path="/dashboard/profile" element={<StudentProfile />} />
+          <Route path="/dashboard/notifications" element={<StudentNotifications />} />
           
           {/* Admin routes */}
           <Route path="/admin" element={<AdminDashboard />} />

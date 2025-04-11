@@ -1,10 +1,10 @@
 
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { FileText, ArrowRight, Bell } from 'lucide-react';
+import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye } from 'lucide-react';
 
 const Dashboard = () => {
   const recentApplications = [
@@ -78,26 +78,29 @@ const Dashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {recentApplications.map((app) => (
-                  <div 
+                  <Link 
                     key={app.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100"
+                    to={`/dashboard/applications`}
+                    className="block"
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="bg-unlimited-blue/10 p-2 rounded-full">
-                        <FileText className="h-5 w-5 text-unlimited-blue" />
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-unlimited-blue/10 p-2 rounded-full">
+                          <FileText className="h-5 w-5 text-unlimited-blue" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">{app.program}</h4>
+                          <p className="text-sm text-unlimited-gray">{app.university}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-medium">{app.program}</h4>
-                        <p className="text-sm text-unlimited-gray">{app.university}</p>
+                      <div className="flex flex-col items-end">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${app.statusColor}`}>
+                          {app.status}
+                        </span>
+                        <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${app.statusColor}`}>
-                        {app.status}
-                      </span>
-                      <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
               
@@ -107,7 +110,7 @@ const Dashboard = () => {
                   <Link to="/programs">
                     <Button>
                       استكشف البرامج
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      <ArrowRight className="mr-2 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
@@ -131,22 +134,109 @@ const Dashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {notifications.map((notification) => (
-                  <div 
+                  <Link
                     key={notification.id}
-                    className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100"
+                    to="/dashboard/notifications"
+                    className="block"
                   >
-                    <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
-                      <Bell className="h-4 w-4 text-unlimited-blue" />
+                    <div className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
+                        <Bell className="h-4 w-4 text-unlimited-blue" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium">{notification.title}</h4>
+                        <p className="text-sm text-unlimited-gray">{notification.message}</p>
+                        <span className="text-xs text-unlimited-gray mt-1">{notification.time}</span>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium">{notification.title}</h4>
-                      <p className="text-sm text-unlimited-gray">{notification.message}</p>
-                      <span className="text-xs text-unlimited-gray mt-1">{notification.time}</span>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </CardContent>
+          </Card>
+        </div>
+
+        {/* Student Profile & Messages */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">الملف الشخصي</CardTitle>
+              <CardDescription>معلوماتك الشخصية</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="flex flex-col items-center justify-center py-4">
+                <div className="w-24 h-24 rounded-full bg-unlimited-blue/10 flex items-center justify-center mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-unlimited-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+                <h3 className="font-medium text-lg">محمد أحمد</h3>
+                <p className="text-unlimited-gray text-sm">طالب</p>
+              </div>
+              <div className="flex flex-col gap-1 mt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-unlimited-gray">البريد الإلكتروني:</span>
+                  <span className="font-medium">mohammad.ahmed@example.com</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-unlimited-gray">رقم الهاتف:</span>
+                  <span className="font-medium">+90 552 123 4567</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-unlimited-gray">البلد:</span>
+                  <span className="font-medium">تركيا</span>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-center pt-0">
+              <Link to="/dashboard/profile">
+                <Button variant="outline">
+                  <Eye className="mr-2 h-4 w-4" />
+                  عرض الملف الشخصي
+                </Button>
+              </Link>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">الرسائل</CardTitle>
+              <CardDescription>التواصل مع فريق الدعم</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-4">
+                <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
+                    <MessageSquare className="h-4 w-4 text-unlimited-blue" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">استفسار حول برنامج الطب</h4>
+                    <p className="text-sm text-unlimited-gray">تم الرد بواسطة: أحمد المستشار</p>
+                    <span className="text-xs text-unlimited-gray mt-1">منذ 3 أيام</span>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
+                    <MessageSquare className="h-4 w-4 text-unlimited-blue" />
+                  </div>
+                  <div>
+                    <h4 className="font-medium">تأكيد موعد المقابلة</h4>
+                    <p className="text-sm text-unlimited-gray">تم الرد بواسطة: سارة المستشارة</p>
+                    <span className="text-xs text-unlimited-gray mt-1">منذ أسبوع</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-center pt-0">
+              <Link to="/student/messages">
+                <Button>
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  فتح المحادثات
+                </Button>
+              </Link>
+            </CardFooter>
           </Card>
         </div>
 
