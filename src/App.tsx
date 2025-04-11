@@ -27,6 +27,7 @@ import UserMessages from "./pages/messaging/UserMessages";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import StudentMessages from "./pages/students/StudentMessages";
+import Scholarships from "./pages/Scholarships";
 
 // Dashboard pages
 import StudentApplications from "./pages/dashboard/StudentApplications";
@@ -49,6 +50,7 @@ const App = () => (
           <Route path="/programs/:id" element={<ProgramDetails />} />
           <Route path="/countries" element={<Countries />} />
           <Route path="/countries/:id" element={<CountryDetails />} />
+          <Route path="/scholarships" element={<Scholarships />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/apply" element={<StudentApplication />} />
