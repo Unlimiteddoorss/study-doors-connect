@@ -52,8 +52,8 @@ const CTASection = () => {
     setStudentPhone("");
   };
   
-  const handleExplorePrograms = () => {
-    // This allows us to filter programs when we navigate to the programs page
+  const getExploreUrlParams = () => {
+    // This function constructs the query params for program filtering
     let queryParams = new URLSearchParams();
     
     if (selectedCountry && selectedCountry !== "all") {
@@ -64,7 +64,7 @@ const CTASection = () => {
       queryParams.append("degree", selectedDegree);
     }
     
-    return `/programs${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+    return queryParams.toString() ? `?${queryParams.toString()}` : '';
   };
 
   return (
@@ -176,7 +176,7 @@ const CTASection = () => {
                 </div>
               </div>
               
-              <Link to={handleExplorePrograms}>
+              <Link to={`/programs${getExploreUrlParams()}`}>
                 <Button className="w-full bg-white text-unlimited-blue hover:bg-gray-100 mb-6">
                   <Search className="mr-2 h-4 w-4" /> بحث عن البرامج
                 </Button>
