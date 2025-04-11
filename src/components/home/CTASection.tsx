@@ -1,6 +1,8 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { MessageSquare } from 'lucide-react';
+
 const CTASection = () => {
   return <section className="py-16 bg-gradient-to-r from-unlimited-dark-blue to-unlimited-blue text-white">
       <div className="container mx-auto px-4 text-center">
@@ -11,10 +13,14 @@ const CTASection = () => {
             <Link to="/register">إنشاء حساب</Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-            <Link to="/contact">تحدث مع مستشار</Link>
+            <Link to="/contact" className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              تحدث مع مستشار
+            </Link>
           </Button>
         </div>
       </div>
     </section>;
 };
+
 export default CTASection;

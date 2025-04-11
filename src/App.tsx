@@ -23,6 +23,7 @@ import AgentDashboard from "./pages/agent/AgentDashboard";
 import UserMessages from "./pages/messaging/UserMessages";
 import AdminMessages from "./pages/admin/AdminMessages";
 import AdminNotifications from "./pages/admin/AdminNotifications";
+import StudentMessages from "./pages/students/StudentMessages";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/apply" element={<StudentApplication />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/messages" element={<UserMessages />} />
+          <Route path="/student/messages" element={<StudentMessages />} />
           
           {/* Admin routes */}
           <Route path="/admin" element={<AdminDashboard />} />
