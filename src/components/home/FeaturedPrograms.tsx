@@ -55,7 +55,7 @@ const FeaturedPrograms = () => {
             <Button asChild variant="outline">
               <Link to="/programs" className="flex items-center">
                 عرض جميع البرامج
-                <ArrowRight className="ml-2 h-4 w-4" />
+                <ArrowRight className="mr-2 h-4 w-4" />
               </Link>
             </Button>
           }

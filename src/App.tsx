@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Programs from "./pages/Programs";
+import ProgramDetails from "./pages/ProgramDetails";
 import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import StudentApplication from "./pages/StudentApplication";
@@ -25,7 +26,7 @@ import AdminMessages from "./pages/admin/AdminMessages";
 import AdminNotifications from "./pages/admin/AdminNotifications";
 import StudentMessages from "./pages/students/StudentMessages";
 
-// New imports for dashboard pages
+// Dashboard pages
 import StudentApplications from "./pages/dashboard/StudentApplications";
 import StudentProfile from "./pages/dashboard/StudentProfile";
 import StudentNotifications from "./pages/dashboard/StudentNotifications";
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/programs" element={<Programs />} />
+          <Route path="/programs/:id" element={<ProgramDetails />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/apply" element={<StudentApplication />} />

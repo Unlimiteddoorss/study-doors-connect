@@ -128,7 +128,30 @@ const Programs = () => {
       );
     }
     
-    // Apply other filters here when implemented
+    // Apply country filters
+    if (filters.countries.length > 0) {
+      result = result.filter(program => {
+        const programCountry = program.location.split('،')[0].trim();
+        return filters.countries.some(country => programCountry === country);
+      });
+    }
+    
+    // Apply level filters (this would need proper tagging in the data)
+    if (filters.levels.length > 0) {
+      result = result.filter(program => {
+        if (program.title.includes('بكالوريوس') && filters.levels.includes('البكالوريوس')) return true;
+        if (program.title.includes('ماجستير') && filters.levels.includes('الماجستير')) return true;
+        if (program.title.includes('دكتوراه') && filters.levels.includes('الدكتوراه')) return true;
+        return false;
+      });
+    }
+    
+    // Apply language filters
+    if (filters.languages.length > 0) {
+      result = result.filter(program => 
+        filters.languages.includes(program.language)
+      );
+    }
     
     setFilteredPrograms(result);
   }, [searchTerm, filters]);
@@ -170,6 +193,32 @@ const Programs = () => {
     });
   };
 
+  const toggleLanguageFilter = (language: string) => {
+    setFilters(prevFilters => {
+      if (prevFilters.languages.includes(language)) {
+        return {
+          ...prevFilters,
+          languages: prevFilters.languages.filter(l => l !== language)
+        };
+      } else {
+        return {
+          ...prevFilters,
+          languages: [...prevFilters.languages, language]
+        };
+      }
+    });
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      countries: [],
+      levels: [],
+      specialties: [],
+      languages: [],
+    });
+    setSearchTerm('');
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
@@ -193,12 +242,17 @@ const Programs = () => {
             </div>
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" type="button">
-                  <Filter className="h-4 w-4 mr-2" />
+                <Button variant="outline" type="button" className="gap-2">
+                  <Filter className="h-4 w-4" />
                   <span>تصفية</span>
+                  {(filters.countries.length > 0 || filters.levels.length > 0 || filters.languages.length > 0) && (
+                    <span className="h-5 w-5 rounded-full bg-unlimited-blue text-white text-xs flex items-center justify-center">
+                      {filters.countries.length + filters.levels.length + filters.languages.length}
+                    </span>
+                  )}
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left">
+              <SheetContent side="left" className="overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle className="text-right">خيارات التصفية</SheetTitle>
                 </SheetHeader>
@@ -257,7 +311,11 @@ const Programs = () => {
                         <div className="space-y-2">
                           {['الإنجليزية', 'التركية', 'العربية', 'الروسية'].map((language) => (
                             <div key={language} className="flex items-center space-x-2 rtl:space-x-reverse">
-                              <Checkbox id={`language-${language}`} />
+                              <Checkbox 
+                                id={`language-${language}`}
+                                checked={filters.languages.includes(language)}
+                                onCheckedChange={() => toggleLanguageFilter(language)}
+                              />
                               <Label htmlFor={`language-${language}`}>{language}</Label>
                             </div>
                           ))}
@@ -267,10 +325,14 @@ const Programs = () => {
                   </Accordion>
                 </div>
                 <div className="mt-6 flex gap-2">
-                  <Button className="flex-grow" onClick={() => setFilters({ countries: [], levels: [], specialties: [], languages: [] })}>
+                  <Button 
+                    className="flex-grow" 
+                    variant="outline"
+                    onClick={resetFilters}
+                  >
                     إعادة ضبط
                   </Button>
-                  <Button variant="outline" className="flex-grow">
+                  <Button className="flex-grow">
                     تطبيق
                   </Button>
                 </div>
@@ -281,7 +343,7 @@ const Programs = () => {
         </div>
 
         {/* Results info */}
-        <div className="mb-6 flex justify-between items-center">
+        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-unlimited-gray">
             تم العثور على {filteredPrograms.length} برنامج دراسي
           </p>
@@ -298,6 +360,49 @@ const Programs = () => {
             </select>
           </div>
         </div>
+
+        {/* Active Filters */}
+        {(filters.countries.length > 0 || filters.levels.length > 0 || filters.languages.length > 0) && (
+          <div className="mb-6 flex flex-wrap gap-2 items-center">
+            <span className="text-unlimited-gray">التصفيات النشطة:</span>
+            {filters.countries.map(country => (
+              <Badge key={country} variant="outline" className="px-3 py-1 gap-2">
+                {country}
+                <button 
+                  onClick={() => toggleCountryFilter(country)}
+                  className="text-unlimited-gray hover:text-unlimited-dark-blue"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            {filters.levels.map(level => (
+              <Badge key={level} variant="outline" className="px-3 py-1 gap-2">
+                {level}
+                <button 
+                  onClick={() => toggleLevelFilter(level)}
+                  className="text-unlimited-gray hover:text-unlimited-dark-blue"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            {filters.languages.map(language => (
+              <Badge key={language} variant="outline" className="px-3 py-1 gap-2">
+                {language}
+                <button 
+                  onClick={() => toggleLanguageFilter(language)}
+                  className="text-unlimited-gray hover:text-unlimited-dark-blue"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            <Button variant="ghost" size="sm" onClick={resetFilters} className="text-unlimited-gray">
+              مسح الكل
+            </Button>
+          </div>
+        )}
 
         {/* Programs Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -354,7 +459,7 @@ const Programs = () => {
         {filteredPrograms.length === 0 && (
           <div className="text-center py-12">
             <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على برامج تطابق بحثك</p>
-            <Button onClick={() => setSearchTerm('')}>إعادة ضبط البحث</Button>
+            <Button onClick={resetFilters}>إعادة ضبط البحث</Button>
           </div>
         )}
 
