@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { availableDegrees, availableLanguages } from '@/data/universityPrograms';
 
 interface UniversitySearchProps {
   searchTerm: string;
@@ -18,6 +19,10 @@ interface UniversitySearchProps {
   resetFilters: () => void;
   cities: string[];
   countryTranslations?: Record<string, string>;
+  selectedDegree?: string;
+  setSelectedDegree?: (value: string) => void;
+  selectedLanguage?: string;
+  setSelectedLanguage?: (value: string) => void;
 }
 
 const UniversitySearch: React.FC<UniversitySearchProps> = ({
@@ -30,14 +35,42 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
   handleSearch,
   resetFilters,
   cities,
-  countryTranslations = {}
+  countryTranslations = {},
+  selectedDegree,
+  setSelectedDegree,
+  selectedLanguage,
+  setSelectedLanguage
 }) => {
   // ترجمة اسم المدينة من الإنجليزية إلى العربية
   const translateCity = (city: string): string => {
     return countryTranslations[city] || city;
   };
 
-  const hasActiveFilters = searchTerm || selectedCity !== 'all' || selectedType !== 'all';
+  // ترجمة الدرجة العلمية
+  const translateDegree = (degree: string): string => {
+    switch(degree) {
+      case 'Bachelor': return 'بكالوريوس';
+      case 'Master': return 'ماجستير';
+      case 'PhD': return 'دكتوراه';
+      case 'Diploma': return 'دبلوم';
+      case 'Vocational School': return 'معهد مهني';
+      default: return degree;
+    }
+  };
+
+  // ترجمة اللغة
+  const translateLanguage = (language: string): string => {
+    switch(language) {
+      case 'English': return 'الإنجليزية';
+      case 'Turkish': return 'التركية';
+      case 'Arabic': return 'العربية';
+      default: return language;
+    }
+  };
+
+  const hasActiveFilters = searchTerm || selectedCity !== 'all' || selectedType !== 'all' || 
+                        (selectedDegree && selectedDegree !== 'all') || 
+                        (selectedLanguage && selectedLanguage !== 'all');
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -135,6 +168,26 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
                 />
               </Badge>
             )}
+
+            {selectedDegree && selectedDegree !== 'all' && setSelectedDegree && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
+                الدرجة: {translateDegree(selectedDegree)}
+                <X 
+                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  onClick={() => setSelectedDegree('all')} 
+                />
+              </Badge>
+            )}
+
+            {selectedLanguage && selectedLanguage !== 'all' && setSelectedLanguage && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
+                اللغة: {translateLanguage(selectedLanguage)}
+                <X 
+                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  onClick={() => setSelectedLanguage('all')} 
+                />
+              </Badge>
+            )}
           </div>
         )}
         
@@ -166,20 +219,45 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
                 <div className="space-y-4">
                   <h4 className="font-medium text-lg">خيارات متقدمة</h4>
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">لغة الدراسة</label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="جميع اللغات" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">جميع اللغات</SelectItem>
-                        <SelectItem value="English">الإنجليزية</SelectItem>
-                        <SelectItem value="Turkish">التركية</SelectItem>
-                        <SelectItem value="Arabic">العربية</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  {/* فلتر الدرجة العلمية */}
+                  {setSelectedDegree && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">الدرجة العلمية</label>
+                      <Select value={selectedDegree} onValueChange={setSelectedDegree}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="جميع الدرجات" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">جميع الدرجات</SelectItem>
+                          {availableDegrees.map(degree => (
+                            <SelectItem key={degree} value={degree}>
+                              {translateDegree(degree)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  
+                  {/* فلتر اللغة */}
+                  {setSelectedLanguage && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">لغة الدراسة</label>
+                      <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="جميع اللغات" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">جميع اللغات</SelectItem>
+                          {availableLanguages.map(language => (
+                            <SelectItem key={language} value={language}>
+                              {translateLanguage(language)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">الرسوم السنوية</label>
@@ -206,7 +284,9 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
                   </div>
                   
                   <div className="pt-2">
-                    <Button type="button" className="w-full bg-unlimited-blue">تطبيق الفلتر</Button>
+                    <Button type="button" className="w-full bg-unlimited-blue" onClick={handleSearch}>
+                      تطبيق الفلتر
+                    </Button>
                   </div>
                 </div>
               </PopoverContent>
