@@ -1,21 +1,12 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { UniversityProgram } from '@/data/universityPrograms';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { School, MapPin, DollarSign, Languages, CalendarDays } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Pagination from '@/components/shared/Pagination';
-
-interface ProgramFilters {
-  degree: string;
-  language: string;
-  campus: string;
-  minPrice: number | null;
-  maxPrice: number | null;
-  searchTerm: string;
-}
+import UniversityProgramCard from './UniversityProgramCard';
 
 interface UniversityProgramsProps {
   programs: UniversityProgram[];
@@ -24,14 +15,12 @@ interface UniversityProgramsProps {
 }
 
 const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, universityId, universityName }) => {
-  const [filters, setFilters] = useState<ProgramFilters>({
-    degree: '',
-    language: '',
-    campus: '',
-    minPrice: null,
-    maxPrice: null,
-    searchTerm: ''
-  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDegree, setSelectedDegree] = useState<string>('all');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('all');
+  const [selectedCampus, setSelectedCampus] = useState<string>('all');
+  const [minFee, setMinFee] = useState<number | undefined>(undefined);
+  const [maxFee, setMaxFee] = useState<number | undefined>(undefined);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState('name');
   const programsPerPage = 9;
@@ -41,39 +30,44 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
   const languages = Array.from(new Set(programs.map(p => p.language)));
   const campuses = Array.from(new Set(programs.map(p => p.campus)));
 
-  // تطبيق التصفية
-  const filteredPrograms = programs.filter(program => {
-    // تصفية حسب الدرجة العلمية
-    if (filters.degree && program.degree !== filters.degree) return false;
-    
-    // تصفية حسب اللغة
-    if (filters.language && program.language !== filters.language) return false;
-    
-    // تصفية حسب الحرم الجامعي
-    if (filters.campus && program.campus !== filters.campus) return false;
-    
-    // تصفية حسب السعر الأدنى
-    if (filters.minPrice !== null && program.discountedFee < filters.minPrice) return false;
-    
-    // تصفية حسب السعر الأقصى
-    if (filters.maxPrice !== null && program.discountedFee > filters.maxPrice) return false;
-    
-    // تصفية حسب البحث
-    if (filters.searchTerm) {
-      const searchLower = filters.searchTerm.toLowerCase();
-      const nameMatch = program.name.toLowerCase().includes(searchLower);
-      const nameArMatch = program.nameAr.toLowerCase().includes(searchLower);
-      if (!nameMatch && !nameArMatch) return false;
-    }
-    
-    return true;
-  });
+  // وظيفة للحصول على البرامج المصفاة
+  const getFilteredPrograms = useCallback(() => {
+    return programs.filter(program => {
+      // تصفية حسب الدرجة العلمية
+      if (selectedDegree !== 'all' && program.degree !== selectedDegree) return false;
+      
+      // تصفية حسب اللغة
+      if (selectedLanguage !== 'all' && program.language !== selectedLanguage) return false;
+      
+      // تصفية حسب الحرم الجامعي
+      if (selectedCampus !== 'all' && program.campus !== selectedCampus) return false;
+      
+      // تصفية حسب السعر الأدنى
+      if (minFee !== undefined && program.discountedFee < minFee) return false;
+      
+      // تصفية حسب السعر الأقصى
+      if (maxFee !== undefined && program.discountedFee > maxFee) return false;
+      
+      // تصفية حسب البحث
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const nameMatch = program.name.toLowerCase().includes(searchLower);
+        const nameArMatch = program.nameAr.toLowerCase().includes(searchLower);
+        if (!nameMatch && !nameArMatch) return false;
+      }
+      
+      return true;
+    });
+  }, [programs, selectedDegree, selectedLanguage, selectedCampus, minFee, maxFee, searchTerm]);
+
+  // الحصول على البرامج المصفاة
+  const filteredPrograms = getFilteredPrograms();
   
   // ترتيب البرامج
   const sortedPrograms = [...filteredPrograms].sort((a, b) => {
     switch(sortBy) {
       case 'name':
-        return a.name.localeCompare(b.name);
+        return a.nameAr.localeCompare(b.nameAr);
       case 'priceLow':
         return a.discountedFee - b.discountedFee;
       case 'priceHigh':
@@ -99,19 +93,17 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
 
   // إعادة ضبط التصفية
   const resetFilters = () => {
-    setFilters({
-      degree: '',
-      language: '',
-      campus: '',
-      minPrice: null,
-      maxPrice: null,
-      searchTerm: ''
-    });
+    setSearchTerm('');
+    setSelectedDegree('all');
+    setSelectedLanguage('all');
+    setSelectedCampus('all');
+    setMinFee(undefined);
+    setMaxFee(undefined);
     setSortBy('name');
     setCurrentPage(1);
   };
 
-  // تحويل اللغة إلى العربية
+  // ترجمة اللغة إلى العربية
   const translateLanguage = (lang: string): string => {
     switch(lang) {
       case 'English': return 'الإنجليزية';
@@ -121,16 +113,25 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
     }
   };
 
-  // تحويل الدرجة العلمية إلى العربية
+  // ترجمة الدرجة العلمية إلى العربية
   const translateDegree = (degree: string): string => {
     switch(degree) {
       case 'Bachelor': return 'بكالوريوس';
       case 'Master': return 'ماجستير';
       case 'PhD': return 'دكتوراه';
       case 'Diploma': return 'دبلوم';
+      case 'Vocational School': return 'معهد مهني';
       default: return degree;
     }
   };
+
+  // وجود تصفية نشطة
+  const hasActiveFilter = searchTerm || 
+                        selectedDegree !== 'all' || 
+                        selectedLanguage !== 'all' || 
+                        selectedCampus !== 'all' || 
+                        minFee !== undefined || 
+                        maxFee !== undefined;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6 my-8">
@@ -138,87 +139,133 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
         <h2 className="text-2xl font-bold mb-6 text-unlimited-blue">برامج {universityName}</h2>
         
         {/* قسم البحث والتصفية */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium mb-1 text-unlimited-gray">ابحث عن برنامج</label>
-            <input
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-grow">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
               type="text"
-              className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
-              placeholder="اسم البرنامج..."
-              value={filters.searchTerm}
-              onChange={(e) => setFilters({...filters, searchTerm: e.target.value})}
+              className="pl-10 pr-10"
+              placeholder="ابحث عن برنامج..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
             />
+            {searchTerm && (
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                onClick={() => {
+                  setSearchTerm('');
+                  setCurrentPage(1);
+                }}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
           
-          <div>
-            <label className="block text-sm font-medium mb-1 text-unlimited-gray">الدرجة العلمية</label>
-            <select
-              className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
-              value={filters.degree}
-              onChange={(e) => setFilters({...filters, degree: e.target.value})}
-            >
-              <option value="">جميع الدرجات العلمية</option>
+          <Select 
+            value={selectedDegree} 
+            onValueChange={(value) => {
+              setSelectedDegree(value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="الدرجة العلمية" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع الدرجات</SelectItem>
               {degrees.map(degree => (
-                <option key={degree} value={degree}>{translateDegree(degree)}</option>
+                <SelectItem key={degree} value={degree}>
+                  {translateDegree(degree)}
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectContent>
+          </Select>
           
-          <div>
-            <label className="block text-sm font-medium mb-1 text-unlimited-gray">لغة الدراسة</label>
-            <select
-              className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
-              value={filters.language}
-              onChange={(e) => setFilters({...filters, language: e.target.value})}
-            >
-              <option value="">جميع اللغات</option>
+          <Select 
+            value={selectedLanguage} 
+            onValueChange={(value) => {
+              setSelectedLanguage(value);
+              setCurrentPage(1);
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="لغة الدراسة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">جميع اللغات</SelectItem>
               {languages.map(language => (
-                <option key={language} value={language}>{translateLanguage(language)}</option>
+                <SelectItem key={language} value={language}>
+                  {translateLanguage(language)}
+                </SelectItem>
               ))}
-            </select>
-          </div>
+            </SelectContent>
+          </Select>
+          
+          <Button
+            type="button"
+            variant="outline"
+            className="flex items-center gap-1"
+            onClick={() => {
+              const element = document.getElementById('advanced-filters');
+              if (element) element.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            خيارات متقدمة
+          </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* خيارات متقدمة */}
+        <div id="advanced-filters" className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium mb-1 text-unlimited-gray">الحرم الجامعي</label>
-            <select
-              className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
-              value={filters.campus}
-              onChange={(e) => setFilters({...filters, campus: e.target.value})}
+            <Select 
+              value={selectedCampus} 
+              onValueChange={(value) => {
+                setSelectedCampus(value);
+                setCurrentPage(1);
+              }}
             >
-              <option value="">جميع الحرم الجامعي</option>
-              {campuses.map(campus => (
-                <option key={campus} value={campus}>{campus}</option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="جميع الحرم الجامعي" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الحرم الجامعي</SelectItem>
+                {campuses.map(campus => (
+                  <SelectItem key={campus} value={campus}>{campus}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1 text-unlimited-gray">الحد الأدنى للسعر</label>
-            <input
+            <Input
               type="number"
-              className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
               placeholder="الحد الأدنى للسعر"
-              value={filters.minPrice || ''}
-              onChange={(e) => setFilters({
-                ...filters, 
-                minPrice: e.target.value ? parseFloat(e.target.value) : null
-              })}
+              value={minFee || ''}
+              onChange={(e) => {
+                setMinFee(e.target.value ? parseFloat(e.target.value) : undefined);
+                setCurrentPage(1);
+              }}
             />
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1 text-unlimited-gray">الحد الأقصى للسعر</label>
-            <input
+            <Input
               type="number"
-              className="w-full px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
               placeholder="الحد الأقصى للسعر"
-              value={filters.maxPrice || ''}
-              onChange={(e) => setFilters({
-                ...filters, 
-                maxPrice: e.target.value ? parseFloat(e.target.value) : null
-              })}
+              value={maxFee || ''}
+              onChange={(e) => {
+                setMaxFee(e.target.value ? parseFloat(e.target.value) : undefined);
+                setCurrentPage(1);
+              }}
             />
           </div>
         </div>
@@ -228,21 +275,23 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
             variant="outline" 
             onClick={resetFilters}
             className="text-unlimited-gray"
+            disabled={!hasActiveFilter}
           >
             إعادة ضبط التصفية
           </Button>
           
           <div className="flex items-center gap-2">
             <span className="text-unlimited-gray">ترتيب حسب:</span>
-            <select
-              className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="name">الاسم</option>
-              <option value="priceLow">السعر (الأقل أولا)</option>
-              <option value="priceHigh">السعر (الأعلى أولا)</option>
-            </select>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">الاسم</SelectItem>
+                <SelectItem value="priceLow">السعر (الأقل أولاً)</SelectItem>
+                <SelectItem value="priceHigh">السعر (الأعلى أولاً)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         
@@ -267,93 +316,11 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
       ) : (
         <div className="space-y-4">
           {currentPrograms.map(program => (
-            <Card key={program.id} className="overflow-hidden hover:border-unlimited-blue transition-all">
-              <CardContent className="p-0">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="md:col-span-2 p-6">
-                    <h3 className="font-bold text-xl mb-2 text-unlimited-blue">{program.nameAr}</h3>
-                    <p className="text-unlimited-gray mb-4">{program.name}</p>
-                    
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <School className="h-3 w-3" />
-                        {translateDegree(program.degree)}
-                      </Badge>
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <Languages className="h-3 w-3" />
-                        {translateLanguage(program.language)}
-                      </Badge>
-                      <Badge variant="outline" className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        {program.campus}
-                      </Badge>
-                      {program.duration && (
-                        <Badge variant="outline" className="flex items-center gap-1">
-                          <CalendarDays className="h-3 w-3" />
-                          {program.duration}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 md:col-span-1 bg-gray-50 flex flex-col justify-center">
-                    <div className="space-y-2">
-                      <div>
-                        <div className="text-sm text-unlimited-gray">الرسوم الدراسية:</div>
-                        <div className="font-semibold">
-                          <DollarSign className="w-4 h-4 inline-block text-unlimited-blue" />
-                          {program.tuitionFee.toLocaleString()} USD
-                        </div>
-                      </div>
-                      
-                      {program.discountedFee < program.tuitionFee && (
-                        <div>
-                          <div className="text-sm text-unlimited-gray">بعد الخصم:</div>
-                          <div className="font-semibold text-green-600">
-                            <DollarSign className="w-4 h-4 inline-block" />
-                            {program.discountedFee.toLocaleString()} USD
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div>
-                        <div className="text-sm text-unlimited-gray">رسوم التأمين:</div>
-                        <div className="font-semibold">
-                          <DollarSign className="w-4 h-4 inline-block" />
-                          {program.depositFee.toLocaleString()} USD
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-sm text-unlimited-gray">رسوم السنة التحضيرية:</div>
-                        <div className="font-semibold">
-                          <DollarSign className="w-4 h-4 inline-block" />
-                          {program.prepFee.toLocaleString()} USD
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="p-6 md:col-span-1 flex flex-col justify-center items-center bg-gray-50 border-r border-gray-200">
-                    <Badge className={program.available ? "bg-green-600 mb-4" : "bg-red-600 mb-4"}>
-                      {program.available ? "متاح للتسجيل" : "مغلق للتسجيل"}
-                    </Badge>
-                    
-                    <Button asChild className="w-full mb-2 bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                      <Link to={`/apply?program=${program.id}&university=${universityId}`}>
-                        تقدم الآن
-                      </Link>
-                    </Button>
-                    
-                    <Button asChild variant="outline" className="w-full">
-                      <Link to={`/programs/${program.id}`}>
-                        التفاصيل
-                      </Link>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <UniversityProgramCard 
+              key={program.id}
+              program={program}
+              universityId={universityId}
+            />
           ))}
         </div>
       )}

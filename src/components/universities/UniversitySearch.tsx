@@ -1,11 +1,12 @@
 
-import React, { useState } from 'react';
-import { Search, Filter, X, ChevronDown } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Search, Filter, X, ChevronDown, DollarSign, Book } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
 import { availableDegrees, availableLanguages } from '@/data/universityPrograms';
 
 interface UniversitySearchProps {
@@ -27,6 +28,8 @@ interface UniversitySearchProps {
   setMinFee?: (value: number | undefined) => void;
   maxFee?: number;
   setMaxFee?: (value: number | undefined) => void;
+  worldRanking?: number;
+  setWorldRanking?: (value: number | undefined) => void;
 }
 
 const UniversitySearch: React.FC<UniversitySearchProps> = ({
@@ -47,8 +50,27 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
   minFee,
   setMinFee,
   maxFee,
-  setMaxFee
+  setMaxFee,
+  worldRanking,
+  setWorldRanking
 }) => {
+  // حالة قيم الرسوم الدراسية المؤقتة للسلايدر
+  const [tempFeeRange, setTempFeeRange] = useState<[number, number]>([
+    minFee || 0,
+    maxFee || 30000
+  ]);
+
+  // تحديث قيم الرسوم المؤقتة
+  const handleFeeRangeChange = (values: number[]) => {
+    setTempFeeRange([values[0], values[1]]);
+  };
+
+  // تطبيق فلتر الرسوم
+  const applyFeeFilter = useCallback(() => {
+    if (setMinFee) setMinFee(tempFeeRange[0]);
+    if (setMaxFee) setMaxFee(tempFeeRange[1]);
+  }, [tempFeeRange, setMinFee, setMaxFee]);
+
   // ترجمة اسم المدينة من الإنجليزية إلى العربية
   const translateCity = (city: string): string => {
     return countryTranslations[city] || city;
@@ -79,7 +101,8 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
   const hasActiveFilters = searchTerm || selectedCity !== 'all' || selectedType !== 'all' || 
                         (selectedDegree && selectedDegree !== 'all') || 
                         (selectedLanguage && selectedLanguage !== 'all') ||
-                        (minFee !== undefined) || (maxFee !== undefined);
+                        (minFee !== undefined) || (maxFee !== undefined) ||
+                        (worldRanking !== undefined);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -152,7 +175,7 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
               <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
                 بحث: {searchTerm}
                 <X 
-                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
                   onClick={() => setSearchTerm('')} 
                 />
               </Badge>
@@ -162,7 +185,7 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
               <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
                 المدينة: {translateCity(selectedCity)}
                 <X 
-                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
                   onClick={() => setSelectedCity('all')} 
                 />
               </Badge>
@@ -172,7 +195,7 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
               <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
                 النوع: {selectedType === 'Private' ? 'خاصة' : 'حكومية'}
                 <X 
-                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
                   onClick={() => setSelectedType('all')} 
                 />
               </Badge>
@@ -182,7 +205,7 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
               <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
                 الدرجة: {translateDegree(selectedDegree)}
                 <X 
-                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
                   onClick={() => setSelectedDegree('all')} 
                 />
               </Badge>
@@ -192,7 +215,7 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
               <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
                 اللغة: {translateLanguage(selectedLanguage)}
                 <X 
-                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
                   onClick={() => setSelectedLanguage('all')} 
                 />
               </Badge>
@@ -202,11 +225,22 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
               <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
                 الرسوم: {minFee !== undefined ? `${minFee}$` : '0$'} - {maxFee !== undefined ? `${maxFee}$` : 'غير محدد'}
                 <X 
-                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
                   onClick={() => {
                     setMinFee(undefined);
                     setMaxFee(undefined);
+                    setTempFeeRange([0, 30000]);
                   }} 
+                />
+              </Badge>
+            )}
+            
+            {worldRanking !== undefined && setWorldRanking && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
+                التصنيف العالمي: {worldRanking < 1000 ? `أفضل من ${worldRanking}` : 'غير مصنفة'}
+                <X 
+                  className="h-4 w-4 mr-1 cursor-pointer" 
+                  onClick={() => setWorldRanking(undefined)} 
                 />
               </Badge>
             )}
@@ -283,43 +317,75 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
                   
                   {/* فلتر الرسوم السنوية */}
                   {setMinFee && setMaxFee && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">الرسوم السنوية</label>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">الرسوم السنوية</label>
+                        <div className="flex justify-between mt-1 text-sm text-unlimited-gray">
+                          <span>${tempFeeRange[0]}</span>
+                          <span>${tempFeeRange[1]}</span>
+                        </div>
+                        <Slider 
+                          defaultValue={[tempFeeRange[0], tempFeeRange[1]]} 
+                          max={30000} 
+                          step={500}
+                          value={[tempFeeRange[0], tempFeeRange[1]]}
+                          onValueChange={handleFeeRangeChange}
+                          className="mt-2"
+                        />
+                      </div>
                       <div className="grid grid-cols-2 gap-2">
                         <div>
                           <Input 
                             type="number" 
                             placeholder="من" 
-                            value={minFee !== undefined ? minFee : ''}
-                            onChange={(e) => setMinFee(e.target.value ? Number(e.target.value) : undefined)}
+                            value={tempFeeRange[0]}
+                            onChange={(e) => setTempFeeRange([parseInt(e.target.value) || 0, tempFeeRange[1]])}
                           />
                         </div>
                         <div>
                           <Input 
                             type="number" 
                             placeholder="إلى" 
-                            value={maxFee !== undefined ? maxFee : ''}
-                            onChange={(e) => setMaxFee(e.target.value ? Number(e.target.value) : undefined)}
+                            value={tempFeeRange[1]}
+                            onChange={(e) => setTempFeeRange([tempFeeRange[0], parseInt(e.target.value) || 30000])}
                           />
                         </div>
                       </div>
                     </div>
                   )}
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">التصنيف العالمي</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Input type="number" placeholder="من" />
-                      </div>
-                      <div>
-                        <Input type="number" placeholder="إلى" />
+                  {/* فلتر التصنيف العالمي */}
+                  {setWorldRanking && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">التصنيف العالمي</label>
+                      <div className="grid grid-cols-1 gap-2">
+                        <Select 
+                          value={worldRanking?.toString() || 'all'} 
+                          onValueChange={(value) => setWorldRanking(value === 'all' ? undefined : parseInt(value))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر التصنيف" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">جميع الجامعات</SelectItem>
+                            <SelectItem value="500">أفضل 500 جامعة</SelectItem>
+                            <SelectItem value="1000">أفضل 1000 جامعة</SelectItem>
+                            <SelectItem value="2000">أفضل 2000 جامعة</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                  </div>
+                  )}
                   
                   <div className="pt-2">
-                    <Button type="button" className="w-full bg-unlimited-blue" onClick={handleSearch}>
+                    <Button 
+                      type="button" 
+                      className="w-full bg-unlimited-blue" 
+                      onClick={() => {
+                        applyFeeFilter();
+                        handleSearch(new Event('submit') as unknown as React.FormEvent);
+                      }}
+                    >
                       تطبيق الفلتر
                     </Button>
                   </div>
