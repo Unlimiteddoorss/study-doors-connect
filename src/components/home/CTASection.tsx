@@ -1,7 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { MessageSquare, GraduationCap, ArrowRight } from 'lucide-react';
+import { MessageSquare, GraduationCap, ArrowRight, Globe, School } from 'lucide-react';
 
 const CTASection = () => {
   return (
@@ -9,7 +9,7 @@ const CTASection = () => {
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">ابدأ رحلة دراستك الآن</h2>
         <p className="max-w-2xl mx-auto text-lg mb-8">انضم إلى آلاف الطلاب الذين حققوا أحلامهم الأكاديمية مع أبواب بلا حدود. فريقنا جاهز لمساعدتك في كل خطوة.</p>
-        <div className="flex flex-col sm:flex-row justify-center gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
           <Button asChild size="lg" className="bg-white text-unlimited-blue hover:bg-gray-100 font-bold">
             <Link to="/apply" className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5" />
@@ -19,8 +19,14 @@ const CTASection = () => {
           </Button>
           <Button asChild size="lg" variant="outline" className="border-white hover:bg-white/10">
             <Link to="/programs" className="flex items-center gap-2 text-white hover:text-white">
-              <GraduationCap className="h-5 w-5" />
-              استعرض البرامج الدراسية
+              <School className="h-5 w-5" />
+              استعرض البرامج
+            </Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="border-white hover:bg-white/10">
+            <Link to="/universities" className="flex items-center gap-2 text-white hover:text-white">
+              <Globe className="h-5 w-5" />
+              استعرض الدول والجامعات
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="border-white hover:bg-white/10">

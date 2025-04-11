@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload, MessageSquare } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -32,12 +33,37 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+
+// Countries data
+const availableCountries = [
+  'Australia', 'Azerbaijan', 'Bosnia and Herzegovina', 'Czech Republic', 'Egypt', 
+  'Georgia', 'Germany', 'Hungary', 'Ireland', 'Kosovo', 'Macedonia', 'Malaysia', 
+  'Malta', 'Montenegro', 'Northern Cyprus', 'Poland', 'Scotland', 'Serbia', 'Spain', 
+  'Turkey', 'United Kingdom', 'United States'
+];
+
+// Degree types
+const degreeTypes = [
+  'Associate', 'Bachelor', 'Diploma', 'Doctorate', 'Foundation Year', 
+  'Language Course', 'Master', 'Training Course'
+];
+
+// Program specialties - first 20 for brevity
+const programSpecialties = [
+  'Accounting and Auditing', 'Accounting, Finance & Economics', 'Aerospace, Aeronautical', 
+  'Agriculture', 'Agriculture Engineering', 'Animal Science', 'Anthropology', 'Arabic', 
+  'Archaeology', 'Architectural Engineering', 'Architecture', 'Art', 'Astronomy', 
+  'Aviation Management', 'Aviation Technology', 'Biochemistry', 'Biology', 'Biomedical', 
+  'Biomedical Engineering', 'Business Administration, Management, General'
+];
 
 type Program = {
   id: string;
@@ -50,6 +76,7 @@ type Program = {
   fees: number;
   status: 'active' | 'inactive' | 'new';
   applicationCount: number;
+  country: string;
 };
 
 const initialPrograms: Program[] = [
@@ -64,6 +91,7 @@ const initialPrograms: Program[] = [
     fees: 8500,
     status: 'active',
     applicationCount: 45,
+    country: 'Turkey'
   },
   {
     id: 'PRG-002',
@@ -76,6 +104,7 @@ const initialPrograms: Program[] = [
     fees: 7200,
     status: 'active',
     applicationCount: 32,
+    country: 'Poland'
   },
   {
     id: 'PRG-003',
@@ -88,6 +117,7 @@ const initialPrograms: Program[] = [
     fees: 5000,
     status: 'active',
     applicationCount: 56,
+    country: 'Czech Republic'
   },
   {
     id: 'PRG-004',
@@ -100,6 +130,7 @@ const initialPrograms: Program[] = [
     fees: 6200,
     status: 'new',
     applicationCount: 12,
+    country: 'Hungary'
   },
   {
     id: 'PRG-005',
@@ -112,6 +143,7 @@ const initialPrograms: Program[] = [
     fees: 6800,
     status: 'active',
     applicationCount: 38,
+    country: 'Turkey'
   },
   {
     id: 'PRG-006',
@@ -124,6 +156,7 @@ const initialPrograms: Program[] = [
     fees: 4500,
     status: 'inactive',
     applicationCount: 20,
+    country: 'Turkey'
   },
   {
     id: 'PRG-007',
@@ -136,6 +169,7 @@ const initialPrograms: Program[] = [
     fees: 9000,
     status: 'new',
     applicationCount: 8,
+    country: 'Czech Republic'
   },
 ];
 
@@ -157,13 +191,29 @@ const ManagePrograms = () => {
   const [universityFilter, setUniversityFilter] = useState<string>('all');
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [countryFilter, setCountryFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
+  
+  // Form fields for new program
+  const [newProgram, setNewProgram] = useState({
+    name: '',
+    university: '',
+    department: '',
+    level: 'bachelor',
+    duration: '',
+    language: '',
+    fees: 0,
+    country: '',
+    specialty: '',
+  });
+
   const { toast } = useToast();
 
   const universities = Array.from(new Set(programs.map(program => program.university)));
+  const countries = Array.from(new Set(programs.map(program => program.country)));
 
   const filteredPrograms = programs.filter((program) => {
     const matchesSearch = 
@@ -174,15 +224,46 @@ const ManagePrograms = () => {
     const matchesUniversity = universityFilter === 'all' || program.university === universityFilter;
     const matchesLevel = levelFilter === 'all' || program.level === levelFilter;
     const matchesStatus = statusFilter === 'all' || program.status === statusFilter;
+    const matchesCountry = countryFilter === 'all' || program.country === countryFilter;
     
-    return matchesSearch && matchesUniversity && matchesLevel && matchesStatus;
+    return matchesSearch && matchesUniversity && matchesLevel && matchesStatus && matchesCountry;
   });
 
   const handleAddProgram = () => {
+    const newProgramEntry = {
+      id: `PRG-${String(programs.length + 1).padStart(3, '0')}`,
+      name: newProgram.name,
+      university: newProgram.university,
+      department: newProgram.department,
+      level: newProgram.level as 'bachelor' | 'master' | 'phd',
+      duration: newProgram.duration,
+      language: newProgram.language,
+      fees: parseFloat(String(newProgram.fees)),
+      status: 'new' as const,
+      applicationCount: 0,
+      country: newProgram.country
+    };
+
+    setPrograms([...programs, newProgramEntry]);
+    
     toast({
       title: "تمت إضافة البرنامج",
       description: "تم إضافة البرنامج الجديد بنجاح",
     });
+    
+    // Reset form
+    setNewProgram({
+      name: '',
+      university: '',
+      department: '',
+      level: 'bachelor',
+      duration: '',
+      language: '',
+      fees: 0,
+      country: '',
+      specialty: '',
+    });
+    
     setIsAddDialogOpen(false);
   };
 
@@ -243,6 +324,13 @@ const ManagePrograms = () => {
     setIsContactDialogOpen(false);
   };
 
+  const handleInputChange = (field: string, value: string | number) => {
+    setNewProgram(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
@@ -257,7 +345,7 @@ const ManagePrograms = () => {
                   إضافة برنامج
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
                   <DialogTitle>إضافة برنامج جديد</DialogTitle>
                   <DialogDescription>
@@ -267,20 +355,71 @@ const ManagePrograms = () => {
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">اسم البرنامج</label>
-                    <Input className="col-span-3" />
+                    <Input 
+                      className="col-span-3" 
+                      value={newProgram.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">الدولة</label>
+                    <div className="col-span-3">
+                      <Select 
+                        value={newProgram.country}
+                        onValueChange={(value) => handleInputChange('country', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الدولة" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] overflow-y-auto">
+                          {availableCountries.map((country) => (
+                            <SelectItem key={country} value={country}>{country}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">الجامعة</label>
-                    <Input className="col-span-3" />
+                    <Input 
+                      className="col-span-3" 
+                      value={newProgram.university}
+                      onChange={(e) => handleInputChange('university', e.target.value)}
+                    />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">القسم</label>
-                    <Input className="col-span-3" />
+                    <Input 
+                      className="col-span-3" 
+                      value={newProgram.department}
+                      onChange={(e) => handleInputChange('department', e.target.value)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <label className="text-right col-span-1">التخصص</label>
+                    <div className="col-span-3">
+                      <Select 
+                        value={newProgram.specialty}
+                        onValueChange={(value) => handleInputChange('specialty', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر التخصص" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-[300px] overflow-y-auto">
+                          {programSpecialties.map((specialty) => (
+                            <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">المستوى</label>
                     <div className="col-span-3">
-                      <Select>
+                      <Select 
+                        value={newProgram.level}
+                        onValueChange={(value) => handleInputChange('level', value)}
+                      >
                         <SelectTrigger>
                           <SelectValue placeholder="اختر المستوى" />
                         </SelectTrigger>
@@ -294,18 +433,34 @@ const ManagePrograms = () => {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">مدة الدراسة</label>
-                    <Input className="col-span-3" />
+                    <Input 
+                      className="col-span-3" 
+                      value={newProgram.duration}
+                      onChange={(e) => handleInputChange('duration', e.target.value)}
+                    />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">لغة الدراسة</label>
-                    <Input className="col-span-3" />
+                    <Input 
+                      className="col-span-3" 
+                      value={newProgram.language}
+                      onChange={(e) => handleInputChange('language', e.target.value)}
+                    />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">الرسوم (دولار)</label>
-                    <Input type="number" className="col-span-3" />
+                    <Input 
+                      type="number" 
+                      className="col-span-3"
+                      value={newProgram.fees}
+                      onChange={(e) => handleInputChange('fees', parseFloat(e.target.value))} 
+                    />
                   </div>
                 </div>
                 <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="mr-2">
+                    إلغاء
+                  </Button>
                   <Button type="submit" onClick={handleAddProgram}>
                     <CheckCircle className="h-4 w-4 mr-2" />
                     حفظ
@@ -368,6 +523,18 @@ const ManagePrograms = () => {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-2 items-center">
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="الدولة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الدول</SelectItem>
+                {countries.map((country) => (
+                  <SelectItem key={country} value={country}>{country}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
             <Select value={universityFilter} onValueChange={setUniversityFilter}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="الجامعة" />
@@ -413,9 +580,9 @@ const ManagePrograms = () => {
                 <TableHead className="w-[100px]">رقم البرنامج</TableHead>
                 <TableHead>اسم البرنامج</TableHead>
                 <TableHead className="hidden md:table-cell">الجامعة</TableHead>
+                <TableHead className="hidden lg:table-cell">الدولة</TableHead>
                 <TableHead className="hidden lg:table-cell">المستوى</TableHead>
                 <TableHead className="hidden lg:table-cell">المدة</TableHead>
-                <TableHead className="hidden md:table-cell">اللغة</TableHead>
                 <TableHead>الرسوم</TableHead>
                 <TableHead>الطلبات</TableHead>
                 <TableHead>الحالة</TableHead>
@@ -440,9 +607,9 @@ const ManagePrograms = () => {
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{program.university}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{program.country}</TableCell>
                     <TableCell className="hidden lg:table-cell">{levelConfig[program.level]}</TableCell>
                     <TableCell className="hidden lg:table-cell">{program.duration}</TableCell>
-                    <TableCell className="hidden md:table-cell">{program.language}</TableCell>
                     <TableCell>{program.fees} $</TableCell>
                     <TableCell>
                       <Badge variant="outline" className="font-medium">

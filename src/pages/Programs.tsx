@@ -28,6 +28,73 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+
+// Countries data from the provided screenshots
+const availableCountries = [
+  'Australia', 'Azerbaijan', 'Bosnia and Herzegovina', 'Czech Republic', 'Egypt', 
+  'Georgia', 'Germany', 'Hungary', 'Ireland', 'Kosovo', 'Macedonia', 'Malaysia', 
+  'Malta', 'Montenegro', 'Northern Cyprus', 'Poland', 'Scotland', 'Serbia', 'Spain', 
+  'Turkey', 'United Kingdom', 'United States'
+];
+
+// Degree types from the provided screenshots
+const degreeTypes = [
+  'Associate', 'Bachelor', 'Diploma', 'Doctorate', 'Foundation Year', 
+  'Language Course', 'Master', 'Training Course'
+];
+
+// Program specialties from the provided screenshots
+const programSpecialties = [
+  'Accounting and Auditing', 'Accounting, Finance & Economics', 'Aerospace, Aeronautical', 
+  'Agriculture', 'Agriculture Engineering', 'Animal Science', 'Anthropology', 'Arabic', 
+  'Archaeology', 'Architectural Engineering', 'Architecture', 'Art', 'Astronomy', 
+  'Aviation Management', 'Aviation Technology', 'Biochemistry', 'Biology', 'Biomedical', 
+  'Biomedical Engineering', 'Business Administration, Management, General', 
+  'Cartoon & Animation', 'Chemical Engineering', 'Chemistry', 'Civil Aviation Cabin Services', 
+  'Civil Engineering & Construction', 'Communications', 'Community, Social Service', 
+  'Comparative Literature', 'Computer Science', 'Cultural Studies, European Studies', 'Dentistry', 
+  'Digital Microchip Design & Verification', 'Education', 'Electrical & Electronics Engineering', 
+  'Engineering Management', 'English', 'English for Academic Studies', 'English Language and Literature', 
+  'English Literature', 'Entrepreneurship', 'Environmental Engineering', 'Environmental, Earth Sciences', 
+  'Fashion, Esthetics', 'Fine Arts & Design', 'Food and Culinary', 'Food Engineering', 
+  'Food, Nutrition, Exercise', 'French', 'Game Design, Game Animation, Game Creation', 'Gastronomy', 
+  'Gender Studies', 'General', 'Geography', 'Geology', 'German', 'Global Studies', 
+  'Graphic Design, Interior Design', 'Handicrafts', 'Health Sciences, Nursing', 'History', 
+  'Hospitality and Tourism, Recreation', 'Human Resources', 'Humanitarian Sciences', 
+  'Industrial Design', 'Industrial Engineering', 'Information Systems Management', 'Interior Design', 
+  'International Business, International Trade', 'International Relations', 'Islamic Studies', 
+  'Journalism', 'Law, Politics, Policy & Security', 'Liberal Arts', 'Literature, Languages', 
+  'Logistics & Supply Chain', 'Logistics and Transportation', 'Marine Science', 
+  'Marketing, Analyst, Advertising', 'Material Engineering', 'Mathematics', 
+  'Mechanical, Energy, Manufacturing, Robotic', 'Media, Photography, Film, Theater, Performance', 
+  'Medicine', 'Molecular Biology and Genetics', 'Molecular Biology, Genetics, and Bioengineering', 
+  'Music', 'Music, Audio', 'Natural and Mathematical Sciences', 'New Media', 'Optometry', 
+  'Paramedic & Kinesiology', 'Petroleum Engineering', 'Pharmacy', 'Philosophy', 'Physics', 
+  'Pilotage', 'Political', 'Political Science & Public Administration', 'Professional Pilot, Civil Aviation', 
+  'Psychology', 'Psychology, Philosophy, Therapy', 'Public Relations', 'Public Relations & Advertising', 
+  'Public Relations and Advertising', 'Radio, Television and Cinema', 'Radiography', 
+  'Real Estate & Asset Valuation', 'Religion', 'Russian', 'Sociology', 'Spanish', 
+  'Sports Management', 'Sports Science', 'Teaching, Early Development, Child Care', 
+  'Technology, Software, Computer, IT', 'Theater', 'Tourism & Hotel Management', 
+  'Translation & Interpretation', 'Transportation Engineering', 'Turkish', 
+  'Turkish Language and Literature', 'Urban Planning', 'Veterinarian'
+];
 
 const dummyPrograms = [
   {
@@ -107,6 +174,9 @@ const dummyPrograms = [
 const Programs = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredPrograms, setFilteredPrograms] = useState(dummyPrograms);
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedDegree, setSelectedDegree] = useState("");
+  const [selectedSpecialty, setSelectedSpecialty] = useState("");
   
   // Filters state
   const [filters, setFilters] = useState({
@@ -194,6 +264,22 @@ const Programs = () => {
     });
   };
 
+  const toggleSpecialtyFilter = (specialty: string) => {
+    setFilters(prevFilters => {
+      if (prevFilters.specialties.includes(specialty)) {
+        return {
+          ...prevFilters,
+          specialties: prevFilters.specialties.filter(s => s !== specialty)
+        };
+      } else {
+        return {
+          ...prevFilters,
+          specialties: [...prevFilters.specialties, specialty]
+        };
+      }
+    });
+  };
+
   const toggleLanguageFilter = (language: string) => {
     setFilters(prevFilters => {
       if (prevFilters.languages.includes(language)) {
@@ -218,6 +304,62 @@ const Programs = () => {
       languages: [],
     });
     setSearchTerm('');
+    setSelectedCountry("");
+    setSelectedDegree("");
+    setSelectedSpecialty("");
+  };
+
+  const handleCountryChange = (value: string) => {
+    setSelectedCountry(value);
+    if (value && value !== "all") {
+      setFilters(prev => ({
+        ...prev,
+        countries: [value]
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        countries: []
+      }));
+    }
+  };
+
+  const handleDegreeChange = (value: string) => {
+    setSelectedDegree(value);
+    if (value && value !== "all") {
+      const levelMapping: {[key: string]: string} = {
+        'Bachelor': 'البكالوريوس',
+        'Master': 'الماجستير',
+        'Doctorate': 'الدكتوراه',
+      };
+      
+      const arabicLevel = levelMapping[value] || value;
+      
+      setFilters(prev => ({
+        ...prev,
+        levels: [arabicLevel]
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        levels: []
+      }));
+    }
+  };
+
+  const handleSpecialtyChange = (value: string) => {
+    setSelectedSpecialty(value);
+    if (value && value !== "all") {
+      setFilters(prev => ({
+        ...prev,
+        specialties: [value]
+      }));
+    } else {
+      setFilters(prev => ({
+        ...prev,
+        specialties: []
+      }));
+    }
   };
 
   return (
@@ -228,9 +370,9 @@ const Programs = () => {
           subtitle="استكشف مئات البرامج الدراسية في أفضل الجامعات العالمية"
         />
 
-        {/* Search Bar */}
-        <div className="max-w-3xl mx-auto mb-10">
-          <form onSubmit={handleSearch} className="flex gap-2">
+        {/* Enhanced Search Bar with Dropdown Selects */}
+        <div className="max-w-5xl mx-auto mb-10">
+          <form onSubmit={handleSearch} className="flex flex-col gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <Input 
@@ -241,105 +383,177 @@ const Programs = () => {
                 className="pl-10 pr-4"
               />
             </div>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" type="button" className="gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>تصفية</span>
-                  {(filters.countries.length > 0 || filters.levels.length > 0 || filters.languages.length > 0) && (
-                    <span className="h-5 w-5 rounded-full bg-unlimited-blue text-white text-xs flex items-center justify-center">
-                      {filters.countries.length + filters.levels.length + filters.languages.length}
-                    </span>
-                  )}
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Select value={selectedCountry} onValueChange={handleCountryChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر الدولة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>الدول</SelectLabel>
+                      <SelectItem value="all">جميع الدول</SelectItem>
+                      {availableCountries.map(country => (
+                        <SelectItem key={country} value={country}>{country}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Select value={selectedDegree} onValueChange={handleDegreeChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر المستوى الدراسي" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>المستوى الدراسي</SelectLabel>
+                      <SelectItem value="all">جميع المستويات</SelectItem>
+                      {degreeTypes.map(degree => (
+                        <SelectItem key={degree} value={degree}>{degree}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Select value={selectedSpecialty} onValueChange={handleSpecialtyChange}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="اختر التخصص" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px] overflow-y-auto">
+                    <SelectGroup>
+                      <SelectLabel>التخصصات</SelectLabel>
+                      <SelectItem value="all">جميع التخصصات</SelectItem>
+                      {programSpecialties.map(specialty => (
+                        <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="flex gap-2 justify-end">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" type="button" className="gap-2">
+                    <Filter className="h-4 w-4" />
+                    <span>تصفية متقدمة</span>
+                    {(filters.countries.length > 0 || 
+                     filters.levels.length > 0 || 
+                     filters.languages.length > 0 || 
+                     filters.specialties.length > 0) && (
+                      <span className="h-5 w-5 rounded-full bg-unlimited-blue text-white text-xs flex items-center justify-center">
+                        {filters.countries.length + filters.levels.length + filters.languages.length + filters.specialties.length}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle className="text-right">خيارات التصفية المتقدمة</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6">
+                    <Accordion type="multiple" className="w-full">
+                      <AccordionItem value="countries">
+                        <AccordionTrigger>الدول</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                            {availableCountries.map((country) => (
+                              <div key={country} className="flex items-center space-x-2 rtl:space-x-reverse">
+                                <Checkbox 
+                                  id={`country-${country}`} 
+                                  checked={filters.countries.includes(country)}
+                                  onCheckedChange={() => toggleCountryFilter(country)}
+                                />
+                                <Label htmlFor={`country-${country}`}>{country}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="levels">
+                        <AccordionTrigger>المستوى الدراسي</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2">
+                            {degreeTypes.map((degree) => (
+                              <div key={degree} className="flex items-center space-x-2 rtl:space-x-reverse">
+                                <Checkbox 
+                                  id={`level-${degree}`} 
+                                  checked={filters.levels.includes(degree)}
+                                  onCheckedChange={() => toggleLevelFilter(degree)}
+                                />
+                                <Label htmlFor={`level-${degree}`}>{degree}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="specialties">
+                        <AccordionTrigger>التخصصات</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                            {programSpecialties.map((specialty) => (
+                              <div key={specialty} className="flex items-center space-x-2 rtl:space-x-reverse">
+                                <Checkbox 
+                                  id={`specialty-${specialty}`}
+                                  checked={filters.specialties.includes(specialty)}
+                                  onCheckedChange={() => toggleSpecialtyFilter(specialty)}
+                                />
+                                <Label htmlFor={`specialty-${specialty}`}>{specialty}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                      <AccordionItem value="languages">
+                        <AccordionTrigger>لغة الدراسة</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-2">
+                            {['الإنجليزية', 'التركية', 'العربية', 'الروسية', 'الألمانية', 'الفرنسية'].map((language) => (
+                              <div key={language} className="flex items-center space-x-2 rtl:space-x-reverse">
+                                <Checkbox 
+                                  id={`language-${language}`}
+                                  checked={filters.languages.includes(language)}
+                                  onCheckedChange={() => toggleLanguageFilter(language)}
+                                />
+                                <Label htmlFor={`language-${language}`}>{language}</Label>
+                              </div>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  </div>
+                  <div className="mt-6 flex gap-2">
+                    <Button 
+                      className="flex-grow" 
+                      variant="outline"
+                      onClick={resetFilters}
+                    >
+                      إعادة ضبط
+                    </Button>
+                    <Button className="flex-grow">
+                      تطبيق
+                    </Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+              <Button type="submit">بحث</Button>
+              {(filters.countries.length > 0 || 
+                filters.levels.length > 0 || 
+                filters.languages.length > 0 || 
+                filters.specialties.length > 0 || 
+                searchTerm) && (
+                <Button variant="ghost" onClick={resetFilters}>
+                  مسح البحث
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle className="text-right">خيارات التصفية</SheetTitle>
-                </SheetHeader>
-                <div className="mt-6">
-                  <Accordion type="multiple" className="w-full">
-                    <AccordionItem value="countries">
-                      <AccordionTrigger>الدول</AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          {['تركيا', 'المجر', 'بولندا', 'التشيك', 'قبرص', 'مصر', 'سوريا'].map((country) => (
-                            <div key={country} className="flex items-center space-x-2 rtl:space-x-reverse">
-                              <Checkbox 
-                                id={`country-${country}`} 
-                                checked={filters.countries.includes(country)}
-                                onCheckedChange={() => toggleCountryFilter(country)}
-                              />
-                              <Label htmlFor={`country-${country}`}>{country}</Label>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="levels">
-                      <AccordionTrigger>المستوى الدراسي</AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          {['البكالوريوس', 'الماجستير', 'الدكتوراه'].map((level) => (
-                            <div key={level} className="flex items-center space-x-2 rtl:space-x-reverse">
-                              <Checkbox 
-                                id={`level-${level}`} 
-                                checked={filters.levels.includes(level)}
-                                onCheckedChange={() => toggleLevelFilter(level)}
-                              />
-                              <Label htmlFor={`level-${level}`}>{level}</Label>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="specialties">
-                      <AccordionTrigger>التخصصات</AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          {['إدارة الأعمال', 'الهندسة', 'الطب', 'علوم الحاسوب', 'العلوم الإنسانية', 'العلوم الاجتماعية'].map((specialty) => (
-                            <div key={specialty} className="flex items-center space-x-2 rtl:space-x-reverse">
-                              <Checkbox id={`specialty-${specialty}`} />
-                              <Label htmlFor={`specialty-${specialty}`}>{specialty}</Label>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                    <AccordionItem value="languages">
-                      <AccordionTrigger>لغة الدراسة</AccordionTrigger>
-                      <AccordionContent>
-                        <div className="space-y-2">
-                          {['الإنجليزية', 'التركية', 'العربية', 'الروسية'].map((language) => (
-                            <div key={language} className="flex items-center space-x-2 rtl:space-x-reverse">
-                              <Checkbox 
-                                id={`language-${language}`}
-                                checked={filters.languages.includes(language)}
-                                onCheckedChange={() => toggleLanguageFilter(language)}
-                              />
-                              <Label htmlFor={`language-${language}`}>{language}</Label>
-                            </div>
-                          ))}
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-                <div className="mt-6 flex gap-2">
-                  <Button 
-                    className="flex-grow" 
-                    variant="outline"
-                    onClick={resetFilters}
-                  >
-                    إعادة ضبط
-                  </Button>
-                  <Button className="flex-grow">
-                    تطبيق
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
-            <Button type="submit">بحث</Button>
+              )}
+            </div>
           </form>
         </div>
 
@@ -363,7 +577,7 @@ const Programs = () => {
         </div>
 
         {/* Active Filters */}
-        {(filters.countries.length > 0 || filters.levels.length > 0 || filters.languages.length > 0) && (
+        {(filters.countries.length > 0 || filters.levels.length > 0 || filters.languages.length > 0 || filters.specialties.length > 0) && (
           <div className="mb-6 flex flex-wrap gap-2 items-center">
             <span className="text-unlimited-gray">التصفيات النشطة:</span>
             {filters.countries.map(country => (
@@ -382,6 +596,17 @@ const Programs = () => {
                 {level}
                 <button 
                   onClick={() => toggleLevelFilter(level)}
+                  className="text-unlimited-gray hover:text-unlimited-dark-blue"
+                >
+                  ×
+                </button>
+              </Badge>
+            ))}
+            {filters.specialties.map(specialty => (
+              <Badge key={specialty} variant="outline" className="px-3 py-1 gap-2">
+                {specialty}
+                <button 
+                  onClick={() => toggleSpecialtyFilter(specialty)}
                   className="text-unlimited-gray hover:text-unlimited-dark-blue"
                 >
                   ×
