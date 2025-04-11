@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Filter, X, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,10 @@ interface UniversitySearchProps {
   setSelectedDegree?: (value: string) => void;
   selectedLanguage?: string;
   setSelectedLanguage?: (value: string) => void;
+  minFee?: number;
+  setMinFee?: (value: number | undefined) => void;
+  maxFee?: number;
+  setMaxFee?: (value: number | undefined) => void;
 }
 
 const UniversitySearch: React.FC<UniversitySearchProps> = ({
@@ -39,7 +43,11 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
   selectedDegree,
   setSelectedDegree,
   selectedLanguage,
-  setSelectedLanguage
+  setSelectedLanguage,
+  minFee,
+  setMinFee,
+  maxFee,
+  setMaxFee
 }) => {
   // ترجمة اسم المدينة من الإنجليزية إلى العربية
   const translateCity = (city: string): string => {
@@ -70,7 +78,8 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
 
   const hasActiveFilters = searchTerm || selectedCity !== 'all' || selectedType !== 'all' || 
                         (selectedDegree && selectedDegree !== 'all') || 
-                        (selectedLanguage && selectedLanguage !== 'all');
+                        (selectedLanguage && selectedLanguage !== 'all') ||
+                        (minFee !== undefined) || (maxFee !== undefined);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -188,6 +197,19 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
                 />
               </Badge>
             )}
+            
+            {(minFee !== undefined || maxFee !== undefined) && setMinFee && setMaxFee && (
+              <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
+                الرسوم: {minFee !== undefined ? `${minFee}$` : '0$'} - {maxFee !== undefined ? `${maxFee}$` : 'غير محدد'}
+                <X 
+                  className="h-4 w-4 ml-1 cursor-pointer" 
+                  onClick={() => {
+                    setMinFee(undefined);
+                    setMaxFee(undefined);
+                  }} 
+                />
+              </Badge>
+            )}
           </div>
         )}
         
@@ -259,17 +281,30 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
                     </div>
                   )}
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">الرسوم السنوية</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Input type="number" placeholder="من" />
-                      </div>
-                      <div>
-                        <Input type="number" placeholder="إلى" />
+                  {/* فلتر الرسوم السنوية */}
+                  {setMinFee && setMaxFee && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">الرسوم السنوية</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Input 
+                            type="number" 
+                            placeholder="من" 
+                            value={minFee !== undefined ? minFee : ''}
+                            onChange={(e) => setMinFee(e.target.value ? Number(e.target.value) : undefined)}
+                          />
+                        </div>
+                        <div>
+                          <Input 
+                            type="number" 
+                            placeholder="إلى" 
+                            value={maxFee !== undefined ? maxFee : ''}
+                            onChange={(e) => setMaxFee(e.target.value ? Number(e.target.value) : undefined)}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium">التصنيف العالمي</label>

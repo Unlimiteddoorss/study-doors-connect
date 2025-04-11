@@ -381,7 +381,7 @@ export const bahcesehirPrograms: UniversityProgram[] = [
     available: true,
     duration: "4 سنوات"
   },
-  // إضافة البرامج الإضافية
+  // البرامج المضافة الجديدة
   {
     id: 1025,
     universityId: 26,
@@ -1666,3 +1666,47 @@ export const availableDegrees = ["Bachelor", "Master", "PhD", "Diploma", "Vocati
 
 // اللغات المتاحة للدراسة
 export const availableLanguages = ["English", "Turkish", "Arabic"];
+
+// وظيفة للحصول على برامج معينة باستخدام الفلاتر
+export const getFilteredPrograms = (
+  universityId: number,
+  filters: {
+    degree?: string;
+    language?: string;
+    campus?: string;
+    minFee?: number;
+    maxFee?: number;
+    available?: boolean;
+    searchTerm?: string;
+  }
+): UniversityProgram[] => {
+  return allUniversityPrograms.filter(program => {
+    if (program.universityId !== universityId) return false;
+    
+    if (filters.degree && filters.degree !== 'all' && program.degree !== filters.degree) return false;
+    
+    if (filters.language && filters.language !== 'all' && !program.language.includes(filters.language)) return false;
+    
+    if (filters.campus && filters.campus !== 'all' && program.campus !== filters.campus) return false;
+    
+    if (filters.minFee !== undefined && program.discountedFee < filters.minFee) return false;
+    
+    if (filters.maxFee !== undefined && program.discountedFee > filters.maxFee) return false;
+    
+    if (filters.available !== undefined && program.available !== filters.available) return false;
+    
+    if (filters.searchTerm) {
+      const searchLower = filters.searchTerm.toLowerCase();
+      return (
+        program.name.toLowerCase().includes(searchLower) ||
+        program.nameAr.toLowerCase().includes(searchLower) ||
+        program.degree.toLowerCase().includes(searchLower) ||
+        program.language.toLowerCase().includes(searchLower) ||
+        program.campus.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    return true;
+  });
+};
+
