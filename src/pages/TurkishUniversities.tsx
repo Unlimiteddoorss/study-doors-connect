@@ -4,7 +4,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, Info } from 'lucide-react';
 import UniversitySearch from '@/components/universities/UniversitySearch';
 import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +62,7 @@ const TurkishUniversities = () => {
   const [sortOrder, setSortOrder] = useState("ranking");
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredUniversities, setFilteredUniversities] = useState(adaptedUniversities);
+  const [totalUniversities, setTotalUniversities] = useState(adaptedUniversities.length);
   
   const universitiesPerPage = 9;
 
@@ -115,10 +116,14 @@ const TurkishUniversities = () => {
       case "featured":
         result = [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         break;
+      case "programs":
+        result = [...result].sort((a, b) => b.programs - a.programs); // Sort by program count (highest first)
+        break;
       default:
         break;
     }
     
+    setTotalUniversities(result.length);
     setFilteredUniversities(result);
     setCurrentPage(1);
   }, [searchTerm, selectedCity, selectedType, sortOrder]);
@@ -171,8 +176,28 @@ const TurkishUniversities = () => {
       <div className="container mx-auto px-4 py-12">
         <SectionTitle
           title="الجامعات التركية"
-          subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
+          subtitle="استكشف أفضل الجامعات التركية الخاصة وتعرف على برامجها وميزاتها"
         />
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.length}</div>
+            <div className="text-unlimited-gray mt-2">جامعة خاصة في تركيا</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.reduce((sum, uni) => sum + uni.programs, 0)}+</div>
+            <div className="text-unlimited-gray mt-2">برنامج دراسي</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">{cities.length}</div>
+            <div className="text-unlimited-gray mt-2">مدينة تركية</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">100%</div>
+            <div className="text-unlimited-gray mt-2">معترف بها عالمياً</div>
+          </div>
+        </div>
 
         {/* Search Component */}
         <UniversitySearch 
@@ -192,7 +217,7 @@ const TurkishUniversities = () => {
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <p className="text-unlimited-gray">
-              تم العثور على <span className="font-semibold text-unlimited-blue">{filteredUniversities.length}</span> جامعة
+              تم العثور على <span className="font-semibold text-unlimited-blue">{totalUniversities}</span> جامعة
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -207,6 +232,7 @@ const TurkishUniversities = () => {
               <option value="name">الاسم</option>
               <option value="founded">تاريخ التأسيس</option>
               <option value="featured">الجامعات المميزة</option>
+              <option value="programs">عدد البرامج</option>
             </select>
           </div>
         </div>
@@ -220,6 +246,41 @@ const TurkishUniversities = () => {
           onResetFilters={resetFilters}
           countryTranslations={cityTranslations}
         />
+
+        {/* Information Section */}
+        <div className="mt-16 bg-white shadow-md rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Info className="h-5 w-5 text-unlimited-blue" />
+            <h3 className="text-xl font-bold">معلومات عن الجامعات التركية الخاصة</h3>
+          </div>
+          
+          <div className="space-y-4 text-unlimited-gray">
+            <p>
+              تعتبر الجامعات التركية الخاصة من أفضل الخيارات للدراسة في الخارج، حيث تقدم برامج معتمدة عالمياً بلغات متعددة وبرسوم دراسية تنافسية.
+            </p>
+            <p>
+              تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
+            </p>
+            <p>
+              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-semibold text-unlimited-blue mb-2">لغات التدريس</h4>
+              <p className="text-unlimited-gray">تقدم الجامعات التركية برامج باللغات الإنجليزية والتركية، وبعضها يوفر برامج باللغة العربية أيضاً.</p>
+            </div>
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-semibold text-unlimited-blue mb-2">الرسوم الدراسية</h4>
+              <p className="text-unlimited-gray">تتراوح الرسوم الدراسية السنوية بين 6,000 و15,000 دولار أمريكي، اعتماداً على الجامعة والتخصص.</p>
+            </div>
+            <div className="border border-gray-200 rounded-lg p-4">
+              <h4 className="font-semibold text-unlimited-blue mb-2">المنح الدراسية</h4>
+              <p className="text-unlimited-gray">تقدم العديد من الجامعات منحاً دراسية تصل إلى 50% من الرسوم للطلاب المتميزين أكاديمياً.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, School, Users, Award, Globe } from 'lucide-react';
+import { MapPin, School, Users, Award, Globe, Book } from 'lucide-react';
 
 export interface University {
   id: number;
@@ -48,6 +48,12 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
         {university.isFeatured && (
           <Badge className="absolute top-2 right-2 bg-unlimited-blue">جامعة مميزة</Badge>
         )}
+        
+        {/* Programs badge - new! */}
+        <Badge className="absolute top-2 left-2 bg-green-600">
+          <Book className="w-3 h-3 mr-1" />
+          {university.programs} برنامج
+        </Badge>
         
         {/* Type badge */}
         <Badge 
@@ -123,9 +129,12 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
         )}
       </CardContent>
       
-      <CardFooter>
+      <CardFooter className="flex flex-col sm:flex-row gap-2">
         <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
           <Link to={`/universities/${university.id}`}>عرض التفاصيل</Link>
+        </Button>
+        <Button asChild variant="outline" className="w-full">
+          <Link to={`/apply?university=${university.id}`}>تقدم الآن</Link>
         </Button>
       </CardFooter>
     </Card>
