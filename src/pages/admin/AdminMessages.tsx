@@ -10,6 +10,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -423,31 +432,35 @@ const AdminMessages = () => {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label className="text-right col-span-1">الفئة</label>
-                  <Select className="col-span-3">
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر الفئة" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="students">الطلاب</SelectItem>
-                      <SelectItem value="agents">الوكلاء</SelectItem>
-                      <SelectItem value="universities">الجامعات</SelectItem>
-                      <SelectItem value="staff">فريق العمل</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="col-span-3">
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر الفئة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="students">الطلاب</SelectItem>
+                        <SelectItem value="agents">الوكلاء</SelectItem>
+                        <SelectItem value="universities">الجامعات</SelectItem>
+                        <SelectItem value="staff">فريق العمل</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label className="text-right col-span-1">المستلم</label>
-                  <Select className="col-span-3">
-                    <SelectTrigger>
-                      <SelectValue placeholder="اختر المستلم" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user-1">أحمد محمد</SelectItem>
-                      <SelectItem value="user-2">سارة عبدالله</SelectItem>
-                      <SelectItem value="agent-1">خالد الأحمد (وكيل)</SelectItem>
-                      <SelectItem value="university-1">جامعة إسطنبول</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="col-span-3">
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="اختر المستلم" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user-1">أحمد محمد</SelectItem>
+                        <SelectItem value="user-2">سارة عبدالله</SelectItem>
+                        <SelectItem value="agent-1">خالد الأحمد (وكيل)</SelectItem>
+                        <SelectItem value="university-1">جامعة إسطنبول</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <label className="text-right col-span-1">الموضوع</label>

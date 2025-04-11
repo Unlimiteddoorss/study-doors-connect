@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload, MessageSquare } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -164,7 +163,6 @@ const ManagePrograms = () => {
   const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // استخراج الجامعات الفريدة للفلتر
   const universities = Array.from(new Set(programs.map(program => program.university)));
 
   const filteredPrograms = programs.filter((program) => {
@@ -181,7 +179,6 @@ const ManagePrograms = () => {
   });
 
   const handleAddProgram = () => {
-    // محاكاة إضافة برنامج جديد
     toast({
       title: "تمت إضافة البرنامج",
       description: "تم إضافة البرنامج الجديد بنجاح",
@@ -190,7 +187,6 @@ const ManagePrograms = () => {
   };
 
   const handleImportPrograms = () => {
-    // محاكاة استيراد بيانات البرامج
     toast({
       title: "تم استيراد البيانات",
       description: "تم استيراد بيانات البرامج بنجاح",
@@ -199,7 +195,6 @@ const ManagePrograms = () => {
   };
 
   const handleExportPrograms = () => {
-    // محاكاة تصدير بيانات البرامج
     toast({
       title: "تم تصدير البيانات",
       description: "تم تصدير بيانات البرامج بنجاح",
@@ -284,16 +279,18 @@ const ManagePrograms = () => {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">المستوى</label>
-                    <Select className="col-span-3">
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر المستوى" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bachelor">بكالوريوس</SelectItem>
-                        <SelectItem value="master">ماجستير</SelectItem>
-                        <SelectItem value="phd">دكتوراه</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="col-span-3">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر المستوى" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bachelor">بكالوريوس</SelectItem>
+                          <SelectItem value="master">ماجستير</SelectItem>
+                          <SelectItem value="phd">دكتوراه</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <label className="text-right col-span-1">مدة الدراسة</label>
@@ -513,7 +510,6 @@ const ManagePrograms = () => {
         </div>
       </div>
 
-      {/* نافذة التواصل مع البرنامج */}
       <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
