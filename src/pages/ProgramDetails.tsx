@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Check, MapPin, Calendar, Clock, Book, Languages, Award, GraduationCap, Globe } from 'lucide-react';
+import { ArrowRight, Check, MapPin, Calendar, Clock, Book, Languages, Award, GraduationCap, Globe, School } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
