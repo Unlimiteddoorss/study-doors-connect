@@ -9,6 +9,9 @@ import Programs from "./pages/Programs";
 import ProgramDetails from "./pages/ProgramDetails";
 import Scholarships from "./pages/Scholarships";
 import Universities from "./pages/Universities";
+import TurkishUniversities from "./pages/TurkishUniversities"; // New page
+import MedicalPrograms from "./pages/MedicalPrograms"; // New page
+import EngineeringPrograms from "./pages/EngineeringPrograms"; // New page
 import UniversityDetails from "./pages/UniversityDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -41,8 +44,11 @@ function App() {
       <Route path="/countries/:id" element={<CountryDetails />} />
       <Route path="/programs" element={<Programs />} />
       <Route path="/programs/:id" element={<ProgramDetails />} />
+      <Route path="/medical-programs" element={<MedicalPrograms />} />
+      <Route path="/engineering-programs" element={<EngineeringPrograms />} />
       <Route path="/scholarships" element={<Scholarships />} />
       <Route path="/universities" element={<Universities />} />
+      <Route path="/turkish-universities" element={<TurkishUniversities />} />
       <Route path="/universities/:id" element={<UniversityDetails />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
