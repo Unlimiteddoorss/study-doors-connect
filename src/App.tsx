@@ -9,6 +9,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Programs from "./pages/Programs";
 import ProgramDetails from "./pages/ProgramDetails";
+import Countries from "./pages/Countries";
+import CountryDetails from "./pages/CountryDetails";
 import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import StudentApplication from "./pages/StudentApplication";
@@ -45,6 +47,8 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/programs" element={<Programs />} />
           <Route path="/programs/:id" element={<ProgramDetails />} />
+          <Route path="/countries" element={<Countries />} />
+          <Route path="/countries/:id" element={<CountryDetails />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/about" element={<About />} />
           <Route path="/apply" element={<StudentApplication />} />
