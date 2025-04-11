@@ -1,241 +1,249 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
-import SectionTitle from '@/components/shared/SectionTitle';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import SectionTitle from '@/components/shared/SectionTitle';
 import { Link } from 'react-router-dom';
-import { Award, Calendar, GraduationCap, Globe, MapPin, Search, University } from 'lucide-react';
 
-const scholarshipsData = [
+// المنح الدراسية
+const scholarships = [
   {
     id: 1,
-    title: 'منحة جامعة اسطنبول للطلاب المتفوقين',
-    university: 'جامعة اسطنبول',
-    country: 'Turkey',
-    coveragePercent: 100,
-    deadline: '15 سبتمبر 2025',
-    studyLevel: ['Bachelor', 'Master'],
-    description: 'منحة كاملة تغطي الرسوم الدراسية والسكن للطلاب المتفوقين أكاديميًا وفي اختبارات القبول.',
-    requirements: 'معدل GPA لا يقل عن 3.5، اجتياز اختبار القبول بنسبة 80% أو أعلى',
-    badge: 'منحة كاملة',
-    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2071&auto=format&fit=crop'
+    title: 'منحة التفوق الأكاديمي للطلاب الدوليين',
+    university: 'جامعة صبنجي',
+    coverage: 'تغطية كاملة للرسوم الدراسية',
+    deadline: '15 يوليو 2025',
+    eligibility: 'معدل تراكمي 3.5/4.0 وأعلى',
+    category: 'منح تنافسية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3'
   },
   {
     id: 2,
-    title: 'منحة التفوق الأكاديمي - جامعة هنغاريا للتكنولوجيا',
-    university: 'جامعة هنغاريا للتكنولوجيا',
-    country: 'Hungary',
-    coveragePercent: 75,
-    deadline: '1 أكتوبر 2025',
-    studyLevel: ['Bachelor', 'Master', 'Doctorate'],
-    description: 'منحة جزئية للطلاب المتفوقين في مجالات الهندسة والعلوم والتكنولوجيا.',
-    requirements: 'معدل GPA لا يقل عن 3.2، خبرة بحثية أو مشاريع سابقة',
-    badge: 'تغطية 75%',
-    image: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?q=80&w=2070&auto=format&fit=crop'
+    title: 'منحة الاتحاد التركي للطلاب العرب',
+    university: 'متعددة الجامعات',
+    coverage: 'تغطية 50% من الرسوم الدراسية',
+    deadline: '30 أغسطس 2025',
+    eligibility: 'الطلاب العرب بمعدل 3.0/4.0 وأعلى',
+    category: 'منح إقليمية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3'
   },
   {
     id: 3,
-    title: 'منحة الأعمال والاقتصاد - جامعة أوزيجين',
-    university: 'جامعة أوزيجين',
-    country: 'Turkey',
-    coveragePercent: 50,
-    deadline: '30 نوفمبر 2025',
-    studyLevel: ['Bachelor'],
-    description: 'منحة جزئية لدراسة تخصصات الأعمال والاقتصاد والمالية للطلاب الموهوبين.',
-    requirements: 'معدل GPA لا يقل عن 3.0، اجتياز المقابلة الشخصية، توصية من أستاذين',
-    badge: 'تغطية 50%',
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?q=80&w=2011&auto=format&fit=crop'
+    title: 'منحة الحكومة التركية (Türkiye Burslari)',
+    university: 'جميع الجامعات الحكومية',
+    coverage: 'تغطية كاملة مع راتب شهري',
+    deadline: '20 فبراير 2026',
+    eligibility: 'مفتوحة لجميع الطلاب الدوليين',
+    category: 'منح حكومية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1596496181871-9681eacf9764?q=80&w=2128&auto=format&fit=crop&ixlib=rb-4.0.3'
   },
   {
     id: 4,
-    title: 'منحة الطب والعلوم الصحية - جامعة القاهرة',
-    university: 'جامعة القاهرة',
-    country: 'Egypt',
-    coveragePercent: 80,
-    deadline: '15 ديسمبر 2025',
-    studyLevel: ['Master', 'Doctorate'],
-    description: 'منحة للدراسات العليا في مجالات الطب والعلوم الصحية للطلاب المتميزين.',
-    requirements: 'معدل GPA لا يقل عن 3.7، خبرة بحثية سابقة، نشر ورقة علمية واحدة على الأقل',
-    badge: 'تغطية 80%',
-    image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=2080&auto=format&fit=crop'
+    title: 'منحة كوتش للتفوق الدراسي',
+    university: 'جامعة كوتش',
+    coverage: 'تغطية 75% من الرسوم الدراسية',
+    deadline: '1 مايو 2025',
+    eligibility: 'معدل تراكمي 3.7/4.0 وأعلى',
+    category: 'منح تنافسية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f8e1c1?q=80&w=2049&auto=format&fit=crop&ixlib=rb-4.0.3'
   },
   {
     id: 5,
-    title: 'منحة علوم الحاسوب والذكاء الاصطناعي - جامعة فاتح سلطان محمد',
-    university: 'جامعة فاتح سلطان محمد',
-    country: 'Turkey',
-    coveragePercent: 60,
-    deadline: '1 يناير 2026',
-    studyLevel: ['Master'],
-    description: 'منحة لدراسة تخصصات علوم الحاسوب والذكاء الاصطناعي وعلم البيانات.',
-    requirements: 'معدل GPA لا يقل عن 3.3، خلفية برمجية قوية، اجتياز اختبار القبول التقني',
-    badge: 'تغطية 60%',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop'
+    title: 'منحة باهتشه شهير لبرامج الهندسة',
+    university: 'جامعة باهتشه شهير',
+    coverage: 'تغطية 50-100% من الرسوم الدراسية',
+    deadline: '15 يونيو 2025',
+    eligibility: 'الطلاب المتقدمين لبرامج الهندسة',
+    category: 'منح تخصصية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3'
   },
   {
     id: 6,
-    title: 'منحة اللغات والترجمة - جامعة السوربون أبوظبي',
-    university: 'جامعة السوربون أبوظبي',
-    country: 'United Arab Emirates',
-    coveragePercent: 70,
-    deadline: '15 فبراير 2026',
-    studyLevel: ['Bachelor', 'Master'],
-    description: 'منحة لدراسة اللغات والترجمة والأدب المقارن للطلاب الموهوبين لغوياً.',
-    requirements: 'إتقان لغتين على الأقل، معدل GPA لا يقل عن 3.2، اجتياز اختبار الكفاءة اللغوية',
-    badge: 'تغطية 70%',
-    image: 'https://images.unsplash.com/photo-1568992688065-536aad8a12f6?q=80&w=2032&auto=format&fit=crop'
+    title: 'منحة بيلكنت للدراسات العليا',
+    university: 'جامعة بيلكنت',
+    coverage: 'تغطية كاملة مع راتب بحثي',
+    deadline: '1 أبريل 2025',
+    eligibility: 'طلاب الماجستير والدكتوراه',
+    category: 'منح بحثية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3'
+  },
+  {
+    id: 7,
+    title: 'منحة الطلاب المتميزين في جامعة سابانجي',
+    university: 'جامعة سابانجي',
+    coverage: 'تغطية 25-100% من الرسوم الدراسية',
+    deadline: '30 مايو 2025',
+    eligibility: 'بناءً على اختبارات القبول',
+    category: 'منح تنافسية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3'
+  },
+  {
+    id: 8,
+    title: 'منحة مدينة إسطنبول للطلاب الدوليين',
+    university: 'جامعة إسطنبول',
+    coverage: 'تغطية 50% من الرسوم الدراسية',
+    deadline: '15 يوليو 2025',
+    eligibility: 'الطلاب القادمين من الدول النامية',
+    category: 'منح إقليمية',
+    location: 'تركيا',
+    image: 'https://images.unsplash.com/photo-1527066579998-dbbae57f45ce?q=80&w=2076&auto=format&fit=crop&ixlib=rb-4.0.3'
   }
 ];
 
 const Scholarships = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredScholarships, setFilteredScholarships] = useState(scholarshipsData);
-  const [selectedLevel, setSelectedLevel] = useState('all');
-  
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [filteredScholarships, setFilteredScholarships] = useState(scholarships);
+
+  // الفئات المتاحة للمنح
+  const categories = [...new Set(scholarships.map(s => s.category))];
+
+  useEffect(() => {
+    let filtered = scholarships;
     
-    const filtered = scholarshipsData.filter(scholarship => {
-      const matchesSearch = scholarship.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           scholarship.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           scholarship.country.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesLevel = selectedLevel === 'all' || 
-                          scholarship.studyLevel.includes(selectedLevel);
-      
-      return matchesSearch && matchesLevel;
-    });
+    // تطبيق البحث النصي
+    if (searchTerm) {
+      filtered = filtered.filter(s => 
+        s.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.university.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // تطبيق فلتر الفئة
+    if (selectedCategory) {
+      filtered = filtered.filter(s => s.category === selectedCategory);
+    }
     
     setFilteredScholarships(filtered);
-  };
-  
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedLevel('all');
-    setFilteredScholarships(scholarshipsData);
-  };
+  }, [searchTerm, selectedCategory]);
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
-        <SectionTitle
-          title="المنح الدراسية"
-          subtitle="استكشف فرص المنح الدراسية المتاحة في الجامعات العالمية"
+        <SectionTitle 
+          title="المنح الدراسية" 
+          subtitle="استكشف المنح الدراسية المتاحة في أفضل الجامعات"
         />
         
-        {/* Search form */}
+        {/* قسم البحث */}
         <div className="max-w-3xl mx-auto mb-10">
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="ابحث عن منح دراسية، جامعات، أو دول..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-unlimited-blue"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex gap-4">
-              <select
-                className="flex-grow px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-unlimited-blue"
-                value={selectedLevel}
-                onChange={(e) => setSelectedLevel(e.target.value)}
-              >
-                <option value="all">جميع المستويات الدراسية</option>
-                <option value="Bachelor">البكالوريوس</option>
-                <option value="Master">الماجستير</option>
-                <option value="Doctorate">الدكتوراه</option>
-              </select>
-              
-              <Button type="submit" className="bg-unlimited-blue hover:bg-unlimited-dark-blue">بحث</Button>
-              
-              {(searchTerm || selectedLevel !== 'all') && (
-                <Button type="button" variant="outline" onClick={resetFilters}>
-                  إعادة ضبط
-                </Button>
-              )}
-            </div>
-          </form>
+          <div className="flex flex-col md:flex-row gap-4">
+            <Input 
+              placeholder="ابحث عن منحة..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1"
+            />
+            <select 
+              className="px-4 py-2 border rounded-md"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              <option value="">جميع الفئات</option>
+              {categories.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
+            <Button 
+              className="bg-unlimited-blue hover:bg-unlimited-dark-blue"
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('');
+              }}
+            >
+              إعادة ضبط
+            </Button>
+          </div>
         </div>
-        
-        {/* Results info */}
+
+        {/* عدد النتائج */}
         <div className="mb-6">
           <p className="text-unlimited-gray">
             تم العثور على <span className="font-semibold text-unlimited-blue">{filteredScholarships.length}</span> منحة دراسية
           </p>
         </div>
-        
-        {/* Scholarships Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredScholarships.map((scholarship) => (
-            <Card key={scholarship.id} className="overflow-hidden hover:shadow-lg transition-all border-t-4 border-t-unlimited-blue">
-              <div className="relative h-40">
-                <img 
-                  src={scholarship.image}
-                  alt={scholarship.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-t from-black/60 to-transparent" />
-                <Badge className="absolute top-4 right-4 bg-unlimited-blue">{scholarship.badge}</Badge>
-              </div>
-              
-              <CardHeader className="pb-2">
-                <div className="flex items-center mb-2">
-                  <University className="h-4 w-4 mr-1 text-unlimited-gray" />
-                  <span className="text-sm text-unlimited-gray">{scholarship.university}</span>
+
+        {/* قائمة المنح */}
+        {filteredScholarships.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredScholarships.map((scholarship) => (
+              <Card key={scholarship.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                <div className="h-48 overflow-hidden">
+                  <img
+                    src={scholarship.image}
+                    alt={scholarship.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-                <h3 className="font-bold text-lg">{scholarship.title}</h3>
-              </CardHeader>
-              
-              <CardContent className="space-y-3 pb-2">
-                <div className="flex justify-between text-sm">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1 text-unlimited-gray" />
-                    <span>{scholarship.country}</span>
+                <CardHeader>
+                  <Badge className="mb-2 bg-unlimited-blue hover:bg-unlimited-dark-blue">{scholarship.category}</Badge>
+                  <h3 className="font-bold text-xl mb-1">{scholarship.title}</h3>
+                  <p className="text-unlimited-gray">{scholarship.university}</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-unlimited-gray text-sm">التغطية:</p>
+                      <p className="font-medium">{scholarship.coverage}</p>
+                    </div>
+                    <div>
+                      <p className="text-unlimited-gray text-sm">الموعد النهائي:</p>
+                      <p className="font-medium text-unlimited-blue">{scholarship.deadline}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Award className="h-4 w-4 mr-1 text-unlimited-blue" />
-                    <span className="text-unlimited-blue font-semibold">
-                      {scholarship.coveragePercent}% تغطية
-                    </span>
+                  <div>
+                    <p className="text-unlimited-gray text-sm">المؤهلات:</p>
+                    <p>{scholarship.eligibility}</p>
                   </div>
-                </div>
-                
-                <div className="flex justify-between text-sm">
-                  <div className="flex items-center">
-                    <GraduationCap className="h-4 w-4 mr-1 text-unlimited-gray" />
-                    <span>{scholarship.studyLevel.join(', ')}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-1 text-unlimited-gray" />
-                    <span>{scholarship.deadline}</span>
-                  </div>
-                </div>
-                
-                <p className="text-sm text-unlimited-gray line-clamp-2">
-                  {scholarship.description}
-                </p>
-              </CardContent>
-              
-              <CardFooter>
-                <Button asChild className="w-full">
-                  <Link to={`/scholarships/${scholarship.id}`}>عرض التفاصيل</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-        
-        {filteredScholarships.length === 0 && (
+                </CardContent>
+                <CardFooter>
+                  <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
+                    <Link to="/contact">
+                      تقديم طلب <ArrowRight className="mr-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-12">
-            <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على منح دراسية تطابق بحثك</p>
-            <Button onClick={resetFilters}>إعادة ضبط البحث</Button>
+            <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على منح تطابق بحثك</p>
+            <Button 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('');
+              }}
+              className="bg-unlimited-blue hover:bg-unlimited-dark-blue"
+            >
+              إعادة ضبط البحث
+            </Button>
           </div>
         )}
+        
+        {/* قسم الاستشارة */}
+        <div className="mt-16 bg-unlimited-blue/10 p-8 rounded-lg">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold mb-4">هل تحتاج إلى مساعدة في اختيار المنحة المناسبة؟</h2>
+            <p className="text-unlimited-gray mb-6">
+              فريقنا من المستشارين التعليميين جاهز لمساعدتك في اختيار المنحة الأنسب لك والتقديم عليها بنجاح.
+            </p>
+            <Button asChild className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
+              <Link to="/contact">احصل على استشارة مجانية</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </MainLayout>
   );
