@@ -8,6 +8,14 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { dummyPrograms } from '@/data/programsData';
 
+interface Program {
+  id: string;
+  name: string;
+  university: string;
+  degree: string;
+  // اضافة باقي الخصائص حسب بيانات البرامج
+}
+
 const Programs = () => {
   useEffect(() => {
     document.title = 'البرامج الدراسية - أبواب بلا حدود';
@@ -16,6 +24,8 @@ const Programs = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filteredPrograms, setFilteredPrograms] = useState(dummyPrograms);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredPrograms.length / 12);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,12 +35,18 @@ const Programs = () => {
       program.university.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredPrograms(filtered);
+    setCurrentPage(1); // Reset to first page on search
   };
 
   const resetFilters = () => {
     setFilteredPrograms(dummyPrograms);
     setSearchQuery('');
     setShowFilters(false);
+    setCurrentPage(1);
+  };
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
   
   return (
@@ -120,19 +136,39 @@ const Programs = () => {
           )}
           
           <TabsContent value="all">
-            <ProgramsGrid programs={filteredPrograms} />
+            <ProgramsGrid 
+              programs={filteredPrograms} 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </TabsContent>
           
           <TabsContent value="bachelor">
-            <ProgramsGrid programs={filteredPrograms.filter(p => p.degree === "bachelor")} />
+            <ProgramsGrid 
+              programs={filteredPrograms.filter(p => p.degree === "bachelor")} 
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredPrograms.filter(p => p.degree === "bachelor").length / 12)}
+              onPageChange={handlePageChange}
+            />
           </TabsContent>
           
           <TabsContent value="master">
-            <ProgramsGrid programs={filteredPrograms.filter(p => p.degree === "master")} />
+            <ProgramsGrid 
+              programs={filteredPrograms.filter(p => p.degree === "master")} 
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredPrograms.filter(p => p.degree === "master").length / 12)}
+              onPageChange={handlePageChange}
+            />
           </TabsContent>
           
           <TabsContent value="phd">
-            <ProgramsGrid programs={filteredPrograms.filter(p => p.degree === "phd")} />
+            <ProgramsGrid 
+              programs={filteredPrograms.filter(p => p.degree === "phd")} 
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredPrograms.filter(p => p.degree === "phd").length / 12)}
+              onPageChange={handlePageChange}
+            />
           </TabsContent>
         </Tabs>
       </div>

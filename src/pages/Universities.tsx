@@ -1,73 +1,79 @@
 
 import { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { UniversitiesGrid } from '@/components/universities/UniversitiesGrid';
-import { Button } from '@/components/ui/button';
+import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
-// Sample university data
-const universities = [
+const dummyUniversities = [
   {
-    id: 1,
-    name: "جامعة إسطنبول جيليشيم",
-    nameAr: "جامعة إسطنبول جيليشيم",
-    location: "إسطنبول، تركيا",
-    country: "تركيا",
-    ranking: "#28",
-    description: "تأسست جامعة إسطنبول جيليشيم في عام 2008 وهي واحدة من الجامعات الرائدة في إسطنبول، تركيا.",
-    logoUrl: "https://upload.wikimedia.org/wikipedia/en/7/7a/Ozyegin_University_logo.png",
-    imageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-    establishedYear: 2008,
-    programCount: 257,
-    studentCount: 35000,
-    website: "https://www.gelisim.edu.tr"
+    id: '1',
+    name: 'جامعة اسطنبول',
+    country: 'تركيا',
+    city: 'اسطنبول',
+    logo: '/placeholder.svg',
+    type: 'public',
+    rating: 4.5,
+    programsCount: 120,
+    language: 'التركية والإنجليزية',
   },
   {
-    id: 2,
-    name: "جامعة أوزيجين",
-    nameAr: "جامعة أوزيجين",
-    location: "إسطنبول، تركيا",
-    country: "تركيا",
-    ranking: "#32",
-    description: "جامعة رائدة في مجال الأعمال والتكنولوجيا",
-    logoUrl: "https://upload.wikimedia.org/wikipedia/en/7/7a/Ozyegin_University_logo.png",
-    imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
-    establishedYear: 2007,
-    programCount: 150,
-    studentCount: 20000,
-    website: "https://www.ozyegin.edu.tr"
+    id: '2',
+    name: 'جامعة أنقرة',
+    country: 'تركيا',
+    city: 'أنقرة',
+    logo: '/placeholder.svg',
+    type: 'public',
+    rating: 4.2,
+    programsCount: 90,
+    language: 'التركية',
   },
   {
-    id: 3,
-    name: "جامعة فاتح سلطان محمد",
-    nameAr: "جامعة فاتح سلطان محمد",
-    location: "إسطنبول، تركيا",
-    country: "تركيا",
-    ranking: "#45",
-    description: "جامعة عريقة تجمع بين التراث والحداثة",
-    logoUrl: "https://upload.wikimedia.org/wikipedia/en/2/27/Fatih_Sultan_Mehmet_Vak%C4%B1f_%C3%9Cniversitesi_logo.jpg",
-    imageUrl: "https://randomuser.me/api/portraits/men/3.jpg",
-    establishedYear: 2010,
-    programCount: 120,
-    studentCount: 15000,
-    website: "https://www.fsm.edu.tr"
+    id: '3',
+    name: 'الجامعة التركية الألمانية',
+    country: 'تركيا',
+    city: 'اسطنبول',
+    logo: '/placeholder.svg',
+    type: 'private',
+    rating: 4.7,
+    programsCount: 50,
+    language: 'الإنجليزية والألمانية',
   },
   {
-    id: 4,
-    name: "جامعة المجر للتكنولوجيا",
-    nameAr: "جامعة المجر للتكنولوجيا",
-    location: "بودابست، المجر",
-    country: "المجر",
-    ranking: "#201-250",
-    description: "جامعة رائدة في مجال الهندسة والعلوم التطبيقية",
-    logoUrl: "https://upload.wikimedia.org/wikipedia/en/d/d4/BME_logo.jpg",
-    imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
-    establishedYear: 1782,
-    programCount: 180,
-    studentCount: 22000,
-    website: "https://www.bme.hu"
-  }
+    id: '4',
+    name: 'جامعة بهتشه شهير',
+    country: 'تركيا',
+    city: 'اسطنبول',
+    logo: '/placeholder.svg',
+    type: 'private',
+    rating: 4.4,
+    programsCount: 75,
+    language: 'الإنجليزية',
+  },
+  {
+    id: '5',
+    name: 'جامعة مرمرة',
+    country: 'تركيا',
+    city: 'اسطنبول',
+    logo: '/placeholder.svg',
+    type: 'public',
+    rating: 4.3,
+    programsCount: 110,
+    language: 'التركية',
+  },
+  {
+    id: '6',
+    name: 'جامعة قبرص الشرق الأوسط',
+    country: 'قبرص',
+    city: 'نيقوسيا',
+    logo: '/placeholder.svg',
+    type: 'private',
+    rating: 4.1,
+    programsCount: 60,
+    language: 'الإنجليزية',
+  },
 ];
 
 const Universities = () => {
@@ -77,30 +83,38 @@ const Universities = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredUniversities, setFilteredUniversities] = useState(universities);
+  const [filteredUniversities, setFilteredUniversities] = useState(dummyUniversities);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(filteredUniversities.length / 9);
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Filter universities based on search query
-    const filtered = universities.filter(university => 
-      university.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      university.location.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = dummyUniversities.filter(uni => 
+      uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      uni.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      uni.city.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredUniversities(filtered);
+    setCurrentPage(1);
   };
 
   const resetFilters = () => {
-    setFilteredUniversities(universities);
+    setFilteredUniversities(dummyUniversities);
     setSearchQuery('');
     setShowFilters(false);
+    setCurrentPage(1);
   };
   
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <MainLayout>
       <div className="bg-unlimited-blue py-16 text-white">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-4 text-center">الجامعات</h1>
-          <p className="text-lg max-w-2xl mx-auto text-center">اكتشف أفضل الجامعات حول العالم وتعرف على برامجها الأكاديمية</p>
+          <p className="text-lg max-w-2xl mx-auto text-center">اكتشف أفضل الجامعات في تركيا وقبرص وأوروبا</p>
           
           <div className="mt-8 max-w-xl mx-auto">
             <form onSubmit={handleSearch} className="flex gap-2">
@@ -128,41 +142,82 @@ const Universities = () => {
       </div>
       
       <div className="container mx-auto py-8 px-4">
-        {showFilters && (
-          <div className="bg-gray-50 p-4 rounded-lg mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-unlimited-gray mb-2">الدولة</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
-                <option value="">جميع الدول</option>
-                <option value="turkey">تركيا</option>
-                <option value="cyprus">قبرص</option>
-                <option value="hungary">المجر</option>
-                <option value="poland">بولندا</option>
-              </select>
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="mb-8 justify-center">
+            <TabsTrigger value="all">جميع الجامعات</TabsTrigger>
+            <TabsTrigger value="turkey">تركيا</TabsTrigger>
+            <TabsTrigger value="cyprus">قبرص</TabsTrigger>
+            <TabsTrigger value="europe">أوروبا</TabsTrigger>
+          </TabsList>
+          
+          {showFilters && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-unlimited-gray mb-2">المدينة</label>
+                <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
+                  <option value="">جميع المدن</option>
+                  <option value="istanbul">اسطنبول</option>
+                  <option value="ankara">أنقرة</option>
+                  <option value="nicosia">نيقوسيا</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-unlimited-gray mb-2">نوع الجامعة</label>
+                <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
+                  <option value="">الكل</option>
+                  <option value="public">حكومية</option>
+                  <option value="private">خاصة</option>
+                </select>
+              </div>
+              
+              <div className="flex items-end">
+                <Button 
+                  onClick={resetFilters}
+                  className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
+                >
+                  إعادة ضبط
+                </Button>
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-unlimited-gray mb-2">التصنيف العالمي</label>
-              <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
-                <option value="">جميع التصنيفات</option>
-                <option value="top100">أفضل 100</option>
-                <option value="100-200">101 - 200</option>
-                <option value="200-500">201 - 500</option>
-              </select>
-            </div>
-            
-            <div className="flex items-end">
-              <Button 
-                onClick={resetFilters}
-                className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
-              >
-                إعادة ضبط
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        <UniversitiesGrid universities={filteredUniversities} />
+          )}
+          
+          <TabsContent value="all">
+            <UniversitiesGrid 
+              universities={filteredUniversities}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </TabsContent>
+          
+          <TabsContent value="turkey">
+            <UniversitiesGrid 
+              universities={filteredUniversities.filter(uni => uni.country === 'تركيا')}
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'تركيا').length / 9)}
+              onPageChange={handlePageChange}
+            />
+          </TabsContent>
+          
+          <TabsContent value="cyprus">
+            <UniversitiesGrid 
+              universities={filteredUniversities.filter(uni => uni.country === 'قبرص')}
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'قبرص').length / 9)}
+              onPageChange={handlePageChange}
+            />
+          </TabsContent>
+          
+          <TabsContent value="europe">
+            <UniversitiesGrid 
+              universities={filteredUniversities.filter(uni => uni.country !== 'تركيا' && uni.country !== 'قبرص')}
+              currentPage={currentPage}
+              totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country !== 'تركيا' && uni.country !== 'قبرص').length / 9)}
+              onPageChange={handlePageChange}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </MainLayout>
   );
