@@ -25,6 +25,7 @@ const Programs = () => {
     // Filter programs based on search query
     const filtered = dummyPrograms.filter(program => 
       program.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (program.nameAr && program.nameAr.toLowerCase().includes(searchQuery.toLowerCase())) ||
       program.university.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredPrograms(filtered);

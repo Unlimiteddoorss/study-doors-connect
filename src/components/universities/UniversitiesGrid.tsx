@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { University } from '@/components/universities/UniversityCard';
+import { University } from '@/types';
 import UniversityCard from '@/components/universities/UniversityCard';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/shared/Pagination';

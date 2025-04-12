@@ -4,58 +4,46 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { School, Map, Calendar, DollarSign, Clock, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Program as ProgramType } from '@/types';
 
-export interface Program {
-  id: number;
-  title: string;
-  university: string;
-  location: string;
-  language: string;
-  duration: string;
-  deadline: string;
-  fee: string;
-  discount?: string;
-  image: string;
-  isFeatured?: boolean;
-  badges?: string[];
-  scholarshipAvailable?: boolean;
-}
-
-interface ProgramCardProps {
-  program: Program;
+// Adapting the Program type from types/index.ts to fit our UI needs
+export interface ProgramCardProps {
+  program: ProgramType;
 }
 
 const ProgramCard = ({ program }: ProgramCardProps) => {
-  // حساب نسبة الخصم إذا كان متوفرًا
+  // Calculate discount if available
   const calculateDiscount = () => {
-    if (program.discount) {
-      const originalPrice = parseFloat(program.fee.replace('$', '').replace(',', ''));
-      const discountedPrice = parseFloat(program.discount.replace('$', '').replace(',', ''));
-      const discountPercentage = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
+    if (program.discountedFee && program.tuitionFee) {
+      const discountPercentage = Math.round(
+        ((program.tuitionFee - program.discountedFee) / program.tuitionFee) * 100
+      );
       return discountPercentage > 0 ? `-${discountPercentage}%` : '';
     }
     return '';
   };
   
   const discountTag = calculateDiscount();
+  const programDuration = program.duration || '4 سنوات';
+  const programDeadline = program.campus || 'مفتوح';
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={program.image}
-          alt={program.title}
+          src={program.imageUrl || '/placeholder.svg'}
+          alt={program.nameAr || program.name}
           className="w-full h-full object-cover transition-transform hover:scale-105"
         />
         
         {/* Featured badge */}
-        {program.isFeatured && (
-          <Badge className="absolute top-2 right-2 bg-unlimited-blue">برنامج مميز</Badge>
+        {program.available && (
+          <Badge className="absolute top-2 right-2 bg-unlimited-blue">برنامج متاح</Badge>
         )}
         
         {/* Scholarship badge */}
-        {program.scholarshipAvailable && (
-          <Badge className="absolute top-2 left-2 bg-green-600">فرصة منحة</Badge>
+        {program.discountedFee && (
+          <Badge className="absolute top-2 left-2 bg-green-600">خصم متاح</Badge>
         )}
         
         {/* Discount badge */}
@@ -69,10 +57,12 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
           <School className="h-4 w-4 ml-1" />
           <span className="text-sm">{program.university}</span>
         </div>
-        <h3 className="font-bold text-lg line-clamp-2 hover:text-unlimited-blue">{program.title}</h3>
+        <h3 className="font-bold text-lg line-clamp-2 hover:text-unlimited-blue">
+          {program.nameAr || program.name}
+        </h3>
         <div className="flex items-center text-unlimited-gray">
           <Map className="h-4 w-4 ml-1" />
-          <span className="text-sm">{program.location}</span>
+          <span className="text-sm">{program.campus || 'الحرم الرئيسي'}</span>
         </div>
       </CardHeader>
       
@@ -84,37 +74,40 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-unlimited-gray" />
-            <span>{program.duration}</span>
+            <span>{programDuration}</span>
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4 text-unlimited-gray" />
-            <span>{program.deadline}</span>
+            <span>{programDeadline}</span>
           </div>
           <div className="flex items-center gap-1">
             <DollarSign className="h-4 w-4 text-unlimited-gray" />
             <div>
-              {program.discount ? (
+              {program.discountedFee ? (
                 <>
-                  <p className="line-through text-unlimited-gray text-xs">{program.fee}</p>
-                  <p className="font-semibold text-unlimited-blue">{program.discount}</p>
+                  <p className="line-through text-unlimited-gray text-xs">{program.tuitionFee}$</p>
+                  <p className="font-semibold text-unlimited-blue">{program.discountedFee}$</p>
                 </>
               ) : (
-                <p>{program.fee}</p>
+                <p>{program.tuitionFee}$</p>
               )}
             </div>
           </div>
         </div>
         
         {/* Program badges */}
-        {program.badges && program.badges.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {program.badges.map((badge, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {badge}
-              </Badge>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-1 mt-2">
+          <Badge variant="outline" className="text-xs">
+            {program.degree === 'bachelor' ? 'بكالوريوس' : 
+             program.degree === 'master' ? 'ماجستير' : 
+             program.degree === 'phd' ? 'دكتوراه' : program.degree}
+          </Badge>
+          {program.requirements && program.requirements.length > 0 && (
+            <Badge variant="outline" className="text-xs">
+              {program.requirements.length} متطلبات
+            </Badge>
+          )}
+        </div>
       </CardContent>
       
       <CardFooter className="pt-0">

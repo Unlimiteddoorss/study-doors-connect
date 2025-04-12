@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Program } from '@/components/programs/ProgramCard';
+import { Program } from '@/types';
 import ProgramCard from '@/components/programs/ProgramCard';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/shared/Pagination';

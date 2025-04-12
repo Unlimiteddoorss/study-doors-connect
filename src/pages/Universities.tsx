@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { University } from '@/types';
+import { cityTranslations } from '@/data/programsData';
 
 // Updated to match the University interface
 const dummyUniversities: University[] = [
   {
     id: 1,
-    name: 'جامعة اسطنبول',
+    name: 'Istanbul University',
     nameAr: 'جامعة اسطنبول',
     country: 'تركيا',
     location: 'اسطنبول',
@@ -27,7 +28,7 @@ const dummyUniversities: University[] = [
   },
   {
     id: 2,
-    name: 'جامعة أنقرة',
+    name: 'Ankara University',
     nameAr: 'جامعة أنقرة',
     country: 'تركيا',
     location: 'أنقرة',
@@ -42,7 +43,7 @@ const dummyUniversities: University[] = [
   },
   {
     id: 3,
-    name: 'الجامعة التركية الألمانية',
+    name: 'Turkish-German University',
     nameAr: 'الجامعة التركية الألمانية',
     country: 'تركيا',
     location: 'اسطنبول',
@@ -57,7 +58,7 @@ const dummyUniversities: University[] = [
   },
   {
     id: 4,
-    name: 'جامعة بهتشه شهير',
+    name: 'Bahcesehir University',
     nameAr: 'جامعة بهتشه شهير',
     country: 'تركيا',
     location: 'اسطنبول',
@@ -72,7 +73,7 @@ const dummyUniversities: University[] = [
   },
   {
     id: 5,
-    name: 'جامعة مرمرة',
+    name: 'Marmara University',
     nameAr: 'جامعة مرمرة',
     country: 'تركيا',
     location: 'اسطنبول',
@@ -87,18 +88,18 @@ const dummyUniversities: University[] = [
   },
   {
     id: 6,
-    name: 'جامعة قبرص الشرق الأوسط',
-    nameAr: 'جامعة قبرص الشرق الأوسط',
+    name: 'Cyprus International University',
+    nameAr: 'جامعة قبرص الدولية',
     country: 'قبرص',
     location: 'نيقوسيا',
     logoUrl: '/placeholder.svg',
     imageUrl: '/placeholder.svg',
     description: 'جامعة خاصة مرموقة في قبرص',
     ranking: '4.1/5',
-    establishedYear: 1988,
+    establishedYear: 1997,
     programCount: 60,
     studentCount: 18000,
-    website: 'https://www.meu.edu.cy'
+    website: 'https://www.ciu.edu.tr'
   },
 ];
 
@@ -117,6 +118,7 @@ const Universities = () => {
     e.preventDefault();
     const filtered = dummyUniversities.filter(uni => 
       uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (uni.nameAr && uni.nameAr.toLowerCase().includes(searchQuery.toLowerCase())) ||
       uni.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
       uni.location.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -214,6 +216,7 @@ const Universities = () => {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
+              countryTranslations={cityTranslations}
             />
           </TabsContent>
           
@@ -223,6 +226,7 @@ const Universities = () => {
               currentPage={currentPage}
               totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'تركيا').length / 9)}
               onPageChange={handlePageChange}
+              countryTranslations={cityTranslations}
             />
           </TabsContent>
           
@@ -232,6 +236,7 @@ const Universities = () => {
               currentPage={currentPage}
               totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'قبرص').length / 9)}
               onPageChange={handlePageChange}
+              countryTranslations={cityTranslations}
             />
           </TabsContent>
           
@@ -241,6 +246,7 @@ const Universities = () => {
               currentPage={currentPage}
               totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country !== 'تركيا' && uni.country !== 'قبرص').length / 9)}
               onPageChange={handlePageChange}
+              countryTranslations={cityTranslations}
             />
           </TabsContent>
         </Tabs>
