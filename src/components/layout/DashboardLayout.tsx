@@ -32,9 +32,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface DashboardLayoutProps {
   children: ReactNode;
+  userRole?: 'student' | 'admin' | 'agent';
 }
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -43,9 +44,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [messages, setMessages] = useState(2);
   
   useEffect(() => {
-    // Set page title
-    document.title = 'لوحة التحكم - أبواب بلا حدود';
-  }, []);
+    // Set page title based on role
+    let roleTitle = userRole === 'admin' ? 'المشرف' : userRole === 'agent' ? 'الوكيل' : 'الطالب';
+    document.title = `لوحة تحكم ${roleTitle} - أبواب بلا حدود`;
+  }, [userRole]);
   
   const handleLogout = () => {
     toast({
@@ -56,6 +58,34 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     // Redirect to homepage after logout
     navigate('/');
   };
+  
+  // Determine dashboard home path based on role
+  const dashboardHomePath = userRole === 'admin' 
+    ? '/admin' 
+    : userRole === 'agent' 
+      ? '/agent' 
+      : '/dashboard';
+
+  // Determine messages path based on role
+  const messagesPath = userRole === 'admin' 
+    ? '/admin/messages' 
+    : userRole === 'agent' 
+      ? '/agent/messages' 
+      : '/dashboard/messages';
+      
+  // Determine notifications path based on role
+  const notificationsPath = userRole === 'admin' 
+    ? '/admin/notifications' 
+    : userRole === 'agent' 
+      ? '/agent/notifications' 
+      : '/dashboard/notifications';
+      
+  // Determine profile path based on role
+  const profilePath = userRole === 'admin' 
+    ? '/admin/profile' 
+    : userRole === 'agent' 
+      ? '/agent/profile' 
+      : '/dashboard/profile';
   
   return (
     <SidebarProvider defaultOpen={true}>
@@ -78,9 +108,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       asChild 
-                      isActive={location.pathname === '/dashboard'}
+                      isActive={location.pathname === dashboardHomePath}
                     >
-                      <Link to="/dashboard">
+                      <Link to={dashboardHomePath}>
                         <LayoutDashboard className="h-5 w-5" />
                         <span>لوحة التحكم</span>
                       </Link>
@@ -90,11 +120,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       asChild 
-                      isActive={location.pathname === '/dashboard/applications'}
+                      isActive={location.pathname === `${dashboardHomePath}/applications` || location.pathname === `/dashboard/applications`}
                     >
-                      <Link to="/dashboard/applications">
+                      <Link to={`${userRole === 'student' ? '/dashboard' : dashboardHomePath}/applications`}>
                         <FileText className="h-5 w-5" />
-                        <span>طلباتي</span>
+                        <span>{userRole === 'student' ? 'طلباتي' : 'الطلبات'}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -102,9 +132,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       asChild 
-                      isActive={location.pathname === '/dashboard/messages'}
+                      isActive={location.pathname === messagesPath}
                     >
-                      <Link to="/dashboard/messages">
+                      <Link to={messagesPath}>
                         <MessageCircle className="h-5 w-5" />
                         <span>الرسائل</span>
                         {messages > 0 && (
@@ -119,9 +149,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       asChild 
-                      isActive={location.pathname === '/dashboard/notifications'}
+                      isActive={location.pathname === notificationsPath}
                     >
-                      <Link to="/dashboard/notifications">
+                      <Link to={notificationsPath}>
                         <Bell className="h-5 w-5" />
                         <span>الإشعارات</span>
                         {notifications > 0 && (
@@ -136,9 +166,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <SidebarMenuItem>
                     <SidebarMenuButton 
                       asChild 
-                      isActive={location.pathname === '/dashboard/profile'}
+                      isActive={location.pathname === profilePath}
                     >
-                      <Link to="/dashboard/profile">
+                      <Link to={profilePath}>
                         <User className="h-5 w-5" />
                         <span>الملف الشخصي</span>
                       </Link>
@@ -211,7 +241,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Link to="/dashboard/notifications">
+                  <Link to={notificationsPath}>
                     <Button variant="ghost" size="icon" className="relative">
                       <Bell className="h-5 w-5" />
                       {notifications > 0 && (
@@ -222,7 +252,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     </Button>
                   </Link>
                   
-                  <Link to="/dashboard/messages">
+                  <Link to={messagesPath}>
                     <Button variant="ghost" size="icon" className="relative">
                       <MessageCircle className="h-5 w-5" />
                       {messages > 0 && (
@@ -233,7 +263,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     </Button>
                   </Link>
                   
-                  <Link to="/dashboard/profile">
+                  <Link to={profilePath}>
                     <Avatar>
                       <AvatarImage src="https://github.com/shadcn.png" />
                       <AvatarFallback>محمد أحمد</AvatarFallback>

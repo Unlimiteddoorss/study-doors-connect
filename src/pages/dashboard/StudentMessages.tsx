@@ -1,151 +1,357 @@
 
-import { useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
-import { Avatar } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { MessageCircle, Send, Search, Paperclip, Image } from 'lucide-react';
+
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'admin';
+  timestamp: Date;
+  read: boolean;
+}
+
+interface Conversation {
+  id: string;
+  title: string;
+  lastMessage: string;
+  timestamp: Date;
+  unread: number;
+  agent: {
+    name: string;
+    avatar?: string;
+  };
+}
 
 const StudentMessages = () => {
-  const [activeChat, setActiveChat] = useState('advisor');
-  const [message, setMessage] = useState('');
+  useEffect(() => {
+    document.title = 'الرسائل - أبواب بلا حدود';
+  }, []);
+
+  const [conversations, setConversations] = useState<Conversation[]>([
+    {
+      id: '1',
+      title: 'طلب تسجيل في جامعة اسطنبول',
+      lastMessage: 'تم استلام أوراقك، سنتواصل معك قريباً',
+      timestamp: new Date(2023, 3, 15, 14, 30),
+      unread: 1,
+      agent: {
+        name: 'أحمد محمد',
+        avatar: 'https://i.pravatar.cc/150?img=1',
+      },
+    },
+    {
+      id: '2',
+      title: 'استفسار حول السكن الجامعي',
+      lastMessage: 'نعم، السكن متوفر للطلاب الدوليين',
+      timestamp: new Date(2023, 3, 10, 11, 25),
+      unread: 0,
+      agent: {
+        name: 'سارة خالد',
+        avatar: 'https://i.pravatar.cc/150?img=5',
+      },
+    },
+    {
+      id: '3',
+      title: 'تأشيرة الدراسة',
+      lastMessage: 'الأوراق المطلوبة هي: جواز السفر، قبول الجامعة...',
+      timestamp: new Date(2023, 3, 5, 9, 15),
+      unread: 2,
+      agent: {
+        name: 'محمد علي',
+        avatar: 'https://i.pravatar.cc/150?img=3',
+      },
+    },
+  ]);
   
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Logic to send message would go here
-    console.log('Sending message:', message);
-    setMessage('');
+  const [selectedConversation, setSelectedConversation] = useState<string>('1');
+  const [messages, setMessages] = useState<Record<string, Message[]>>({
+    '1': [
+      {
+        id: '1-1',
+        text: 'مرحباً، لقد تقدمت بطلب للتسجيل في جامعة اسطنبول',
+        sender: 'user',
+        timestamp: new Date(2023, 3, 15, 10, 30),
+        read: true,
+      },
+      {
+        id: '1-2',
+        text: 'مرحباً، شكراً لتواصلك معنا. سنقوم بمراجعة طلبك ومتابعته مع الجامعة.',
+        sender: 'admin',
+        timestamp: new Date(2023, 3, 15, 11, 45),
+        read: true,
+      },
+      {
+        id: '1-3',
+        text: 'متى يمكنني الحصول على رد من الجامعة؟',
+        sender: 'user',
+        timestamp: new Date(2023, 3, 15, 12, 10),
+        read: true,
+      },
+      {
+        id: '1-4',
+        text: 'عادة ما يستغرق الرد من الجامعة من 7 إلى 10 أيام عمل. سنبقيك على اطلاع بمجرد تلقينا أي معلومات جديدة.',
+        sender: 'admin',
+        timestamp: new Date(2023, 3, 15, 12, 45),
+        read: true,
+      },
+      {
+        id: '1-5',
+        text: 'تم استلام أوراقك، سنتواصل معك قريباً',
+        sender: 'admin',
+        timestamp: new Date(2023, 3, 15, 14, 30),
+        read: false,
+      },
+    ],
+    '2': [
+      {
+        id: '2-1',
+        text: 'هل يوجد سكن جامعي متاح للطلاب الدوليين؟',
+        sender: 'user',
+        timestamp: new Date(2023, 3, 10, 9, 15),
+        read: true,
+      },
+      {
+        id: '2-2',
+        text: 'نعم، السكن متوفر للطلاب الدوليين وهناك عدة خيارات متاحة',
+        sender: 'admin',
+        timestamp: new Date(2023, 3, 10, 11, 25),
+        read: true,
+      },
+    ],
+    '3': [
+      {
+        id: '3-1',
+        text: 'ما هي الأوراق المطلوبة للحصول على تأشيرة الدراسة؟',
+        sender: 'user',
+        timestamp: new Date(2023, 3, 5, 8, 30),
+        read: true,
+      },
+      {
+        id: '3-2',
+        text: 'الأوراق المطلوبة هي: جواز السفر، قبول الجامعة...',
+        sender: 'admin',
+        timestamp: new Date(2023, 3, 5, 9, 15),
+        read: false,
+      },
+      {
+        id: '3-3',
+        text: 'هل يلزم تصديق الأوراق من السفارة؟',
+        sender: 'admin',
+        timestamp: new Date(2023, 3, 5, 9, 17),
+        read: false,
+      },
+    ],
+  });
+  
+  const [newMessage, setNewMessage] = useState('');
+  
+  const handleSendMessage = () => {
+    if (newMessage.trim() === '') return;
+    
+    const newMsg: Message = {
+      id: `${selectedConversation}-${messages[selectedConversation].length + 1}`,
+      text: newMessage,
+      sender: 'user',
+      timestamp: new Date(),
+      read: true,
+    };
+    
+    // Update messages
+    setMessages(prev => ({
+      ...prev,
+      [selectedConversation]: [...prev[selectedConversation], newMsg],
+    }));
+    
+    // Update conversation last message
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === selectedConversation 
+          ? { ...conv, lastMessage: newMessage, timestamp: new Date(), unread: 0 } 
+          : conv
+      )
+    );
+    
+    // Clear input
+    setNewMessage('');
+  };
+  
+  const handleSelectConversation = (convId: string) => {
+    setSelectedConversation(convId);
+    
+    // Mark messages as read
+    setMessages(prev => ({
+      ...prev,
+      [convId]: prev[convId].map(msg => ({ ...msg, read: true })),
+    }));
+    
+    // Update unread count in conversation
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === convId 
+          ? { ...conv, unread: 0 } 
+          : conv
+      )
+    );
+  };
+  
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return date.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return 'الأمس';
+    } else {
+      return date.toLocaleDateString('ar-EG', { day: 'numeric', month: 'numeric' });
+    }
   };
   
   return (
-    <MainLayout>
-      <div className="bg-unlimited-blue py-16 text-white">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-4 text-center">الرسائل</h1>
-          <p className="text-lg max-w-2xl mx-auto text-center">تواصل مع المرشدين الأكاديميين والمسؤولين عن طلبك</p>
-        </div>
-      </div>
-      
-      <div className="container mx-auto py-8 px-4">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-4">
-            {/* Contacts Sidebar */}
-            <div className="bg-gray-50 border-r border-gray-200">
-              <Tabs defaultValue="advisor" className="w-full" onValueChange={setActiveChat}>
-                <TabsList className="grid grid-cols-2 w-full">
-                  <TabsTrigger value="advisor">المرشدين</TabsTrigger>
-                  <TabsTrigger value="admin">الإدارة</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="advisor" className="m-0">
-                  <ScrollArea className="h-[500px] w-full">
-                    <div className="space-y-1">
-                      {[1, 2, 3].map((contact) => (
-                        <button
-                          key={contact}
-                          className={`flex items-center p-4 w-full hover:bg-gray-100 transition ${activeChat === 'advisor' && contact === 1 ? 'bg-blue-50' : ''}`}
-                        >
-                          <Avatar className="h-10 w-10 border">
-                            <div className="bg-unlimited-blue w-full h-full flex items-center justify-center text-white">
-                              م{contact}
-                            </div>
-                          </Avatar>
-                          <div className="mr-4 text-right">
-                            <div className="font-medium">مرشد أكاديمي {contact}</div>
-                            <p className="text-sm text-gray-500 truncate">رسالة تجريبية...</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-                
-                <TabsContent value="admin" className="m-0">
-                  <ScrollArea className="h-[500px] w-full">
-                    <div className="space-y-1">
-                      {[1, 2].map((contact) => (
-                        <button
-                          key={contact}
-                          className={`flex items-center p-4 w-full hover:bg-gray-100 transition ${activeChat === 'admin' && contact === 1 ? 'bg-blue-50' : ''}`}
-                        >
-                          <Avatar className="h-10 w-10 border">
-                            <div className="bg-unlimited-dark-blue w-full h-full flex items-center justify-center text-white">
-                              ا{contact}
-                            </div>
-                          </Avatar>
-                          <div className="mr-4 text-right">
-                            <div className="font-medium">مسؤول {contact}</div>
-                            <p className="text-sm text-gray-500 truncate">رسالة تجريبية...</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
-            </div>
-            
-            {/* Chat Area */}
-            <div className="col-span-3 flex flex-col h-[600px]">
-              {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 flex items-center">
-                <Avatar className="h-10 w-10 border">
-                  <div className="bg-unlimited-blue w-full h-full flex items-center justify-center text-white">
-                    م1
-                  </div>
-                </Avatar>
-                <div className="mr-4">
-                  <div className="font-medium">مرشد أكاديمي 1</div>
-                  <div className="text-sm text-gray-500">متصل</div>
-                </div>
+    <DashboardLayout>
+      <div className="container mx-auto p-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-130px)]">
+          {/* Conversations list */}
+          <Card className="md:col-span-1">
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">الرسائل</CardTitle>
+                <Badge className="bg-unlimited-blue">{conversations.reduce((acc, conv) => acc + conv.unread, 0)}</Badge>
               </div>
-              
-              {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                      <p>مرحباً بك! كيف يمكنني مساعدتك اليوم؟</p>
-                      <span className="text-xs text-gray-500 block mt-1">10:30 صباحاً</span>
+              <div className="relative">
+                <Search className="absolute right-3 top-2.5 h-4 w-4 text-unlimited-gray" />
+                <Input placeholder="بحث..." className="pl-4 pr-10" />
+              </div>
+            </CardHeader>
+            
+            <ScrollArea className="h-[calc(100vh-245px)]">
+              {conversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className={`flex items-start gap-3 p-3 cursor-pointer hover:bg-gray-50 border-b last:border-b-0 ${
+                    selectedConversation === conversation.id ? 'bg-gray-50' : ''
+                  }`}
+                  onClick={() => handleSelectConversation(conversation.id)}
+                >
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={conversation.agent.avatar} />
+                    <AvatarFallback>{conversation.agent.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-semibold text-sm truncate">{conversation.title}</h4>
+                      <span className="text-xs text-unlimited-gray">{formatDate(conversation.timestamp)}</span>
                     </div>
+                    <p className="text-sm text-unlimited-gray truncate">{conversation.lastMessage}</p>
                   </div>
-                  
-                  <div className="flex justify-end">
-                    <div className="bg-unlimited-blue text-white rounded-lg p-3 max-w-[80%]">
-                      <p>مرحباً، أود الاستفسار عن برنامج بكالوريوس إدارة الأعمال</p>
-                      <span className="text-xs text-white/70 block mt-1">10:32 صباحاً</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-lg p-3 max-w-[80%]">
-                      <p>بالتأكيد! يعد برنامج بكالوريوس إدارة الأعمال من أكثر البرامج شعبية لدينا. هل لديك جامعة محددة تهتم بها؟</p>
-                      <span className="text-xs text-gray-500 block mt-1">10:35 صباحاً</span>
-                    </div>
-                  </div>
+                  {conversation.unread > 0 && (
+                    <Badge className="bg-unlimited-blue rounded-full h-5 w-5 flex items-center justify-center p-0">
+                      {conversation.unread}
+                    </Badge>
+                  )}
                 </div>
-              </ScrollArea>
-              
-              {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="border-t border-gray-200 p-4 flex gap-2">
-                <Input
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="اكتب رسالتك هنا..."
-                  className="flex-1"
-                />
-                <Button type="submit" className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                  <Send className="h-5 w-5" />
-                </Button>
-              </form>
-            </div>
-          </div>
+              ))}
+            </ScrollArea>
+          </Card>
+          
+          {/* Messages */}
+          <Card className="md:col-span-2">
+            {selectedConversation && (
+              <>
+                <CardHeader className="py-3 border-b">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={conversations.find(c => c.id === selectedConversation)?.agent.avatar} />
+                      <AvatarFallback>
+                        {conversations.find(c => c.id === selectedConversation)?.agent.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <CardTitle className="text-base">
+                        {conversations.find(c => c.id === selectedConversation)?.agent.name}
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {conversations.find(c => c.id === selectedConversation)?.title}
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[calc(100vh-310px)] p-4">
+                    <div className="flex flex-col gap-4">
+                      {messages[selectedConversation].map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] rounded-lg p-3 ${
+                              message.sender === 'user'
+                                ? 'bg-unlimited-blue text-white rounded-br-none'
+                                : 'bg-gray-100 text-unlimited-dark-blue rounded-bl-none'
+                            }`}
+                          >
+                            <p className="text-sm">{message.text}</p>
+                            <div
+                              className={`text-xs mt-1 flex justify-end ${
+                                message.sender === 'user' ? 'text-unlimited-blue-light' : 'text-unlimited-gray'
+                              }`}
+                            >
+                              {formatDate(message.timestamp)}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+                
+                <CardFooter className="p-3 border-t">
+                  <div className="flex items-center w-full gap-2">
+                    <Button variant="ghost" size="icon" className="shrink-0">
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="shrink-0">
+                      <Image className="h-5 w-5" />
+                    </Button>
+                    <Input
+                      placeholder="اكتب رسالتك هنا..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!newMessage.trim()}
+                      className="shrink-0 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardFooter>
+              </>
+            )}
+          </Card>
         </div>
       </div>
-    </MainLayout>
+    </DashboardLayout>
   );
 };
 

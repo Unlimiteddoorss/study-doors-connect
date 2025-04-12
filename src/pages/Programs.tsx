@@ -7,14 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { dummyPrograms } from '@/data/programsData';
-
-interface Program {
-  id: string;
-  name: string;
-  university: string;
-  degree: string;
-  // اضافة باقي الخصائص حسب بيانات البرامج
-}
+import { Program } from '@/types';
 
 const Programs = () => {
   useEffect(() => {
@@ -23,7 +16,7 @@ const Programs = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredPrograms, setFilteredPrograms] = useState(dummyPrograms);
+  const [filteredPrograms, setFilteredPrograms] = useState<Program[]>(dummyPrograms);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(filteredPrograms.length / 12);
   

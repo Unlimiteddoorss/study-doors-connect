@@ -6,73 +6,99 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, SlidersHorizontal } from 'lucide-react';
+import { University } from '@/types';
 
-const dummyUniversities = [
+// Updated to match the University interface
+const dummyUniversities: University[] = [
   {
-    id: '1',
+    id: 1,
     name: 'جامعة اسطنبول',
+    nameAr: 'جامعة اسطنبول',
     country: 'تركيا',
-    city: 'اسطنبول',
-    logo: '/placeholder.svg',
-    type: 'public',
-    rating: 4.5,
-    programsCount: 120,
-    language: 'التركية والإنجليزية',
+    location: 'اسطنبول',
+    logoUrl: '/placeholder.svg',
+    imageUrl: '/placeholder.svg',
+    description: 'جامعة عريقة في اسطنبول',
+    ranking: '4.5/5',
+    establishedYear: 1953,
+    programCount: 120,
+    studentCount: 25000,
+    website: 'https://www.istanbul.edu.tr'
   },
   {
-    id: '2',
+    id: 2,
     name: 'جامعة أنقرة',
+    nameAr: 'جامعة أنقرة',
     country: 'تركيا',
-    city: 'أنقرة',
-    logo: '/placeholder.svg',
-    type: 'public',
-    rating: 4.2,
-    programsCount: 90,
-    language: 'التركية',
+    location: 'أنقرة',
+    logoUrl: '/placeholder.svg',
+    imageUrl: '/placeholder.svg',
+    description: 'من أقدم الجامعات التركية',
+    ranking: '4.2/5',
+    establishedYear: 1946,
+    programCount: 90,
+    studentCount: 20000,
+    website: 'https://www.ankara.edu.tr'
   },
   {
-    id: '3',
+    id: 3,
     name: 'الجامعة التركية الألمانية',
+    nameAr: 'الجامعة التركية الألمانية',
     country: 'تركيا',
-    city: 'اسطنبول',
-    logo: '/placeholder.svg',
-    type: 'private',
-    rating: 4.7,
-    programsCount: 50,
-    language: 'الإنجليزية والألمانية',
+    location: 'اسطنبول',
+    logoUrl: '/placeholder.svg',
+    imageUrl: '/placeholder.svg',
+    description: 'جامعة تعتمد المعايير الألمانية في التعليم',
+    ranking: '4.7/5',
+    establishedYear: 2008,
+    programCount: 50,
+    studentCount: 10000,
+    website: 'https://www.tau.edu.tr'
   },
   {
-    id: '4',
+    id: 4,
     name: 'جامعة بهتشه شهير',
+    nameAr: 'جامعة بهتشه شهير',
     country: 'تركيا',
-    city: 'اسطنبول',
-    logo: '/placeholder.svg',
-    type: 'private',
-    rating: 4.4,
-    programsCount: 75,
-    language: 'الإنجليزية',
+    location: 'اسطنبول',
+    logoUrl: '/placeholder.svg',
+    imageUrl: '/placeholder.svg',
+    description: 'جامعة خاصة مميزة في اسطنبول',
+    ranking: '4.4/5',
+    establishedYear: 1998,
+    programCount: 75,
+    studentCount: 15000,
+    website: 'https://www.bahcesehir.edu.tr'
   },
   {
-    id: '5',
+    id: 5,
     name: 'جامعة مرمرة',
+    nameAr: 'جامعة مرمرة',
     country: 'تركيا',
-    city: 'اسطنبول',
-    logo: '/placeholder.svg',
-    type: 'public',
-    rating: 4.3,
-    programsCount: 110,
-    language: 'التركية',
+    location: 'اسطنبول',
+    logoUrl: '/placeholder.svg',
+    imageUrl: '/placeholder.svg',
+    description: 'من أعرق الجامعات في اسطنبول',
+    ranking: '4.3/5',
+    establishedYear: 1883,
+    programCount: 110,
+    studentCount: 28000,
+    website: 'https://www.marmara.edu.tr'
   },
   {
-    id: '6',
+    id: 6,
     name: 'جامعة قبرص الشرق الأوسط',
+    nameAr: 'جامعة قبرص الشرق الأوسط',
     country: 'قبرص',
-    city: 'نيقوسيا',
-    logo: '/placeholder.svg',
-    type: 'private',
-    rating: 4.1,
-    programsCount: 60,
-    language: 'الإنجليزية',
+    location: 'نيقوسيا',
+    logoUrl: '/placeholder.svg',
+    imageUrl: '/placeholder.svg',
+    description: 'جامعة خاصة مرموقة في قبرص',
+    ranking: '4.1/5',
+    establishedYear: 1988,
+    programCount: 60,
+    studentCount: 18000,
+    website: 'https://www.meu.edu.cy'
   },
 ];
 
@@ -83,7 +109,7 @@ const Universities = () => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredUniversities, setFilteredUniversities] = useState(dummyUniversities);
+  const [filteredUniversities, setFilteredUniversities] = useState<University[]>(dummyUniversities);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(filteredUniversities.length / 9);
   
@@ -92,7 +118,7 @@ const Universities = () => {
     const filtered = dummyUniversities.filter(uni => 
       uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       uni.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      uni.city.toLowerCase().includes(searchQuery.toLowerCase())
+      uni.location.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredUniversities(filtered);
     setCurrentPage(1);
