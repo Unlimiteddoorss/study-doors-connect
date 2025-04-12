@@ -1,3 +1,4 @@
+
 // برامج الجامعات
 export interface UniversityProgram {
   id: number;
@@ -32,6 +33,16 @@ export const availableLanguages = [
   'Turkish',
   'Arabic'
 ];
+
+// Function to get university programs by university ID
+export const getUniversityPrograms = (universityId: number): UniversityProgram[] => {
+  // Currently we only have bahcesehirPrograms, so we return it if the universityId matches
+  if (universityId === 26) {
+    return bahcesehirPrograms;
+  }
+  // Return an empty array for other universities (can be expanded in future)
+  return [];
+};
 
 // برامج جامعة بهتشي شهير
 const bahcesehirPrograms: UniversityProgram[] = [
