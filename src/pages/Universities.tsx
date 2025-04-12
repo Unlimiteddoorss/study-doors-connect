@@ -1,197 +1,168 @@
 
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import SectionTitle from '@/components/shared/SectionTitle';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { UniversitiesGrid } from '@/components/universities/UniversitiesGrid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, School } from 'lucide-react';
-import { turkishUniversities } from '@/data/programsData';
+import { Search, SlidersHorizontal } from 'lucide-react';
 
-// ترجمة أسماء الدول إلى العربية
-const countryTranslations: Record<string, string> = {
-  'Turkey': 'تركيا',
-  'Istanbul': 'إسطنبول',
-  'Ankara': 'أنقرة',
-  'Antalya': 'أنطاليا',
-  'Alanya': 'ألانيا',
-};
+// Sample university data
+const universities = [
+  {
+    id: 1,
+    name: "جامعة إسطنبول جيليشيم",
+    nameAr: "جامعة إسطنبول جيليشيم",
+    location: "إسطنبول، تركيا",
+    country: "تركيا",
+    ranking: "#28",
+    description: "تأسست جامعة إسطنبول جيليشيم في عام 2008 وهي واحدة من الجامعات الرائدة في إسطنبول، تركيا.",
+    logoUrl: "https://upload.wikimedia.org/wikipedia/en/7/7a/Ozyegin_University_logo.png",
+    imageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+    establishedYear: 2008,
+    programCount: 257,
+    studentCount: 35000,
+    website: "https://www.gelisim.edu.tr"
+  },
+  {
+    id: 2,
+    name: "جامعة أوزيجين",
+    nameAr: "جامعة أوزيجين",
+    location: "إسطنبول، تركيا",
+    country: "تركيا",
+    ranking: "#32",
+    description: "جامعة رائدة في مجال الأعمال والتكنولوجيا",
+    logoUrl: "https://upload.wikimedia.org/wikipedia/en/7/7a/Ozyegin_University_logo.png",
+    imageUrl: "https://randomuser.me/api/portraits/men/2.jpg",
+    establishedYear: 2007,
+    programCount: 150,
+    studentCount: 20000,
+    website: "https://www.ozyegin.edu.tr"
+  },
+  {
+    id: 3,
+    name: "جامعة فاتح سلطان محمد",
+    nameAr: "جامعة فاتح سلطان محمد",
+    location: "إسطنبول، تركيا",
+    country: "تركيا",
+    ranking: "#45",
+    description: "جامعة عريقة تجمع بين التراث والحداثة",
+    logoUrl: "https://upload.wikimedia.org/wikipedia/en/2/27/Fatih_Sultan_Mehmet_Vak%C4%B1f_%C3%9Cniversitesi_logo.jpg",
+    imageUrl: "https://randomuser.me/api/portraits/men/3.jpg",
+    establishedYear: 2010,
+    programCount: 120,
+    studentCount: 15000,
+    website: "https://www.fsm.edu.tr"
+  },
+  {
+    id: 4,
+    name: "جامعة المجر للتكنولوجيا",
+    nameAr: "جامعة المجر للتكنولوجيا",
+    location: "بودابست، المجر",
+    country: "المجر",
+    ranking: "#201-250",
+    description: "جامعة رائدة في مجال الهندسة والعلوم التطبيقية",
+    logoUrl: "https://upload.wikimedia.org/wikipedia/en/d/d4/BME_logo.jpg",
+    imageUrl: "https://randomuser.me/api/portraits/men/4.jpg",
+    establishedYear: 1782,
+    programCount: 180,
+    studentCount: 22000,
+    website: "https://www.bme.hu"
+  }
+];
 
 const Universities = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredUniversities, setFilteredUniversities] = useState(turkishUniversities);
-  const [currentPage, setCurrentPage] = useState(1);
-  const universitiesPerPage = 12;
-
   useEffect(() => {
-    if (searchTerm) {
-      setFilteredUniversities(
-        turkishUniversities.filter(
-          university =>
-            university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            university.location.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredUniversities(turkishUniversities);
-    }
-  }, [searchTerm]);
+    document.title = 'الجامعات - أبواب بلا حدود';
+  }, []);
 
-  // حساب صفحة العرض الحالية
-  const indexOfLastUniversity = currentPage * universitiesPerPage;
-  const indexOfFirstUniversity = indexOfLastUniversity - universitiesPerPage;
-  const currentUniversities = filteredUniversities.slice(indexOfFirstUniversity, indexOfLastUniversity);
-  const totalPages = Math.ceil(filteredUniversities.length / universitiesPerPage);
-
-  // التنقل بين الصفحات
-  const paginate = (pageNumber: number) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filteredUniversities, setFilteredUniversities] = useState(universities);
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Filter universities based on search query
+    const filtered = universities.filter(university => 
+      university.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      university.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredUniversities(filtered);
   };
 
-  // ترجمة الموقع من الإنجليزية إلى العربية
-  const translateLocation = (location: string): string => {
-    return countryTranslations[location] || location;
+  const resetFilters = () => {
+    setFilteredUniversities(universities);
+    setSearchQuery('');
+    setShowFilters(false);
   };
-
+  
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12">
-        <SectionTitle
-          title="الجامعات التركية"
-          subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
-        />
-
-        {/* Search Component */}
-        <div className="max-w-2xl mx-auto mb-10">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="ابحث عن جامعة..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4"
-            />
-          </div>
-        </div>
-
-        {/* Results info */}
-        <div className="mb-6">
-          <p className="text-unlimited-gray">
-            تم العثور على <span className="font-semibold text-unlimited-blue">{filteredUniversities.length}</span> جامعة
-          </p>
-        </div>
-
-        {/* Universities Grid */}
-        {currentUniversities.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentUniversities.map((university) => (
-              <Card key={university.id} className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={university.image}
-                    alt={university.name}
-                    className="w-full h-full object-cover transition-transform hover:scale-105"
-                  />
-                </div>
-                
-                <CardHeader className="pb-2">
-                  <h3 className="font-bold text-xl mb-2">{university.name}</h3>
-                  <div className="flex items-center text-unlimited-gray">
-                    <MapPin className="h-4 w-4 ml-2" />
-                    <span>{translateLocation(university.location)}، {translateLocation('Turkey')}</span>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="pb-2">
-                  <div className="grid grid-cols-2 gap-2 text-sm mb-4">
-                    <div>
-                      <p className="text-unlimited-gray">تأسست عام:</p>
-                      <p className="font-medium">{university.founded}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray">النوع:</p>
-                      <p className="font-medium">{university.type === 'Private' ? 'خاصة' : 'حكومية'}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray">البرامج:</p>
-                      <p className="font-medium">{university.programs}+ برنامج</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray">الرسوم:</p>
-                      <p className="font-medium text-unlimited-blue">{university.fees}</p>
-                    </div>
-                  </div>
-                </CardContent>
-                
-                <CardFooter>
-                  <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                    <Link to={`/universities/${university.id}`}>عرض التفاصيل</Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على جامعات تطابق بحثك</p>
-            <Button onClick={() => setSearchTerm("")} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">إعادة ضبط البحث</Button>
-          </div>
-        )}
-        
-        {/* Pagination */}
-        {filteredUniversities.length > 0 && (
-          <div className="flex justify-center mt-12">
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="pagination" 
-                onClick={() => paginate(currentPage - 1)} 
-                disabled={currentPage === 1}
-              >
-                <MapPin className="h-4 w-4" />
+      <div className="bg-unlimited-blue py-16 text-white">
+        <div className="container mx-auto px-4">
+          <h1 className="text-3xl font-bold mb-4 text-center">الجامعات</h1>
+          <p className="text-lg max-w-2xl mx-auto text-center">اكتشف أفضل الجامعات حول العالم وتعرف على برامجها الأكاديمية</p>
+          
+          <div className="mt-8 max-w-xl mx-auto">
+            <form onSubmit={handleSearch} className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="ابحث عن جامعة..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-white text-unlimited-dark-blue"
+              />
+              <Button type="submit" className="bg-white text-unlimited-blue hover:bg-gray-100">
+                <Search className="h-4 w-4" />
               </Button>
-              
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                // إذا كان عدد الصفحات أكثر من 5، نعرض الصفحات المحيطة بالصفحة الحالية
-                let pageNum: number;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else {
-                  if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                }
-                
-                return (
-                  <Button 
-                    key={pageNum}
-                    variant="pagination"
-                    aria-current={pageNum === currentPage ? "page" : undefined}
-                    onClick={() => paginate(pageNum)}
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              })}
-              
               <Button 
-                variant="pagination" 
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                type="button" 
+                variant="outline" 
+                className="border-white text-white hover:bg-white/10"
+                onClick={() => setShowFilters(!showFilters)}
               >
-                <MapPin className="h-4 w-4 rotate-180" />
+                <SlidersHorizontal className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </div>
+      </div>
+      
+      <div className="container mx-auto py-8 px-4">
+        {showFilters && (
+          <div className="bg-gray-50 p-4 rounded-lg mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-unlimited-gray mb-2">الدولة</label>
+              <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
+                <option value="">جميع الدول</option>
+                <option value="turkey">تركيا</option>
+                <option value="cyprus">قبرص</option>
+                <option value="hungary">المجر</option>
+                <option value="poland">بولندا</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-unlimited-gray mb-2">التصنيف العالمي</label>
+              <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
+                <option value="">جميع التصنيفات</option>
+                <option value="top100">أفضل 100</option>
+                <option value="100-200">101 - 200</option>
+                <option value="200-500">201 - 500</option>
+              </select>
+            </div>
+            
+            <div className="flex items-end">
+              <Button 
+                onClick={resetFilters}
+                className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
+              >
+                إعادة ضبط
               </Button>
             </div>
           </div>
         )}
+        
+        <UniversitiesGrid universities={filteredUniversities} />
       </div>
     </MainLayout>
   );
