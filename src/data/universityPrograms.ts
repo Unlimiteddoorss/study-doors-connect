@@ -766,7 +766,7 @@ const bahcesehirPrograms: UniversityProgram[] = [
   {
     id: 49,
     name: 'English Language Education (English) (Thesis)',
-    nameAr: 'معلم اللغة الإنجليزية (إنجليزي) (بأطروحة)',
+    nameAr: 'معلم اللغة الإن��ليزية (إنجليزي) (بأطروحة)',
     university: 26,
     degree: 'Master',
     duration: '2 سنوات',
@@ -908,4 +908,13 @@ const bahcesehirPrograms: UniversityProgram[] = [
     duration: '1.5 سنوات',
     language: 'English',
     campus: 'Beşiktaş South',
-    tuitionFee: 12
+    tuitionFee: 12000,
+    discountedFee: 9000,
+    depositFee: 1000,
+    prepFee: 8500,
+    available: true
+  }
+];
+
+// Export the programs
+export default bahcesehirPrograms;
