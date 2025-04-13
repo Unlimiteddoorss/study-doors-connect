@@ -2,8 +2,12 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, GraduationCap, Building, Plane, Home, Users } from 'lucide-react';
 import SectionTitle from '../shared/SectionTitle';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 const Services = () => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
   const services = [
     {
       title: 'إدارة طلبات القبول',
@@ -37,8 +41,24 @@ const Services = () => {
     },
   ];
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
+  };
+
   return (
-    <section className="py-20">
+    <section id="services" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <SectionTitle
           title="خدماتنا"
@@ -47,19 +67,39 @@ const Services = () => {
           className="mb-16"
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.2 }}
+        >
           {services.map((service, index) => (
-            <Card key={index} className="border-t-4 border-t-unlimited-blue transition-all hover:shadow-lg hover:-translate-y-1">
-              <CardHeader>
-                <div className="text-unlimited-blue mb-3">{service.icon}</div>
-                <CardTitle className="text-xl">{service.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-600 text-base">{service.description}</CardDescription>
-              </CardContent>
-            </Card>
+            <motion.div key={index} variants={item}>
+              <Card 
+                className={`border-t-4 border-t-unlimited-blue transition-all duration-300 ${
+                  hoveredIndex === index 
+                    ? 'shadow-xl -translate-y-2 border-t-unlimited-light-blue' 
+                    : 'hover:shadow-lg hover:-translate-y-1'
+                }`}
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
+              >
+                <CardHeader>
+                  <div className={`transition-colors duration-300 ${
+                    hoveredIndex === index ? 'text-unlimited-light-blue' : 'text-unlimited-blue'
+                  } mb-3`}>
+                    {service.icon}
+                  </div>
+                  <CardTitle className="text-xl">{service.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-gray-600 text-base">{service.description}</CardDescription>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
