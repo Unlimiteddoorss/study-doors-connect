@@ -1,173 +1,49 @@
 
-import { 
-  FileText, 
-  Mail, 
-  CalendarCheck, 
-  GraduationCap, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle, 
-  BarChart4 
-} from 'lucide-react';
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { FileText, MessageCircle, Bell, Building } from 'lucide-react';
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
-
-type StatCardProps = {
-  title: string;
-  value: string | number;
-  description?: string;
-  icon: React.ReactNode;
-  color: string;
-};
-
-const StatCard = ({ title, value, description, icon, color }: StatCardProps) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium text-unlimited-gray">
-        {title}
-      </CardTitle>
-      <div className={`p-2 rounded-full ${color}`}>
-        {icon}
-      </div>
-    </CardHeader>
-    <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
-      {description && (
-        <CardDescription className="text-xs text-unlimited-gray mt-1">
-          {description}
-        </CardDescription>
-      )}
-    </CardContent>
-  </Card>
-);
-
-type DashboardStatsProps = {
+interface DashboardStatsProps {
   userRole?: 'student' | 'admin' | 'agent';
-};
+}
 
-const DashboardStats = ({ userRole = 'student' }: DashboardStatsProps) => {
-  // Stats for student dashboard
-  const studentStats = [
-    {
-      title: 'طلباتي',
-      value: 3,
-      description: 'إجمالي عدد الطلبات',
-      icon: <FileText className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-blue',
-    },
-    {
-      title: 'طلبات قيد المعالجة',
-      value: 1,
-      description: 'بانتظار الرد',
-      icon: <Clock className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-warning',
-    },
-    {
-      title: 'طلبات مقبولة',
-      value: 2,
-      description: 'تم قبولها من الجامعات',
-      icon: <CheckCircle2 className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-success',
-    },
-    {
-      title: 'رسائل غير مقروءة',
-      value: 4,
-      description: 'من فريق الدعم والجامعات',
-      icon: <Mail className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-info',
-    },
-  ];
+const DashboardStats: React.FC<DashboardStatsProps> = ({ userRole = 'student' }) => {
+  // بيانات الإحصائيات حسب نوع المستخدم
+  const statsData = {
+    student: [
+      { label: 'طلباتي', value: 3, icon: <FileText className="h-6 w-6 text-blue-500" />, bgColor: 'bg-blue-100', description: 'إجمالي عدد الطلبات' },
+      { label: 'طلبات في المراجعة', value: 1, icon: <FileText className="h-6 w-6 text-orange-500" />, bgColor: 'bg-orange-100', description: 'بانتظار الرد' },
+      { label: 'طلبات مقبولة', value: 2, icon: <FileText className="h-6 w-6 text-green-500" />, bgColor: 'bg-green-100', description: 'تم قبولها من الجامعات' },
+      { label: 'رسائل', value: 4, icon: <MessageCircle className="h-6 w-6 text-blue-500" />, bgColor: 'bg-blue-100', description: 'من فريق الدعم والجامعات' },
+    ],
+    admin: [
+      { label: 'طلبات جديدة', value: 15, icon: <FileText className="h-6 w-6 text-blue-500" />, bgColor: 'bg-blue-100', description: 'في انتظار المراجعة' },
+      { label: 'طلاب جدد', value: 8, icon: <FileText className="h-6 w-6 text-orange-500" />, bgColor: 'bg-orange-100', description: 'مسجلين هذا الأسبوع' },
+      { label: 'رسائل', value: 12, icon: <MessageCircle className="h-6 w-6 text-purple-500" />, bgColor: 'bg-purple-100', description: 'تحتاج للرد' },
+      { label: 'جامعات', value: 42, icon: <Building className="h-6 w-6 text-green-500" />, bgColor: 'bg-green-100', description: 'مسجلة في النظام' },
+    ],
+    agent: [
+      { label: 'طلاب', value: 18, icon: <FileText className="h-6 w-6 text-blue-500" />, bgColor: 'bg-blue-100', description: 'إجمالي عدد الطلاب' },
+      { label: 'طلبات نشطة', value: 7, icon: <FileText className="h-6 w-6 text-orange-500" />, bgColor: 'bg-orange-100', description: 'قيد المعالجة' },
+      { label: 'طلبات مقبولة', value: 12, icon: <FileText className="h-6 w-6 text-green-500" />, bgColor: 'bg-green-100', description: 'تم قبولها' },
+      { label: 'رسائل', value: 5, icon: <MessageCircle className="h-6 w-6 text-purple-500" />, bgColor: 'bg-purple-100', description: 'تحتاج للرد' },
+    ]
+  };
 
-  // Stats for admin dashboard
-  const adminStats = [
-    {
-      title: 'إجمالي الطلبات',
-      value: 125,
-      description: 'هذا الشهر',
-      icon: <FileText className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-blue',
-    },
-    {
-      title: 'طلبات جديدة',
-      value: 24,
-      description: 'بانتظار المراجعة',
-      icon: <AlertCircle className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-warning',
-    },
-    {
-      title: 'إجمالي الطلاب',
-      value: 450,
-      description: '50+ طالب جديد هذا الشهر',
-      icon: <GraduationCap className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-info',
-    },
-    {
-      title: 'إجمالي الوكلاء',
-      value: 15,
-      description: '3 وكلاء نشطين',
-      icon: <BarChart4 className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-success',
-    },
-  ];
-
-  // Stats for agent dashboard
-  const agentStats = [
-    {
-      title: 'طلابي',
-      value: 28,
-      description: 'إجمالي عدد الطلاب',
-      icon: <GraduationCap className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-blue',
-    },
-    {
-      title: 'طلبات قيد المعالجة',
-      value: 12,
-      description: 'بانتظار الرد',
-      icon: <Clock className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-warning',
-    },
-    {
-      title: 'طلبات مقبولة',
-      value: 45,
-      description: 'تم قبولها من الجامعات',
-      icon: <CheckCircle2 className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-success',
-    },
-    {
-      title: 'اجتماعات قادمة',
-      value: 3,
-      description: 'في الأسبوع القادم',
-      icon: <CalendarCheck className="h-4 w-4 text-white" />,
-      color: 'bg-unlimited-info',
-    },
-  ];
-
-  let stats;
-  if (userRole === 'admin') {
-    stats = adminStats;
-  } else if (userRole === 'agent') {
-    stats = agentStats;
-  } else {
-    stats = studentStats;
-  }
+  const activeStats = statsData[userRole];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat, index) => (
-        <StatCard 
-          key={index}
-          title={stat.title}
-          value={stat.value}
-          description={stat.description}
-          icon={stat.icon}
-          color={stat.color}
-        />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {activeStats.map((stat, index) => (
+        <Card key={index}>
+          <CardContent className="flex flex-col items-center p-6">
+            <div className={`mb-2 rounded-full ${stat.bgColor} p-3`}>
+              {stat.icon}
+            </div>
+            <div className="text-3xl font-bold">{stat.value}</div>
+            <p className="text-sm text-unlimited-gray">{stat.description}</p>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
