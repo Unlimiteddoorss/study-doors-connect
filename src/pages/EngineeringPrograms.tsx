@@ -7,7 +7,6 @@ import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { dummyPrograms } from '@/data/programsData';
-import { Program } from '@/types';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -37,116 +36,88 @@ const countryTranslations: Record<string, string> = {
 };
 
 // Create engineering programs data
-const engineeringPrograms: Program[] = dummyPrograms
+const engineeringPrograms = dummyPrograms
   .filter(program => 
-    program.title && program.title.includes('هندسة')
+    program.title.includes('هندسة')
   )
   .concat([
     {
-      id: "201",
-      name: "بكالوريوس الهندسة المدنية",
+      id: 201,
       title: "بكالوريوس الهندسة المدنية",
       university: "جامعة اسطنبول التقنية",
-      universityId: "u201",
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
       duration: "4 سنوات",
       deadline: "30/08/2023",
-      tuitionFee: "$5,200 / سنة",
       fee: "$5,200 / سنة",
-      currency: "USD",
-      imageUrl: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      country: "Turkey",
-      city: "إسطنبول"
+      badges: ["معتمد دوليًا", "تدريب عملي"]
     },
     {
-      id: "202",
-      name: "بكالوريوس هندسة البرمجيات",
+      id: 202,
       title: "بكالوريوس هندسة البرمجيات",
       university: "جامعة الشرق الأوسط التقنية",
-      universityId: "u202",
       location: "Turkey، أنقرة",
       language: "إنجليزية",
       duration: "4 سنوات",
       deadline: "15/08/2023",
-      tuitionFee: "$4,800 / سنة",
-      fee: "$4,200 / سنة",
-      discount: 15,
-      currency: "USD",
-      imageUrl: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      country: "Turkey",
-      city: "أنقرة"
+      fee: "$4,800 / سنة",
+      discount: "$4,200 / سنة",
+      image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      badges: ["وظائف مضمونة", "تقنيات حديثة"]
     },
     {
-      id: "203",
-      name: "بكالوريوس الهندسة الميكانيكية",
+      id: 203,
       title: "بكالوريوس الهندسة الميكانيكية",
       university: "جامعة إسطنبول بيلجي",
-      universityId: "u203",
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
       duration: "4 سنوات",
       deadline: "10/09/2023",
-      tuitionFee: "$5,500 / سنة",
       fee: "$5,500 / سنة",
-      currency: "USD",
-      imageUrl: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      country: "Turkey",
-      city: "إسطنبول"
+      image: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      scholarshipAvailable: true,
+      badges: ["معدات حديثة", "برامج تبادل طلابي"]
     },
     {
-      id: "204",
-      name: "بكالوريوس الهندسة الكهربائية",
+      id: 204,
       title: "بكالوريوس الهندسة الكهربائية",
       university: "جامعة يلدز التقنية",
-      universityId: "u204",
       location: "Turkey، إسطنبول",
       language: "تركية وإنجليزية",
       duration: "4 سنوات",
       deadline: "05/08/2023",
-      tuitionFee: "$4,900 / سنة",
-      fee: "$4,500 / سنة",
-      discount: 10,
-      currency: "USD",
-      imageUrl: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      country: "Turkey",
-      city: "إسطنبول"
+      fee: "$4,900 / سنة",
+      discount: "$4,500 / سنة",
+      image: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      badges: ["معامل متطورة", "تدريب صناعي"]
     },
     {
-      id: "205",
-      name: "ماجستير هندسة الإلكترونيات",
+      id: 205,
       title: "ماجستير هندسة الإلكترونيات",
       university: "جامعة غازي",
-      universityId: "u205",
       location: "Turkey، أنقرة",
       language: "إنجليزية",
       duration: "2 سنوات",
       deadline: "20/08/2023",
-      tuitionFee: "$6,800 / سنة",
       fee: "$6,800 / سنة",
-      currency: "USD",
-      imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      country: "Turkey",
-      city: "أنقرة"
+      badges: ["بحث متقدم", "فرص عمل دولية"]
     },
     {
-      id: "206",
-      name: "بكالوريوس هندسة الطيران",
+      id: 206,
       title: "بكالوريوس هندسة الطيران",
       university: "جامعة اسطنبول التقنية",
-      universityId: "u201",
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
       duration: "4 سنوات",
       deadline: "01/09/2023",
-      tuitionFee: "$7,200 / سنة",
       fee: "$7,200 / سنة",
-      currency: "USD",
-      imageUrl: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      country: "Turkey",
-      city: "إسطنبول"
+      image: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      scholarshipAvailable: true,
+      badges: ["فرص تدريب في شركات الطيران", "معامل محاكاة حديثة"]
     }
   ]);
 
@@ -169,7 +140,7 @@ const EngineeringPrograms = () => {
     if (searchTerm) {
       result = result.filter(
         program =>
-          program.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           program.university.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -185,9 +156,9 @@ const EngineeringPrograms = () => {
     // Apply degree filter
     if (selectedDegree && selectedDegree !== "all") {
       result = result.filter(program => {
-        if (program.title?.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
-        if (program.title?.includes('ماجستير') && selectedDegree === 'Master') return true;
-        if (program.title?.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
+        if (program.title.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
+        if (program.title.includes('ماجستير') && selectedDegree === 'Master') return true;
+        if (program.title.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
         return false;
       });
     }
@@ -197,17 +168,17 @@ const EngineeringPrograms = () => {
       result = result.filter(program => {
         switch(selectedSpecialty) {
           case "Civil":
-            return program.title?.includes('مدنية');
+            return program.title.includes('مدنية');
           case "Computer":
-            return program.title?.includes('برمجيات') || program.title?.includes('حاسوب');
+            return program.title.includes('برمجيات') || program.title.includes('حاسوب');
           case "Mechanical":
-            return program.title?.includes('ميكانيكية');
+            return program.title.includes('ميكانيكية');
           case "Electrical":
-            return program.title?.includes('كهربائية');
+            return program.title.includes('كهربائية');
           case "Electronics":
-            return program.title?.includes('إلكترونيات');
+            return program.title.includes('إلكترونيات');
           case "Aerospace":
-            return program.title?.includes('طيران');
+            return program.title.includes('طيران');
           default:
             return true;
         }
@@ -221,15 +192,15 @@ const EngineeringPrograms = () => {
         break;
       case "priceAsc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat((a.discount ? a.fee : a.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat((b.discount ? b.fee : b.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
+          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
           return priceA - priceB;
         });
         break;
       case "priceDesc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat((a.discount ? a.fee : a.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat((b.discount ? b.fee : b.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
+          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
           return priceB - priceA;
         });
         break;

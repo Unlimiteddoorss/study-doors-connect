@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { Program } from '@/types';
+import { Program } from '@/components/programs/ProgramCard';
 import ProgramCard from '@/components/programs/ProgramCard';
 import { Button } from '@/components/ui/button';
-import { Pagination } from '@/components/shared/Pagination';
+import Pagination from '@/components/shared/Pagination';
 
 interface ProgramsGridProps {
   programs: Program[];

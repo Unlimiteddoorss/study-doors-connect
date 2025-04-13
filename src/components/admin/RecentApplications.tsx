@@ -1,233 +1,170 @@
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, CheckCircle, AlertCircle, XCircle, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Eye, Download, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useToast } from '@/hooks/use-toast';
+
+type ApplicationStatus = 'pending' | 'approved' | 'rejected' | 'processing';
+
+type Application = {
+  id: string;
+  studentName: string;
+  program: string;
+  university: string;
+  date: string;
+  status: ApplicationStatus;
+};
+
+const statusConfig: Record<ApplicationStatus, { label: string; color: string }> = {
+  pending: { label: 'قيد الانتظار', color: 'bg-unlimited-warning text-white' },
+  approved: { label: 'مقبول', color: 'bg-unlimited-success text-white' },
+  rejected: { label: 'مرفوض', color: 'bg-unlimited-danger text-white' },
+  processing: { label: 'قيد المعالجة', color: 'bg-unlimited-info text-white' },
+};
+
+const recentApplications: Application[] = [
+  {
+    id: 'APP-2023-001',
+    studentName: 'أحمد محمد',
+    program: 'هندسة البرمجيات',
+    university: 'جامعة لندن',
+    date: '2023-04-01',
+    status: 'approved',
+  },
+  {
+    id: 'APP-2023-002',
+    studentName: 'سارة عبدالله',
+    program: 'علوم الحاسب',
+    university: 'جامعة تورنتو',
+    date: '2023-04-02',
+    status: 'pending',
+  },
+  {
+    id: 'APP-2023-003',
+    studentName: 'عمر خالد',
+    program: 'إدارة الأعمال',
+    university: 'جامعة ملبورن',
+    date: '2023-04-03',
+    status: 'processing',
+  },
+  {
+    id: 'APP-2023-004',
+    studentName: 'فاطمة علي',
+    program: 'الطب البشري',
+    university: 'جامعة برلين',
+    date: '2023-04-04',
+    status: 'rejected',
+  },
+  {
+    id: 'APP-2023-005',
+    studentName: 'محمد أحمد',
+    program: 'علوم البيانات',
+    university: 'جامعة طوكيو',
+    date: '2023-04-05',
+    status: 'approved',
+  }
+];
 
 export function RecentApplications() {
-  const [applications, setApplications] = useState([
-    {
-      id: "app1",
-      student: "فاطمة الزهراء",
-      program: "بكالوريوس هندسة البرمجيات",
-      university: "جامعة إسطنبول التقنية",
-      date: "12/04/2025",
-      status: "قيد المراجعة"
-    },
-    {
-      id: "app2",
-      student: "أحمد محمود",
-      program: "ماجستير علوم الحاسوب",
-      university: "جامعة أوزيجين",
-      date: "11/04/2025",
-      status: "بانتظار المستندات"
-    },
-    {
-      id: "app3",
-      student: "سارة عبد الرحمن",
-      program: "دبلوم اللغة التركية",
-      university: "جامعة بهجة شهير",
-      date: "10/04/2025",
-      status: "مقبول"
-    }
-  ]);
-  
-  const [selectedApp, setSelectedApp] = useState<any>(null);
+  const [applications, setApplications] = useState<Application[]>(recentApplications);
   const { toast } = useToast();
-  
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "مقبول":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case "قيد المراجعة":
-        return <Clock className="h-4 w-4 text-orange-500" />;
-      case "بانتظار المستندات":
-        return <AlertCircle className="h-4 w-4 text-blue-500" />;
-      case "مرفوض":
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <FileText className="h-4 w-4 text-unlimited-gray" />;
-    }
+
+  const handleViewApplication = (id: string) => {
+    toast({
+      title: "عرض الطلب",
+      description: `تم فتح الطلب رقم ${id}`,
+    });
   };
-  
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "مقبول":
-        return "bg-green-100 text-green-800";
-      case "قيد المراجعة":
-        return "bg-orange-100 text-orange-800";
-      case "بانتظار المستندات":
-        return "bg-blue-100 text-blue-800";
-      case "مرفوض":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-  
-  const handleApprove = () => {
-    if (selectedApp) {
-      setApplications(applications.map(app => 
-        app.id === selectedApp.id ? { ...app, status: "مقبول" } : app
-      ));
-      
-      toast({
-        title: "تم قبول الطلب",
-        description: `تم قبول طلب الطالب ${selectedApp.student} بنجاح`,
-      });
-      
-      setSelectedApp(null);
-    }
-  };
-  
-  const handleReject = () => {
-    if (selectedApp) {
-      setApplications(applications.map(app => 
-        app.id === selectedApp.id ? { ...app, status: "مرفوض" } : app
-      ));
-      
-      toast({
-        title: "تم رفض الطلب",
-        description: `تم رفض طلب الطالب ${selectedApp.student}`,
-        variant: "destructive"
-      });
-      
-      setSelectedApp(null);
-    }
+
+  const handleDownloadDocuments = (id: string) => {
+    toast({
+      title: "تنزيل المستندات",
+      description: `جاري تنزيل مستندات الطلب رقم ${id}`,
+    });
   };
 
   return (
     <div className="space-y-4">
-      {applications.map(app => (
-        <div key={app.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-          <div className="flex items-start gap-3">
-            <div className="bg-unlimited-blue/10 p-2 rounded-full">
-              <FileText className="h-5 w-5 text-unlimited-blue" />
-            </div>
-            <div>
-              <h4 className="font-medium text-sm">{app.student}</h4>
-              <p className="text-xs text-unlimited-gray">{app.program}</p>
-              <p className="text-xs text-unlimited-gray">{app.university}</p>
-              <div className="mt-1">
-                <Badge className={`text-xs ${getStatusColor(app.status)}`}>
-                  <span className="flex items-center gap-1">
-                    {getStatusIcon(app.status)}
-                    {app.status}
-                  </span>
-                </Badge>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <span className="text-xs text-unlimited-gray">{app.date}</span>
-            
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-xs h-7" onClick={() => setSelectedApp(app)}>
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                  عرض
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>تفاصيل الطلب</DialogTitle>
-                  <DialogDescription>
-                    معلومات طلب التسجيل للطالب
-                  </DialogDescription>
-                </DialogHeader>
-                
-                {selectedApp && (
-                  <div className="py-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-lg">{selectedApp.student}</h3>
-                      <Badge className={getStatusColor(selectedApp.status)}>
-                        <span className="flex items-center gap-1">
-                          {getStatusIcon(selectedApp.status)}
-                          {selectedApp.status}
-                        </span>
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <p className="text-unlimited-gray text-sm">البرنامج</p>
-                        <p className="font-medium">{selectedApp.program}</p>
-                      </div>
-                      <div>
-                        <p className="text-unlimited-gray text-sm">الجامعة</p>
-                        <p className="font-medium">{selectedApp.university}</p>
-                      </div>
-                      <div>
-                        <p className="text-unlimited-gray text-sm">تاريخ التقديم</p>
-                        <p className="font-medium">{selectedApp.date}</p>
-                      </div>
-                      <div>
-                        <p className="text-unlimited-gray text-sm">رقم الطلب</p>
-                        <p className="font-medium">{selectedApp.id}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="border-t pt-4">
-                      <h4 className="font-medium mb-2">المستندات المرفقة</h4>
-                      <div className="space-y-2">
-                        <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span>جواز السفر</span>
-                          <Button variant="ghost" size="sm">عرض</Button>
-                        </div>
-                        <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                          <span>الشهادة الثانوية</span>
-                          <Button variant="ghost" size="sm">عرض</Button>
-                        </div>
-                      </div>
-                    </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-unlimited-blue/20">
+              <th className="text-right py-2 px-2">الطالب</th>
+              <th className="text-right py-2 px-2">الحالة</th>
+              <th className="text-right py-2 px-2">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            {applications.map((application) => (
+              <tr key={application.id} className="border-b border-gray-100">
+                <td className="py-2 px-2">
+                  <div>
+                    <p className="font-medium">{application.studentName}</p>
+                    <p className="text-xs text-unlimited-gray">{application.program}</p>
                   </div>
-                )}
-                
-                <DialogFooter className="flex gap-2">
-                  {selectedApp && selectedApp.status !== "مقبول" && (
-                    <Button variant="outline" className="bg-green-500 text-white hover:bg-green-600" onClick={handleApprove}>
-                      <CheckCircle className="h-4 w-4 ml-1" />
-                      قبول
+                </td>
+                <td className="py-2 px-2">
+                  <Badge className={statusConfig[application.status].color}>
+                    {statusConfig[application.status].label}
+                  </Badge>
+                </td>
+                <td className="py-2 px-2">
+                  <div className="flex space-x-2 rtl:space-x-reverse">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 w-8 p-0" 
+                      onClick={() => handleViewApplication(application.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">عرض</span>
                     </Button>
-                  )}
-                  
-                  {selectedApp && selectedApp.status !== "مرفوض" && (
-                    <Button variant="outline" className="bg-red-500 text-white hover:bg-red-600" onClick={handleReject}>
-                      <XCircle className="h-4 w-4 ml-1" />
-                      رفض
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={() => handleDownloadDocuments(application.id)}
+                    >
+                      <Download className="h-4 w-4" />
+                      <span className="sr-only">تنزيل</span>
                     </Button>
-                  )}
-                  
-                  <Button variant="outline">
-                    <Link to={`/admin/applications/${selectedApp?.id}`} className="flex items-center">
-                      <ExternalLink className="h-4 w-4 ml-1" />
-                      التفاصيل الكاملة
-                    </Link>
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-      ))}
-      
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">المزيد من الخيارات</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>تغيير الحالة</DropdownMenuItem>
+                        <DropdownMenuItem>إرسال رسالة</DropdownMenuItem>
+                        <DropdownMenuItem>إضافة ملاحظة</DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-unlimited-danger">حذف</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="text-center">
-        <Link to="/admin/applications">
-          <Button variant="link" className="text-unlimited-blue">
-            عرض جميع الطلبات
-          </Button>
-        </Link>
+        <Button variant="outline" size="sm">
+          عرض جميع الطلبات
+        </Button>
       </div>
     </div>
   );

@@ -1,68 +1,82 @@
 
-import { Routes, Route } from 'react-router-dom';
-import Index from './pages/Index';
-import About from './pages/About';
-import Contact from './pages/Contact';
-import Countries from './pages/Countries';
-import CountryDetails from './pages/CountryDetails';
-import NotFound from './pages/NotFound';
-import TurkishUniversities from './pages/TurkishUniversities';
-import UniversityDetails from './pages/UniversityDetails';
-import ProgramDetails from './pages/ProgramDetails';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Programs from './pages/Programs';
-import MedicalPrograms from './pages/MedicalPrograms';
-import EngineeringPrograms from './pages/EngineeringPrograms';
-import Universities from './pages/Universities';
-import Apply from './pages/Apply';
-import StudentDashboard from './pages/dashboard/StudentDashboard';
-import StudentApplications from './pages/dashboard/StudentApplications';
-import StudentMessages from './pages/dashboard/StudentMessages';
-import StudentNotifications from './pages/dashboard/StudentNotifications';
-import StudentProfile from './pages/dashboard/StudentProfile';
-import UserMessages from './pages/messaging/UserMessages';
-import ContactUs from './pages/messaging/ContactUs';
-import Home from './pages/Home';
-import { Toaster } from '@/components/ui/toaster';
-import './App.css';
+import { Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Countries from "./pages/Countries";
+import CountryDetails from "./pages/CountryDetails";
+import Programs from "./pages/Programs";
+import ProgramDetails from "./pages/ProgramDetails";
+import Scholarships from "./pages/Scholarships";
+import Universities from "./pages/Universities";
+import TurkishUniversities from "./pages/TurkishUniversities"; // New page
+import MedicalPrograms from "./pages/MedicalPrograms"; // New page
+import EngineeringPrograms from "./pages/EngineeringPrograms"; // New page
+import UniversityDetails from "./pages/UniversityDetails";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+import StudentApplication from "./pages/StudentApplication";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageStudents from "./pages/admin/ManageStudents";
+import ManageAgents from "./pages/admin/ManageAgents";
+import ManagePrograms from "./pages/admin/ManagePrograms";
+import ManageApplications from "./pages/admin/ManageApplications";
+import ManageUniversities from "./pages/admin/ManageUniversities";
+import AdminNotifications from "./pages/admin/AdminNotifications";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AgentDashboard from "./pages/agent/AgentDashboard";
+import StudentApplications from "./pages/dashboard/StudentApplications";
+import StudentProfile from "./pages/dashboard/StudentProfile";
+import StudentNotifications from "./pages/dashboard/StudentNotifications";
+import UserMessages from "./pages/messaging/UserMessages";
+import "./App.css";
 
 function App() {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/countries" element={<Countries />} />
-        <Route path="/countries/:id" element={<CountryDetails />} />
-        <Route path="/turkish-universities" element={<TurkishUniversities />} />
-        <Route path="/universities" element={<Universities />} />
-        <Route path="/universities/:id" element={<UniversityDetails />} />
-        <Route path="/programs" element={<Programs />} />
-        <Route path="/programs/medical" element={<MedicalPrograms />} />
-        <Route path="/programs/engineering" element={<EngineeringPrograms />} />
-        <Route path="/programs/:id" element={<ProgramDetails />} />
-        <Route path="/apply" element={<Apply />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/contact-us" element={<ContactUs />} />
-        <Route path="/scholarships" element={<Programs />} />
-        
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<StudentDashboard />} />
-        <Route path="/dashboard/applications" element={<StudentApplications />} />
-        <Route path="/dashboard/messages" element={<StudentMessages />} />
-        <Route path="/dashboard/messages/chat" element={<UserMessages />} />
-        <Route path="/dashboard/notifications" element={<StudentNotifications />} />
-        <Route path="/dashboard/profile" element={<StudentProfile />} />
-        
-        {/* 404 Page */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-    </>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Index />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/countries" element={<Countries />} />
+      <Route path="/countries/:id" element={<CountryDetails />} />
+      <Route path="/programs" element={<Programs />} />
+      <Route path="/programs/:id" element={<ProgramDetails />} />
+      <Route path="/medical-programs" element={<MedicalPrograms />} />
+      <Route path="/engineering-programs" element={<EngineeringPrograms />} />
+      <Route path="/scholarships" element={<Scholarships />} />
+      <Route path="/universities" element={<Universities />} />
+      <Route path="/turkish-universities" element={<TurkishUniversities />} />
+      <Route path="/universities/:id" element={<UniversityDetails />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Student Routes */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/apply" element={<StudentApplication />} />
+      <Route path="/dashboard/applications" element={<StudentApplications />} />
+      <Route path="/dashboard/profile" element={<StudentProfile />} />
+      <Route path="/dashboard/notifications" element={<StudentNotifications />} />
+      <Route path="/messages" element={<UserMessages />} />
+
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminDashboard />} />
+      <Route path="/admin/students" element={<ManageStudents />} />
+      <Route path="/admin/agents" element={<ManageAgents />} />
+      <Route path="/admin/programs" element={<ManagePrograms />} />
+      <Route path="/admin/applications" element={<ManageApplications />} />
+      <Route path="/admin/universities" element={<ManageUniversities />} />
+      <Route path="/admin/notifications" element={<AdminNotifications />} />
+      <Route path="/admin/messages" element={<AdminMessages />} />
+
+      {/* Agent Routes */}
+      <Route path="/agent" element={<AgentDashboard />} />
+      
+      {/* Not Found */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

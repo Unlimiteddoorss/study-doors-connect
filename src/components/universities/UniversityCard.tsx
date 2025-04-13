@@ -1,83 +1,143 @@
 
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { University } from '@/types';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, GraduationCap, Trophy } from 'lucide-react';
+import { MapPin, School, Users, Award, Globe, Book } from 'lucide-react';
+
+export interface University {
+  id: number;
+  name: string;
+  nameAr?: string;
+  location: string;
+  country: string;
+  city: string;
+  type: 'Public' | 'Private';
+  founded: string;
+  programs: number;
+  students: number;
+  ranking?: number;
+  fees: string;
+  image: string;
+  languages?: string[];
+  accreditations?: string[];
+  isFeatured?: boolean;
+}
 
 interface UniversityCardProps {
   university: University;
   countryTranslations?: Record<string, string>;
 }
 
-const UniversityCard: React.FC<UniversityCardProps> = ({ 
-  university,
-  countryTranslations = {}
-}) => {
-  // استخدام صورة افتراضية إذا لم تكن الصورة متوفرة
-  const defaultImage = '/public/lovable-uploads/6a53354c-8208-42a9-a03e-ccad494ff4be.png';
-  
-  // ترجمة اسم البلد إذا كانت متوفرة
-  const countryName = countryTranslations[university.country] || university.country;
-  
+const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTranslations = {} }) => {
+  // ترجمة الموقع من الإنجليزية إلى العربية
+  const translateLocation = (location: string): string => {
+    return countryTranslations[location] || location;
+  };
+
   return (
-    <Link to={`/universities/${university.id}`}>
-      <Card className="h-full overflow-hidden hover:shadow-md transition-shadow duration-300">
-        <div className="h-40 overflow-hidden relative">
-          <img 
-            src={university.image || defaultImage} 
-            alt={university.nameAr} 
-            className="w-full h-full object-cover"
-          />
-          {university.isFeatured && (
-            <Badge className="absolute top-2 right-2 bg-unlimited-blue">
-              مميز
-            </Badge>
-          )}
-          {university.type && (
-            <Badge className="absolute bottom-2 right-2" variant={university.type === "Public" ? "secondary" : "outline"}>
-              {university.type === "Public" ? "حكومية" : "خاصة"}
-            </Badge>
-          )}
-        </div>
+    <Card className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
+      <div className="relative h-48 overflow-hidden">
+        <img 
+          src={university.image}
+          alt={university.nameAr || university.name}
+          className="w-full h-full object-cover transition-transform hover:scale-105"
+        />
         
-        <CardContent className="pt-4">
-          <div className="space-y-2">
-            <h3 className="font-bold text-lg">{university.nameAr}</h3>
-            
-            <div className="flex items-center gap-2 text-xs text-unlimited-gray">
-              <MapPin className="h-3 w-3 flex-shrink-0" />
-              <span>
-                {university.city || university.location}، {countryName}
-              </span>
-            </div>
-            
-            <div className="flex flex-wrap gap-y-1 gap-x-4 pt-2">
-              <div className="flex items-center gap-1 text-xs text-unlimited-gray">
-                <GraduationCap className="h-3 w-3 flex-shrink-0" />
-                <span>{university.programsCount || 0} برنامج</span>
-              </div>
-              
-              <div className="flex items-center gap-1 text-xs text-unlimited-gray">
-                <Trophy className="h-3 w-3 flex-shrink-0" />
-                <span>
-                  {university.ranking === "0" ? "غير مصنفة" : `التصنيف: ${university.ranking}`}
-                </span>
-              </div>
+        {/* Featured badge */}
+        {university.isFeatured && (
+          <Badge className="absolute top-2 right-2 bg-unlimited-blue">جامعة مميزة</Badge>
+        )}
+        
+        {/* Programs badge - new! */}
+        <Badge className="absolute top-2 left-2 bg-green-600">
+          <Book className="w-3 h-3 mr-1" />
+          {university.programs} برنامج
+        </Badge>
+        
+        {/* Type badge */}
+        <Badge 
+          className={`absolute bottom-2 left-2 ${university.type === 'Private' ? 'bg-unlimited-blue' : 'bg-unlimited-dark-blue'}`}
+        >
+          {university.type === 'Private' ? 'خاصة' : 'حكومية'}
+        </Badge>
+      </div>
+      
+      <CardHeader className="pb-2">
+        <h3 className="font-bold text-xl mb-2">{university.nameAr || university.name}</h3>
+        <div className="flex items-center text-unlimited-gray">
+          <MapPin className="h-4 w-4 ml-2" />
+          <span>{translateLocation(university.city)}، {translateLocation(university.country)}</span>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="pb-2">
+        <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+          <div className="flex items-center gap-1">
+            <Globe className="h-4 w-4 text-unlimited-gray" />
+            <div>
+              <p className="text-unlimited-gray">تأسست عام:</p>
+              <p className="font-medium">{university.founded}</p>
             </div>
           </div>
-        </CardContent>
-        
-        <CardFooter className="border-t pt-3">
-          {university.founded && (
-            <div className="text-xs text-unlimited-gray">
-              تأسست عام {university.founded}
+          <div className="flex items-center gap-1">
+            <School className="h-4 w-4 text-unlimited-gray" />
+            <div>
+              <p className="text-unlimited-gray">البرامج:</p>
+              <p className="font-medium">{university.programs}+ برنامج</p>
             </div>
-          )}
-        </CardFooter>
-      </Card>
-    </Link>
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4 text-unlimited-gray" />
+            <div>
+              <p className="text-unlimited-gray">الطلاب:</p>
+              <p className="font-medium">{university.students}+ طالب</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1">
+            {university.ranking ? (
+              <>
+                <Award className="h-4 w-4 text-unlimited-gray" />
+                <div>
+                  <p className="text-unlimited-gray">التصنيف:</p>
+                  <p className="font-medium">#{university.ranking}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <Award className="h-4 w-4 text-unlimited-gray" />
+                <div>
+                  <p className="text-unlimited-gray">الرسوم:</p>
+                  <p className="font-medium text-unlimited-blue">{university.fees}</p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        
+        {/* Languages */}
+        {university.languages && university.languages.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {university.languages.map((language, index) => (
+              <Badge key={index} variant="outline" className="text-xs">
+                {language === 'English' ? 'الإنجليزية' : 
+                 language === 'Turkish' ? 'التركية' : 
+                 language === 'Arabic' ? 'العربية' : language}
+              </Badge>
+            ))}
+          </div>
+        )}
+      </CardContent>
+      
+      <CardFooter className="flex flex-col sm:flex-row gap-2">
+        <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
+          <Link to={`/universities/${university.id}`}>عرض التفاصيل</Link>
+        </Button>
+        <Button asChild variant="outline" className="w-full">
+          <Link to={`/apply?university=${university.id}`}>تقدم الآن</Link>
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

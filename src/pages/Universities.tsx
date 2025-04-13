@@ -1,257 +1,197 @@
-import { useEffect, useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { University } from '@/types';
-import { cityTranslations } from '@/data/programsData';
 
-const dummyUniversities: University[] = [
-  {
-    id: 1,
-    name: 'Istanbul University',
-    nameAr: 'جامعة اسطنبول',
-    country: 'تركيا',
-    location: 'اسطنبول',
-    logoUrl: '/placeholder.svg',
-    imageUrl: '/placeholder.svg',
-    description: 'جامعة عريقة في اسطنبول',
-    ranking: '4.5/5',
-    establishedYear: 1953,
-    programCount: 120,
-    studentCount: 25000,
-    website: 'https://www.istanbul.edu.tr'
-  },
-  {
-    id: 2,
-    name: 'Ankara University',
-    nameAr: 'جامعة أنقرة',
-    country: 'تركيا',
-    location: 'أنقرة',
-    logoUrl: '/placeholder.svg',
-    imageUrl: '/placeholder.svg',
-    description: 'من أقدم الجامعات التركية',
-    ranking: '4.2/5',
-    establishedYear: 1946,
-    programCount: 90,
-    studentCount: 20000,
-    website: 'https://www.ankara.edu.tr'
-  },
-  {
-    id: 3,
-    name: 'Turkish-German University',
-    nameAr: 'الجامعة التركية الألمانية',
-    country: 'تركيا',
-    location: 'اسطنبول',
-    logoUrl: '/placeholder.svg',
-    imageUrl: '/placeholder.svg',
-    description: 'جامعة تعتمد المعايير الألمانية في التعليم',
-    ranking: '4.7/5',
-    establishedYear: 2008,
-    programCount: 50,
-    studentCount: 10000,
-    website: 'https://www.tau.edu.tr'
-  },
-  {
-    id: 4,
-    name: 'Bahcesehir University',
-    nameAr: 'جامعة بهتشه شهير',
-    country: 'تركيا',
-    location: 'اسطنبول',
-    logoUrl: '/placeholder.svg',
-    imageUrl: '/placeholder.svg',
-    description: 'جامعة خاصة مميزة في اسطنبول',
-    ranking: '4.4/5',
-    establishedYear: 1998,
-    programCount: 75,
-    studentCount: 15000,
-    website: 'https://www.bahcesehir.edu.tr'
-  },
-  {
-    id: 5,
-    name: 'Marmara University',
-    nameAr: 'جامعة مرمرة',
-    country: 'تركيا',
-    location: 'اسطنبول',
-    logoUrl: '/placeholder.svg',
-    imageUrl: '/placeholder.svg',
-    description: 'من أعرق الجامعات في اسطنبول',
-    ranking: '4.3/5',
-    establishedYear: 1883,
-    programCount: 110,
-    studentCount: 28000,
-    website: 'https://www.marmara.edu.tr'
-  },
-  {
-    id: 6,
-    name: 'Cyprus International University',
-    nameAr: 'جامعة قبرص الدولية',
-    country: 'قبرص',
-    location: 'نيقوسيا',
-    logoUrl: '/placeholder.svg',
-    imageUrl: '/placeholder.svg',
-    description: 'جامعة خاصة مرموقة في قبرص',
-    ranking: '4.1/5',
-    establishedYear: 1997,
-    programCount: 60,
-    studentCount: 18000,
-    website: 'https://www.ciu.edu.tr'
-  },
-];
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
+import SectionTitle from '@/components/shared/SectionTitle';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Search, MapPin, School } from 'lucide-react';
+import { turkishUniversities } from '@/data/programsData';
+
+// ترجمة أسماء الدول إلى العربية
+const countryTranslations: Record<string, string> = {
+  'Turkey': 'تركيا',
+  'Istanbul': 'إسطنبول',
+  'Ankara': 'أنقرة',
+  'Antalya': 'أنطاليا',
+  'Alanya': 'ألانيا',
+};
 
 const Universities = () => {
-  useEffect(() => {
-    document.title = 'الجامعات - أبواب بلا حدود';
-  }, []);
-
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [filteredUniversities, setFilteredUniversities] = useState<University[]>(dummyUniversities);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredUniversities, setFilteredUniversities] = useState(turkishUniversities);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(filteredUniversities.length / 9);
-  
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const filtered = dummyUniversities.filter(uni => 
-      uni.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (uni.nameAr && uni.nameAr.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      uni.country.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      uni.location.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredUniversities(filtered);
-    setCurrentPage(1);
+  const universitiesPerPage = 12;
+
+  useEffect(() => {
+    if (searchTerm) {
+      setFilteredUniversities(
+        turkishUniversities.filter(
+          university =>
+            university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            university.location.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      );
+    } else {
+      setFilteredUniversities(turkishUniversities);
+    }
+  }, [searchTerm]);
+
+  // حساب صفحة العرض الحالية
+  const indexOfLastUniversity = currentPage * universitiesPerPage;
+  const indexOfFirstUniversity = indexOfLastUniversity - universitiesPerPage;
+  const currentUniversities = filteredUniversities.slice(indexOfFirstUniversity, indexOfLastUniversity);
+  const totalPages = Math.ceil(filteredUniversities.length / universitiesPerPage);
+
+  // التنقل بين الصفحات
+  const paginate = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const resetFilters = () => {
-    setFilteredUniversities(dummyUniversities);
-    setSearchQuery('');
-    setShowFilters(false);
-    setCurrentPage(1);
-  };
-  
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+  // ترجمة الموقع من الإنجليزية إلى العربية
+  const translateLocation = (location: string): string => {
+    return countryTranslations[location] || location;
   };
 
   return (
     <MainLayout>
-      <div className="bg-unlimited-blue py-16 text-white">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-4 text-center">الجامعات</h1>
-          <p className="text-lg max-w-2xl mx-auto text-center">اكتشف أفضل الجامعات في تركيا وقبرص وأوروبا</p>
-          
-          <div className="mt-8 max-w-xl mx-auto">
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="ابحث عن جامعة..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-white text-unlimited-dark-blue"
-              />
-              <Button type="submit" className="bg-white text-unlimited-blue hover:bg-gray-100">
-                <Search className="h-4 w-4" />
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white/10"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-              </Button>
-            </form>
+      <div className="container mx-auto px-4 py-12">
+        <SectionTitle
+          title="الجامعات التركية"
+          subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
+        />
+
+        {/* Search Component */}
+        <div className="max-w-2xl mx-auto mb-10">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="ابحث عن جامعة..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4"
+            />
           </div>
         </div>
-      </div>
-      
-      <div className="container mx-auto py-8 px-4">
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="mb-8 justify-center">
-            <TabsTrigger value="all">جميع الجامعات</TabsTrigger>
-            <TabsTrigger value="turkey">تركيا</TabsTrigger>
-            <TabsTrigger value="cyprus">قبرص</TabsTrigger>
-            <TabsTrigger value="europe">أوروبا</TabsTrigger>
-          </TabsList>
-          
-          {showFilters && (
-            <div className="bg-gray-50 p-4 rounded-lg mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-unlimited-gray mb-2">المدينة</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
-                  <option value="">جميع المدن</option>
-                  <option value="istanbul">اسطنبول</option>
-                  <option value="ankara">أنقرة</option>
-                  <option value="nicosia">نيقوسيا</option>
-                </select>
-              </div>
+
+        {/* Results info */}
+        <div className="mb-6">
+          <p className="text-unlimited-gray">
+            تم العثور على <span className="font-semibold text-unlimited-blue">{filteredUniversities.length}</span> جامعة
+          </p>
+        </div>
+
+        {/* Universities Grid */}
+        {currentUniversities.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {currentUniversities.map((university) => (
+              <Card key={university.id} className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
+                <div className="relative h-48 overflow-hidden">
+                  <img 
+                    src={university.image}
+                    alt={university.name}
+                    className="w-full h-full object-cover transition-transform hover:scale-105"
+                  />
+                </div>
+                
+                <CardHeader className="pb-2">
+                  <h3 className="font-bold text-xl mb-2">{university.name}</h3>
+                  <div className="flex items-center text-unlimited-gray">
+                    <MapPin className="h-4 w-4 ml-2" />
+                    <span>{translateLocation(university.location)}، {translateLocation('Turkey')}</span>
+                  </div>
+                </CardHeader>
+                
+                <CardContent className="pb-2">
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-4">
+                    <div>
+                      <p className="text-unlimited-gray">تأسست عام:</p>
+                      <p className="font-medium">{university.founded}</p>
+                    </div>
+                    <div>
+                      <p className="text-unlimited-gray">النوع:</p>
+                      <p className="font-medium">{university.type === 'Private' ? 'خاصة' : 'حكومية'}</p>
+                    </div>
+                    <div>
+                      <p className="text-unlimited-gray">البرامج:</p>
+                      <p className="font-medium">{university.programs}+ برنامج</p>
+                    </div>
+                    <div>
+                      <p className="text-unlimited-gray">الرسوم:</p>
+                      <p className="font-medium text-unlimited-blue">{university.fees}</p>
+                    </div>
+                  </div>
+                </CardContent>
+                
+                <CardFooter>
+                  <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
+                    <Link to={`/universities/${university.id}`}>عرض التفاصيل</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على جامعات تطابق بحثك</p>
+            <Button onClick={() => setSearchTerm("")} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">إعادة ضبط البحث</Button>
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {filteredUniversities.length > 0 && (
+          <div className="flex justify-center mt-12">
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="pagination" 
+                onClick={() => paginate(currentPage - 1)} 
+                disabled={currentPage === 1}
+              >
+                <MapPin className="h-4 w-4" />
+              </Button>
               
-              <div>
-                <label className="block text-unlimited-gray mb-2">نوع الجامعة</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md">
-                  <option value="">الكل</option>
-                  <option value="public">حكومية</option>
-                  <option value="private">خاصة</option>
-                </select>
-              </div>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                // إذا كان عدد الصفحات أكثر من 5، نعرض الصفحات المحيطة بالصفحة الحالية
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else {
+                  if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                }
+                
+                return (
+                  <Button 
+                    key={pageNum}
+                    variant="pagination"
+                    aria-current={pageNum === currentPage ? "page" : undefined}
+                    onClick={() => paginate(pageNum)}
+                  >
+                    {pageNum}
+                  </Button>
+                );
+              })}
               
-              <div className="flex items-end">
-                <Button 
-                  onClick={resetFilters}
-                  className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
-                >
-                  إعادة ضبط
-                </Button>
-              </div>
+              <Button 
+                variant="pagination" 
+                onClick={() => paginate(currentPage + 1)}
+                disabled={currentPage === totalPages}
+              >
+                <MapPin className="h-4 w-4 rotate-180" />
+              </Button>
             </div>
-          )}
-          
-          <TabsContent value="all">
-            <UniversitiesGrid 
-              universities={filteredUniversities}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-              countryTranslations={cityTranslations}
-              onResetFilters={resetFilters}
-            />
-          </TabsContent>
-          
-          <TabsContent value="turkey">
-            <UniversitiesGrid 
-              universities={filteredUniversities.filter(uni => uni.country === 'تركيا')}
-              currentPage={currentPage}
-              totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'تركيا').length / 9)}
-              onPageChange={handlePageChange}
-              countryTranslations={cityTranslations}
-              onResetFilters={resetFilters}
-            />
-          </TabsContent>
-          
-          <TabsContent value="cyprus">
-            <UniversitiesGrid 
-              universities={filteredUniversities.filter(uni => uni.country === 'قبرص')}
-              currentPage={currentPage}
-              totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'قبرص').length / 9)}
-              onPageChange={handlePageChange}
-              countryTranslations={cityTranslations}
-              onResetFilters={resetFilters}
-            />
-          </TabsContent>
-          
-          <TabsContent value="europe">
-            <UniversitiesGrid 
-              universities={filteredUniversities.filter(uni => uni.country !== 'تركيا' && uni.country !== 'قبرص')}
-              currentPage={currentPage}
-              totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country !== 'تركيا' && uni.country !== 'قبرص').length / 9)}
-              onPageChange={handlePageChange}
-              countryTranslations={cityTranslations}
-              onResetFilters={resetFilters}
-            />
-          </TabsContent>
-        </Tabs>
+          </div>
+        )}
       </div>
     </MainLayout>
   );

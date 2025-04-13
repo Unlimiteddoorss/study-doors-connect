@@ -1,11 +1,10 @@
 
 import { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
 type StatsCardProps = {
   title: string;
-  value: string | number | ReactNode;
+  value: string | number;
   icon?: ReactNode;
   className?: string;
   iconClassName?: string;
@@ -24,15 +23,7 @@ const StatsCard = ({
 }: StatsCardProps) => {
   return (
     <div className={cn('bg-white rounded-lg shadow p-6 flex flex-col items-center', className)}>
-      {icon && (
-        <motion.div 
-          className={cn('text-unlimited-blue mb-3', iconClassName)}
-          whileHover={{ scale: 1.1 }}
-          transition={{ type: "spring", stiffness: 400, damping: 10 }}
-        >
-          {icon}
-        </motion.div>
-      )}
+      {icon && <div className={cn('text-unlimited-blue mb-3', iconClassName)}>{icon}</div>}
       <div className={cn('text-3xl font-bold text-unlimited-dark-blue mb-2', valueClassName)}>
         {value}
       </div>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
@@ -47,7 +48,7 @@ const UniversityDetails = () => {
   
   // التحقق من معرف الجامعة وإيجادها
   const universityId = id ? parseInt(id) : -1;
-  const university = turkishUniversities.find(uni => Number(uni.id) === universityId);
+  const university = turkishUniversities.find(uni => uni.id === universityId);
   
   // الحصول على برامج الجامعة
   const programs = getUniversityPrograms(universityId);
@@ -66,16 +67,6 @@ const UniversityDetails = () => {
   // ترجمة النص
   const translate = (text: string): string => {
     return translations[text] || text;
-  };
-
-  // Safely get email domain from website URL with null check
-  const getEmailDomain = (website?: string) => {
-    if (!website) return 'university.edu';
-    try {
-      return website.replace(/^https?:\/\//, '').replace(/^www\./, '');
-    } catch (error) {
-      return 'university.edu';
-    }
   };
 
   if (!university) {
@@ -117,7 +108,7 @@ const UniversityDetails = () => {
             <h1 className="text-2xl md:text-4xl font-bold mt-2">{university.nameAr || university.name}</h1>
             <div className="flex items-center gap-2 text-gray-600 mt-2">
               <MapPin className="h-4 w-4" />
-              <span>{translate(university.city || '')}، {translate(university.country || '')}</span>
+              <span>{translate(university.city)}، {translate(university.country)}</span>
             </div>
           </div>
         </div>
@@ -151,7 +142,7 @@ const UniversityDetails = () => {
               <div className="text-unlimited-blue">
                 <Users className="mx-auto h-8 w-8 mb-2" />
               </div>
-              <div className="text-2xl font-bold">{university.students?.toLocaleString() || 0}+</div>
+              <div className="text-2xl font-bold">{university.students.toLocaleString()}+</div>
               <div className="text-gray-600">طالب</div>
             </CardContent>
           </Card>
@@ -161,9 +152,7 @@ const UniversityDetails = () => {
               <div className="text-unlimited-blue">
                 <Clock className="mx-auto h-8 w-8 mb-2" />
               </div>
-              <div className="text-2xl font-bold">
-                {university.founded ? new Date().getFullYear() - parseInt(university.founded) : 'N/A'}
-              </div>
+              <div className="text-2xl font-bold">{new Date().getFullYear() - parseInt(university.founded)}</div>
               <div className="text-gray-600">سنة من تأسيسها</div>
             </CardContent>
           </Card>
@@ -202,15 +191,15 @@ const UniversityDetails = () => {
                     
                     <div className="mb-6">
                       <p className="mb-4 text-gray-600">
-                        تأسست جامعة {university.nameAr || university.name} في عام {university.founded} وهي واحدة من الجامعات {translate(university.type || 'Private')} الرائدة في {translate(university.city || 'Istanbul')}، {translate(university.country || 'Turkey')}.
+                        تأسست جامعة {university.nameAr || university.name} في عام {university.founded} وهي واحدة من الجامعات {translate(university.type)} الرائدة في {translate(university.city)}، {translate(university.country)}.
                       </p>
                       
                       <p className="mb-4 text-gray-600">
-                        تتميز الجامعة بتقديم أكثر من {university.programs} برنامج دراسي في مختلف التخصصات، وتضم أكثر من {university.students?.toLocaleString() || 0} طالب من مختلف أنحاء العالم.
+                        تتميز الجامعة بتقديم أكثر من {university.programs} برنامج دراسي في مختلف التخصصات، وتضم أكثر من {university.students.toLocaleString()} طالب من مختلف أنحاء العالم.
                       </p>
                       
                       <p className="text-gray-600">
-                        تقدم الجامعة برامج باللغات: {university.languages?.map(lang => translate(lang)).join('، ') || 'العربية، الإنجليزية، التركية'}، وتتمتع باعتراف عالمي وسمعة متميزة في مجال التعليم العالي.
+                        تقدم الجامعة برامج باللغات: {university.languages?.map(lang => translate(lang)).join('، ')}، وتتمتع باعتراف عالمي وسمعة متميزة في مجال التعليم العالي.
                       </p>
                     </div>
                     
@@ -262,7 +251,7 @@ const UniversityDetails = () => {
                             rel="noreferrer" 
                             className="text-unlimited-blue hover:underline break-all"
                           >
-                            {university.website || `www.${university.name?.toLowerCase().replace(/\s/g, '')}.edu`}
+                            {university.website}
                           </a>
                         </div>
                       </div>
@@ -272,7 +261,7 @@ const UniversityDetails = () => {
                         <div>
                           <p className="font-semibold">العنوان</p>
                           <p className="text-gray-600">
-                            {translate(university.city || 'Istanbul')}، {translate(university.country || 'Turkey')}
+                            {translate(university.city)}، {translate(university.country)}
                           </p>
                         </div>
                       </div>
@@ -289,12 +278,7 @@ const UniversityDetails = () => {
                         <Mail className="h-5 w-5 text-unlimited-blue shrink-0 mt-0.5" />
                         <div>
                           <p className="font-semibold">البريد الإلكتروني</p>
-                          <p className="text-unlimited-blue hover:underline">
-                            {university.email || university.website ? 
-                              `info@${getEmailDomain(university.website)}` :
-                              `info@${university.name ? university.name.toLowerCase().replace(/\s/g, '') : 'university'}.edu`
-                            }
-                          </p>
+                          <p className="text-unlimited-blue hover:underline">info@{university.website.replace('https://www.', '')}</p>
                         </div>
                       </div>
                     </div>
@@ -322,7 +306,7 @@ const UniversityDetails = () => {
                       
                       <div>
                         <p className="font-semibold">الاعتمادات</p>
-                        <p className="text-gray-600">{university.accreditation || 'YÖK, ABET'}</p>
+                        <p className="text-gray-600">{university.accreditation}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -334,7 +318,7 @@ const UniversityDetails = () => {
           <TabsContent value="programs">
             <UniversityPrograms 
               programs={programs}
-              universityId={String(university.id)}
+              universityId={university.id}
               universityName={university.nameAr || university.name}
             />
           </TabsContent>
@@ -473,7 +457,7 @@ const UniversityDetails = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             {turkishUniversities
-              .filter(uni => Number(uni.id) !== universityId && uni.city === university.city)
+              .filter(uni => uni.id !== universityId && uni.city === university.city)
               .slice(0, 3)
               .map(uni => (
                 <Card key={uni.id} className="overflow-hidden hover:shadow-lg transition-all">
@@ -488,7 +472,7 @@ const UniversityDetails = () => {
                     <h3 className="font-bold text-xl mb-2">{uni.nameAr || uni.name}</h3>
                     <div className="flex items-center text-gray-600 mb-3">
                       <MapPin className="h-4 w-4 ml-1" />
-                      <span>{translate(uni.city || '')}، {translate(uni.country || '')}</span>
+                      <span>{translate(uni.city)}، {translate(uni.country)}</span>
                     </div>
                     <div className="flex justify-between mb-4 text-sm">
                       <span className="flex items-center">
