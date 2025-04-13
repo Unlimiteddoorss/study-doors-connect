@@ -9,6 +9,7 @@ import Partners from '@/components/home/Partners';
 import CTASection from '@/components/home/CTASection';
 import { useEffect } from 'react';
 import { Helmet } from 'react-helmet';
+import { motion } from 'framer-motion';
 
 const Index = () => {
   useEffect(() => {
@@ -49,15 +50,23 @@ const Index = () => {
         <meta property="og:title" content="أبواب بلا حدود - الرئيسية" />
         <meta property="og:description" content="فتح أبواب المستقبل للطلاب حول العالم" />
         <meta property="og:type" content="website" />
-        <meta name="theme-color" content="#1e40af" />
+        <meta name="theme-color" content="#031c4c" />
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </Helmet>
-      <Hero />
-      <Stats />
-      <Services />
-      <FeaturedPrograms />
-      <Testimonials />
-      <Partners />
-      <CTASection />
+      
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Hero />
+        <Stats />
+        <Services />
+        <FeaturedPrograms />
+        <Testimonials />
+        <Partners />
+        <CTASection />
+      </motion.div>
     </MainLayout>
   );
 };
