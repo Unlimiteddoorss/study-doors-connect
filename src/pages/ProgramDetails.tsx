@@ -22,7 +22,7 @@ const ProgramDetails = () => {
   const universityId = universityIdParam ? parseInt(universityIdParam) : 26; // افتراضي بهتشي شهير
   
   // الحصول على بيانات الجامعة والبرنامج
-  const university = turkishUniversities.find(uni => uni.id === universityId);
+  const university = turkishUniversities.find(uni => Number(uni.id) === universityId);
   const allPrograms = getUniversityPrograms(universityId);
   const program = allPrograms.find(prog => prog.id === programId);
   

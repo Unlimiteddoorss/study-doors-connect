@@ -1,4 +1,3 @@
-
 export interface Program {
   id: string;
   name: string;
@@ -32,7 +31,7 @@ export interface Program {
 }
 
 export interface University {
-  id: string;
+  id: string | number;
   name: string;
   nameAr: string;
   description?: string;
@@ -57,6 +56,11 @@ export interface University {
   accreditation?: any[];
   accreditations?: any[][]; // Added for compatibility
   isFeatured?: boolean;
+  logoUrl?: string; // Added for compatibility with Universities.tsx
+  imageUrl?: string; // Added for compatibility with Universities.tsx
+  establishedYear?: number; // Added for compatibility with Universities.tsx
+  programCount?: number; // Added for compatibility with Universities.tsx
+  studentCount?: number; // Added for compatibility with Universities.tsx
 }
 
 export interface Application {
@@ -141,7 +145,6 @@ export interface UserProfile {
   avatar?: string;
 }
 
-// Add any additional types needed for the application
 export type ApplicationStatus = 
   | 'pending'
   | 'reviewed' 
