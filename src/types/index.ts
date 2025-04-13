@@ -4,9 +4,9 @@ export interface Program {
   name: string;
   university: string;
   universityId: string;
-  description: string;
-  degreeLevel: 'bachelor' | 'master' | 'phd' | 'diploma';
-  faculty: string;
+  description?: string; // Make optional
+  degreeLevel?: 'bachelor' | 'master' | 'phd' | 'diploma';
+  faculty?: string; // Make optional
   duration: string;
   language: string;
   tuitionFee: string;

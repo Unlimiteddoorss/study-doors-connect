@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
@@ -9,7 +8,6 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import { University } from '@/types';
 import { cityTranslations } from '@/data/programsData';
 
-// Updated to match the University interface
 const dummyUniversities: University[] = [
   {
     id: 1,
@@ -217,6 +215,7 @@ const Universities = () => {
               totalPages={totalPages}
               onPageChange={handlePageChange}
               countryTranslations={cityTranslations}
+              onResetFilters={resetFilters}
             />
           </TabsContent>
           
@@ -227,6 +226,7 @@ const Universities = () => {
               totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'تركيا').length / 9)}
               onPageChange={handlePageChange}
               countryTranslations={cityTranslations}
+              onResetFilters={resetFilters}
             />
           </TabsContent>
           
@@ -237,6 +237,7 @@ const Universities = () => {
               totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country === 'قبرص').length / 9)}
               onPageChange={handlePageChange}
               countryTranslations={cityTranslations}
+              onResetFilters={resetFilters}
             />
           </TabsContent>
           
@@ -247,6 +248,7 @@ const Universities = () => {
               totalPages={Math.ceil(filteredUniversities.filter(uni => uni.country !== 'تركيا' && uni.country !== 'قبرص').length / 9)}
               onPageChange={handlePageChange}
               countryTranslations={cityTranslations}
+              onResetFilters={resetFilters}
             />
           </TabsContent>
         </Tabs>

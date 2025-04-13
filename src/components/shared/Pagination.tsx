@@ -98,3 +98,5 @@ export const Pagination: React.FC<PaginationProps> = ({
     </div>
   );
 };
+
+export default Pagination; // Add default export alongside named export
