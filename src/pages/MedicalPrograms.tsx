@@ -7,6 +7,7 @@ import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { dummyPrograms } from '@/data/programsData';
+import { Program } from '@/types';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -36,78 +37,104 @@ const countryTranslations: Record<string, string> = {
 };
 
 // Create medical programs data
-const medicalPrograms = dummyPrograms
+const medicalPrograms: Program[] = dummyPrograms
   .filter(program => 
-    program.title.includes('طب') || 
-    program.title.includes('صيدلة') || 
-    program.title.includes('طبي') ||
-    program.title.includes('تمريض')
+    program.title && (
+      program.title.includes('طب') || 
+      program.title.includes('صيدلة') || 
+      program.title.includes('طبي') ||
+      program.title.includes('تمريض')
+    )
   )
   .concat([
     {
-      id: 101,
+      id: "101",
+      name: "بكالوريوس الطب والجراحة - MBBS",
       title: "بكالوريوس الطب والجراحة - MBBS",
       university: "جامعة إسطنبول",
+      universityId: "u101",
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
       duration: "6 سنوات",
       deadline: "15/08/2023",
+      tuitionFee: "$8,500 / سنة",
       fee: "$8,500 / سنة",
-      image: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      currency: "USD",
+      imageUrl: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      scholarshipAvailable: true,
-      badges: ["برنامج معتمد", "تدريب عملي"]
+      country: "Turkey",
+      city: "إسطنبول"
     },
     {
-      id: 102,
+      id: "102",
+      name: "بكالوريوس طب الأسنان",
       title: "بكالوريوس طب الأسنان",
       university: "جامعة أنقرة",
+      universityId: "u102",
       location: "Turkey، أنقرة",
       language: "تركية",
       duration: "5 سنوات",
       deadline: "30/07/2023",
-      fee: "$7,500 / سنة",
-      discount: "$6,800 / سنة",
-      image: "https://images.unsplash.com/photo-1588776814546-daab30f0477e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["منهج حديث", "معامل متطورة"]
+      tuitionFee: "$7,500 / سنة",
+      fee: "$6,800 / سنة",
+      discount: 10,
+      currency: "USD",
+      imageUrl: "https://images.unsplash.com/photo-1588776814546-daab30f0477e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      country: "Turkey",
+      city: "أنقرة"
     },
     {
-      id: 103,
+      id: "103",
+      name: "بكالوريوس الصيدلة",
       title: "بكالوريوس الصيدلة",
       university: "جامعة إزمير",
+      universityId: "u103",
       location: "Turkey، إزمير",
       language: "إنجليزية وتركية",
       duration: "5 سنوات",
       deadline: "10/09/2023",
+      tuitionFee: "$5,200 / سنة",
       fee: "$5,200 / سنة",
-      image: "https://images.unsplash.com/photo-1585435557343-3b348b7a7cef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["تدريب مهني", "برنامج تبادل طلابي"]
+      currency: "USD",
+      imageUrl: "https://images.unsplash.com/photo-1585435557343-3b348b7a7cef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      country: "Turkey",
+      city: "إزمير"
     },
     {
-      id: 104,
+      id: "104",
+      name: "بكالوريوس العلاج الطبيعي",
       title: "بكالوريوس العلاج الطبيعي",
       university: "جامعة بورصة",
+      universityId: "u104",
       location: "Turkey، بورصة",
       language: "إنجليزية",
       duration: "4 سنوات",
       deadline: "20/08/2023",
-      fee: "$4,800 / سنة",
-      discount: "$4,300 / سنة",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["تدريب ميداني", "فرص وظيفية"]
+      tuitionFee: "$4,800 / سنة",
+      fee: "$4,300 / سنة",
+      discount: 10,
+      currency: "USD",
+      imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      country: "Turkey",
+      city: "بورصة"
     },
     {
-      id: 105,
+      id: "105",
+      name: "ماجستير الجراحة العامة",
       title: "ماجستير الجراحة العامة",
       university: "جامعة إسطنبول",
+      universityId: "u101",
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
       duration: "3 سنوات",
       deadline: "05/08/2023",
+      tuitionFee: "$10,200 / سنة",
       fee: "$10,200 / سنة",
-      image: "https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      currency: "USD",
+      imageUrl: "https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      badges: ["بحث متخصص", "تدريب في المستشفيات"]
+      country: "Turkey",
+      city: "إسطنبول"
     }
   ]);
 
@@ -130,7 +157,7 @@ const MedicalPrograms = () => {
     if (searchTerm) {
       result = result.filter(
         program =>
-          program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          program.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           program.university.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -146,9 +173,9 @@ const MedicalPrograms = () => {
     // Apply degree filter
     if (selectedDegree && selectedDegree !== "all") {
       result = result.filter(program => {
-        if (program.title.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
-        if (program.title.includes('ماجستير') && selectedDegree === 'Master') return true;
-        if (program.title.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
+        if (program.title?.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
+        if (program.title?.includes('ماجستير') && selectedDegree === 'Master') return true;
+        if (program.title?.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
         return false;
       });
     }
@@ -158,15 +185,15 @@ const MedicalPrograms = () => {
       result = result.filter(program => {
         switch(selectedSpecialty) {
           case "Medicine":
-            return program.title.includes('طب') && !program.title.includes('أسنان');
+            return program.title?.includes('طب') && !program.title.includes('أسنان');
           case "Dentistry":
-            return program.title.includes('أسنان');
+            return program.title?.includes('أسنان');
           case "Pharmacy":
-            return program.title.includes('صيدلة');
+            return program.title?.includes('صيدلة');
           case "Nursing":
-            return program.title.includes('تمريض');
+            return program.title?.includes('تمريض');
           case "Physiotherapy":
-            return program.title.includes('علاج طبيعي');
+            return program.title?.includes('علاج طبيعي');
           default:
             return true;
         }
@@ -180,15 +207,15 @@ const MedicalPrograms = () => {
         break;
       case "priceAsc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceA = parseFloat((a.discount ? a.fee : a.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
+          const priceB = parseFloat((b.discount ? b.fee : b.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
           return priceA - priceB;
         });
         break;
       case "priceDesc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceA = parseFloat((a.discount ? a.fee : a.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
+          const priceB = parseFloat((b.discount ? b.fee : b.tuitionFee).toString().replace('$', '').replace(',', '').split(' ')[0]);
           return priceB - priceA;
         });
         break;
