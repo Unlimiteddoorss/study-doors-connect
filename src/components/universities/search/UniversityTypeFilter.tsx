@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Building } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface UniversityTypeFilterProps {
@@ -9,22 +10,24 @@ interface UniversityTypeFilterProps {
 
 const UniversityTypeFilter: React.FC<UniversityTypeFilterProps> = ({
   selectedType,
-  setSelectedType,
+  setSelectedType
 }) => {
   return (
-    <Select 
-      value={selectedType} 
-      onValueChange={setSelectedType}
-    >
-      <SelectTrigger className="h-12 text-lg">
-        <SelectValue placeholder="نوع الجامعة" />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="all">جميع أنواع الجامعات</SelectItem>
-        <SelectItem value="Public">حكومية</SelectItem>
-        <SelectItem value="Private">خاصة</SelectItem>
-      </SelectContent>
-    </Select>
+    <div className="relative">
+      <Select value={selectedType} onValueChange={setSelectedType}>
+        <SelectTrigger className="pl-4 pr-10">
+          <div className="flex items-center gap-2">
+            <Building className="w-4 h-4 text-gray-400" />
+            <SelectValue placeholder="نوع الجامعة" />
+          </div>
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">جميع الأنواع</SelectItem>
+          <SelectItem value="Public">جامعات حكومية</SelectItem>
+          <SelectItem value="Private">جامعات خاصة</SelectItem>
+        </SelectContent>
+      </Select>
+    </div>
   );
 };
 

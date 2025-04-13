@@ -43,18 +43,15 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   setMaxFee,
   worldRanking,
   setWorldRanking,
-  countryTranslations
+  countryTranslations,
+  hasActiveFilters
 }) => {
   // ترجمة اسم البلد إذا كانت متوفرة
   const translateCity = (city: string): string => {
     return countryTranslations[city] || city;
   };
   
-  if (!searchTerm && selectedCity === 'all' && selectedType === 'all' && 
-      (!selectedDegree || selectedDegree === 'all') && 
-      (!selectedLanguage || selectedLanguage === 'all') && 
-      minFee === undefined && maxFee === undefined && 
-      worldRanking === undefined) {
+  if (!hasActiveFilters) {
     return null;
   }
 

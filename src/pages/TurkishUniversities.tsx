@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -6,6 +7,7 @@ import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import { useToast } from '@/hooks/use-toast';
 import { turkishUniversities } from '@/data/programsData';
 import { SlidersHorizontal, Info } from 'lucide-react';
+import { University } from '@/types';
 
 // ترجمة أسماء المدن والدول إلى العربية
 const cityTranslations: Record<string, string> = {
@@ -32,7 +34,7 @@ const cityTranslations: Record<string, string> = {
 };
 
 // Adapt our universities data to match the University interface
-const adaptedUniversities = turkishUniversities.map(uni => ({
+const adaptedUniversities: University[] = turkishUniversities.map(uni => ({
   id: uni.id,
   name: uni.name,
   nameAr: uni.name, // Use name as nameAr since it doesn't exist
@@ -43,7 +45,7 @@ const adaptedUniversities = turkishUniversities.map(uni => ({
   founded: String(uni.founded), // Convert to string as per University interface
   programs: uni.programs,
   students: 5000 + Math.floor(Math.random() * 20000), // Generate random student number
-  ranking: Math.floor(Math.random() * 1000) + 1, // Generate random ranking
+  ranking: String(Math.floor(Math.random() * 1000) + 1), // Generate random ranking as string
   fees: uni.fees,
   image: uni.image,
   languages: ['Turkish', 'English'],
@@ -94,7 +96,7 @@ const TurkishUniversities = () => {
       case "ranking":
         // Sort by ranking, universities without ranking at the end
         result = [...result].sort((a, b) => {
-          if (a.ranking && b.ranking) return a.ranking - b.ranking;
+          if (a.ranking && b.ranking) return parseInt(a.ranking) - parseInt(b.ranking);
           if (!a.ranking && b.ranking) return 1;
           if (a.ranking && !b.ranking) return -1;
           return 0;
@@ -105,8 +107,8 @@ const TurkishUniversities = () => {
         break;
       case "founded":
         result = [...result].sort((a, b) => {
-          const aYear = parseInt(a.founded);
-          const bYear = parseInt(b.founded);
+          const aYear = parseInt(a.founded || '0');
+          const bYear = parseInt(b.founded || '0');
           return aYear - bYear;
         });
         break;
@@ -114,7 +116,7 @@ const TurkishUniversities = () => {
         result = [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         break;
       case "programs":
-        result = [...result].sort((a, b) => b.programs - a.programs); // Sort by program count (highest first)
+        result = [...result].sort((a, b) => (b.programs || 0) - (a.programs || 0)); // Sort by program count (highest first)
         break;
       default:
         break;
@@ -183,7 +185,7 @@ const TurkishUniversities = () => {
             <div className="text-unlimited-gray mt-2">جامعة خاصة في تركيا</div>
           </div>
           <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.reduce((sum, uni) => sum + uni.programs, 0)}+</div>
+            <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.reduce((sum, uni) => sum + (uni.programs || 0), 0)}+</div>
             <div className="text-unlimited-gray mt-2">برنامج دراسي</div>
           </div>
           <div className="bg-white shadow-md rounded-lg p-4 text-center">
@@ -259,7 +261,7 @@ const TurkishUniversities = () => {
               تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
             </p>
             <p>
-              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريج��ن فرص عمل واسعة في مختلف أنحاء العالم.
+              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
             </p>
           </div>
 

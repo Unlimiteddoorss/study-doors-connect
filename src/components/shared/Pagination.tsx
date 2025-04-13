@@ -1,39 +1,38 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft, MoreHorizontal } from 'lucide-react';
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  onPageChange: (pageNumber: number) => void;
-  className?: string;
+  onPageChange: (page: number) => void;
 }
 
-const Pagination: React.FC<PaginationProps> = ({
-  currentPage,
-  totalPages,
-  onPageChange,
-  className = "",
+export const Pagination: React.FC<PaginationProps> = ({ 
+  currentPage, 
+  totalPages, 
+  onPageChange 
 }) => {
-  // Calculate which page numbers to show
+  // إنشاء مصفوفة لأرقام الصفحات التي سيتم عرضها
   const getPageNumbers = () => {
     const pages = [];
     
+    // إضافة الصفحة الأولى دائمًا
+    pages.push(1);
+    
     if (totalPages <= 5) {
-      // Show all pages if there are 5 or fewer
-      for (let i = 1; i <= totalPages; i++) {
+      // إذا كان العدد الإجمالي للصفحات 5 أو أقل، عرض جميع الصفحات
+      for (let i = 2; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always include first page
-      pages.push(1);
-      
+      // عرض الصفحات حول الصفحة الحالية
       if (currentPage > 3) {
-        pages.push(null); // Placeholder for ellipsis
+        pages.push('ellipsis1');
       }
       
-      // Add pages around current page
+      // الصفحات حول الصفحة الحالية
       const startPage = Math.max(2, currentPage - 1);
       const endPage = Math.min(totalPages - 1, currentPage + 1);
       
@@ -42,60 +41,60 @@ const Pagination: React.FC<PaginationProps> = ({
       }
       
       if (currentPage < totalPages - 2) {
-        pages.push(null); // Placeholder for ellipsis
+        pages.push('ellipsis2');
       }
       
-      // Always include last page
-      pages.push(totalPages);
+      // إضافة الصفحة الأخيرة دائمًا
+      if (totalPages > 1) {
+        pages.push(totalPages);
+      }
     }
     
     return pages;
   };
 
+  const pageNumbers = getPageNumbers();
+
   return (
-    <div className={`flex justify-center mt-12 ${className}`}>
-      <div className="flex items-center gap-2">
-        <Button 
-          variant="pagination" 
-          onClick={() => onPageChange(currentPage - 1)} 
-          disabled={currentPage === 1}
-          aria-label="الصفحة السابقة"
-        >
-          <ChevronRight className="h-4 w-4 rtl:rotate-180" />
-        </Button>
-        
-        {getPageNumbers().map((pageNumber, index) => {
-          if (pageNumber === null) {
-            return (
-              <span key={`ellipsis-${index}`} className="px-3 py-2">
-                ...
-              </span>
-            );
-          }
-          
-          return (
-            <Button 
-              key={pageNumber}
-              variant="pagination"
-              aria-current={pageNumber === currentPage ? "page" : undefined}
-              onClick={() => onPageChange(pageNumber as number)}
-            >
-              {pageNumber}
-            </Button>
-          );
-        })}
-        
-        <Button 
-          variant="pagination" 
-          onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          aria-label="الصفحة التالية"
-        >
-          <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
-        </Button>
-      </div>
+    <div className="flex justify-center items-center gap-1">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+      
+      {pageNumbers.map((page, index) => 
+        page === 'ellipsis1' || page === 'ellipsis2' ? (
+          <Button
+            key={`ellipsis-${index}`}
+            variant="ghost"
+            disabled
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button
+            key={index}
+            variant={currentPage === page ? "default" : "outline"}
+            onClick={() => onPageChange(page as number)}
+            className={currentPage === page ? "bg-unlimited-blue hover:bg-unlimited-dark-blue" : ""}
+          >
+            {page}
+          </Button>
+        )
+      )}
+      
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
     </div>
   );
 };
-
-export default Pagination;

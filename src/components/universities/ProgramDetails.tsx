@@ -1,36 +1,34 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UniversityProgram } from '@/data/universityPrograms';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@/components/ui/card';
 import {
-  GraduationCap,
-  Clock,
-  DollarSign,
+  Calendar,
   BookOpen,
+  Clock,
   MapPin,
-  Languages,
-  CircleDollarSign,
+  DollarSign,
   FileCheck,
   Award,
-  Sparkles,
+  GraduationCap,
   Building,
-  CheckCircle
+  Globe,
+  Check
 } from 'lucide-react';
 
 interface ProgramDetailsProps {
   program: UniversityProgram;
   universityName: string;
-  universityId: string | number;
+  universityId: string;
 }
 
-const ProgramDetails: React.FC<ProgramDetailsProps> = ({ 
-  program, 
+const ProgramDetails: React.FC<ProgramDetailsProps> = ({
+  program,
   universityName,
-  universityId 
+  universityId
 }) => {
   // ترجمة الدرجة العلمية إلى العربية
   const getArabicDegree = (degree: string) => {
@@ -49,270 +47,241 @@ const ProgramDetails: React.FC<ProgramDetailsProps> = ({
         return degree;
     }
   };
-  
+
+  // حساب نسبة الخصم إذا وجدت
+  const discountPercentage = program.tuitionFee !== program.discountedFee
+    ? Math.round(((program.tuitionFee - program.discountedFee) / program.tuitionFee) * 100)
+    : 0;
+
   return (
-    <>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card className="mb-8">
-            <CardHeader>
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <div>
-                  <CardTitle className="text-2xl">{program.nameAr}</CardTitle>
-                  <CardDescription className="text-lg mt-1">{program.name}</CardDescription>
-                  <div className="mt-2">
-                    <Link 
-                      to={`/universities/${universityId}`} 
-                      className="text-unlimited-blue hover:underline"
-                    >
-                      {universityName}
-                    </Link>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="text-base py-1 px-3">
-                    {getArabicDegree(program.degree)}
-                  </Badge>
-                  <Badge variant="outline" className="text-base py-1 px-3">
-                    {program.language === 'English' ? 'الإنجليزية' : 
-                     program.language === 'Turkish' ? 'التركية' : 'العربية'}
-                  </Badge>
-                  <Badge variant={program.available ? "secondary" : "destructive"} className="text-base py-1 px-3">
-                    {program.available ? 'متاح للتسجيل' : 'غير متاح حالياً'}
-                  </Badge>
-                </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* القسم الرئيسي للمعلومات */}
+      <div className="md:col-span-2">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h1 className="text-2xl font-bold mb-2">{program.nameAr}</h1>
+              <p className="text-unlimited-gray">{program.name}</p>
+              <div className="flex items-center mt-2 text-unlimited-gray">
+                <Building className="w-4 h-4 mr-2" />
+                <span>{universityName}</span>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 border-b pb-6">
-                  <div className="flex items-center gap-3">
-                    <GraduationCap className="h-5 w-5 text-unlimited-blue" />
-                    <div>
-                      <div className="font-medium text-gray-500">الدرجة العلمية</div>
-                      <div>{getArabicDegree(program.degree)}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <Clock className="h-5 w-5 text-unlimited-blue" />
-                    <div>
-                      <div className="font-medium text-gray-500">مدة الدراسة</div>
-                      <div>{program.duration}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <Languages className="h-5 w-5 text-unlimited-blue" />
-                    <div>
-                      <div className="font-medium text-gray-500">لغة الدراسة</div>
-                      <div>
-                        {program.language === 'English' ? 'الإنجليزية' : 
-                         program.language === 'Turkish' ? 'التركية' : 'العربية'}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <MapPin className="h-5 w-5 text-unlimited-blue" />
-                    <div>
-                      <div className="font-medium text-gray-500">الحرم الجامعي</div>
-                      <div>{program.campus}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <CircleDollarSign className="h-5 w-5 text-unlimited-blue" />
-                    <div>
-                      <div className="font-medium text-gray-500">الرسوم السنوية</div>
-                      <div className="flex items-center gap-2">
-                        {program.discountedFee < program.tuitionFee ? (
-                          <>
-                            <span className="line-through text-gray-400">${program.tuitionFee}</span>
-                            <span className="text-green-600 font-semibold">${program.discountedFee}</span>
-                          </>
-                        ) : (
-                          <span>${program.tuitionFee}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-3">
-                    <DollarSign className="h-5 w-5 text-unlimited-blue" />
-                    <div>
-                      <div className="font-medium text-gray-500">رسوم التسجيل</div>
-                      <div>${program.depositFee}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="pt-2">
-                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <FileCheck className="h-5 w-5 text-unlimited-blue" />
-                    <span>متطلبات القبول</span>
-                  </h3>
-                  <ul className="space-y-2 list-disc list-inside pr-4 text-gray-700">
-                    <li>شهادة الثانوية العامة أو ما يعادلها</li>
-                    {program.language === 'English' && (
-                      <li>شهادة إتقان اللغة الإنجليزية (TOEFL، IELTS) أو اجتياز امتحان اللغة بالجامعة</li>
-                    )}
-                    {program.language === 'Turkish' && (
-                      <li>شهادة إتقان اللغة التركية (TÖMER) أو اجتياز امتحان اللغة بالجامعة</li>
-                    )}
-                    {program.degree === 'Bachelor' && (
-                      <li>معدل لا يقل عن 60% في الثانوية العامة</li>
-                    )}
-                    {program.degree === 'Master' && (
-                      <>
-                        <li>شهادة البكالوريوس في تخصص ذي صلة</li>
-                        <li>معدل تراكمي لا يقل عن 2.5/4.0 أو ما يعادله</li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <Award className="h-5 w-5 text-unlimited-blue" />
-                    <span>مزايا البرنامج</span>
-                  </h3>
-                  <ul className="space-y-2 pr-4 text-gray-700">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>فرص للتدريب العملي في شركات ومؤسسات رائدة</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>إمكانية المشاركة في برامج تبادل طلابي عالمية</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>هيئة تدريس متميزة من خبراء المجال محلياً وعالمياً</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>مرافق حديثة ومختبرات متطورة</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                      <span>برنامج معتمد دولياً ومعترف به عالمياً</span>
-                    </li>
-                  </ul>
-                </div>
+            </div>
+            <div className="flex flex-col items-end space-y-2">
+              <Badge className="mb-2">
+                {getArabicDegree(program.degree)}
+              </Badge>
+              <Badge variant="outline">
+                {program.language === 'English' ? 'الإنجليزية' : 
+                 program.language === 'Turkish' ? 'التركية' : 'العربية'}
+              </Badge>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center">
+              <MapPin className="w-5 h-5 text-unlimited-blue mr-2" />
+              <div>
+                <p className="text-sm text-unlimited-gray">الحرم الجامعي</p>
+                <p>{program.campus}</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <div className="hidden md:block">
-            <h3 className="text-xl font-bold mb-6">وصف البرنامج</h3>
-            <div className="space-y-4 text-gray-700">
-              <p>
-                برنامج {program.nameAr} من البرامج المتميزة التي تقدمها {universityName} ويهدف إلى تخريج كوادر مؤهلة في هذا المجال الحيوي.
-              </p>
-              <p>
-                يتميز البرنامج بمنهج دراسي متكامل يجمع بين الجوانب النظرية والتطبيقية، مع التركيز على أحدث التقنيات والأساليب المستخدمة في سوق العمل.
-              </p>
-              <p>
-                يُدرس البرنامج باللغة {program.language === 'English' ? 'الإنجليزية' : program.language === 'Turkish' ? 'التركية' : 'العربية'} ويتضمن العديد من المقررات التخصصية بالإضافة إلى التدريب العملي والميداني.
-              </p>
+            </div>
+            <div className="flex items-center">
+              <Clock className="w-5 h-5 text-unlimited-blue mr-2" />
+              <div>
+                <p className="text-sm text-unlimited-gray">مدة الدراسة</p>
+                <p>{program.duration}</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <Globe className="w-5 h-5 text-unlimited-blue mr-2" />
+              <div>
+                <p className="text-sm text-unlimited-gray">لغة الدراسة</p>
+                <p>{program.language === 'English' ? 'الإنجليزية' : 
+                    program.language === 'Turkish' ? 'التركية' : 'العربية'}</p>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <Calendar className="w-5 h-5 text-unlimited-blue mr-2" />
+              <div>
+                <p className="text-sm text-unlimited-gray">تاريخ البدء</p>
+                <p>سبتمبر/يناير</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4">نبذة عن البرنامج</h2>
+            <p className="text-unlimited-gray">
+              برنامج {program.nameAr} هو برنامج تعليمي متميز يقدم من جامعة {universityName} ويستمر لمدة {program.duration}. يتم تدريس البرنامج باللغة {program.language === 'English' ? 'الإنجليزية' : program.language === 'Turkish' ? 'التركية' : 'العربية'} ويضم مجموعة متنوعة من المواد الدراسية التي تغطي جميع جوانب التخصص.
+            </p>
+          </div>
+
+          {/* متطلبات القبول */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <FileCheck className="w-5 h-5 text-unlimited-blue mr-2" />
+              متطلبات القبول
+            </h2>
+            <ul className="space-y-2">
+              <li className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>شهادة الثانوية العامة أو ما يعادلها</span>
+              </li>
+              {program.language === 'English' && (
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-green-500 mr-2" />
+                  <span>شهادة إتقان اللغة الإنجليزية (TOEFL/IELTS/YOS) أو اجتياز اختبار اللغة في الجامعة</span>
+                </li>
+              )}
+              {program.language === 'Turkish' && (
+                <li className="flex items-center">
+                  <Check className="w-4 h-4 text-green-500 mr-2" />
+                  <span>شهادة إتقان اللغة التركية أو اجتياز اختبار اللغة في الجامعة</span>
+                </li>
+              )}
+              <li className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>صورة عن جواز السفر</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>صور شخصية</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* المجالات الوظيفية */}
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <Award className="w-5 h-5 text-unlimited-blue mr-2" />
+              المجالات الوظيفية
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>العمل في القطاع الخاص</span>
+              </div>
+              <div className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>العمل في القطاع الحكومي</span>
+              </div>
+              <div className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>العمل في المنظمات الدولية</span>
+              </div>
+              <div className="flex items-center">
+                <Check className="w-4 h-4 text-green-500 mr-2" />
+                <span>إنشاء مشاريع خاصة</span>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* الجانب الأيمن - معلومات الرسوم والتقديم */}
+      <div>
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <DollarSign className="w-5 h-5 text-unlimited-blue mr-2" />
+              الرسوم الدراسية
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">الرسوم الدراسية:</span>
+                {program.discountedFee < program.tuitionFee ? (
+                  <div className="text-right">
+                    <span className="line-through text-gray-400">${program.tuitionFee}</span>
+                    <Badge className="bg-green-600 mr-2">خصم {discountPercentage}%</Badge>
+                  </div>
+                ) : (
+                  <span className="font-semibold">${program.tuitionFee}</span>
+                )}
+              </div>
+
+              {program.discountedFee < program.tuitionFee && (
+                <div className="flex justify-between items-center">
+                  <span className="text-unlimited-gray">بعد الخصم:</span>
+                  <span className="font-semibold text-green-600">${program.discountedFee}</span>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">رسوم التأمين:</span>
+                <span className="font-semibold">${program.depositFee}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">رسوم السنة التحضيرية:</span>
+                <span className="font-semibold">${program.prepFee}</span>
+              </div>
+              
+              <div className="border-t pt-4 mt-4">
+                <div className="flex justify-between items-center text-lg font-bold">
+                  <span>المجموع:</span>
+                  <span className="text-unlimited-blue">${program.discountedFee + program.depositFee}</span>
+                </div>
+                <p className="text-xs text-unlimited-gray mt-1">
+                  * لا تشمل رسوم السنة التحضيرية إذا كانت مطلوبة
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
-        <div>
-          <Card className="mb-6">
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-bold mb-4">معلومات التسجيل</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">رسوم الدراسة</span>
-                  <span className="font-bold">${program.tuitionFee}</span>
-                </div>
-                {program.discountedFee < program.tuitionFee && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">بعد الخصم</span>
-                    <span className="font-bold text-green-600">${program.discountedFee}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">رسوم التسجيل</span>
-                  <span className="font-bold">${program.depositFee}</span>
-                </div>
-                {program.prepFee && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">سنة تحضيرية</span>
-                    <span className="font-bold">${program.prepFee}</span>
-                  </div>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">حالة البرنامج</span>
-                  <Badge variant={program.available ? "secondary" : "destructive"}>
-                    {program.available ? 'متاح للتسجيل' : 'غير متاح حالياً'}
-                  </Badge>
-                </div>
-                <Separator />
-                <div className="pt-2">
-                  <Button className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue" asChild>
-                    <Link to={`/apply?program=${program.id}&university=${universityId}`}>
-                      تقدم للالتحاق الآن
-                    </Link>
-                  </Button>
-                </div>
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <h2 className="text-xl font-bold mb-4 flex items-center">
+              <BookOpen className="w-5 h-5 text-unlimited-blue mr-2" />
+              معلومات البرنامج
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">الدرجة العلمية:</span>
+                <span>{getArabicDegree(program.degree)}</span>
               </div>
-            </CardContent>
-          </Card>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">لغة الدراسة:</span>
+                <span>
+                  {program.language === 'English' ? 'الإنجليزية' : 
+                   program.language === 'Turkish' ? 'التركية' : 'العربية'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">مدة الدراسة:</span>
+                <span>{program.duration}</span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-unlimited-gray">الحالة:</span>
+                <Badge className={program.available ? "bg-green-600" : "bg-red-600"}>
+                  {program.available ? 'متاح للتسجيل' : 'مغلق للتسجيل'}
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="space-y-4">
+          <Button className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue" asChild>
+            <Link to={`/apply?program=${program.id}&university=${universityId}`}>
+              تقديم طلب
+            </Link>
+          </Button>
           
-          <Card>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-unlimited-blue" />
-                <span>آفاق العمل للخريجين</span>
-              </h3>
-              <div className="space-y-3 text-gray-700">
-                <p className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-unlimited-blue flex-shrink-0" />
-                  <span>العمل في كبرى الشركات المحلية والدولية</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-unlimited-blue flex-shrink-0" />
-                  <span>العمل في المؤسسات الحكومية والخاصة</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-unlimited-blue flex-shrink-0" />
-                  <span>فرص عمل في المنظمات الدولية</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-unlimited-blue flex-shrink-0" />
-                  <span>إمكانية إكمال الدراسات العليا والعمل في مجال البحث العلمي</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-unlimited-blue flex-shrink-0" />
-                  <span>إنشاء مشاريع خاصة في المجال</span>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <Button variant="outline" className="w-full" asChild>
+            <Link to="#" onClick={() => window.open(`https://wa.me/+905000000000?text=استفسار حول برنامج ${program.nameAr} في جامعة ${universityName}`, '_blank')}>
+              استفسار عبر الواتساب
+            </Link>
+          </Button>
         </div>
       </div>
-      
-      <div className="md:hidden mt-8">
-        <h3 className="text-xl font-bold mb-6">وصف البرنامج</h3>
-        <div className="space-y-4 text-gray-700">
-          <p>
-            برنامج {program.nameAr} من البرامج المتميزة التي تقدمها {universityName} ويهدف إلى تخريج كوادر مؤهلة في هذا المجال الحيوي.
-          </p>
-          <p>
-            يتميز البرنامج بمنهج دراسي متكامل يجمع بين الجوانب النظرية والتطبيقية، مع التركيز على أحدث التقنيات والأساليب المستخدمة في سوق العمل.
-          </p>
-          <p>
-            يُدرس البرنامج باللغة {program.language === 'English' ? 'الإنجليزية' : program.language === 'Turkish' ? 'التركية' : 'العربية'} ويتضمن العديد من المقررات التخصصية بالإضافة إلى التدريب العملي والميداني.
-          </p>
-        </div>
-      </div>
-    </>
+    </div>
   );
 };
 
