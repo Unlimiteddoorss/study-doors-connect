@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
@@ -291,7 +290,10 @@ const UniversityDetails = () => {
                         <div>
                           <p className="font-semibold">البريد الإلكتروني</p>
                           <p className="text-unlimited-blue hover:underline">
-                            info@{university.website ? getEmailDomain(university.website) : `${university.name?.toLowerCase().replace(/\s/g, '')}.edu`}
+                            {university.email || university.website ? 
+                              `info@${getEmailDomain(university.website)}` :
+                              `info@${university.name ? university.name.toLowerCase().replace(/\s/g, '') : 'university'}.edu`
+                            }
                           </p>
                         </div>
                       </div>
@@ -332,7 +334,7 @@ const UniversityDetails = () => {
           <TabsContent value="programs">
             <UniversityPrograms 
               programs={programs}
-              universityId={university.id}
+              universityId={String(university.id)}
               universityName={university.nameAr || university.name}
             />
           </TabsContent>

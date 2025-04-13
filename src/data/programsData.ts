@@ -1,3 +1,4 @@
+
 import { Program, University } from '@/types';
 
 // Add new dummy data to match the updated Program interface
@@ -7,6 +8,8 @@ export const dummyPrograms: Program[] = [
     name: "Computer Science",
     nameAr: "علوم الحاسوب",
     degree: "bachelor",
+    degreeLevel: "bachelor",
+    faculty: "Faculty of Computer Science",
     university: "Istanbul University",
     universityId: "1",
     language: "English",
@@ -26,12 +29,15 @@ export const dummyPrograms: Program[] = [
     name: "Business Administration",
     nameAr: "إدارة الأعمال",
     degree: "bachelor",
+    degreeLevel: "bachelor",
+    faculty: "Faculty of Business",
     university: "Ankara University",
     universityId: "2",
     language: "Turkish",
     duration: "4 years",
     tuitionFee: "4500",
     currency: "USD",
+    description: "برنامج إدارة الأعمال",
     requirements: ["High School Diploma", "Turkish Language Proficiency"],
     imageUrl: "/placeholder.svg",
     city: "Ankara",

@@ -18,7 +18,7 @@ export interface Program {
   requirements?: string[];
   features?: string[];
   scholarships?: string[];
-  ranking?: string; // Changed from number to string
+  ranking?: string; 
   studentsCount?: number;
   imageUrl?: string;
   isFeatured?: boolean;
@@ -26,8 +26,15 @@ export interface Program {
   fee?: string;
   title?: string;
   location?: string;
-  degree?: string; // Added for compatibility
-  nameAr?: string; // Added for compatibility
+  degree?: string;
+  nameAr?: string;
+  career?: string[];
+  quota?: number;
+  discountedFee?: number;
+  depositFee?: number;
+  campus?: string;
+  available?: boolean;
+  prepFee?: number;
 }
 
 export interface University {
@@ -37,7 +44,7 @@ export interface University {
   description?: string;
   location: string;
   country: string;
-  ranking: string; // Changed from number to string
+  ranking: string; // تم تغييرها من رقم إلى نص
   logo?: string;
   website?: string;
   email?: string;
@@ -54,13 +61,13 @@ export interface University {
   image?: string;
   languages?: string[];
   accreditation?: any[];
-  accreditations?: any[][]; // Added for compatibility
+  accreditations?: any[];
   isFeatured?: boolean;
-  logoUrl?: string; // Added for compatibility with Universities.tsx
-  imageUrl?: string; // Added for compatibility with Universities.tsx
-  establishedYear?: number; // Added for compatibility with Universities.tsx
-  programCount?: number; // Added for compatibility with Universities.tsx
-  studentCount?: number; // Added for compatibility with Universities.tsx
+  logoUrl?: string;
+  imageUrl?: string;
+  establishedYear?: number;
+  programCount?: number;
+  studentCount?: number;
 }
 
 export interface Application {

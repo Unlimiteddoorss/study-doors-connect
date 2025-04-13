@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Filter, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface ActiveFiltersProps {
@@ -20,8 +20,8 @@ interface ActiveFiltersProps {
   setMaxFee?: (value: number | undefined) => void;
   worldRanking?: number;
   setWorldRanking?: (value: number | undefined) => void;
-  tempFeeRange: [number, number];
-  setTempFeeRange: (value: [number, number]) => void;
+  tempFeeRange?: [number, number];
+  setTempFeeRange?: (value: [number, number]) => void;
   countryTranslations: Record<string, string>;
   hasActiveFilters: boolean;
 }
@@ -43,117 +43,96 @@ const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   setMaxFee,
   worldRanking,
   setWorldRanking,
-  tempFeeRange,
-  setTempFeeRange,
-  countryTranslations,
-  hasActiveFilters
+  countryTranslations
 }) => {
-  // ترجمة اسم المدينة من الإنجليزية إلى العربية
+  // ترجمة اسم البلد إذا كانت متوفرة
   const translateCity = (city: string): string => {
     return countryTranslations[city] || city;
   };
-
-  // ترجمة الدرجة العلمية
-  const translateDegree = (degree: string): string => {
-    switch(degree) {
-      case 'Bachelor': return 'بكالوريوس';
-      case 'Master': return 'ماجستير';
-      case 'PhD': return 'دكتوراه';
-      case 'Diploma': return 'دبلوم';
-      case 'Vocational School': return 'معهد مهني';
-      default: return degree;
-    }
-  };
-
-  // ترجمة اللغة
-  const translateLanguage = (language: string): string => {
-    switch(language) {
-      case 'English': return 'الإنجليزية';
-      case 'Turkish': return 'التركية';
-      case 'Arabic': return 'العربية';
-      default: return language;
-    }
-  };
-
-  if (!hasActiveFilters) return null;
+  
+  if (!searchTerm && selectedCity === 'all' && selectedType === 'all' && 
+      (!selectedDegree || selectedDegree === 'all') && 
+      (!selectedLanguage || selectedLanguage === 'all') && 
+      minFee === undefined && maxFee === undefined && 
+      worldRanking === undefined) {
+    return null;
+  }
 
   return (
-    <div className="flex flex-wrap gap-2 mt-4 mb-2">
-      <div className="flex items-center gap-1 text-unlimited-gray">
-        <Filter className="h-4 w-4" />
-        <span>المرشحات النشطة:</span>
-      </div>
+    <div className="mt-4 flex flex-wrap gap-2">
+      <div className="text-sm text-unlimited-gray mr-2 flex items-center">المرشحات النشطة:</div>
       
       {searchTerm && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          بحث: {searchTerm}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>بحث: {searchTerm}</span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
-            onClick={() => setSearchTerm('')} 
+            className="h-3 w-3 cursor-pointer" 
+            onClick={() => setSearchTerm('')}
           />
         </Badge>
       )}
       
       {selectedCity !== 'all' && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          المدينة: {translateCity(selectedCity)}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>المدينة: {translateCity(selectedCity)}</span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
-            onClick={() => setSelectedCity('all')} 
+            className="h-3 w-3 cursor-pointer" 
+            onClick={() => setSelectedCity('all')}
           />
         </Badge>
       )}
       
       {selectedType !== 'all' && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          النوع: {selectedType === 'Private' ? 'خاصة' : 'حكومية'}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>النوع: {selectedType === 'Public' ? 'حكومية' : 'خاصة'}</span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
-            onClick={() => setSelectedType('all')} 
+            className="h-3 w-3 cursor-pointer" 
+            onClick={() => setSelectedType('all')}
           />
         </Badge>
       )}
-
+      
       {selectedDegree && selectedDegree !== 'all' && setSelectedDegree && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          الدرجة: {translateDegree(selectedDegree)}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>الدرجة: {selectedDegree}</span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
-            onClick={() => setSelectedDegree('all')} 
+            className="h-3 w-3 cursor-pointer" 
+            onClick={() => setSelectedDegree('all')}
           />
         </Badge>
       )}
-
+      
       {selectedLanguage && selectedLanguage !== 'all' && setSelectedLanguage && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          اللغة: {translateLanguage(selectedLanguage)}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>اللغة: {selectedLanguage}</span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
-            onClick={() => setSelectedLanguage('all')} 
+            className="h-3 w-3 cursor-pointer" 
+            onClick={() => setSelectedLanguage('all')}
           />
         </Badge>
       )}
       
       {(minFee !== undefined || maxFee !== undefined) && setMinFee && setMaxFee && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          الرسوم: {minFee !== undefined ? `${minFee}$` : '0$'} - {maxFee !== undefined ? `${maxFee}$` : 'غير محدد'}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>
+            الرسوم: ${minFee || 0} - ${maxFee || 30000}
+          </span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
+            className="h-3 w-3 cursor-pointer" 
             onClick={() => {
               setMinFee(undefined);
               setMaxFee(undefined);
-              setTempFeeRange([0, 30000]);
-            }} 
+            }}
           />
         </Badge>
       )}
       
       {worldRanking !== undefined && setWorldRanking && (
-        <Badge variant="secondary" className="flex items-center gap-1 text-base py-1.5 px-3">
-          التصنيف العالمي: {worldRanking < 1000 ? `أفضل من ${worldRanking}` : 'غير مصنفة'}
+        <Badge variant="outline" className="flex items-center gap-1">
+          <span>التصنيف: {worldRanking}</span>
           <X 
-            className="h-4 w-4 mr-1 cursor-pointer" 
-            onClick={() => setWorldRanking(undefined)} 
+            className="h-3 w-3 cursor-pointer" 
+            onClick={() => setWorldRanking(undefined)}
           />
         </Badge>
       )}

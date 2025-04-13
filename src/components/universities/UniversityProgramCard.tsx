@@ -2,167 +2,123 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { UniversityProgram } from '@/data/universityPrograms';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { School, MapPin, DollarSign, Languages, CalendarDays, Book, Clock } from 'lucide-react';
+import { BookOpen, Clock, MapPin, GraduationCap, DollarSign } from 'lucide-react';
 
 interface UniversityProgramCardProps {
   program: UniversityProgram;
-  universityId: number;
-  universityName?: string;
-  showUniversityInfo?: boolean;
+  universityId: string | number;
+  universityName: string;
 }
 
-const UniversityProgramCard: React.FC<UniversityProgramCardProps> = ({ 
-  program, 
+const UniversityProgramCard: React.FC<UniversityProgramCardProps> = ({
+  program,
   universityId,
-  universityName,
-  showUniversityInfo = false
+  universityName
 }) => {
-  // ترجمة الدرجة العلمية
-  const translateDegree = (degree: string): string => {
-    switch(degree) {
-      case 'Bachelor': return 'بكالوريوس';
-      case 'Master': return 'ماجستير';
-      case 'PhD': return 'دكتوراه';
-      case 'Diploma': return 'دبلوم';
-      case 'Vocational School': return 'معهد مهني';
-      default: return degree;
+  // تحديد لون الشارة اعتمادًا على نوع البرنامج
+  const getBadgeVariant = () => {
+    switch (program.degree) {
+      case 'Bachelor':
+        return 'default';
+      case 'Master':
+        return 'secondary';
+      case 'PhD':
+        return 'destructive';
+      default:
+        return 'outline';
     }
   };
   
-  // ترجمة اللغة
-  const translateLanguage = (language: string): string => {
-    switch(language) {
-      case 'English': return 'الإنجليزية';
-      case 'Turkish': return 'التركية';
-      case 'Arabic': return 'العربية';
-      default: return language;
+  // ترجمة الدرجة العلمية إلى العربية
+  const getArabicDegree = (degree: string) => {
+    switch (degree) {
+      case 'Bachelor':
+        return 'بكالوريوس';
+      case 'Master':
+        return 'ماجستير';
+      case 'PhD':
+        return 'دكتوراه';
+      case 'Diploma':
+        return 'دبلوم';
+      case 'Vocational School':
+        return 'مدرسة مهنية';
+      default:
+        return degree;
     }
   };
-  
-  // حساب نسبة الخصم
-  const discountPercentage = program.tuitionFee > 0 
-    ? Math.round(((program.tuitionFee - program.discountedFee) / program.tuitionFee) * 100)
-    : 0;
 
   return (
-    <Card className="overflow-hidden hover:border-unlimited-blue transition-all h-full">
-      <CardContent className="p-0">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-full">
-          <div className="md:col-span-2 p-6">
-            <div className="flex justify-between items-start">
-              <Badge className="bg-unlimited-light-blue text-unlimited-blue mb-2 px-2">
-                {translateDegree(program.degree)}
-              </Badge>
-              
-              {discountPercentage > 0 && (
-                <Badge className="bg-green-100 text-green-800">
-                  خصم {discountPercentage}%
-                </Badge>
-              )}
-            </div>
-            
-            <h3 className="font-bold text-xl mb-2 text-unlimited-blue">{program.nameAr}</h3>
-            <p className="text-unlimited-gray mb-4">{program.name}</p>
-            
-            {showUniversityInfo && universityName && (
-              <div className="flex items-center gap-1 mb-3 text-unlimited-gray">
-                <School className="h-4 w-4" />
-                <span>{universityName}</span>
-              </div>
-            )}
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <Languages className="h-3 w-3" />
-                {translateLanguage(program.language)}
-              </Badge>
-              
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <MapPin className="h-3 w-3" />
-                {program.campus}
-              </Badge>
-              
-              <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                <CalendarDays className="h-3 w-3" />
-                {program.duration}
-              </Badge>
-              
-              {program.degree === 'Master' && (
-                <Badge variant="outline" className="flex items-center gap-1 text-xs">
-                  <Book className="h-3 w-3" />
-                  {program.name.includes('Thesis') ? 'بأطروحة' : 'بدون أطروحة'}
-                </Badge>
-              )}
-
-              {program.degree === 'Master' && program.name.includes('Distance') && (
-                <Badge variant="outline" className="flex items-center gap-1 text-xs bg-blue-50">
-                  <Clock className="h-3 w-3" />
-                  تعليم عن بعد
-                </Badge>
-              )}
-            </div>
+    <Card className="h-full hover:shadow-md transition-shadow">
+      <CardHeader>
+        <div className="flex justify-between">
+          <div>
+            <CardTitle>{program.nameAr}</CardTitle>
+            <CardDescription className="mt-1">{program.name}</CardDescription>
           </div>
-          
-          <div className="p-5 md:col-span-1 bg-gray-50 flex flex-col justify-center border-r border-b md:border-b-0 md:border-l">
-            <div className="space-y-3">
-              <div>
-                <div className="text-xs text-unlimited-gray">الرسوم الدراسية:</div>
-                <div className="font-semibold">
-                  <DollarSign className="w-4 h-4 inline-block text-unlimited-blue" />
-                  {program.tuitionFee.toLocaleString()} USD
-                </div>
-              </div>
-              
-              {program.discountedFee < program.tuitionFee && (
-                <div>
-                  <div className="text-xs text-unlimited-gray">بعد الخصم:</div>
-                  <div className="font-semibold text-green-600">
-                    <DollarSign className="w-4 h-4 inline-block" />
-                    {program.discountedFee.toLocaleString()} USD
-                  </div>
-                </div>
-              )}
-              
-              <div>
-                <div className="text-xs text-unlimited-gray">رسوم التأمين:</div>
-                <div className="font-semibold">
-                  <DollarSign className="w-4 h-4 inline-block" />
-                  {program.depositFee.toLocaleString()} USD
-                </div>
-              </div>
-              
-              <div>
-                <div className="text-xs text-unlimited-gray">رسوم السنة التحضيرية:</div>
-                <div className="font-semibold">
-                  <DollarSign className="w-4 h-4 inline-block" />
-                  {program.prepFee.toLocaleString()} USD
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="p-5 md:col-span-1 flex flex-col justify-center items-center bg-gray-50 border-t md:border-t-0">
-            <Badge className={program.available ? "bg-green-600 mb-4" : "bg-red-600 mb-4"}>
-              {program.available ? "متاح للتسجيل" : "مغلق للتسجيل"}
+          <div className="flex flex-col gap-2">
+            <Badge variant={getBadgeVariant()}>
+              {getArabicDegree(program.degree)}
             </Badge>
-            
-            <Button asChild className="w-full mb-2 bg-unlimited-blue hover:bg-unlimited-dark-blue">
-              <Link to={`/apply?program=${program.id}&university=${universityId}`}>
-                تقدم الآن
-              </Link>
-            </Button>
-            
-            <Button asChild variant="outline" className="w-full">
-              <Link to={`/programs/${program.id}?universityId=${universityId}`}>
-                التفاصيل
-              </Link>
-            </Button>
+            <Badge variant="outline">
+              {program.language === 'English' ? 'الإنجليزية' : 
+               program.language === 'Turkish' ? 'التركية' : 'العربية'}
+            </Badge>
           </div>
         </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 text-unlimited-gray">
+          <BookOpen className="h-4 w-4 flex-shrink-0" />
+          <span>الجامعة: {universityName}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 text-unlimited-gray">
+          <MapPin className="h-4 w-4 flex-shrink-0" />
+          <span>الحرم الجامعي: {program.campus}</span>
+        </div>
+        
+        <div className="flex items-center gap-2 text-unlimited-gray">
+          <GraduationCap className="h-4 w-4 flex-shrink-0" />
+          <span>مدة الدراسة: {program.duration}</span>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <DollarSign className="h-4 w-4 flex-shrink-0 text-unlimited-gray" />
+          <div>
+            <span className="text-unlimited-gray">الرسوم الدراسية:</span>
+            {program.discountedFee < program.tuitionFee ? (
+              <div className="flex gap-2 items-center">
+                <span className="line-through text-gray-400">${program.tuitionFee}</span>
+                <span className="text-green-600 font-semibold">${program.discountedFee}</span>
+              </div>
+            ) : (
+              <span className="ml-2">${program.tuitionFee}</span>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2 text-unlimited-gray">
+          <Clock className="h-4 w-4 flex-shrink-0" />
+          <span>الدوام: {program.language.includes('Turkish') ? 'صباحي' : 'صباحي / مسائي'}</span>
+        </div>
       </CardContent>
+      <CardFooter className="border-t pt-4">
+        <div className="flex justify-between w-full">
+          <Button variant="outline" asChild>
+            <Link to={`/programs/${program.id}?universityId=${universityId}`}>
+              عرض التفاصيل
+            </Link>
+          </Button>
+          <Button className="bg-unlimited-blue hover:bg-unlimited-dark-blue" asChild>
+            <Link to={`/apply?program=${program.id}&university=${universityId}`}>
+              تقديم طلب
+            </Link>
+          </Button>
+        </div>
+      </CardFooter>
     </Card>
   );
 };

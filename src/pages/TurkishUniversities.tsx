@@ -1,14 +1,11 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal, Info } from 'lucide-react';
 import UniversitySearch from '@/components/universities/UniversitySearch';
 import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import { useToast } from '@/hooks/use-toast';
 import { turkishUniversities } from '@/data/programsData';
+import { SlidersHorizontal, Info } from 'lucide-react';
 
 // ترجمة أسماء المدن والدول إلى العربية
 const cityTranslations: Record<string, string> = {
@@ -262,7 +259,7 @@ const TurkishUniversities = () => {
               تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
             </p>
             <p>
-              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
+              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريج��ن فرص عمل واسعة في مختلف أنحاء العالم.
             </p>
           </div>
 

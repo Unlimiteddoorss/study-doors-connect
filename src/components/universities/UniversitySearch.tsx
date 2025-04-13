@@ -68,11 +68,17 @@ const UniversitySearch: React.FC<UniversitySearchProps> = ({
     if (setMaxFee) setMaxFee(tempFeeRange[1]);
   }, [tempFeeRange, setMinFee, setMaxFee]);
 
-  const hasActiveFilters = searchTerm || selectedCity !== 'all' || selectedType !== 'all' || 
-                        (selectedDegree && selectedDegree !== 'all') || 
-                        (selectedLanguage && selectedLanguage !== 'all') ||
-                        (minFee !== undefined) || (maxFee !== undefined) ||
-                        (worldRanking !== undefined);
+  // التحقق من وجود فلاتر نشطة
+  const hasActiveFilters = Boolean(
+    searchTerm || 
+    selectedCity !== 'all' || 
+    selectedType !== 'all' || 
+    (selectedDegree && selectedDegree !== 'all') || 
+    (selectedLanguage && selectedLanguage !== 'all') ||
+    (minFee !== undefined) || 
+    (maxFee !== undefined) ||
+    (worldRanking !== undefined)
+  );
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-8">

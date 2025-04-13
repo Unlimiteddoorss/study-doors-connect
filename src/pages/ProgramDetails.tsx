@@ -89,7 +89,7 @@ const ProgramDetails = () => {
         <ProgramDetailsComponent 
           program={program} 
           universityName={university.nameAr || university.name}
-          universityId={university.id}
+          universityId={String(university.id)}
         />
         
         {/* برامج مشابهة */}
@@ -110,7 +110,7 @@ const ProgramDetails = () => {
                 <UniversityProgramCard 
                   key={prog.id} 
                   program={prog} 
-                  universityId={university.id}
+                  universityId={String(university.id)}
                   universityName={university.nameAr || university.name}
                 />
               ))}
