@@ -7,8 +7,13 @@ import FeaturedPrograms from '@/components/home/FeaturedPrograms';
 import Testimonials from '@/components/home/Testimonials';
 import Partners from '@/components/home/Partners';
 import CTASection from '@/components/home/CTASection';
+import { useEffect } from 'react';
 
 const Index = () => {
+  useEffect(() => {
+    document.title = 'أبواب بلا حدود - الرئيسية';
+  }, []);
+
   return (
     <MainLayout>
       <Hero />

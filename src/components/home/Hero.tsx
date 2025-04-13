@@ -2,8 +2,51 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Search, GraduationCap, School, FileText, MessageSquare } from 'lucide-react';
+import { useState, FormEvent } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [country, setCountry] = useState("");
+  const [degree, setDegree] = useState("");
+  const [specialty, setSpecialty] = useState("");
+
+  const handleSearch = (e: FormEvent) => {
+    e.preventDefault();
+    
+    // بناء رابط البحث
+    let searchUrl = '/programs';
+    const params = new URLSearchParams();
+    
+    if (country) {
+      params.append('country', country);
+    }
+    
+    if (degree) {
+      params.append('degree', degree);
+    }
+    
+    if (specialty) {
+      params.append('specialty', specialty);
+    }
+    
+    const queryString = params.toString();
+    if (queryString) {
+      searchUrl += `?${queryString}`;
+    }
+    
+    // عرض رسالة تأكيد
+    toast({
+      title: "جاري البحث...",
+      description: "نبحث عن البرامج المناسبة لك",
+    });
+    
+    // الانتقال إلى صفحة البرامج مع معاملات البحث
+    navigate(searchUrl);
+  };
+
   return <section className="bg-gradient-to-r from-unlimited-dark-blue to-unlimited-blue text-white py-16 md:py-24">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center">
@@ -18,7 +61,7 @@ const Hero = () => {
               <Button asChild size="lg" className="bg-white text-unlimited-blue hover:bg-gray-100">
                 <Link to="/programs">استكشف البرامج</Link>
               </Button>
-              <Button asChild size="lg" variant="outline" className="border-white text-unlimited-blue bg-white hover:bg-gray-100">
+              <Button asChild size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
                 <Link to="/apply">تقديم طلب التسجيل</Link>
               </Button>
             </div>
@@ -37,7 +80,7 @@ const Hero = () => {
                 <School className="h-5 w-5 text-unlimited-light-blue" />
                 <span>الجامعات</span>
               </Link>
-              <Link to="/messages" className="flex items-center gap-2 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
+              <Link to="/contact" className="flex items-center gap-2 bg-white/10 p-3 rounded-lg hover:bg-white/20 transition-colors">
                 <MessageSquare className="h-5 w-5 text-unlimited-light-blue" />
                 <span>تواصل معنا</span>
               </Link>
@@ -45,44 +88,58 @@ const Hero = () => {
           </div>
           <div className="w-full md:w-1/2 flex justify-center">
             <div className="bg-white text-unlimited-dark-blue rounded-lg shadow-lg p-6 w-full max-w-md">
-              <h3 className="text-xl font-semibold mb-4 text-center">ابحث عن برنامجك المثالي</h3>
-              <div className="mb-4">
-                <label className="block text-unlimited-gray mb-2">الدولة</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue" defaultValue="">
-                  <option value="" disabled>اختر الدولة</option>
-                  <option value="turkey">تركيا</option>
-                  <option value="cyprus">قبرص</option>
-                  <option value="hungary">المجر</option>
-                  <option value="poland">بولندا</option>
-                  <option value="czech">التشيك</option>
-                  <option value="egypt">مصر</option>
-                  <option value="syria">سوريا</option>
-                </select>
-              </div>
-              <div className="mb-4">
-                <label className="block text-unlimited-gray mb-2">مستوى الدراسة</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue" defaultValue="">
-                  <option value="" disabled>اختر المستوى</option>
-                  <option value="bachelor">البكالوريوس</option>
-                  <option value="master">الماجستير</option>
-                  <option value="phd">الدكتوراه</option>
-                </select>
-              </div>
-              <div className="mb-6">
-                <label className="block text-unlimited-gray mb-2">التخصص</label>
-                <select className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue" defaultValue="">
-                  <option value="" disabled>اختر التخصص</option>
-                  <option value="business">إدارة الأعمال</option>
-                  <option value="engineering">الهندسة</option>
-                  <option value="medicine">الطب</option>
-                  <option value="computer-science">علوم الحاسوب</option>
-                  <option value="arts">الفنون</option>
-                </select>
-              </div>
-              <Button className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90">
-                <Search className="h-4 w-4 ml-2" />
-                <span>بحث</span>
-              </Button>
+              <form onSubmit={handleSearch}>
+                <h3 className="text-xl font-semibold mb-4 text-center">ابحث عن برنامجك المثالي</h3>
+                <div className="mb-4">
+                  <label className="block text-unlimited-gray mb-2">الدولة</label>
+                  <select 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue" 
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  >
+                    <option value="" disabled>اختر الدولة</option>
+                    <option value="turkey">تركيا</option>
+                    <option value="cyprus">قبرص</option>
+                    <option value="hungary">المجر</option>
+                    <option value="poland">بولندا</option>
+                    <option value="czech">التشيك</option>
+                    <option value="egypt">مصر</option>
+                    <option value="syria">سوريا</option>
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-unlimited-gray mb-2">مستوى الدراسة</label>
+                  <select 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+                    value={degree}
+                    onChange={(e) => setDegree(e.target.value)}
+                  >
+                    <option value="" disabled>اختر المستوى</option>
+                    <option value="bachelor">البكالوريوس</option>
+                    <option value="master">الماجستير</option>
+                    <option value="phd">الدكتوراه</option>
+                  </select>
+                </div>
+                <div className="mb-6">
+                  <label className="block text-unlimited-gray mb-2">التخصص</label>
+                  <select 
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                  >
+                    <option value="" disabled>اختر التخصص</option>
+                    <option value="business">إدارة الأعمال</option>
+                    <option value="engineering">الهندسة</option>
+                    <option value="medicine">الطب</option>
+                    <option value="computer-science">علوم الحاسوب</option>
+                    <option value="arts">الفنون</option>
+                  </select>
+                </div>
+                <Button type="submit" className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90">
+                  <Search className="h-4 w-4 ml-2" />
+                  <span>بحث</span>
+                </Button>
+              </form>
             </div>
           </div>
         </div>
