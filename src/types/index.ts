@@ -19,7 +19,7 @@ export interface Program {
   requirements?: string[];
   features?: string[];
   scholarships?: string[];
-  ranking?: number;
+  ranking?: string; // Changed from number to string
   studentsCount?: number;
   imageUrl?: string;
   isFeatured?: boolean;
@@ -27,6 +27,8 @@ export interface Program {
   fee?: string;
   title?: string;
   location?: string;
+  degree?: string; // Added for compatibility
+  nameAr?: string; // Added for compatibility
 }
 
 export interface University {
@@ -36,7 +38,7 @@ export interface University {
   description?: string;
   location: string;
   country: string;
-  ranking: string;
+  ranking: string; // Changed from number to string
   logo?: string;
   website?: string;
   email?: string;
@@ -53,6 +55,7 @@ export interface University {
   image?: string;
   languages?: string[];
   accreditation?: any[];
+  accreditations?: any[][]; // Added for compatibility
   isFeatured?: boolean;
 }
 
@@ -137,3 +140,15 @@ export interface UserProfile {
   bio: string;
   avatar?: string;
 }
+
+// Add any additional types needed for the application
+export type ApplicationStatus = 
+  | 'pending'
+  | 'reviewed' 
+  | 'accepted' 
+  | 'rejected' 
+  | 'awaiting_documents'
+  | 'completed'
+  | 'archived';
+
+export type UserRole = 'student' | 'admin' | 'agent';

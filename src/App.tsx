@@ -19,6 +19,8 @@ import StudentApplications from './pages/dashboard/StudentApplications';
 import StudentMessages from './pages/dashboard/StudentMessages';
 import StudentNotifications from './pages/dashboard/StudentNotifications';
 import StudentProfile from './pages/dashboard/StudentProfile';
+import UserMessages from './pages/messaging/UserMessages';
+import ContactUs from './pages/messaging/ContactUs';
 import './App.css';
 
 function App() {
@@ -37,11 +39,13 @@ function App() {
       <Route path="/apply" element={<Apply />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/contact-us" element={<ContactUs />} />
       
       {/* Dashboard Routes */}
       <Route path="/dashboard" element={<StudentDashboard />} />
       <Route path="/dashboard/applications" element={<StudentApplications />} />
       <Route path="/dashboard/messages" element={<StudentMessages />} />
+      <Route path="/dashboard/messages/chat" element={<UserMessages />} />
       <Route path="/dashboard/notifications" element={<StudentNotifications />} />
       <Route path="/dashboard/profile" element={<StudentProfile />} />
       
