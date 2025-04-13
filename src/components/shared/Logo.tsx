@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom';
 
 const Logo = () => {
   return (
-    <Link to="/" className="flex items-center gap-3 rtl:space-x-reverse">
+    <Link to="/" className="flex items-center gap-2 rtl:space-x-reverse">
       <div className="relative flex items-center">
         <div className="flex-shrink-0">
           <img 
             alt="أبواب بلا حدود - Unlimited Doors" 
-            className="h-14 w-auto" 
+            className="h-16 w-auto" 
             src="/lovable-uploads/a0d3407c-db28-452b-9d6f-84824ac5096f.png" 
           />
         </div>
-        <div className="hidden md:block mr-3 rtl:mr-0 rtl:ml-3">
+        <div className="mr-3 rtl:mr-0 rtl:ml-3">
           <h1 className="text-xl font-bold text-white">أبواب بلا حدود</h1>
           <p className="text-xs text-unlimited-light-blue -mt-1">Unlimited Doors - Since 1992</p>
         </div>

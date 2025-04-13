@@ -8,6 +8,7 @@ import Testimonials from '@/components/home/Testimonials';
 import Partners from '@/components/home/Partners';
 import CTASection from '@/components/home/CTASection';
 import { useEffect } from 'react';
+import { Helmet } from 'react-helmet';
 
 const Index = () => {
   useEffect(() => {
@@ -16,6 +17,9 @@ const Index = () => {
 
   return (
     <MainLayout>
+      <Helmet>
+        <html lang="ar" dir="rtl" />
+      </Helmet>
       <Hero />
       <Stats />
       <Services />
