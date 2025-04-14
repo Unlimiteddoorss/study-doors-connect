@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import Sidebar from '@/components/dashboard/Sidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import { useTranslation } from 'react-i18next';
 
 type DashboardLayoutProps = {
   children: ReactNode;
@@ -12,44 +13,65 @@ type DashboardLayoutProps = {
 
 const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProps) => {
   const { pathname } = useLocation();
+  const { t } = useTranslation();
   
   let title = '';
   let breadcrumbs: { label: string; href: string }[] = [];
   
   // Determine page title and breadcrumbs based on path
   if (pathname === '/dashboard') {
-    title = 'لوحة التحكم';
-    breadcrumbs = [{ label: 'الرئيسية', href: '/' }, { label: 'لوحة التحكم', href: '/dashboard' }];
-  } else if (pathname === '/dashboard/applications') {
-    title = 'طلباتي';
+    title = t('admin.dashboard');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/dashboard' },
-      { label: 'طلباتي', href: '/dashboard/applications' },
+      { label: t('admin.breadcrumbs.home'), href: '/' }, 
+      { label: t('admin.breadcrumbs.dashboard'), href: '/dashboard' }
+    ];
+  } else if (pathname === '/dashboard/applications') {
+    title = t('application.myApplications.title');
+    breadcrumbs = [
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.dashboard'), href: '/dashboard' },
+      { label: t('application.myApplications.title'), href: '/dashboard/applications' },
     ];
   } else if (pathname === '/admin') {
-    title = 'لوحة التحكم الإدارية';
-    breadcrumbs = [{ label: 'الرئيسية', href: '/' }, { label: 'لوحة التحكم الإدارية', href: '/admin' }];
-  } else if (pathname === '/admin/students') {
-    title = 'إدارة الطلاب';
+    title = t('admin.breadcrumbs.adminDashboard');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم الإدارية', href: '/admin' },
-      { label: 'إدارة الطلاب', href: '/admin/students' },
+      { label: t('admin.breadcrumbs.home'), href: '/' }, 
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' }
+    ];
+  } else if (pathname === '/admin/students') {
+    title = t('admin.students');
+    breadcrumbs = [
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
+      { label: t('admin.breadcrumbs.students'), href: '/admin/students' },
     ];
   } else if (pathname === '/admin/applications') {
-    title = 'إدارة طلبات التسجيل';
+    title = t('admin.applications');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم الإدارية', href: '/admin' },
-      { label: 'إدارة طلبات التسجيل', href: '/admin/applications' },
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
+      { label: t('admin.breadcrumbs.applications'), href: '/admin/applications' },
     ];
   } else if (pathname === '/admin/programs') {
-    title = 'إدارة البرامج الدراسية';
+    title = t('admin.programs');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم الإدارية', href: '/admin' },
-      { label: 'إدارة البرامج الدراسية', href: '/admin/programs' },
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
+      { label: t('admin.breadcrumbs.programs'), href: '/admin/programs' },
+    ];
+  } else if (pathname === '/admin/agents') {
+    title = t('admin.agents');
+    breadcrumbs = [
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
+      { label: t('admin.breadcrumbs.agents'), href: '/admin/agents' },
+    ];
+  } else if (pathname === '/admin/universities') {
+    title = t('admin.universities');
+    breadcrumbs = [
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
+      { label: t('admin.breadcrumbs.universities'), href: '/admin/universities' },
     ];
   }
   // Add more conditions for different paths

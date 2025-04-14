@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload, X } from 'lucide-react';
+import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -38,6 +37,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 type Student = {
   id: string;
@@ -125,13 +125,6 @@ const initialStudents: Student[] = [
   },
 ];
 
-const statusConfig = {
-  active: { label: 'نشط', color: 'bg-unlimited-success text-white' },
-  inactive: { label: 'غير نشط', color: 'bg-unlimited-gray text-white' },
-  pending: { label: 'قيد التفعيل', color: 'bg-unlimited-warning text-white' },
-  graduated: { label: 'خريج', color: 'bg-unlimited-blue text-white' },
-};
-
 const ManageStudents = () => {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [searchQuery, setSearchQuery] = useState('');
@@ -140,6 +133,7 @@ const ManageStudents = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch = 
@@ -153,98 +147,101 @@ const ManageStudents = () => {
     return matchesSearch && matchesNationality && matchesStatus;
   });
 
-  // Get unique nationalities for filters
   const nationalities = Array.from(new Set(students.map(student => student.nationality)));
 
   const handleAddStudent = () => {
-    // محاكاة إضافة طالب جديد
     toast({
-      title: "تمت إضافة الطالب",
-      description: "تم إضافة الطالب الجديد بنجاح",
+      title: t('admin.toasts.addSuccess'),
+      description: t('admin.toasts.addSuccessDesc'),
     });
     setIsAddDialogOpen(false);
   };
 
   const handleImportStudents = () => {
-    // محاكاة استيراد بيانات الطلاب
     toast({
-      title: "تم استيراد البيانات",
-      description: "تم استيراد بيانات الطلاب بنجاح",
+      title: t('admin.toasts.importSuccess'),
+      description: t('admin.toasts.importSuccessDesc'),
     });
     setIsImportDialogOpen(false);
   };
 
   const handleExportStudents = () => {
-    // محاكاة تصدير بيانات الطلاب
     toast({
-      title: "تم تصدير البيانات",
-      description: "تم تصدير بيانات الطلاب بنجاح",
+      title: t('admin.toasts.exportSuccess'),
+      description: t('admin.toasts.exportSuccessDesc'),
     });
   };
 
   const handleDeleteStudent = (id: string) => {
     setStudents(students.filter((student) => student.id !== id));
     toast({
-      title: "تم حذف الطالب",
-      description: `تم حذف الطالب رقم ${id} بنجاح`,
+      title: t('admin.toasts.deleteSuccess'),
+      description: t('admin.toasts.deleteSuccessDesc'),
     });
+  };
+
+  const statusConfig = {
+    active: { label: t('admin.studentsPage.active'), color: 'bg-unlimited-success text-white' },
+    inactive: { label: t('admin.studentsPage.inactive'), color: 'bg-unlimited-gray text-white' },
+    pending: { label: t('admin.studentsPage.pending'), color: 'bg-unlimited-warning text-white' },
+    graduated: { label: t('admin.studentsPage.graduated'), color: 'bg-unlimited-blue text-white' },
   };
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة الطلاب</h2>
+          <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.studentsPage.title')}</h2>
           
           <div className="flex flex-col md:flex-row gap-2">
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  إضافة طالب
+                  {t('admin.studentsPage.addStudent')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>إضافة طالب جديد</DialogTitle>
+                  <DialogTitle>{t('admin.studentsPage.addNewStudent')}</DialogTitle>
                   <DialogDescription>
-                    أدخل معلومات الطالب الجديد. اضغط على حفظ عند الانتهاء.
+                    {t('admin.studentsPage.addNewStudentDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الاسم</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.name')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">البريد الإلكتروني</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.email')}</label>
                     <Input type="email" className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الهاتف</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.phone')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الجنسية</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.nationality')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">البرنامج</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.program')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الجامعة</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.university')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الوكيل</label>
+                    <label className="text-right col-span-1">{t('admin.studentsPage.agent')}</label>
                     <Input className="col-span-3" />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleAddStudent}>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    حفظ
+                    {t('admin.studentsPage.save')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -254,32 +251,32 @@ const ManageStudents = () => {
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Upload className="h-4 w-4 mr-2" />
-                  استيراد
+                  {t('admin.studentsPage.importStudents')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>استيراد بيانات الطلاب</DialogTitle>
+                  <DialogTitle>{t('admin.studentsPage.importData')}</DialogTitle>
                   <DialogDescription>
-                    يرجى تحميل ملف CSV أو Excel يحتوي على بيانات الطلاب.
+                    {t('admin.studentsPage.importDataDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                     <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
                     <p className="mt-2 text-sm text-unlimited-gray">
-                      اسحب وأفلت الملف هنا أو انقر للاختيار
+                      {t('admin.studentsPage.dragDrop')}
                     </p>
                     <input type="file" className="hidden" />
                     <Button variant="outline" className="mt-4">
-                      اختيار ملف
+                      {t('admin.studentsPage.chooseFile')}
                     </Button>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleImportStudents}>
                     <Upload className="h-4 w-4 mr-2" />
-                    استيراد البيانات
+                    {t('admin.studentsPage.import')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -287,7 +284,7 @@ const ManageStudents = () => {
             
             <Button variant="outline" onClick={handleExportStudents}>
               <Download className="h-4 w-4 mr-2" />
-              تصدير
+              {t('admin.studentsPage.exportStudents')}
             </Button>
           </div>
         </div>
@@ -296,7 +293,7 @@ const ManageStudents = () => {
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
             <Input
-              placeholder="البحث عن طالب..."
+              placeholder={t('admin.studentsPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full md:w-[300px]"
@@ -306,10 +303,10 @@ const ManageStudents = () => {
           <div className="flex flex-row gap-2 items-center">
             <Select value={nationalityFilter} onValueChange={setNationalityFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الجنسية" />
+                <SelectValue placeholder={t('admin.studentsPage.nationality')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الجنسيات</SelectItem>
+                <SelectItem value="all">{t('admin.studentsPage.allNationalities')}</SelectItem>
                 {nationalities.map((nationality) => (
                   <SelectItem key={nationality} value={nationality}>{nationality}</SelectItem>
                 ))}
@@ -318,14 +315,14 @@ const ManageStudents = () => {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t('admin.studentsPage.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="active">نشط</SelectItem>
-                <SelectItem value="inactive">غير نشط</SelectItem>
-                <SelectItem value="pending">قيد التفعيل</SelectItem>
-                <SelectItem value="graduated">خريج</SelectItem>
+                <SelectItem value="all">{t('admin.studentsPage.allStatuses')}</SelectItem>
+                <SelectItem value="active">{t('admin.studentsPage.active')}</SelectItem>
+                <SelectItem value="inactive">{t('admin.studentsPage.inactive')}</SelectItem>
+                <SelectItem value="pending">{t('admin.studentsPage.pending')}</SelectItem>
+                <SelectItem value="graduated">{t('admin.studentsPage.graduated')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -335,22 +332,22 @@ const ManageStudents = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">رقم الطالب</TableHead>
-                <TableHead>الاسم</TableHead>
-                <TableHead className="hidden md:table-cell">البريد الإلكتروني</TableHead>
-                <TableHead className="hidden lg:table-cell">الهاتف</TableHead>
-                <TableHead className="hidden lg:table-cell">الجنسية</TableHead>
-                <TableHead className="hidden lg:table-cell">البرنامج</TableHead>
-                <TableHead className="hidden md:table-cell">الجامعة</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-left">الإجراءات</TableHead>
+                <TableHead className="w-[100px]">{t('admin.studentsPage.tableHeaders.id')}</TableHead>
+                <TableHead>{t('admin.studentsPage.tableHeaders.name')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.studentsPage.tableHeaders.email')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.studentsPage.tableHeaders.phone')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.studentsPage.tableHeaders.nationality')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.studentsPage.tableHeaders.program')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.studentsPage.tableHeaders.university')}</TableHead>
+                <TableHead>{t('admin.studentsPage.tableHeaders.status')}</TableHead>
+                <TableHead className="text-left">{t('admin.studentsPage.tableHeaders.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredStudents.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
-                    لا توجد بيانات متطابقة مع البحث
+                    {t('admin.studentsPage.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -361,7 +358,7 @@ const ManageStudents = () => {
                       <div>
                         <p>{student.name}</p>
                         {student.agentName && (
-                          <p className="text-xs text-unlimited-gray">وكيل: {student.agentName}</p>
+                          <p className="text-xs text-unlimited-gray">{t('admin.studentsPage.agent')}: {student.agentName}</p>
                         )}
                       </div>
                     </TableCell>
@@ -390,18 +387,17 @@ const ManageStudents = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>خيارات الطالب</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('admin.studentsPage.tableHeaders.name')}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>عرض التفاصيل</DropdownMenuItem>
-                            <DropdownMenuItem>عرض الطلبات</DropdownMenuItem>
-                            <DropdownMenuItem>إرسال رسالة</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.actions.view')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.actions.edit')}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-unlimited-danger focus:text-unlimited-danger"
                               onClick={() => handleDeleteStudent(student.id)}
                             >
                               <Trash className="h-4 w-4 mr-2" />
-                              حذف
+                              {t('admin.actions.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

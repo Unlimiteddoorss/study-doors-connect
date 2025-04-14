@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -38,6 +37,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 type Agent = {
   id: string;
@@ -115,12 +115,6 @@ const initialAgents: Agent[] = [
   },
 ];
 
-const statusConfig = {
-  active: { label: 'نشط', color: 'bg-unlimited-success text-white' },
-  inactive: { label: 'غير نشط', color: 'bg-unlimited-gray text-white' },
-  pending: { label: 'قيد التفعيل', color: 'bg-unlimited-warning text-white' },
-};
-
 const ManageAgents = () => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,6 +122,7 @@ const ManageAgents = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch = 
@@ -141,36 +136,33 @@ const ManageAgents = () => {
   });
 
   const handleAddAgent = () => {
-    // محاكاة إضافة وكيل جديد
     toast({
-      title: "تمت إضافة الوكيل",
-      description: "تم إضافة الوكيل الجديد بنجاح",
+      title: t('admin.toasts.addSuccess'),
+      description: t('admin.toasts.addSuccessDesc'),
     });
     setIsAddDialogOpen(false);
   };
 
   const handleImportAgents = () => {
-    // محاكاة استيراد بيانات الوكلاء
     toast({
-      title: "تم استيراد البيانات",
-      description: "تم استيراد بيانات الوكلاء بنجاح",
+      title: t('admin.toasts.importSuccess'),
+      description: t('admin.toasts.importSuccessDesc'),
     });
     setIsImportDialogOpen(false);
   };
 
   const handleExportAgents = () => {
-    // محاكاة تصدير بيانات الوكلاء
     toast({
-      title: "تم تصدير البيانات",
-      description: "تم تصدير بيانات الوكلاء بنجاح",
+      title: t('admin.toasts.exportSuccess'),
+      description: t('admin.toasts.exportSuccessDesc'),
     });
   };
 
   const handleDeleteAgent = (id: string) => {
     setAgents(agents.filter((agent) => agent.id !== id));
     toast({
-      title: "تم حذف الوكيل",
-      description: `تم حذف الوكيل رقم ${id} بنجاح`,
+      title: t('admin.toasts.deleteSuccess'),
+      description: t('admin.toasts.deleteSuccessDesc'),
     });
   };
 
@@ -189,59 +181,65 @@ const ManageAgents = () => {
     const agent = agents.find((a) => a.id === id);
     if (agent) {
       toast({
-        title: "تم تغيير الحالة",
-        description: `تم تغيير حالة الوكيل ${agent.name} بنجاح`,
+        title: t('admin.toasts.statusChange'),
+        description: t('admin.toasts.statusChangeDesc'),
       });
     }
+  };
+
+  const statusConfig = {
+    active: { label: t('admin.agentsPage.active'), color: 'bg-unlimited-success text-white' },
+    inactive: { label: t('admin.agentsPage.inactive'), color: 'bg-unlimited-gray text-white' },
+    pending: { label: t('admin.agentsPage.pending'), color: 'bg-unlimited-warning text-white' },
   };
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة الوكلاء</h2>
+          <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.agentsPage.title')}</h2>
           
           <div className="flex flex-col md:flex-row gap-2">
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  إضافة وكيل
+                  {t('admin.agentsPage.addAgent')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>إضافة وكيل جديد</DialogTitle>
+                  <DialogTitle>{t('admin.agentsPage.addNewAgent')}</DialogTitle>
                   <DialogDescription>
-                    أدخل معلومات الوكيل الجديد. اضغط على حفظ عند الانتهاء.
+                    {t('admin.agentsPage.addNewAgentDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الاسم</label>
+                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.name')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">البريد الإلكتروني</label>
+                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.email')}</label>
                     <Input type="email" className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الهاتف</label>
+                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.phone')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الدولة</label>
+                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.country')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">نسبة العمولة (%)</label>
+                    <label className="text-right col-span-1">{t('admin.agentsPage.commissionRate')}</label>
                     <Input type="number" className="col-span-3" />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleAddAgent}>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    حفظ
+                    {t('admin.studentsPage.save')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -251,32 +249,32 @@ const ManageAgents = () => {
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Upload className="h-4 w-4 mr-2" />
-                  استيراد
+                  {t('admin.agentsPage.importAgents')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>استيراد بيانات الوكلاء</DialogTitle>
+                  <DialogTitle>{t('admin.agentsPage.importData')}</DialogTitle>
                   <DialogDescription>
-                    يرجى تحميل ملف CSV أو Excel يحتوي على بيانات الوكلاء.
+                    {t('admin.agentsPage.importDataDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                     <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
                     <p className="mt-2 text-sm text-unlimited-gray">
-                      اسحب وأفلت الملف هنا أو انقر للاختيار
+                      {t('admin.studentsPage.dragDrop')}
                     </p>
                     <input type="file" className="hidden" />
                     <Button variant="outline" className="mt-4">
-                      اختيار ملف
+                      {t('admin.studentsPage.chooseFile')}
                     </Button>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleImportAgents}>
                     <Upload className="h-4 w-4 mr-2" />
-                    استيراد البيانات
+                    {t('admin.studentsPage.import')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -284,7 +282,7 @@ const ManageAgents = () => {
             
             <Button variant="outline" onClick={handleExportAgents}>
               <Download className="h-4 w-4 mr-2" />
-              تصدير
+              {t('admin.agentsPage.exportAgents')}
             </Button>
           </div>
         </div>
@@ -293,7 +291,7 @@ const ManageAgents = () => {
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
             <Input
-              placeholder="البحث عن وكيل..."
+              placeholder={t('admin.agentsPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full md:w-[300px]"
@@ -302,13 +300,13 @@ const ManageAgents = () => {
           
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="الحالة" />
+              <SelectValue placeholder={t('admin.agentsPage.status')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">جميع الحالات</SelectItem>
-              <SelectItem value="active">نشط</SelectItem>
-              <SelectItem value="inactive">غير نشط</SelectItem>
-              <SelectItem value="pending">قيد التفعيل</SelectItem>
+              <SelectItem value="all">{t('admin.agentsPage.allStatuses')}</SelectItem>
+              <SelectItem value="active">{t('admin.agentsPage.active')}</SelectItem>
+              <SelectItem value="inactive">{t('admin.agentsPage.inactive')}</SelectItem>
+              <SelectItem value="pending">{t('admin.agentsPage.pending')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -317,23 +315,23 @@ const ManageAgents = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">رقم الوكيل</TableHead>
-                <TableHead>الاسم</TableHead>
-                <TableHead className="hidden md:table-cell">البريد الإلكتروني</TableHead>
-                <TableHead className="hidden lg:table-cell">الهاتف</TableHead>
-                <TableHead className="hidden lg:table-cell">الدولة</TableHead>
-                <TableHead className="hidden md:table-cell">الطلاب</TableHead>
-                <TableHead className="hidden md:table-cell">الطلبات</TableHead>
-                <TableHead>العمولة</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-left">الإجراءات</TableHead>
+                <TableHead className="w-[100px]">{t('admin.agentsPage.tableHeaders.id')}</TableHead>
+                <TableHead>{t('admin.agentsPage.tableHeaders.name')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.agentsPage.tableHeaders.email')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.agentsPage.tableHeaders.phone')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.agentsPage.tableHeaders.country')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.agentsPage.tableHeaders.students')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.agentsPage.tableHeaders.applications')}</TableHead>
+                <TableHead>{t('admin.agentsPage.tableHeaders.commission')}</TableHead>
+                <TableHead>{t('admin.agentsPage.tableHeaders.status')}</TableHead>
+                <TableHead className="text-left">{t('admin.agentsPage.tableHeaders.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredAgents.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
-                    لا توجد بيانات متطابقة مع البحث
+                    {t('admin.agentsPage.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -367,22 +365,22 @@ const ManageAgents = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>خيارات الوكيل</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('admin.agentsPage.agentOptions')}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => toggleAgentStatus(agent.id)}>
-                              {agent.status === 'active' ? 'تعطيل الحساب' : 'تفعيل الحساب'}
+                              {agent.status === 'active' ? t('admin.agentsPage.disableAccount') : t('admin.agentsPage.enableAccount')}
                             </DropdownMenuItem>
-                            <DropdownMenuItem>عرض طلبات الوكيل</DropdownMenuItem>
-                            <DropdownMenuItem>عرض طلاب الوكيل</DropdownMenuItem>
-                            <DropdownMenuItem>تعديل نسبة العمولة</DropdownMenuItem>
-                            <DropdownMenuItem>إرسال رسالة</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.agentsPage.viewAgentRequests')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.agentsPage.viewAgentStudents')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.agentsPage.editCommissionRate')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.agentsPage.sendMessage')}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-unlimited-danger focus:text-unlimited-danger"
                               onClick={() => handleDeleteAgent(agent.id)}
                             >
                               <Trash className="h-4 w-4 mr-2" />
-                              حذف
+                              {t('admin.agentsPage.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

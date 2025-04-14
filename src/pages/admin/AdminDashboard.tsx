@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, BarChart, LineChart, PieChart } from "@/components/ui/chart";
 import { RecentApplications } from "@/components/admin/RecentApplications";
 import { PendingTasks } from "@/components/admin/PendingTasks";
+import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const { t } = useTranslation();
 
   const applicationData = {
     daily: [

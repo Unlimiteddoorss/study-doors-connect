@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 type University = {
   id: string;
@@ -115,11 +116,6 @@ const initialUniversities: University[] = [
   },
 ];
 
-const statusConfig = {
-  active: { label: 'نشط', color: 'bg-unlimited-success text-white' },
-  inactive: { label: 'غير نشط', color: 'bg-unlimited-gray text-white' },
-};
-
 const ManageUniversities = () => {
   const [universities, setUniversities] = useState<University[]>(initialUniversities);
   const [searchQuery, setSearchQuery] = useState('');
@@ -128,6 +124,7 @@ const ManageUniversities = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const filteredUniversities = universities.filter((university) => {
     const matchesSearch = 
@@ -145,36 +142,33 @@ const ManageUniversities = () => {
   const countries = Array.from(new Set(universities.map(university => university.country)));
 
   const handleAddUniversity = () => {
-    // محاكاة إضافة جامعة جديدة
     toast({
-      title: "تمت إضافة الجامعة",
-      description: "تم إضافة الجامعة الجديدة بنجاح",
+      title: t('admin.toasts.addSuccess'),
+      description: t('admin.toasts.addSuccessDesc'),
     });
     setIsAddDialogOpen(false);
   };
 
   const handleImportUniversities = () => {
-    // محاكاة استيراد بيانات الجامعات
     toast({
-      title: "تم استيراد البيانات",
-      description: "تم استيراد بيانات الجامعات بنجاح",
+      title: t('admin.toasts.importSuccess'),
+      description: t('admin.toasts.importSuccessDesc'),
     });
     setIsImportDialogOpen(false);
   };
 
   const handleExportUniversities = () => {
-    // محاكاة تصدير بيانات الجامعات
     toast({
-      title: "تم تصدير البيانات",
-      description: "تم تصدير بيانات الجامعات بنجاح",
+      title: t('admin.toasts.exportSuccess'),
+      description: t('admin.toasts.exportSuccessDesc'),
     });
   };
 
   const handleDeleteUniversity = (id: string) => {
     setUniversities(universities.filter((university) => university.id !== id));
     toast({
-      title: "تم حذف الجامعة",
-      description: `تم حذف الجامعة رقم ${id} بنجاح`,
+      title: t('admin.toasts.deleteSuccess'),
+      description: t('admin.toasts.deleteSuccessDesc'),
     });
   };
 
@@ -193,65 +187,70 @@ const ManageUniversities = () => {
     const university = universities.find((u) => u.id === id);
     if (university) {
       toast({
-        title: "تم تغيير الحالة",
-        description: `تم تغيير حالة الجامعة ${university.name} بنجاح`,
+        title: t('admin.toasts.statusChange'),
+        description: t('admin.toasts.statusChangeDesc'),
       });
     }
+  };
+
+  const statusConfig = {
+    active: { label: t('admin.universitiesPage.active'), color: 'bg-unlimited-success text-white' },
+    inactive: { label: t('admin.universitiesPage.inactive'), color: 'bg-unlimited-gray text-white' },
   };
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة الجامعات</h2>
+          <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.universitiesPage.title')}</h2>
           
           <div className="flex flex-col md:flex-row gap-2">
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
-                  إضافة جامعة
+                  {t('admin.universitiesPage.addUniversity')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                  <DialogTitle>إضافة جامعة جديدة</DialogTitle>
+                  <DialogTitle>{t('admin.universitiesPage.addNewUniversity')}</DialogTitle>
                   <DialogDescription>
-                    أدخل معلومات الجامعة الجديدة. اضغط على حفظ عند الانتهاء.
+                    {t('admin.universitiesPage.addNewUniversityDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الاسم (بالإنجليزية)</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.nameEn')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الاسم (بالعربية)</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.nameAr')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الدولة</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.country')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">المدينة</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.city')}</label>
                     <Input className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الموقع الإلكتروني</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.website')}</label>
                     <Input type="url" className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">التصنيف العالمي</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.ranking')}</label>
                     <Input type="number" className="col-span-3" />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">شعار الجامعة</label>
+                    <label className="text-right col-span-1">{t('admin.universitiesPage.universityLogo')}</label>
                     <div className="col-span-3">
                       <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
                         <Button variant="outline" className="w-full">
                           <Upload className="h-4 w-4 mr-2" />
-                          اختر ملفاً
+                          {t('admin.studentsPage.chooseFile')}
                         </Button>
                       </div>
                     </div>
@@ -260,7 +259,7 @@ const ManageUniversities = () => {
                 <DialogFooter>
                   <Button type="submit" onClick={handleAddUniversity}>
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    حفظ
+                    {t('admin.studentsPage.save')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -270,32 +269,32 @@ const ManageUniversities = () => {
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Upload className="h-4 w-4 mr-2" />
-                  استيراد
+                  {t('admin.universitiesPage.importUniversities')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>استيراد بيانات الجامعات</DialogTitle>
+                  <DialogTitle>{t('admin.universitiesPage.importData')}</DialogTitle>
                   <DialogDescription>
-                    يرجى تحميل ملف CSV أو Excel يحتوي على بيانات الجامعات.
+                    {t('admin.universitiesPage.importDataDesc')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
                     <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
                     <p className="mt-2 text-sm text-unlimited-gray">
-                      اسحب وأفلت الملف هنا أو انقر للاختيار
+                      {t('admin.studentsPage.dragDrop')}
                     </p>
                     <input type="file" className="hidden" />
                     <Button variant="outline" className="mt-4">
-                      اختيار ملف
+                      {t('admin.studentsPage.chooseFile')}
                     </Button>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleImportUniversities}>
                     <Upload className="h-4 w-4 mr-2" />
-                    استيراد البيانات
+                    {t('admin.studentsPage.import')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -303,7 +302,7 @@ const ManageUniversities = () => {
             
             <Button variant="outline" onClick={handleExportUniversities}>
               <Download className="h-4 w-4 mr-2" />
-              تصدير
+              {t('admin.universitiesPage.exportUniversities')}
             </Button>
           </div>
         </div>
@@ -312,7 +311,7 @@ const ManageUniversities = () => {
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
             <Input
-              placeholder="البحث عن جامعة..."
+              placeholder={t('admin.universitiesPage.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full md:w-[300px]"
@@ -322,10 +321,10 @@ const ManageUniversities = () => {
           <div className="flex flex-row gap-2 items-center">
             <Select value={countryFilter} onValueChange={setCountryFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الدولة" />
+                <SelectValue placeholder={t('admin.universitiesPage.country')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الدول</SelectItem>
+                <SelectItem value="all">{t('admin.universitiesPage.allCountries')}</SelectItem>
                 {countries.map((country) => (
                   <SelectItem key={country} value={country}>{country}</SelectItem>
                 ))}
@@ -334,12 +333,12 @@ const ManageUniversities = () => {
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t('admin.universitiesPage.status')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="active">نشط</SelectItem>
-                <SelectItem value="inactive">غير نشط</SelectItem>
+                <SelectItem value="all">{t('admin.universitiesPage.allStatuses')}</SelectItem>
+                <SelectItem value="active">{t('admin.universitiesPage.active')}</SelectItem>
+                <SelectItem value="inactive">{t('admin.universitiesPage.inactive')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -349,22 +348,22 @@ const ManageUniversities = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">رقم الجامعة</TableHead>
-                <TableHead>اسم الجامعة</TableHead>
-                <TableHead className="hidden md:table-cell">الدولة</TableHead>
-                <TableHead className="hidden lg:table-cell">المدينة</TableHead>
-                <TableHead className="hidden lg:table-cell">عدد البرامج</TableHead>
-                <TableHead className="hidden md:table-cell">عدد الطلاب</TableHead>
-                <TableHead className="hidden md:table-cell">التصنيف</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-left">الإجراءات</TableHead>
+                <TableHead className="w-[100px]">{t('admin.universitiesPage.tableHeaders.id')}</TableHead>
+                <TableHead>{t('admin.universitiesPage.tableHeaders.name')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.country')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.universitiesPage.tableHeaders.city')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('admin.universitiesPage.tableHeaders.programsCount')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.studentsCount')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.ranking')}</TableHead>
+                <TableHead>{t('admin.universitiesPage.tableHeaders.status')}</TableHead>
+                <TableHead className="text-left">{t('admin.universitiesPage.tableHeaders.actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUniversities.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
-                    لا توجد بيانات متطابقة مع البحث
+                    {t('admin.universitiesPage.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -402,21 +401,24 @@ const ManageUniversities = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>خيارات الجامعة</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('admin.universitiesPage.universityOptions')}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => toggleUniversityStatus(university.id)}>
-                              {university.status === 'active' ? 'تعطيل الجامعة' : 'تفعيل الجامعة'}
+                              {university.status === 'active' ? 
+                                t('admin.universitiesPage.disableUniversity') : 
+                                t('admin.universitiesPage.enableUniversity')
+                              }
                             </DropdownMenuItem>
-                            <DropdownMenuItem>عرض البرامج</DropdownMenuItem>
-                            <DropdownMenuItem>عرض الطلاب</DropdownMenuItem>
-                            <DropdownMenuItem>زيارة الموقع الرسمي</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.universitiesPage.viewPrograms')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.universitiesPage.viewStudents')}</DropdownMenuItem>
+                            <DropdownMenuItem>{t('admin.universitiesPage.visitWebsite')}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-unlimited-danger focus:text-unlimited-danger"
                               onClick={() => handleDeleteUniversity(university.id)}
                             >
                               <Trash className="h-4 w-4 mr-2" />
-                              حذف
+                              {t('admin.actions.delete')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
