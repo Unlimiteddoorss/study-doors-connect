@@ -1,0 +1,45 @@
+
+{
+  "site": {
+    "name": "أبواب بلا حدود",
+    "tagline": "Unlimited Doors - Since 1992"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "programs": "البرامج الدراسية",
+    "universities": "الجامعات",
+    "about": "من نحن",
+    "contact": "تواصل معنا",
+    "apply": "طلب التسجيل"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "myAccount": "حسابي",
+    "logout": "تسجيل الخروج"
+  },
+  "hero": {
+    "title": "فتح أبواب المستقبل للطلاب حول العالم",
+    "subtitle": "نساعدك في اختيار الجامعة المناسبة والبرنامج المثالي لمستقبلك الأكاديمي والمهني",
+    "exploreCta": "استكشف البرامج",
+    "applyCta": "تقديم طلب التسجيل",
+    "search": {
+      "title": "ابحث عن برنامجك المثالي",
+      "country": "الدولة",
+      "selectCountry": "اختر الدولة",
+      "level": "مستوى الدراسة",
+      "selectLevel": "اختر المستوى",
+      "major": "التخصص",
+      "selectMajor": "اختر التخصص",
+      "button": "بحث"
+    }
+  },
+  "stats": {
+    "successfulStudents": "طلاب ناجحون",
+    "partnerUniversities": "جامعات شريكة",
+    "availableCountries": "دول متاحة",
+    "programs": "برامج دراسية",
+    "title": "أرقامنا تتحدث عنا",
+    "subtitle": "إنجازاتنا في مجال التعليم العالي على مدى سنوات"
+  }
+}

@@ -1,0 +1,45 @@
+
+{
+  "site": {
+    "name": "Unlimited Doors",
+    "tagline": "Unlimited Doors - Since 1992"
+  },
+  "nav": {
+    "home": "Home",
+    "programs": "Programs",
+    "universities": "Universities",
+    "about": "About",
+    "contact": "Contact",
+    "apply": "Apply Now"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "myAccount": "My Account",
+    "logout": "Logout"
+  },
+  "hero": {
+    "title": "Opening Future Doors for Students Worldwide",
+    "subtitle": "We help you choose the right university and ideal program for your academic and professional future",
+    "exploreCta": "Explore Programs",
+    "applyCta": "Apply Now",
+    "search": {
+      "title": "Find Your Perfect Program",
+      "country": "Country",
+      "selectCountry": "Select Country",
+      "level": "Study Level",
+      "selectLevel": "Select Level",
+      "major": "Major",
+      "selectMajor": "Select Major",
+      "button": "Search"
+    }
+  },
+  "stats": {
+    "successfulStudents": "Successful Students",
+    "partnerUniversities": "Partner Universities",
+    "availableCountries": "Available Countries",
+    "programs": "Study Programs",
+    "title": "Our Numbers Speak for Themselves",
+    "subtitle": "Our achievements in higher education over the years"
+  }
+}
