@@ -38,6 +38,8 @@ import {
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { FormDialog } from '@/components/admin/FormDialog';
 
 type Agent = {
   id: string;
@@ -117,23 +119,24 @@ const initialAgents: Agent[] = [
 
 const ManageAgents = () => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const filteredAgents = agents.filter((agent) => {
-    const matchesSearch = 
-      agent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      agent.id.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesStatus = statusFilter === 'all' || agent.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const {
+    searchQuery,
+    setSearchQuery,
+    filters,
+    setFilters,
+    filteredItems: filteredAgents
+  } = useTableFilters(
+    initialAgents,
+    ['name', 'email', 'id'],
+    [
+      { field: 'status', defaultValue: 'all' }
+    ]
+  );
 
   const handleAddAgent = () => {
     toast({
@@ -298,7 +301,7 @@ const ManageAgents = () => {
             />
           </div>
           
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder={t('admin.agentsPage.status')} />
             </SelectTrigger>
@@ -392,6 +395,38 @@ const ManageAgents = () => {
             </TableBody>
           </Table>
         </div>
+
+        <FormDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+          title={t('admin.agentsPage.addNewAgent')}
+          description={t('admin.agentsPage.addNewAgentDesc')}
+          onSubmit={handleAddAgent}
+          submitLabel={t('admin.studentsPage.save')}
+        >
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.name')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.email')}</label>
+            <Input type="email" className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.phone')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.country')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.agentsPage.commissionRate')}</label>
+            <Input type="number" className="col-span-3" />
+          </div>
+        </FormDialog>
+
+        
       </div>
     </DashboardLayout>
   );

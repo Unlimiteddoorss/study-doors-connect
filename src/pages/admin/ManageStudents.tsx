@@ -4,40 +4,10 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { FormDialog } from '@/components/admin/FormDialog';
 
 type Student = {
   id: string;
@@ -126,28 +96,25 @@ const initialStudents: Student[] = [
 ];
 
 const ManageStudents = () => {
-  const [students, setStudents] = useState<Student[]>(initialStudents);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [nationalityFilter, setNationalityFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch = 
-      student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.id.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesNationality = nationalityFilter === 'all' || student.nationality === nationalityFilter;
-    const matchesStatus = statusFilter === 'all' || student.status === statusFilter;
-    
-    return matchesSearch && matchesNationality && matchesStatus;
-  });
-
-  const nationalities = Array.from(new Set(students.map(student => student.nationality)));
+  const {
+    searchQuery,
+    setSearchQuery,
+    filters,
+    setFilters,
+    filteredItems: filteredStudents
+  } = useTableFilters(
+    initialStudents,
+    ['name', 'email', 'id'],
+    [
+      { field: 'nationality', defaultValue: 'all' },
+      { field: 'status', defaultValue: 'all' }
+    ]
+  );
 
   const handleAddStudent = () => {
     toast({
@@ -301,7 +268,7 @@ const ManageStudents = () => {
           </div>
           
           <div className="flex flex-row gap-2 items-center">
-            <Select value={nationalityFilter} onValueChange={setNationalityFilter}>
+            <Select value={filters.nationality} onValueChange={(value) => setFilters({ ...filters, nationality: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('admin.studentsPage.nationality')} />
               </SelectTrigger>
@@ -313,7 +280,7 @@ const ManageStudents = () => {
               </SelectContent>
             </Select>
             
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('admin.studentsPage.status')} />
               </SelectTrigger>

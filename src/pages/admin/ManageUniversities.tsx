@@ -1,27 +1,12 @@
-
 import { useState } from 'react';
 import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { FormDialog } from '@/components/admin/FormDialog';
 import {
   Table,
   TableBody,
@@ -37,8 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
 
 type University = {
   id: string;
@@ -117,29 +101,27 @@ const initialUniversities: University[] = [
 ];
 
 const ManageUniversities = () => {
-  const [universities, setUniversities] = useState<University[]>(initialUniversities);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [countryFilter, setCountryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const filteredUniversities = universities.filter((university) => {
-    const matchesSearch = 
-      university.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      university.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      university.country.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesCountry = countryFilter === 'all' || university.country === countryFilter;
-    const matchesStatus = statusFilter === 'all' || university.status === statusFilter;
-    
-    return matchesSearch && matchesCountry && matchesStatus;
-  });
+  const {
+    searchQuery,
+    setSearchQuery,
+    filters,
+    setFilters,
+    filteredItems: filteredUniversities
+  } = useTableFilters(
+    initialUniversities,
+    ['name', 'nameAr', 'country'],
+    [
+      { field: 'country', defaultValue: 'all' },
+      { field: 'status', defaultValue: 'all' }
+    ]
+  );
 
-  // Get unique countries for filters
-  const countries = Array.from(new Set(universities.map(university => university.country)));
+  const countries = Array.from(new Set(initialUniversities.map(university => university.country)));
 
   const handleAddUniversity = () => {
     toast({
@@ -165,7 +147,7 @@ const ManageUniversities = () => {
   };
 
   const handleDeleteUniversity = (id: string) => {
-    setUniversities(universities.filter((university) => university.id !== id));
+    // setUniversities(universities.filter((university) => university.id !== id));
     toast({
       title: t('admin.toasts.deleteSuccess'),
       description: t('admin.toasts.deleteSuccessDesc'),
@@ -173,24 +155,24 @@ const ManageUniversities = () => {
   };
 
   const toggleUniversityStatus = (id: string) => {
-    setUniversities(
-      universities.map((university) =>
-        university.id === id
-          ? {
-              ...university,
-              status: university.status === 'active' ? 'inactive' : 'active',
-            }
-          : university
-      )
-    );
+    // setUniversities(
+    //   universities.map((university) =>
+    //     university.id === id
+    //       ? {
+    //           ...university,
+    //           status: university.status === 'active' ? 'inactive' : 'active',
+    //         }
+    //       : university
+    //   )
+    // );
     
-    const university = universities.find((u) => u.id === id);
-    if (university) {
+    // const university = universities.find((u) => u.id === id);
+    // if (university) {
       toast({
         title: t('admin.toasts.statusChange'),
         description: t('admin.toasts.statusChangeDesc'),
       });
-    }
+    // }
   };
 
   const statusConfig = {
@@ -205,100 +187,15 @@ const ManageUniversities = () => {
           <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.universitiesPage.title')}</h2>
           
           <div className="flex flex-col md:flex-row gap-2">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('admin.universitiesPage.addUniversity')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.universitiesPage.addNewUniversity')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.universitiesPage.addNewUniversityDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.nameEn')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.nameAr')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.country')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.city')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.website')}</label>
-                    <Input type="url" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.ranking')}</label>
-                    <Input type="number" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.universitiesPage.universityLogo')}</label>
-                    <div className="col-span-3">
-                      <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
-                        <Button variant="outline" className="w-full">
-                          <Upload className="h-4 w-4 mr-2" />
-                          {t('admin.studentsPage.chooseFile')}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleAddUniversity}>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.save')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              {t('admin.universitiesPage.addUniversity')}
+            </Button>
             
-            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('admin.universitiesPage.importUniversities')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.universitiesPage.importData')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.universitiesPage.importDataDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
-                    <p className="mt-2 text-sm text-unlimited-gray">
-                      {t('admin.studentsPage.dragDrop')}
-                    </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      {t('admin.studentsPage.chooseFile')}
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleImportUniversities}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.import')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
+              <Upload className="h-4 w-4 mr-2" />
+              {t('admin.universitiesPage.importUniversities')}
+            </Button>
             
             <Button variant="outline" onClick={handleExportUniversities}>
               <Download className="h-4 w-4 mr-2" />
@@ -319,7 +216,7 @@ const ManageUniversities = () => {
           </div>
           
           <div className="flex flex-row gap-2 items-center">
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
+            <Select value={filters.country} onValueChange={(value) => setFilters({...filters, country: value})}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('admin.universitiesPage.country')} />
               </SelectTrigger>
@@ -331,7 +228,7 @@ const ManageUniversities = () => {
               </SelectContent>
             </Select>
             
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={filters.status} onValueChange={(value) => setFilters({...filters, status: value})}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder={t('admin.universitiesPage.status')} />
               </SelectTrigger>
@@ -430,6 +327,81 @@ const ManageUniversities = () => {
             </TableBody>
           </Table>
         </div>
+
+        <FormDialog
+          open={isAddDialogOpen}
+          onOpenChange={setIsAddDialogOpen}
+          title={t('admin.universitiesPage.addNewUniversity')}
+          description={t('admin.universitiesPage.addNewUniversityDesc')}
+          onSubmit={handleAddUniversity}
+          submitLabel={t('admin.studentsPage.save')}
+        >
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.nameEn')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.nameAr')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.country')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.city')}</label>
+            <Input className="col-span-3" />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.website')}</label>
+            <Input type="url" className="col-span-3" />
+          </div>
+           <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.ranking')}</label>
+            <Input type="number" className="col-span-3" />
+          </div>
+           <div className="grid grid-cols-4 items-center gap-4">
+            <label className="text-right col-span-1">{t('admin.universitiesPage.universityLogo')}</label>
+            <div className="col-span-3">
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+                <Button variant="outline" className="w-full">
+                  <Upload className="h-4 w-4 mr-2" />
+                  {t('admin.studentsPage.chooseFile')}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </FormDialog>
+
+        <Dialog open={isImportDialogOpen} onOpenChange={() => setIsImportDialogOpen(false)}>
+          
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{t('admin.universitiesPage.importData')}</DialogTitle>
+              <DialogDescription>
+                {t('admin.universitiesPage.importDataDesc')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
+                <p className="mt-2 text-sm text-unlimited-gray">
+                  {t('admin.studentsPage.dragDrop')}
+                </p>
+                <input type="file" className="hidden" />
+                <Button variant="outline" className="mt-4">
+                  {t('admin.studentsPage.chooseFile')}
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" onClick={handleImportUniversities}>
+                <Upload className="h-4 w-4 mr-2" />
+                {t('admin.studentsPage.import')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
