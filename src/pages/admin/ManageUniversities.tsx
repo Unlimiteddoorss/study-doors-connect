@@ -147,7 +147,6 @@ const ManageUniversities = () => {
   };
 
   const handleDeleteUniversity = (id: string) => {
-    // setUniversities(universities.filter((university) => university.id !== id));
     toast({
       title: t('admin.toasts.deleteSuccess'),
       description: t('admin.toasts.deleteSuccessDesc'),
@@ -155,24 +154,10 @@ const ManageUniversities = () => {
   };
 
   const toggleUniversityStatus = (id: string) => {
-    // setUniversities(
-    //   universities.map((university) =>
-    //     university.id === id
-    //       ? {
-    //           ...university,
-    //           status: university.status === 'active' ? 'inactive' : 'active',
-    //         }
-    //       : university
-    //   )
-    // );
-    
-    // const university = universities.find((u) => u.id === id);
-    // if (university) {
-      toast({
-        title: t('admin.toasts.statusChange'),
-        description: t('admin.toasts.statusChangeDesc'),
-      });
-    // }
+    toast({
+      title: t('admin.toasts.statusChange'),
+      description: t('admin.toasts.statusChangeDesc'),
+    });
   };
 
   const statusConfig = {
@@ -241,7 +226,7 @@ const ManageUniversities = () => {
           </div>
         </div>
         
-        <div className="rounded-md border">
+        <div className="rounded-md border shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>

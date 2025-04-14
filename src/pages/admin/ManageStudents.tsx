@@ -4,98 +4,65 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
-import { FormDialog } from '@/components/admin/FormDialog';
 
-type Student = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  nationality: string;
-  program: string;
-  university: string;
-  status: 'active' | 'inactive' | 'pending' | 'graduated';
-  registrationDate: string;
-  agentName?: string;
-};
-
-const initialStudents: Student[] = [
-  {
-    id: 'STD-001',
-    name: 'أحمد محمد',
-    email: 'ahmed@example.com',
-    phone: '+966 50 123 4567',
-    nationality: 'سعودي',
-    program: 'الطب البشري',
-    university: 'جامعة إسطنبول',
-    status: 'active',
-    registrationDate: '2023-01-15',
-    agentName: 'محمد العلي',
-  },
-  {
-    id: 'STD-002',
-    name: 'سارة عبدالله',
-    email: 'sara@example.com',
-    phone: '+966 55 987 6543',
-    nationality: 'سعودية',
-    program: 'طب الأسنان',
-    university: 'جامعة وارسو',
-    status: 'active',
-    registrationDate: '2023-02-20',
-  },
-  {
-    id: 'STD-003',
-    name: 'خالد عمر',
-    email: 'khaled@example.com',
-    phone: '+971 50 222 3333',
-    nationality: 'إماراتي',
-    program: 'هندسة البرمجيات',
-    university: 'جامعة براغ',
-    status: 'inactive',
-    registrationDate: '2023-03-05',
-    agentName: 'خالد الأحمد',
-  },
-  {
-    id: 'STD-004',
-    name: 'فاطمة علي',
-    email: 'fatima@example.com',
-    phone: '+965 90 111 2222',
-    nationality: 'كويتية',
-    program: 'علوم الحاسوب',
-    university: 'جامعة بودابست',
-    status: 'active',
-    registrationDate: '2023-03-15',
-  },
-  {
-    id: 'STD-005',
-    name: 'محمد أحمد',
-    email: 'mohammed@example.com',
-    phone: '+20 10 555 6666',
-    nationality: 'مصري',
-    program: 'الصيدلة',
-    university: 'جامعة أنقرة',
-    status: 'graduated',
-    registrationDate: '2022-09-10',
-    agentName: 'سارة المحمود',
-  },
-  {
-    id: 'STD-006',
-    name: 'نورة سعيد',
-    email: 'noura@example.com',
-    phone: '+962 77 888 9999',
-    nationality: 'أردنية',
-    program: 'إدارة الأعمال',
-    university: 'جامعة إسطنبول',
-    status: 'pending',
-    registrationDate: '2023-04-01',
-    agentName: 'فهد الراشد',
-  },
+const nationalities = [
+  'سعودي',
+  'إماراتي',
+  'كويتي',
+  'قطري',
+  'بحريني',
+  'عماني',
+  'مصري',
+  'أردني',
+  'لبناني',
+  'سوري',
+  'عراقي',
+  'يمني',
+  'فلسطيني',
+  'سوداني',
+  'مغربي',
+  'تونسي',
+  'جزائري',
+  'ليبي'
 ];
 
 const ManageStudents = () => {
+  const [students, setStudents] = useState(initialStudents);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
