@@ -41,5 +41,60 @@
     "programs": "Study Programs",
     "title": "Our Numbers Speak for Themselves",
     "subtitle": "Our achievements in higher education over the years"
+  },
+  "application": {
+    "title": "Submit Application",
+    "subtitle": "Apply to the best universities worldwide",
+    "tabs": {
+      "newApplication": "New Application",
+      "browsePrograms": "Browse Programs",
+      "myApplications": "My Applications"
+    },
+    "search": {
+      "placeholder": "Search for program or university...",
+      "country": "Country",
+      "level": "Study Level",
+      "language": "Study Language",
+      "resetFilters": "Reset Filters",
+      "allCountries": "All Countries",
+      "allLevels": "All Levels",
+      "allLanguages": "All Languages"
+    },
+    "programCard": {
+      "applyNow": "Apply for this Program",
+      "duration": "Duration",
+      "tuitionFees": "Tuition Fees"
+    },
+    "noPrograms": {
+      "title": "No Matching Programs",
+      "description": "No programs match your current search criteria. Please adjust your search options or reset filters.",
+      "resetFilters": "Reset Filters"
+    },
+    "myApplications": {
+      "title": "My Applications",
+      "subtitle": "Track your application status and updates",
+      "submission": "Submission Date",
+      "notes": "Notes",
+      "completeApplication": "Complete Application",
+      "viewDetails": "View Details",
+      "empty": {
+        "title": "No Current Applications",
+        "description": "You haven't submitted any applications yet. Browse available programs and apply now.",
+        "browsePrograms": "Browse Programs"
+      }
+    },
+    "status": {
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "review": "Under Review",
+      "incomplete": "Incomplete",
+      "processing": "Processing"
+    },
+    "notifications": {
+      "applyStart": "Application Started",
+      "applyStartDesc": "Application process started successfully",
+      "continueApplication": "Continue Application",
+      "continueApplicationDesc": "You can now continue completing your application"
+    }
   }
 }

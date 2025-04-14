@@ -41,5 +41,60 @@
     "programs": "برامج دراسية",
     "title": "أرقامنا تتحدث عنا",
     "subtitle": "إنجازاتنا في مجال التعليم العالي على مدى سنوات"
+  },
+  "application": {
+    "title": "تقديم طلب التحاق",
+    "subtitle": "قدم طلبك للالتحاق بأفضل الجامعات العالمية",
+    "tabs": {
+      "newApplication": "تقديم طلب جديد",
+      "browsePrograms": "استعراض البرامج",
+      "myApplications": "طلباتي"
+    },
+    "search": {
+      "placeholder": "ابحث عن برنامج أو جامعة...",
+      "country": "البلد",
+      "level": "المستوى الدراسي",
+      "language": "لغة الدراسة",
+      "resetFilters": "إعادة تعيين",
+      "allCountries": "جميع البلدان",
+      "allLevels": "جميع المستويات",
+      "allLanguages": "جميع اللغات"
+    },
+    "programCard": {
+      "applyNow": "التقديم على هذا البرنامج",
+      "duration": "مدة الدراسة",
+      "tuitionFees": "الرسوم الدراسية"
+    },
+    "noPrograms": {
+      "title": "لا توجد برامج مطابقة",
+      "description": "لا يوجد برامج تطابق معايير البحث الحالية. يرجى تعديل خيارات البحث أو إعادة تعيين الفلاتر.",
+      "resetFilters": "إعادة تعيين الفلاتر"
+    },
+    "myApplications": {
+      "title": "طلباتي",
+      "subtitle": "تتبع حالة طلباتك وتحديثاتها",
+      "submission": "تاريخ التقديم",
+      "notes": "ملاحظات",
+      "completeApplication": "استكمال الطلب",
+      "viewDetails": "عرض التفاصيل",
+      "empty": {
+        "title": "لا توجد طلبات حالية",
+        "description": "لم تقم بتقديم أي طلبات بعد. استعرض البرامج المتاحة وقدم طلبك الآن.",
+        "browsePrograms": "استعراض البرامج"
+      }
+    },
+    "status": {
+      "approved": "تمت الموافقة",
+      "rejected": "مرفوض",
+      "review": "قيد المراجعة",
+      "incomplete": "غير مكتمل",
+      "processing": "قيد الإجراء"
+    },
+    "notifications": {
+      "applyStart": "بدء التقديم",
+      "applyStartDesc": "تم بدء عملية التقديم للبرنامج بنجاح",
+      "continueApplication": "متابعة الطلب",
+      "continueApplicationDesc": "يمكنك الآن متابعة استكمال طلبك"
+    }
   }
 }

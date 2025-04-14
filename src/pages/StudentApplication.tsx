@@ -1,6 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
 import StudentApplicationForm from '@/components/applications/StudentApplicationForm';
@@ -19,45 +20,107 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Sample data - in a real app, this would come from an API
 const programs = [
   {
     id: 1,
-    title: "الطب البشري (بالإنجليزية)",
+    title: "Medicine (English)",
     titleAr: "الطب البشري (بالإنجليزية)",
-    university: "جامعة اسطنبول",
-    country: "تركيا",
-    duration: "6 سنوات",
-    language: "الإنجليزية",
-    tuitionFee: "26,400 دولار أمريكي",
-    discountedFee: "24,600 دولار أمريكي",
+    university: "Istanbul University",
+    universityAr: "جامعة اسطنبول",
+    country: "Turkey",
+    countryAr: "تركيا",
+    duration: "6 years",
+    durationAr: "6 سنوات",
+    language: "English",
+    languageAr: "الإنجليزية",
+    tuitionFee: "$26,400",
+    tuitionFeeAr: "26,400 دولار أمريكي",
+    discountedFee: "$24,600",
+    discountedFeeAr: "24,600 دولار أمريكي",
     image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png",
-    level: "بكالوريوس",
+    level: "Bachelor",
+    levelAr: "بكالوريوس",
   },
   {
     id: 2,
-    title: "الطب البشري (بالتركية)",
+    title: "Medicine (Turkish)",
     titleAr: "الطب البشري (بالتركية)",
-    university: "جامعة اسطنبول",
-    country: "تركيا",
-    duration: "6 سنوات",
-    language: "التركية",
-    tuitionFee: "20,000 دولار أمريكي",
-    discountedFee: "19,000 دولار أمريكي",
+    university: "Istanbul University",
+    universityAr: "جامعة اسطنبول",
+    country: "Turkey",
+    countryAr: "تركيا",
+    duration: "6 years",
+    durationAr: "6 سنوات",
+    language: "Turkish",
+    languageAr: "التركية",
+    tuitionFee: "$20,000",
+    tuitionFeeAr: "20,000 دولار أمريكي",
+    discountedFee: "$19,000",
+    discountedFeeAr: "19,000 دولار أمريكي",
     image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png",
-    level: "بكالوريوس",
+    level: "Bachelor",
+    levelAr: "بكالوريوس",
   },
   {
     id: 3,
-    title: "طب الأسنان (بالإنجليزية)",
+    title: "Dentistry (English)",
     titleAr: "طب الأسنان (بالإنجليزية)",
-    university: "جامعة اسطنبول",
-    country: "تركيا",
-    duration: "5 سنوات",
-    language: "الإنجليزية",
-    tuitionFee: "22,000 دولار أمريكي",
-    discountedFee: "21,090 دولار أمريكي",
+    university: "Istanbul University",
+    universityAr: "جامعة اسطنبول",
+    country: "Turkey",
+    countryAr: "تركيا",
+    duration: "5 years",
+    durationAr: "5 سنوات",
+    language: "English",
+    languageAr: "الإنجليزية",
+    tuitionFee: "$22,000",
+    tuitionFeeAr: "22,000 دولار أمريكي",
+    discountedFee: "$21,090",
+    discountedFeeAr: "21,090 دولار أمريكي",
     image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png",
-    level: "بكالوريوس",
+    level: "Bachelor",
+    levelAr: "بكالوريوس",
+  },
+  {
+    id: 4,
+    title: "Computer Engineering",
+    titleAr: "هندسة الحاسوب",
+    university: "Bahcesehir University",
+    universityAr: "جامعة باهتشه شهير",
+    country: "Turkey",
+    countryAr: "تركيا",
+    duration: "4 years",
+    durationAr: "4 سنوات",
+    language: "English",
+    languageAr: "الإنجليزية",
+    tuitionFee: "$18,400",
+    tuitionFeeAr: "18,400 دولار أمريكي",
+    discountedFee: "$16,900",
+    discountedFeeAr: "16,900 دولار أمريكي",
+    image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png",
+    level: "Bachelor",
+    levelAr: "بكالوريوس",
+  },
+  {
+    id: 5,
+    title: "Business Administration",
+    titleAr: "إدارة الأعمال",
+    university: "Bahcesehir University",
+    universityAr: "جامعة باهتشه شهير",
+    country: "Turkey",
+    countryAr: "تركيا",
+    duration: "4 years",
+    durationAr: "4 سنوات",
+    language: "English",
+    languageAr: "الإنجليزية",
+    tuitionFee: "$15,200",
+    tuitionFeeAr: "15,200 دولار أمريكي",
+    discountedFee: "$14,500",
+    discountedFeeAr: "14,500 دولار أمريكي",
+    image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png",
+    level: "Bachelor",
+    levelAr: "بكالوريوس",
   },
 ];
 
@@ -67,18 +130,21 @@ const myApplications = [
     programId: 1,
     status: "review",
     submissionDate: "2025-03-15",
-    notes: "قيد المراجعة من قبل المختصين",
+    notes: "Under review by admissions team",
+    notesAr: "قيد المراجعة من قبل المختصين"
   },
   {
     id: 102,
     programId: 3,
     status: "incomplete",
     submissionDate: "2025-03-10",
-    notes: "يرجى استكمال المستندات المطلوبة",
+    notes: "Please complete required documents",
+    notesAr: "يرجى استكمال المستندات المطلوبة"
   }
 ];
 
 const StudentApplication = () => {
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('all_countries');
   const [selectedLevel, setSelectedLevel] = useState('all_levels');
@@ -86,13 +152,29 @@ const StudentApplication = () => {
   const [activeTab, setActiveTab] = useState('new-application');
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isRtl = i18n.language === 'ar';
+  
+  // Function to get localized field values
+  const getLocalizedValue = (enValue: string, arValue: string) => {
+    return i18n.language === 'ar' ? arValue : enValue;
+  };
 
   const filteredPrograms = programs.filter((program) => {
-    const matchesSearch = program.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         program.university.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCountry = selectedCountry === 'all_countries' || program.country === selectedCountry;
-    const matchesLevel = selectedLevel === 'all_levels' || program.level === selectedLevel;
-    const matchesLanguage = selectedLanguage === 'all_languages' || program.language === selectedLanguage;
+    const programTitle = getLocalizedValue(program.title, program.titleAr).toLowerCase();
+    const programUniversity = getLocalizedValue(program.university, program.universityAr).toLowerCase();
+    const searchLower = searchQuery.toLowerCase();
+    
+    const matchesSearch = programTitle.includes(searchLower) || 
+                         programUniversity.includes(searchLower);
+                         
+    const matchesCountry = selectedCountry === 'all_countries' || 
+                          getLocalizedValue(program.country, program.countryAr) === getLocalizedValue("Turkey", "تركيا");
+                          
+    const matchesLevel = selectedLevel === 'all_levels' || 
+                         getLocalizedValue(program.level, program.levelAr) === getLocalizedValue("Bachelor", "بكالوريوس");
+                         
+    const matchesLanguage = selectedLanguage === 'all_languages' || 
+                          getLocalizedValue(program.language, program.languageAr) === getLocalizedValue("English", "الإنجليزية");
     
     return matchesSearch && matchesCountry && matchesLevel && matchesLanguage;
   });
@@ -106,16 +188,16 @@ const StudentApplication = () => {
 
   const handleApplyNow = (programId: number) => {
     toast({
-      title: "بدء التقديم",
-      description: "تم بدء عملية التقديم للبرنامج بنجاح",
+      title: t("application.notifications.applyStart"),
+      description: t("application.notifications.applyStartDesc"),
     });
     setActiveTab('new-application');
   };
   
   const handleContinueApplication = (applicationId: number) => {
     toast({
-      title: "متابعة الطلب",
-      description: "يمكنك الآن متابعة استكمال طلبك",
+      title: t("application.notifications.continueApplication"),
+      description: t("application.notifications.continueApplicationDesc"),
     });
     setActiveTab('new-application');
   };
@@ -127,40 +209,56 @@ const StudentApplication = () => {
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'approved':
-        return <Badge className="bg-green-500">تمت الموافقة</Badge>;
+        return <Badge className="bg-green-500">{t("application.status.approved")}</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-500">مرفوض</Badge>;
+        return <Badge className="bg-red-500">{t("application.status.rejected")}</Badge>;
       case 'review':
-        return <Badge className="bg-amber-500">قيد المراجعة</Badge>;
+        return <Badge className="bg-amber-500">{t("application.status.review")}</Badge>;
       case 'incomplete':
-        return <Badge className="bg-blue-500">غير مكتمل</Badge>;
+        return <Badge className="bg-blue-500">{t("application.status.incomplete")}</Badge>;
       default:
-        return <Badge>قيد الإجراء</Badge>;
+        return <Badge>{t("application.status.processing")}</Badge>;
     }
   };
   
   const getProgramById = (id: number) => {
     return programs.find(program => program.id === id) || {
-      title: "غير معروف",
-      university: "غير معروف",
+      title: "Unknown",
+      titleAr: "غير معروف",
+      university: "Unknown",
+      universityAr: "غير معروف",
       image: "/placeholder.svg"
     };
   };
+  
+  // Get countries, levels and languages for filters
+  const countries = [...new Set(programs.map(p => p.country))];
+  const levels = [...new Set(programs.map(p => p.level))];
+  const languages = [...new Set(programs.map(p => p.language))];
+
+  // Effect to set the tab from URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab && ['new-application', 'browse-programs', 'my-applications'].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, []);
 
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
         <SectionTitle
-          title="تقديم طلب التحاق"
-          subtitle="قدم طلبك للالتحاق بأفضل الجامعات العالمية"
+          title={t("application.title")}
+          subtitle={t("application.subtitle")}
         />
         
         <div className="max-w-7xl mx-auto mt-10">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <TabsList className="grid w-full md:w-[600px] grid-cols-3">
-              <TabsTrigger value="new-application">تقديم طلب جديد</TabsTrigger>
-              <TabsTrigger value="browse-programs">استعراض البرامج</TabsTrigger>
-              <TabsTrigger value="my-applications">طلباتي</TabsTrigger>
+              <TabsTrigger value="new-application">{t("application.tabs.newApplication")}</TabsTrigger>
+              <TabsTrigger value="browse-programs">{t("application.tabs.browsePrograms")}</TabsTrigger>
+              <TabsTrigger value="my-applications">{t("application.tabs.myApplications")}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="new-application" className="space-y-4">
@@ -170,19 +268,24 @@ const StudentApplication = () => {
             <TabsContent value="browse-programs" className="space-y-4">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-unlimited-dark-blue">استكشاف البرامج الدراسية</h2>
-                  <p className="text-unlimited-gray">اختر من بين مجموعة متنوعة من البرامج الدراسية المتاحة</p>
+                  <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t("application.tabs.browsePrograms")}</h2>
+                  <p className="text-unlimited-gray">
+                    {isRtl ? 
+                      "اختر من بين مجموعة متنوعة من البرامج الدراسية المتاحة" : 
+                      "Choose from a variety of available study programs"
+                    }
+                  </p>
                 </div>
                 
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
                   <div className="flex-1">
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray" />
+                      <Search className={`absolute ${isRtl ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 text-unlimited-gray`} />
                       <Input
-                        placeholder="ابحث عن برنامج أو جامعة..."
+                        placeholder={t("application.search.placeholder")}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
+                        className={isRtl ? "pl-10" : "pr-10"}
                       />
                     </div>
                   </div>
@@ -190,94 +293,110 @@ const StudentApplication = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
                     <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                       <SelectTrigger>
-                        <SelectValue placeholder="البلد" />
+                        <SelectValue placeholder={t("application.search.country")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all_countries">جميع البلدان</SelectItem>
-                        <SelectItem value="تركيا">تركيا</SelectItem>
-                        <SelectItem value="المجر">المجر</SelectItem>
-                        <SelectItem value="بولندا">بولندا</SelectItem>
-                        <SelectItem value="التشيك">التشيك</SelectItem>
-                        <SelectItem value="قبرص">قبرص</SelectItem>
+                        <SelectItem value="all_countries">{t("application.search.allCountries")}</SelectItem>
+                        {countries.map(country => (
+                          <SelectItem key={country} value={country}>
+                            {getLocalizedValue(country, country === "Turkey" ? "تركيا" : country)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     
                     <Select value={selectedLevel} onValueChange={setSelectedLevel}>
                       <SelectTrigger>
-                        <SelectValue placeholder="المستوى الدراسي" />
+                        <SelectValue placeholder={t("application.search.level")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all_levels">جميع المستويات</SelectItem>
-                        <SelectItem value="بكالوريوس">بكالوريوس</SelectItem>
-                        <SelectItem value="ماجستير">ماجستير</SelectItem>
-                        <SelectItem value="دكتوراه">دكتوراه</SelectItem>
+                        <SelectItem value="all_levels">{t("application.search.allLevels")}</SelectItem>
+                        {levels.map(level => (
+                          <SelectItem key={level} value={level}>
+                            {getLocalizedValue(level, level === "Bachelor" ? "بكالوريوس" : 
+                                                  level === "Master" ? "ماجستير" : 
+                                                  level === "PhD" ? "دكتوراه" : level)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     
                     <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
                       <SelectTrigger>
-                        <SelectValue placeholder="لغة الدراسة" />
+                        <SelectValue placeholder={t("application.search.language")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all_languages">جميع اللغات</SelectItem>
-                        <SelectItem value="الإنجليزية">الإنجليزية</SelectItem>
-                        <SelectItem value="التركية">التركية</SelectItem>
-                        <SelectItem value="العربية">العربية</SelectItem>
+                        <SelectItem value="all_languages">{t("application.search.allLanguages")}</SelectItem>
+                        {languages.map(language => (
+                          <SelectItem key={language} value={language}>
+                            {getLocalizedValue(language, language === "English" ? "الإنجليزية" : 
+                                                      language === "Turkish" ? "التركية" : 
+                                                      language === "Arabic" ? "العربية" : language)}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   
                   <Button variant="outline" onClick={resetFilters} className="flex-shrink-0">
-                    <FilterIcon className="h-4 w-4 mr-2" />
-                    إعادة تعيين
+                    <FilterIcon className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                    {t("application.search.resetFilters")}
                   </Button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredPrograms.map((program) => (
-                    <Card key={program.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                    <Card key={program.id} className="overflow-hidden hover:shadow-lg transition-shadow animate-fade-in">
                       <img 
                         src={program.image} 
-                        alt={program.title} 
+                        alt={getLocalizedValue(program.title, program.titleAr)} 
                         className="w-full h-36 object-cover"
                       />
                       <CardHeader>
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-lg">{program.titleAr}</CardTitle>
-                            <CardDescription>{program.university}</CardDescription>
+                            <CardTitle className="text-lg">{getLocalizedValue(program.title, program.titleAr)}</CardTitle>
+                            <CardDescription>{getLocalizedValue(program.university, program.universityAr)}</CardDescription>
                           </div>
-                          <Badge variant="secondary">{program.level}</Badge>
+                          <Badge variant="secondary">{getLocalizedValue(program.level, program.levelAr)}</Badge>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 text-sm">
                           <div className="flex items-center text-unlimited-gray">
-                            <Globe className="h-4 w-4 ml-2" />
-                            <span>{program.country}</span>
+                            <Globe className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                            <span>{getLocalizedValue(program.country, program.countryAr)}</span>
                           </div>
                           <div className="flex items-center text-unlimited-gray">
-                            <Building className="h-4 w-4 ml-2" />
-                            <span>{program.university}</span>
+                            <Building className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                            <span>{getLocalizedValue(program.university, program.universityAr)}</span>
                           </div>
                           <div className="flex items-center text-unlimited-gray">
-                            <GraduationCap className="h-4 w-4 ml-2" />
-                            <span>مدة الدراسة: {program.duration}</span>
+                            <GraduationCap className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                            <span>
+                              {isRtl ? `مدة الدراسة: ${program.durationAr}` : `Duration: ${program.duration}`}
+                            </span>
                           </div>
                         </div>
                         
                         <div className="mt-4">
-                          <p className="text-unlimited-gray text-sm">الرسوم الدراسية:</p>
+                          <p className="text-unlimited-gray text-sm">
+                            {t("application.programCard.tuitionFees")}:
+                          </p>
                           <div className="flex items-baseline">
-                            <span className="text-unlimited-blue font-bold">{program.discountedFee}</span>
-                            <span className="text-unlimited-gray text-sm line-through mr-2">{program.tuitionFee}</span>
+                            <span className="text-unlimited-blue font-bold">
+                              {getLocalizedValue(program.discountedFee, program.discountedFeeAr)}
+                            </span>
+                            <span className="text-unlimited-gray text-sm line-through mr-2">
+                              {getLocalizedValue(program.tuitionFee, program.tuitionFeeAr)}
+                            </span>
                           </div>
                         </div>
                       </CardContent>
                       <CardFooter className="pt-0">
-                        <Button className="w-full" onClick={() => handleApplyNow(program.id)}>
-                          <Plus className="h-4 w-4 ml-1" />
-                          التقديم على هذا البرنامج
+                        <Button className="w-full hover-scale" onClick={() => handleApplyNow(program.id)}>
+                          <Plus className={`h-4 w-4 ${isRtl ? 'ml-1' : 'mr-1'}`} />
+                          {t("application.programCard.applyNow")}
                         </Button>
                       </CardFooter>
                     </Card>
@@ -285,12 +404,12 @@ const StudentApplication = () => {
                 </div>
                 
                 {filteredPrograms.length === 0 && (
-                  <div className="text-center py-12 text-unlimited-gray">
+                  <div className="text-center py-12 text-unlimited-gray animate-fade-in">
                     <AlertCircle className="h-12 w-12 mx-auto mb-4 text-unlimited-blue" />
-                    <h3 className="text-xl font-medium mb-2">لا توجد برامج مطابقة</h3>
-                    <p>لا يوجد برامج تطابق معايير البحث الحالية. يرجى تعديل خيارات البحث أو إعادة تعيين الفلاتر.</p>
+                    <h3 className="text-xl font-medium mb-2">{t("application.noPrograms.title")}</h3>
+                    <p>{t("application.noPrograms.description")}</p>
                     <Button variant="outline" className="mt-4" onClick={resetFilters}>
-                      إعادة تعيين الفلاتر
+                      {t("application.noPrograms.resetFilters")}
                     </Button>
                   </div>
                 )}
@@ -300,8 +419,8 @@ const StudentApplication = () => {
             <TabsContent value="my-applications" className="space-y-4">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-unlimited-dark-blue">طلباتي</h2>
-                  <p className="text-unlimited-gray">تتبع حالة طلباتك وتحديثاتها</p>
+                  <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t("application.myApplications.title")}</h2>
+                  <p className="text-unlimited-gray">{t("application.myApplications.subtitle")}</p>
                 </div>
                 
                 {myApplications.length > 0 ? (
@@ -309,19 +428,23 @@ const StudentApplication = () => {
                     {myApplications.map((application) => {
                       const program = getProgramById(application.programId);
                       return (
-                        <Card key={application.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                        <Card key={application.id} className="overflow-hidden hover:shadow-lg transition-shadow animate-fade-in">
                           <div className="flex flex-col md:flex-row">
                             <img 
                               src={program.image} 
-                              alt={program.title} 
+                              alt={getLocalizedValue(program.title, program.titleAr)} 
                               className="w-full md:w-48 h-36 object-cover"
                             />
                             <div className="flex-1 flex flex-col">
                               <CardHeader>
                                 <div className="flex justify-between items-start">
                                   <div>
-                                    <CardTitle className="text-lg">{program.title}</CardTitle>
-                                    <CardDescription>{program.university}</CardDescription>
+                                    <CardTitle className="text-lg">
+                                      {getLocalizedValue(program.title, program.titleAr)}
+                                    </CardTitle>
+                                    <CardDescription>
+                                      {getLocalizedValue(program.university, program.universityAr)}
+                                    </CardDescription>
                                   </div>
                                   {getStatusBadge(application.status)}
                                 </div>
@@ -329,12 +452,18 @@ const StudentApplication = () => {
                               <CardContent>
                                 <div className="space-y-2 text-sm">
                                   <div className="flex items-center text-unlimited-gray">
-                                    <Clock className="h-4 w-4 ml-2" />
-                                    <span>تاريخ التقديم: {application.submissionDate}</span>
+                                    <Clock className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                                    <span>
+                                      {isRtl ? `تاريخ التقديم: ${application.submissionDate}` : 
+                                             `Submission Date: ${application.submissionDate}`}
+                                    </span>
                                   </div>
                                   <div className="flex items-center text-unlimited-gray">
-                                    <FileText className="h-4 w-4 ml-2" />
-                                    <span>ملاحظات: {application.notes}</span>
+                                    <FileText className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                                    <span>
+                                      {isRtl ? `ملاحظات: ${application.notesAr}` : 
+                                             `Notes: ${application.notes}`}
+                                    </span>
                                   </div>
                                 </div>
                               </CardContent>
@@ -343,15 +472,16 @@ const StudentApplication = () => {
                                   <Button 
                                     onClick={() => handleContinueApplication(application.id)}
                                     variant="default"
+                                    className="hover-scale"
                                   >
-                                    استكمال الطلب
+                                    {t("application.myApplications.completeApplication")}
                                   </Button>
                                 ) : (
                                   <Button 
                                     onClick={() => handleViewApplication(application.id)}
                                     variant="outline"
                                   >
-                                    عرض التفاصيل
+                                    {t("application.myApplications.viewDetails")}
                                   </Button>
                                 )}
                               </CardFooter>
@@ -362,15 +492,15 @@ const StudentApplication = () => {
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-12 text-unlimited-gray">
+                  <div className="text-center py-12 text-unlimited-gray animate-fade-in">
                     <FileText className="h-12 w-12 mx-auto mb-4 text-unlimited-blue" />
-                    <h3 className="text-xl font-medium mb-2">لا توجد طلبات حالية</h3>
-                    <p>لم تقم بتقديم أي طلبات بعد. استعرض البرامج المتاحة وقدم طلبك الآن.</p>
+                    <h3 className="text-xl font-medium mb-2">{t("application.myApplications.empty.title")}</h3>
+                    <p>{t("application.myApplications.empty.description")}</p>
                     <Button 
-                      className="mt-4" 
+                      className="mt-4 hover-scale" 
                       onClick={() => setActiveTab('browse-programs')}
                     >
-                      استعراض البرامج
+                      {t("application.myApplications.empty.browsePrograms")}
                     </Button>
                   </div>
                 )}
