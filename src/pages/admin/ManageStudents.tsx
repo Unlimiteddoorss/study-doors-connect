@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { FormDialog } from '@/components/admin/FormDialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import {
   Table,
   TableBody,
@@ -39,6 +31,53 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  program: string;
+  university: string;
+  status: 'active' | 'inactive' | 'pending' | 'graduated';
+  agentName?: string;
+}
+
+const dummyStudents: Student[] = [
+  {
+    id: "ST001",
+    name: "أحمد محمد",
+    email: "ahmed@example.com",
+    phone: "+966501234567",
+    nationality: "سعودي",
+    program: "هندسة برمجيات",
+    university: "جامعة الملك سعود",
+    status: "active",
+    agentName: "وكيل التعليم الدولي"
+  },
+  {
+    id: "ST002",
+    name: "سارة عبدالله",
+    email: "sara@example.com",
+    phone: "+966507654321",
+    nationality: "سعودي",
+    program: "طب بشري",
+    university: "جامعة الملك عبدالعزيز",
+    status: "pending"
+  },
+  {
+    id: "ST003",
+    name: "محمد العلي",
+    email: "mohammed@example.com",
+    phone: "+966509876543",
+    nationality: "كويتي",
+    program: "إدارة أعمال",
+    university: "جامعة الكويت",
+    status: "graduated",
+    agentName: "وكيل الخليج التعليمي"
+  }
+];
 
 const nationalities = [
   'سعودي',
@@ -62,7 +101,7 @@ const nationalities = [
 ];
 
 const ManageStudents = () => {
-  const [students, setStudents] = useState(initialStudents);
+  const [students, setStudents] = useState<Student[]>(dummyStudents);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -75,7 +114,7 @@ const ManageStudents = () => {
     setFilters,
     filteredItems: filteredStudents
   } = useTableFilters(
-    initialStudents,
+    students,
     ['name', 'email', 'id'],
     [
       { field: 'nationality', defaultValue: 'all' },

@@ -1,12 +1,26 @@
 import { useState } from 'react';
-import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
+import { Building, CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
-import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { Badge } from '@/components/ui/badge';
 import { FormDialog } from '@/components/admin/FormDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -22,82 +36,45 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
 
-type University = {
+interface University {
   id: string;
-  name: string;
   nameAr: string;
+  nameEn: string;
   country: string;
   city: string;
-  website: string;
   programsCount: number;
   studentsCount: number;
   ranking: number;
   status: 'active' | 'inactive';
-};
+}
 
-const initialUniversities: University[] = [
+const dummyUniversities: University[] = [
   {
-    id: 'UNI-001',
-    name: 'Istanbul University',
-    nameAr: 'جامعة إسطنبول',
-    country: 'Turkey',
-    city: 'Istanbul',
-    website: 'https://www.istanbul.edu.tr',
-    programsCount: 42,
-    studentsCount: 156,
-    ranking: 500,
-    status: 'active',
+    id: "UNI001",
+    nameAr: "جامعة الملك سعود",
+    nameEn: "King Saud University",
+    country: "المملكة العربية السعودية",
+    city: "الرياض",
+    programsCount: 150,
+    studentsCount: 5000,
+    ranking: 200,
+    status: "active"
   },
   {
-    id: 'UNI-002',
-    name: 'Warsaw University',
-    nameAr: 'جامعة وارسو',
-    country: 'Poland',
-    city: 'Warsaw',
-    website: 'https://www.uw.edu.pl',
-    programsCount: 28,
-    studentsCount: 87,
-    ranking: 320,
-    status: 'active',
-  },
-  {
-    id: 'UNI-003',
-    name: 'Budapest University',
-    nameAr: 'جامعة بودابست',
-    country: 'Hungary',
-    city: 'Budapest',
-    website: 'https://www.elte.hu',
-    programsCount: 35,
-    studentsCount: 103,
-    ranking: 450,
-    status: 'active',
-  },
-  {
-    id: 'UNI-004',
-    name: 'Prague University',
-    nameAr: 'جامعة براغ',
-    country: 'Czech Republic',
-    city: 'Prague',
-    website: 'https://cuni.cz',
-    programsCount: 22,
-    studentsCount: 65,
-    ranking: 380,
-    status: 'inactive',
-  },
-  {
-    id: 'UNI-005',
-    name: 'Ankara University',
-    nameAr: 'جامعة أنقرة',
-    country: 'Turkey',
-    city: 'Ankara',
-    website: 'https://www.ankara.edu.tr',
-    programsCount: 30,
-    studentsCount: 92,
-    ranking: 550,
-    status: 'active',
-  },
+    id: "UNI002",
+    nameAr: "جامعة الملك عبدالعزيز",
+    nameEn: "King Abdulaziz University",
+    country: "المملكة العربية السعودية",
+    city: "جدة",
+    programsCount: 120,
+    studentsCount: 4500,
+    ranking: 250,
+    status: "active"
+  }
 ];
 
 const ManageUniversities = () => {
@@ -113,15 +90,15 @@ const ManageUniversities = () => {
     setFilters,
     filteredItems: filteredUniversities
   } = useTableFilters(
-    initialUniversities,
-    ['name', 'nameAr', 'country'],
+    dummyUniversities,
+    ['nameAr', 'nameEn', 'country'],
     [
       { field: 'country', defaultValue: 'all' },
       { field: 'status', defaultValue: 'all' }
     ]
   );
 
-  const countries = Array.from(new Set(initialUniversities.map(university => university.country)));
+  const countries = Array.from(new Set(dummyUniversities.map(university => university.country)));
 
   const handleAddUniversity = () => {
     toast({
@@ -255,7 +232,7 @@ const ManageUniversities = () => {
                     <TableCell>
                       <div>
                         <p className="font-medium">{university.nameAr}</p>
-                        <p className="text-xs text-unlimited-gray">{university.name}</p>
+                        <p className="text-xs text-unlimited-gray">{university.nameEn}</p>
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{university.country}</TableCell>
