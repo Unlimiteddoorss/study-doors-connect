@@ -1,4 +1,3 @@
-
 {
   "site": {
     "name": "Unlimited Doors",
@@ -95,6 +94,63 @@
       "applyStartDesc": "Application process started successfully",
       "continueApplication": "Continue Application",
       "continueApplicationDesc": "You can now continue completing your application"
+    },
+    "form": {
+      "nationality": "Nationality",
+      "selectNationality": "Select your nationality",
+      "nationalities": {
+        "afghan": "Afghan",
+        "albanian": "Albanian",
+        "algerian": "Algerian",
+        "american": "American",
+        "andorran": "Andorran",
+        "angolan": "Angolan",
+        "argentine": "Argentine",
+        "armenian": "Armenian",
+        "australian": "Australian",
+        "austrian": "Austrian",
+        "azerbaijani": "Azerbaijani",
+        "bahamian": "Bahamian",
+        "bahraini": "Bahraini",
+        "bangladeshi": "Bangladeshi",
+        "belgian": "Belgian",
+        "brazilian": "Brazilian",
+        "british": "British",
+        "bulgarian": "Bulgarian",
+        "canadian": "Canadian",
+        "chinese": "Chinese",
+        "egyptian": "Egyptian",
+        "emirati": "Emirati",
+        "french": "French",
+        "german": "German",
+        "indian": "Indian",
+        "indonesian": "Indonesian",
+        "iranian": "Iranian",
+        "iraqi": "Iraqi",
+        "irish": "Irish",
+        "italian": "Italian",
+        "japanese": "Japanese",
+        "jordanian": "Jordanian",
+        "kazakh": "Kazakh",
+        "kuwaiti": "Kuwaiti",
+        "lebanese": "Lebanese",
+        "libyan": "Libyan",
+        "malaysian": "Malaysian",
+        "moroccan": "Moroccan",
+        "omani": "Omani",
+        "pakistani": "Pakistani",
+        "palestinian": "Palestinian",
+        "qatari": "Qatari",
+        "russian": "Russian",
+        "saudi": "Saudi",
+        "somali": "Somali",
+        "sudanese": "Sudanese",
+        "syrian": "Syrian",
+        "tunisian": "Tunisian",
+        "turkish": "Turkish",
+        "ukrainian": "Ukrainian",
+        "yemeni": "Yemeni"
+      }
     }
   }
 }

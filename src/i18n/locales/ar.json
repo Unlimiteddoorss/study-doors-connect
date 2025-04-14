@@ -1,4 +1,3 @@
-
 {
   "site": {
     "name": "أبواب بلا حدود",
@@ -95,6 +94,63 @@
       "applyStartDesc": "تم بدء عملية التقديم للبرنامج بنجاح",
       "continueApplication": "متابعة الطلب",
       "continueApplicationDesc": "يمكنك الآن متابعة استكمال طلبك"
+    },
+    "form": {
+      "nationality": "الجنسية",
+      "selectNationality": "اختر جنسيتك",
+      "nationalities": {
+        "afghan": "أفغاني",
+        "albanian": "ألباني",
+        "algerian": "جزائري",
+        "american": "أمريكي",
+        "andorran": "أندوري",
+        "angolan": "أنغولي",
+        "argentine": "أرجنتيني",
+        "armenian": "أرميني",
+        "australian": "أسترالي",
+        "austrian": "نمساوي",
+        "azerbaijani": "أذربيجاني",
+        "bahamian": "باهامي",
+        "bahraini": "بحريني",
+        "bangladeshi": "بنغلاديشي",
+        "belgian": "بلجيكي",
+        "brazilian": "برازيلي",
+        "british": "بريطاني",
+        "bulgarian": "بلغاري",
+        "canadian": "كندي",
+        "chinese": "صيني",
+        "egyptian": "مصري",
+        "emirati": "إماراتي",
+        "french": "فرنسي",
+        "german": "ألماني",
+        "indian": "هندي",
+        "indonesian": "إندونيسي",
+        "iranian": "إيراني",
+        "iraqi": "عراقي",
+        "irish": "إيرلندي",
+        "italian": "إيطالي",
+        "japanese": "ياباني",
+        "jordanian": "أردني",
+        "kazakh": "كازاخستاني",
+        "kuwaiti": "كويتي",
+        "lebanese": "لبناني",
+        "libyan": "ليبي",
+        "malaysian": "ماليزي",
+        "moroccan": "مغربي",
+        "omani": "عماني",
+        "pakistani": "باكستاني",
+        "palestinian": "فلسطيني",
+        "qatari": "قطري",
+        "russian": "روسي",
+        "saudi": "سعودي",
+        "somali": "صومالي",
+        "sudanese": "سوداني",
+        "syrian": "سوري",
+        "tunisian": "تونسي",
+        "turkish": "تركي",
+        "ukrainian": "أوكراني",
+        "yemeni": "يمني"
+      }
     }
   }
 }
