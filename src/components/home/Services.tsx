@@ -1,62 +1,96 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, GraduationCap, Building, Plane, Home, Users } from 'lucide-react';
-import SectionTitle from '../shared/SectionTitle';
+import { 
+  GraduationCap, 
+  Building2, 
+  Globe2, 
+  FileCheck, 
+  Handshake, 
+  HeartHandshake 
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
+const servicesData = [
+  {
+    id: 1,
+    title: 'استشارات القبول الجامعي',
+    description: 'نقدم استشارات متخصصة لاختيار أفضل الجامعات والبرامج المناسبة لك',
+    icon: GraduationCap,
+    link: '/programs'
+  },
+  {
+    id: 2,
+    title: 'خدمات التأشيرات',
+    description: 'نساعدك في إجراءات التأشيرة الدراسية وتجهيز جميع المستندات المطلوبة',
+    icon: Globe2,
+    link: '/services'
+  },
+  {
+    id: 3,
+    title: 'تقديم الطلبات',
+    description: 'نقوم بتقديم طلبات القبول نيابة عنك ومتابعتها مع الجامعات',
+    icon: FileCheck,
+    link: '/apply'
+  },
+  {
+    id: 4,
+    title: 'السكن الطلابي',
+    description: 'نوفر خدمات البحث عن السكن المناسب وحجزه قبل وصولك',
+    icon: Building2,
+    link: '/services'
+  },
+  {
+    id: 5,
+    title: 'خدمات ما بعد القبول',
+    description: 'نقدم الدعم المستمر بعد القبول للتأكد من راحتك واستقرارك',
+    icon: HeartHandshake,
+    link: '/services'
+  },
+  {
+    id: 6,
+    title: 'شراكات دولية',
+    description: 'نتعاون مع أفضل الجامعات العالمية لضمان أفضل فرص التعليم',
+    icon: Handshake,
+    link: '/universities'
+  }
+];
 
 const Services = () => {
-  const services = [
-    {
-      title: 'إدارة طلبات القبول',
-      description: 'نساعدك في تقديم طلبات القبول للجامعات المناسبة وفقاً لاهتماماتك ومؤهلاتك',
-      icon: <FileText className="h-8 w-8" />,
-    },
-    {
-      title: 'اختيار التخصص المناسب',
-      description: 'نقدم استشارات متخصصة لمساعدتك في اختيار التخصص الذي يناسب قدراتك وطموحاتك',
-      icon: <GraduationCap className="h-8 w-8" />,
-    },
-    {
-      title: 'اختيار الجامعة المناسبة',
-      description: 'نساعدك في العثور على الجامعة المثالية التي تلبي احتياجاتك الأكاديمية والشخصية',
-      icon: <Building className="h-8 w-8" />,
-    },
-    {
-      title: 'خدمات التأشيرة',
-      description: 'نقدم المساعدة في إجراءات التأشيرة والإقامة والأوراق المطلوبة للدراسة في الخارج',
-      icon: <Plane className="h-8 w-8" />,
-    },
-    {
-      title: 'خدمات السكن',
-      description: 'نساعدك في العثور على السكن المناسب قريباً من الجامعة وبأسعار مناسبة',
-      icon: <Home className="h-8 w-8" />,
-    },
-    {
-      title: 'دعم الطلاب',
-      description: 'نقدم الدعم المستمر للطلاب خلال فترة الدراسة ونتابع تقدمهم الأكاديمي',
-      icon: <Users className="h-8 w-8" />,
-    },
-  ];
+  const navigate = useNavigate();
 
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
-        <SectionTitle
-          title="خدماتنا"
-          subtitle="نقدم مجموعة متكاملة من الخدمات لمساعدة الطلاب على تحقيق أهدافهم الأكاديمية"
-          centered
-        />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-          {services.map((service, index) => (
-            <Card key={index} className="border-t-4 border-t-unlimited-blue transition-all hover:shadow-md">
-              <CardHeader>
-                <div className="text-unlimited-blue mb-3">{service.icon}</div>
-                <CardTitle>{service.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-600">{service.description}</CardDescription>
-              </CardContent>
-            </Card>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-unlimited-dark-blue mb-4">خدماتنا</h2>
+          <p className="text-unlimited-gray max-w-2xl mx-auto">
+            نقدم مجموعة شاملة من الخدمات لمساعدتك في رحلتك التعليمية
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {servicesData.map((service) => (
+            <div 
+              key={service.id} 
+              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="p-3 bg-unlimited-blue/10 rounded-full w-fit mb-4">
+                <service.icon className="h-6 w-6 text-unlimited-blue" />
+              </div>
+              <h3 className="text-xl font-semibold text-unlimited-dark-blue mb-3">
+                {service.title}
+              </h3>
+              <p className="text-unlimited-gray mb-4">
+                {service.description}
+              </p>
+              <Button 
+                variant="link" 
+                className="text-unlimited-blue hover:text-unlimited-dark-blue p-0"
+                onClick={() => navigate(service.link)}
+              >
+                اكتشف المزيد
+              </Button>
+            </div>
           ))}
         </div>
       </div>
