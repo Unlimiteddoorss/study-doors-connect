@@ -5,7 +5,8 @@ import {
   Globe2, 
   FileCheck, 
   Handshake, 
-  HeartHandshake 
+  HeartHandshake,
+  ArrowLeft
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
