@@ -1,4 +1,3 @@
-
 import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -9,9 +8,9 @@ import Programs from "./pages/Programs";
 import ProgramDetails from "./pages/ProgramDetails";
 import Scholarships from "./pages/Scholarships";
 import Universities from "./pages/Universities";
-import TurkishUniversities from "./pages/TurkishUniversities"; // New page
-import MedicalPrograms from "./pages/MedicalPrograms"; // New page
-import EngineeringPrograms from "./pages/EngineeringPrograms"; // New page
+import TurkishUniversities from "./pages/TurkishUniversities";
+import MedicalPrograms from "./pages/MedicalPrograms";
+import EngineeringPrograms from "./pages/EngineeringPrograms";
 import UniversityDetails from "./pages/UniversityDetails";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -31,12 +30,12 @@ import StudentApplications from "./pages/dashboard/StudentApplications";
 import StudentProfile from "./pages/dashboard/StudentProfile";
 import StudentNotifications from "./pages/dashboard/StudentNotifications";
 import UserMessages from "./pages/messaging/UserMessages";
+import Reports from "./pages/admin/Reports";
 import "./App.css";
 
 function App() {
   return (
     <Routes>
-      {/* Public Routes */}
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
@@ -53,7 +52,6 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Student Routes */}
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/apply" element={<StudentApplication />} />
       <Route path="/dashboard/applications" element={<StudentApplications />} />
@@ -61,7 +59,6 @@ function App() {
       <Route path="/dashboard/notifications" element={<StudentNotifications />} />
       <Route path="/messages" element={<UserMessages />} />
 
-      {/* Admin Routes */}
       <Route path="/admin" element={<AdminDashboard />} />
       <Route path="/admin/students" element={<ManageStudents />} />
       <Route path="/admin/agents" element={<ManageAgents />} />
@@ -70,11 +67,10 @@ function App() {
       <Route path="/admin/universities" element={<ManageUniversities />} />
       <Route path="/admin/notifications" element={<AdminNotifications />} />
       <Route path="/admin/messages" element={<AdminMessages />} />
+      <Route path="/admin/reports" element={<Reports />} />
 
-      {/* Agent Routes */}
       <Route path="/agent" element={<AgentDashboard />} />
       
-      {/* Not Found */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
