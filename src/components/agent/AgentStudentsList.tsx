@@ -28,7 +28,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 type Student = {
   id: string;
@@ -82,24 +93,56 @@ const initialStudents: Student[] = [
   },
 ];
 
+// Schema for student form validation
+const studentFormSchema = z.object({
+  name: z.string().min(2, { message: "اسم الطالب يجب أن يكون أكثر من حرفين" }),
+  email: z.string().email({ message: "البريد الإلكتروني غير صالح" }),
+  phone: z.string().min(10, { message: "رقم الهاتف يجب أن يكون 10 أرقام على الأقل" }),
+});
+
 export function AgentStudentsList() {
   const [students, setStudents] = useState<Student[]>(initialStudents);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const { toast } = useToast();
 
+  // Filtered students based on search
   const filteredStudents = students.filter((student) =>
     student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.phone.includes(searchQuery)
   );
 
-  const handleAddStudent = () => {
+  // Form for adding new student
+  const form = useForm<z.infer<typeof studentFormSchema>>({
+    resolver: zodResolver(studentFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+    },
+  });
+
+  const handleAddStudent = (values: z.infer<typeof studentFormSchema>) => {
+    const newStudent = {
+      id: `STD-${String(students.length + 1).padStart(3, '0')}`,
+      name: values.name,
+      email: values.email,
+      phone: values.phone,
+      applications: 0,
+      lastActive: new Date().toISOString().split('T')[0],
+    };
+    
+    setStudents([...students, newStudent]);
+    form.reset();
+    setIsAddDialogOpen(false);
+    
     toast({
       title: "تمت إضافة الطالب",
       description: "تم إضافة الطالب الجديد بنجاح",
     });
-    setIsAddDialogOpen(false);
   };
 
   const handleSendMessage = (studentId: string) => {
@@ -109,10 +152,22 @@ export function AgentStudentsList() {
     });
   };
 
-  const handleViewStudent = (studentId: string) => {
+  const handleViewStudent = (student: Student) => {
+    setSelectedStudent(student);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleCreateApplication = (studentId: string) => {
     toast({
-      title: "عرض معلومات الطالب",
-      description: `تم فتح صفحة الطالب رقم ${studentId}`,
+      title: "إنشاء طلب جديد",
+      description: `تم فتح نموذج طلب جديد للطالب رقم ${studentId}`,
+    });
+  };
+
+  const handleViewApplications = (studentId: string) => {
+    toast({
+      title: "عرض طلبات الطالب",
+      description: `تم فتح صفحة عرض طلبات الطالب رقم ${studentId}`,
     });
   };
 
@@ -143,25 +198,54 @@ export function AgentStudentsList() {
                 أدخل معلومات الطالب الجديد. سيتم ربط الطالب بحسابك كوكيل.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">الاسم</label>
-                <Input className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">البريد الإلكتروني</label>
-                <Input type="email" className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">الهاتف</label>
-                <Input className="col-span-3" />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" onClick={handleAddStudent}>
-                إضافة الطالب
-              </Button>
-            </DialogFooter>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleAddStudent)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الاسم</FormLabel>
+                      <FormControl>
+                        <Input placeholder="اسم الطالب" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>البريد الإلكتروني</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="البريد الإلكتروني" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الهاتف</FormLabel>
+                      <FormControl>
+                        <Input placeholder="رقم الهاتف" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button type="submit">
+                    إضافة الطالب
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
       </div>
@@ -201,7 +285,7 @@ export function AgentStudentsList() {
                         variant="ghost" 
                         size="icon" 
                         className="h-8 w-8"
-                        onClick={() => handleViewStudent(student.id)}
+                        onClick={() => handleViewStudent(student)}
                       >
                         <User className="h-4 w-4" />
                       </Button>
@@ -222,16 +306,20 @@ export function AgentStudentsList() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>خيارات الطالب</DropdownMenuLabel>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleViewStudent(student.id)}>
+                          <DropdownMenuItem onClick={() => handleViewStudent(student)}>
+                            <Eye className="h-4 w-4 ml-2" />
                             عرض معلومات الطالب
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleSendMessage(student.id)}>
+                            <MessageCircle className="h-4 w-4 ml-2" />
                             إرسال رسالة
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleCreateApplication(student.id)}>
+                            <Plus className="h-4 w-4 ml-2" />
                             إنشاء طلب جديد
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleViewApplications(student.id)}>
+                            <Eye className="h-4 w-4 ml-2" />
                             عرض طلبات الطالب
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -244,6 +332,67 @@ export function AgentStudentsList() {
           </TableBody>
         </Table>
       </div>
+
+      {/* View Student Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>معلومات الطالب</DialogTitle>
+          </DialogHeader>
+          {selectedStudent && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-unlimited-gray">رقم الطالب</p>
+                  <p className="font-medium">{selectedStudent.id}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-unlimited-gray">الاسم</p>
+                  <p className="font-medium">{selectedStudent.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-unlimited-gray">البريد الإلكتروني</p>
+                  <p className="font-medium">{selectedStudent.email}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-unlimited-gray">الهاتف</p>
+                  <p className="font-medium">{selectedStudent.phone}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-unlimited-gray">عدد الطلبات</p>
+                  <p className="font-medium">{selectedStudent.applications}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-unlimited-gray">آخر نشاط</p>
+                  <p className="font-medium">{selectedStudent.lastActive}</p>
+                </div>
+              </div>
+              
+              <div className="flex justify-between pt-4">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleSendMessage(selectedStudent.id);
+                  }}
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  إرسال رسالة
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleCreateApplication(selectedStudent.id);
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  إنشاء طلب جديد
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

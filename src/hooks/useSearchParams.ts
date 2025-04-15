@@ -45,9 +45,33 @@ export function useSearchParams() {
     navigate(`/programs?${searchParams.toString()}`);
   };
 
+  // Reset search parameters
+  const resetSearch = () => {
+    setSearchData({
+      country: '',
+      level: '',
+      specialization: ''
+    });
+  };
+
+  // Set search data from URL parameters
+  const setSearchFromUrl = (params: URLSearchParams) => {
+    const country = params.get('country') || '';
+    const level = params.get('level') || '';
+    const specialization = params.get('specialization') || '';
+    
+    setSearchData({
+      country,
+      level,
+      specialization
+    });
+  };
+
   return {
     searchData,
     handleInputChange,
-    handleSearch
+    handleSearch,
+    resetSearch,
+    setSearchFromUrl
   };
 }
