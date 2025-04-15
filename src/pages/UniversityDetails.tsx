@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
 import { turkishUniversities } from '@/data/programsData';
@@ -14,8 +13,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UniversityPrograms from '@/components/universities/UniversityPrograms';
+import UniversityAdminControls from '@/components/admin/UniversityAdminControls';
 
-// ترجمة أسماء المدن والدول إلى العربية
 const translations: Record<string, string> = {
   'Turkey': 'تركيا',
   'Istanbul': 'إسطنبول',
@@ -46,14 +45,11 @@ const UniversityDetails = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
   
-  // التحقق من معرف الجامعة وإيجادها
   const universityId = id ? parseInt(id) : -1;
   const university = turkishUniversities.find(uni => uni.id === universityId);
   
-  // الحصول على برامج الجامعة
   const programs = getUniversityPrograms(universityId);
   
-  // التحقق من وجود الجامعة
   useEffect(() => {
     if (!university) {
       toast({
@@ -64,7 +60,6 @@ const UniversityDetails = () => {
     }
   }, [university, toast]);
 
-  // ترجمة النص
   const translate = (text: string): string => {
     return translations[text] || text;
   };
@@ -85,8 +80,9 @@ const UniversityDetails = () => {
 
   return (
     <MainLayout>
+      <UniversityAdminControls universityId={universityId} />
+      
       <div className="container mx-auto px-4 py-8">
-        {/* صورة الغلاف والمعلومات الأساسية */}
         <div className="relative mb-8">
           <div className="h-[300px] w-full bg-gray-300 overflow-hidden rounded-lg">
             <img 
@@ -113,7 +109,6 @@ const UniversityDetails = () => {
           </div>
         </div>
         
-        {/* إحصائيات سريعة */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="text-center">
             <CardContent className="pt-6">
@@ -158,7 +153,6 @@ const UniversityDetails = () => {
           </Card>
         </div>
         
-        {/* زر التقديم */}
         <div className="flex justify-center mb-8">
           <Button asChild size="lg" className="bg-unlimited-blue hover:bg-unlimited-dark-blue text-lg px-8">
             <Link to={`/apply?university=${university.id}`}>
@@ -167,7 +161,6 @@ const UniversityDetails = () => {
           </Button>
         </div>
         
-        {/* تبويبات المعلومات */}
         <Tabs 
           value={activeTab} 
           onValueChange={setActiveTab}
@@ -448,7 +441,6 @@ const UniversityDetails = () => {
           </TabsContent>
         </Tabs>
         
-        {/* الجامعات المقترحة */}
         <div className="mt-16">
           <SectionTitle 
             title="جامعات مشابهة قد تهمك"
