@@ -72,7 +72,7 @@ const Services = () => {
           {servicesData.map((service) => (
             <div 
               key={service.id} 
-              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="p-3 bg-unlimited-blue/10 rounded-full w-fit mb-4">
                 <service.icon className="h-6 w-6 text-unlimited-blue" />
@@ -85,10 +85,11 @@ const Services = () => {
               </p>
               <Button 
                 variant="link" 
-                className="text-unlimited-blue hover:text-unlimited-dark-blue p-0"
+                className="text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2"
                 onClick={() => navigate(service.link)}
               >
                 اكتشف المزيد
+                <ArrowLeft className="h-4 w-4" />
               </Button>
             </div>
           ))}

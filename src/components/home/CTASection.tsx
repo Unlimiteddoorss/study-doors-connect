@@ -2,21 +2,38 @@
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const CTASection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-16 bg-unlimited-blue text-white">
-      <div className="container mx-auto px-4">
+    <section className="py-16 bg-unlimited-blue text-white relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-unlimited-dark-blue/20 to-transparent" />
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-4xl font-bold mb-6"
+          >
             ابدأ رحلتك التعليمية اليوم
-          </h2>
-          <p className="text-lg mb-8 text-white/90">
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-lg mb-8 text-white/90"
+          >
             سجل الآن واكتشف الفرص التعليمية المتاحة في أفضل الجامعات العالمية
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          >
             <Button
               size="lg"
               variant="secondary"
@@ -34,7 +51,7 @@ const CTASection = () => {
             >
               استكشف البرامج
             </Button>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
