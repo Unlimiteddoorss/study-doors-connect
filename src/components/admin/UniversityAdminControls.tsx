@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, ImagePlus, Building, Plus, X } from 'lucide-react';
@@ -33,6 +32,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
+import { useAdminActions } from '@/hooks/admin/useAdminActions';
 
 interface UniversityAdminControlsProps {
   universityId: number;
@@ -45,16 +45,24 @@ const UniversityAdminControls = ({ universityId }: UniversityAdminControlsProps)
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [isProgramsDialogOpen, setIsProgramsDialogOpen] = useState(false);
 
+  const { handleAction } = useAdminActions();
+
   const handleEdit = () => {
     setIsEditDialogOpen(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
+    await handleAction(
+      async () => {
+        // Here you would implement the actual save logic
+        console.log('Saving university changes...');
+      },
+      {
+        successMessage: 'تم تحديث بيانات الجامعة بنجاح',
+        errorMessage: 'حدث خطأ أثناء تحديث بيانات الجامعة'
+      }
+    );
     setIsEditDialogOpen(false);
-    toast({
-      title: "تحديث الجامعة",
-      description: "تم تحديث بيانات الجامعة بنجاح"
-    });
   };
 
   const handleDelete = () => {
@@ -73,23 +81,35 @@ const UniversityAdminControls = ({ universityId }: UniversityAdminControlsProps)
     setIsImageDialogOpen(true);
   };
 
-  const handleSaveImage = () => {
+  const handleSaveImage = async () => {
+    await handleAction(
+      async () => {
+        // Here you would implement the actual image upload logic
+        console.log('Uploading university image...');
+      },
+      {
+        successMessage: 'تم تحديث صورة الجامعة بنجاح',
+        errorMessage: 'حدث خطأ أثناء تحديث صورة الجامعة'
+      }
+    );
     setIsImageDialogOpen(false);
-    toast({
-      title: "تحديث الصورة",
-      description: "تم تحديث صورة الجامعة بنجاح"
-    });
   };
 
   const handleManagePrograms = () => {
     setIsProgramsDialogOpen(true);
   };
 
-  const handleAddProgram = () => {
-    toast({
-      title: "إضافة برنامج",
-      description: "تم إضافة البرنامج بنجاح"
-    });
+  const handleAddProgram = async () => {
+    await handleAction(
+      async () => {
+        // Here you would implement the actual program addition logic
+        console.log('Adding new program...');
+      },
+      {
+        successMessage: 'تم إضافة البرنامج بنجاح',
+        errorMessage: 'حدث خطأ أثناء إضافة البرنامج'
+      }
+    );
   };
 
   const toggleControls = () => {

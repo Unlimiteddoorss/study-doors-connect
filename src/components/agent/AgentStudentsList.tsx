@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Eye, MessageCircle, MoreHorizontal, Plus, Search, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -40,6 +39,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAdminActions } from '@/hooks/admin/useAdminActions';
 
 type Student = {
   id: string;
@@ -125,31 +125,33 @@ export function AgentStudentsList() {
     },
   });
 
-  const handleAddStudent = (values: z.infer<typeof studentFormSchema>) => {
-    const newStudent = {
-      id: `STD-${String(students.length + 1).padStart(3, '0')}`,
-      name: values.name,
-      email: values.email,
-      phone: values.phone,
-      applications: 0,
-      lastActive: new Date().toISOString().split('T')[0],
-    };
-    
-    setStudents([...students, newStudent]);
-    form.reset();
+  const { handleAction } = useAdminActions();
+
+  const handleAddStudent = async (values: z.infer<typeof studentFormSchema>) => {
+    await handleAction(
+      async () => {
+        // Here you would implement the actual student addition logic
+        console.log('Adding new student...', values);
+      },
+      {
+        successMessage: 'تم إضافة الطالب بنجاح',
+        errorMessage: 'حدث خطأ أثناء إضافة الطالب'
+      }
+    );
     setIsAddDialogOpen(false);
-    
-    toast({
-      title: "تمت إضافة الطالب",
-      description: "تم إضافة الطالب الجديد بنجاح",
-    });
   };
 
-  const handleSendMessage = (studentId: string) => {
-    toast({
-      title: "إرسال رسالة",
-      description: `تم فتح محادثة مع الطالب رقم ${studentId}`,
-    });
+  const handleSendMessage = async (studentId: string) => {
+    await handleAction(
+      async () => {
+        // Here you would implement the actual message sending logic
+        console.log('Sending message to student...', studentId);
+      },
+      {
+        successMessage: 'تم فتح المحادثة بنجاح',
+        errorMessage: 'حدث خطأ أثناء فتح المحادثة'
+      }
+    );
   };
 
   const handleViewStudent = (student: Student) => {
