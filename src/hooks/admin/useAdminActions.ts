@@ -4,12 +4,16 @@ import { useToast } from '@/hooks/use-toast';
 
 interface AdminActionsConfig {
   onSuccess?: () => void;
+  onError?: (error: any) => void;
   successMessage?: string;
   errorMessage?: string;
 }
 
 export function useAdminActions() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
+  const [pendingConfig, setPendingConfig] = useState<AdminActionsConfig | null>(null);
   const { toast } = useToast();
 
   const handleAction = async (
@@ -18,6 +22,7 @@ export function useAdminActions() {
   ) => {
     const {
       onSuccess,
+      onError,
       successMessage = 'تمت العملية بنجاح',
       errorMessage = 'حدث خطأ أثناء تنفيذ العملية'
     } = config;
@@ -37,13 +42,42 @@ export function useAdminActions() {
         description: errorMessage,
         variant: 'destructive'
       });
+      onError?.(error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const confirmAction = (
+    action: () => Promise<void>,
+    config: AdminActionsConfig = {}
+  ) => {
+    setPendingAction(() => action);
+    setPendingConfig(config);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const executePendingAction = async () => {
+    if (pendingAction && pendingConfig) {
+      await handleAction(pendingAction, pendingConfig);
+    }
+    setIsConfirmDialogOpen(false);
+    setPendingAction(null);
+    setPendingConfig(null);
+  };
+
+  const cancelConfirmAction = () => {
+    setIsConfirmDialogOpen(false);
+    setPendingAction(null);
+    setPendingConfig(null);
+  };
+
   return {
     isLoading,
-    handleAction
+    handleAction,
+    confirmAction,
+    isConfirmDialogOpen,
+    executePendingAction,
+    cancelConfirmAction
   };
 }

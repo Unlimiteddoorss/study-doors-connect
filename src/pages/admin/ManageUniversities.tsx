@@ -1,10 +1,13 @@
+
 import { useState } from 'react';
-import { Building, CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
+import { Building, CheckCircle, Download, Edit, Eye, MoreHorizontal, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FormDialog } from '@/components/admin/FormDialog';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { AdminPageActions } from '@/components/admin/AdminPageActions';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,6 +44,7 @@ import { useTranslation } from 'react-i18next';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
 import { TablePagination } from '@/components/admin/TablePagination';
 import { TableSkeleton } from '@/components/admin/TableSkeleton';
+import { useAdminActions } from '@/hooks/admin/useAdminActions';
 
 interface University {
   id: string;
@@ -82,12 +86,24 @@ const dummyUniversities: University[] = [
 const itemsPerPage = 10;
 
 const ManageUniversities = () => {
+  const [universities, setUniversities] = useState<University[]>(dummyUniversities);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { 
+    isLoading: isActionLoading, 
+    confirmAction, 
+    isConfirmDialogOpen, 
+    executePendingAction, 
+    cancelConfirmAction,
+    handleAction 
+  } = useAdminActions();
 
   const {
     searchQuery,
@@ -96,7 +112,7 @@ const ManageUniversities = () => {
     setFilters,
     filteredItems: filteredUniversities
   } = useTableFilters(
-    dummyUniversities,
+    universities,
     ['nameAr', 'nameEn', 'country'],
     [
       { field: 'country', defaultValue: 'all' },
@@ -104,43 +120,95 @@ const ManageUniversities = () => {
     ]
   );
 
-  const countries = Array.from(new Set(dummyUniversities.map(university => university.country)));
+  const countries = Array.from(new Set(universities.map(university => university.country)));
 
   const handleAddUniversity = () => {
-    toast({
-      title: t('admin.toasts.addSuccess'),
-      description: t('admin.toasts.addSuccessDesc'),
-    });
-    setIsAddDialogOpen(false);
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Add university logic would go here
+      },
+      {
+        successMessage: t('admin.toasts.addSuccess'),
+        onSuccess: () => setIsAddDialogOpen(false)
+      }
+    );
   };
 
   const handleImportUniversities = () => {
-    toast({
-      title: t('admin.toasts.importSuccess'),
-      description: t('admin.toasts.importSuccessDesc'),
-    });
-    setIsImportDialogOpen(false);
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Import universities logic would go here
+      },
+      {
+        successMessage: t('admin.toasts.importSuccess'),
+        onSuccess: () => setIsImportDialogOpen(false)
+      }
+    );
   };
 
   const handleExportUniversities = () => {
-    toast({
-      title: t('admin.toasts.exportSuccess'),
-      description: t('admin.toasts.exportSuccessDesc'),
-    });
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Export universities logic would go here
+      },
+      {
+        successMessage: t('admin.toasts.exportSuccess')
+      }
+    );
   };
 
   const handleDeleteUniversity = (id: string) => {
-    toast({
-      title: t('admin.toasts.deleteSuccess'),
-      description: t('admin.toasts.deleteSuccessDesc'),
-    });
+    setSelectedUniversityId(id);
+    const university = universities.find(u => u.id === id);
+    
+    confirmAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setUniversities(universities.filter(u => u.id !== id));
+      },
+      {
+        successMessage: t('admin.toasts.deleteSuccess')
+      }
+    );
+  };
+
+  const handleEditUniversity = (id: string) => {
+    setSelectedUniversityId(id);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleViewUniversity = (id: string) => {
+    setSelectedUniversityId(id);
+    setIsViewDialogOpen(true);
   };
 
   const toggleUniversityStatus = (id: string) => {
-    toast({
-      title: t('admin.toasts.statusChange'),
-      description: t('admin.toasts.statusChangeDesc'),
-    });
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setUniversities(
+          universities.map((university) =>
+            university.id === id
+              ? {
+                  ...university,
+                  status: university.status === 'active' ? 'inactive' : 'active',
+                }
+              : university
+          )
+        );
+      },
+      {
+        successMessage: t('admin.toasts.statusChange')
+      }
+    );
   };
 
   const statusConfig = {
@@ -159,28 +227,24 @@ const ManageUniversities = () => {
     setTimeout(() => setIsLoading(false), 500);
   };
 
+  const selectedUniversity = selectedUniversityId ? 
+    universities.find(university => university.id === selectedUniversityId) : null;
+
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.universitiesPage.title')}</h2>
           
-          <div className="flex flex-col md:flex-row gap-2">
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('admin.universitiesPage.addUniversity')}
-            </Button>
-            
-            <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
-              <Upload className="h-4 w-4 mr-2" />
-              {t('admin.universitiesPage.importUniversities')}
-            </Button>
-            
-            <Button variant="outline" onClick={handleExportUniversities}>
-              <Download className="h-4 w-4 mr-2" />
-              {t('admin.universitiesPage.exportUniversities')}
-            </Button>
-          </div>
+          <AdminPageActions 
+            onAdd={() => setIsAddDialogOpen(true)}
+            onImport={() => setIsImportDialogOpen(true)}
+            onExport={handleExportUniversities}
+            addLabel={t('admin.universitiesPage.addUniversity')}
+            importLabel={t('admin.universitiesPage.importUniversities')}
+            exportLabel={t('admin.universitiesPage.exportUniversities')}
+            isLoading={isActionLoading}
+          />
         </div>
         
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -266,10 +330,20 @@ const ManageUniversities = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleViewUniversity(university.id)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleEditUniversity(university.id)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
@@ -325,6 +399,7 @@ const ManageUniversities = () => {
           description={t('admin.universitiesPage.addNewUniversityDesc')}
           onSubmit={handleAddUniversity}
           submitLabel={t('admin.studentsPage.save')}
+          isLoading={isActionLoading}
         >
           <div className="grid grid-cols-4 items-center gap-4">
             <label className="text-right col-span-1">{t('admin.universitiesPage.nameEn')}</label>
@@ -363,8 +438,7 @@ const ManageUniversities = () => {
           </div>
         </FormDialog>
 
-        <Dialog open={isImportDialogOpen} onOpenChange={() => setIsImportDialogOpen(false)}>
-          
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle>{t('admin.universitiesPage.importData')}</DialogTitle>
@@ -385,13 +459,168 @@ const ManageUniversities = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleImportUniversities}>
-                <Upload className="h-4 w-4 mr-2" />
+              <Button 
+                type="submit" 
+                onClick={handleImportUniversities} 
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-2" />
+                )}
                 {t('admin.studentsPage.import')}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog for viewing university details */}
+        {selectedUniversity && (
+          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>{t('admin.universitiesPage.viewUniversity')}</DialogTitle>
+                <DialogDescription>
+                  {t('admin.universitiesPage.viewUniversityDesc')}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="flex justify-center mb-4">
+                  <div className="h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center">
+                    <Building className="h-12 w-12 text-unlimited-gray" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.nameAr')}</p>
+                    <p>{selectedUniversity.nameAr}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.nameEn')}</p>
+                    <p>{selectedUniversity.nameEn}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.country')}</p>
+                    <p>{selectedUniversity.country}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.city')}</p>
+                    <p>{selectedUniversity.city}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.tableHeaders.programsCount')}</p>
+                    <p>{selectedUniversity.programsCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.tableHeaders.studentsCount')}</p>
+                    <p>{selectedUniversity.studentsCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.tableHeaders.ranking')}</p>
+                    <p>#{selectedUniversity.ranking}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.universitiesPage.tableHeaders.status')}</p>
+                    <Badge className={statusConfig[selectedUniversity.status].color}>
+                      {statusConfig[selectedUniversity.status].label}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsViewDialogOpen(false)}
+                >
+                  {t('admin.actions.close')}
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleEditUniversity(selectedUniversity.id);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  {t('admin.actions.edit')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Dialog for editing university */}
+        {selectedUniversity && (
+          <FormDialog
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            title={t('admin.universitiesPage.editUniversity')}
+            description={t('admin.universitiesPage.editUniversityDesc')}
+            onSubmit={() => {
+              handleAction(
+                async () => {
+                  // Simulate API call
+                  await new Promise(resolve => setTimeout(resolve, 800));
+                  // Edit university logic would go here
+                },
+                {
+                  successMessage: t('admin.toasts.editSuccess'),
+                  onSuccess: () => setIsEditDialogOpen(false)
+                }
+              );
+            }}
+            submitLabel={t('admin.actions.save')}
+            isLoading={isActionLoading}
+          >
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.nameEn')}</label>
+              <Input className="col-span-3" defaultValue={selectedUniversity.nameEn} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.nameAr')}</label>
+              <Input className="col-span-3" defaultValue={selectedUniversity.nameAr} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.country')}</label>
+              <Input className="col-span-3" defaultValue={selectedUniversity.country} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.city')}</label>
+              <Input className="col-span-3" defaultValue={selectedUniversity.city} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.website')}</label>
+              <Input type="url" className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.ranking')}</label>
+              <Input type="number" className="col-span-3" defaultValue={selectedUniversity.ranking} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.universitiesPage.universityLogo')}</label>
+              <div className="col-span-3">
+                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
+                  <Button variant="outline" className="w-full">
+                    <Upload className="h-4 w-4 mr-2" />
+                    {t('admin.studentsPage.chooseFile')}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </FormDialog>
+        )}
+
+        {/* Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={isConfirmDialogOpen}
+          onClose={cancelConfirmAction}
+          onConfirm={executePendingAction}
+          title={t('admin.universitiesPage.deleteConfirmTitle')}
+          description={t('admin.universitiesPage.deleteConfirmDesc')}
+          confirmLabel={t('admin.actions.delete')}
+          cancelLabel={t('admin.actions.cancel')}
+          isLoading={isActionLoading}
+        />
       </div>
     </DashboardLayout>
   );

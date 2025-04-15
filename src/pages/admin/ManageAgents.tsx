@@ -1,9 +1,20 @@
+
 import { useState } from 'react';
-import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
+import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload, UserCheck } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { AdminPageActions } from '@/components/admin/AdminPageActions';
+import { FormDialog } from '@/components/admin/FormDialog';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { TablePagination } from '@/components/admin/TablePagination';
+import { TableSkeleton } from '@/components/admin/TableSkeleton';
+import { useAdminActions } from '@/hooks/admin/useAdminActions';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +30,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   Table,
@@ -36,12 +46,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
-import { useTableFilters } from '@/hooks/admin/useTableFilters';
-import { FormDialog } from '@/components/admin/FormDialog';
-import { TablePagination } from '@/components/admin/TablePagination';
-import { TableSkeleton } from '@/components/admin/TableSkeleton';
 
 type Agent = {
   id: string;
@@ -125,8 +129,18 @@ const ManageAgents = () => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const { toast } = useToast();
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { 
+    isLoading: isActionLoading, 
+    confirmAction, 
+    isConfirmDialogOpen, 
+    executePendingAction, 
+    cancelConfirmAction,
+    handleAction 
+  } = useAdminActions();
 
   const {
     searchQuery,
@@ -135,7 +149,7 @@ const ManageAgents = () => {
     setFilters,
     filteredItems: filteredAgents
   } = useTableFilters(
-    initialAgents,
+    agents,
     ['name', 'email', 'id'],
     [
       { field: 'status', defaultValue: 'all' }
@@ -158,55 +172,90 @@ const ManageAgents = () => {
   };
 
   const handleAddAgent = () => {
-    toast({
-      title: t('admin.toasts.addSuccess'),
-      description: t('admin.toasts.addSuccessDesc'),
-    });
-    setIsAddDialogOpen(false);
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Add agent logic would go here
+      },
+      {
+        successMessage: t('admin.toasts.addSuccess'),
+        onSuccess: () => setIsAddDialogOpen(false)
+      }
+    );
   };
 
   const handleImportAgents = () => {
-    toast({
-      title: t('admin.toasts.importSuccess'),
-      description: t('admin.toasts.importSuccessDesc'),
-    });
-    setIsImportDialogOpen(false);
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Import agents logic would go here
+      },
+      {
+        successMessage: t('admin.toasts.importSuccess'),
+        onSuccess: () => setIsImportDialogOpen(false)
+      }
+    );
   };
 
   const handleExportAgents = () => {
-    toast({
-      title: t('admin.toasts.exportSuccess'),
-      description: t('admin.toasts.exportSuccessDesc'),
-    });
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        // Export agents logic would go here
+      },
+      {
+        successMessage: t('admin.toasts.exportSuccess')
+      }
+    );
   };
 
   const handleDeleteAgent = (id: string) => {
-    setAgents(agents.filter((agent) => agent.id !== id));
-    toast({
-      title: t('admin.toasts.deleteSuccess'),
-      description: t('admin.toasts.deleteSuccessDesc'),
-    });
+    setSelectedAgentId(id);
+    confirmAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setAgents(agents.filter((agent) => agent.id !== id));
+      },
+      {
+        successMessage: t('admin.toasts.deleteSuccess')
+      }
+    );
+  };
+
+  const handleViewAgent = (id: string) => {
+    setSelectedAgentId(id);
+    setIsViewDialogOpen(true);
+  };
+
+  const handleEditAgent = (id: string) => {
+    setSelectedAgentId(id);
+    setIsEditDialogOpen(true);
   };
 
   const toggleAgentStatus = (id: string) => {
-    setAgents(
-      agents.map((agent) =>
-        agent.id === id
-          ? {
-              ...agent,
-              status: agent.status === 'active' ? 'inactive' : 'active',
-            }
-          : agent
-      )
+    handleAction(
+      async () => {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 800));
+        setAgents(
+          agents.map((agent) =>
+            agent.id === id
+              ? {
+                  ...agent,
+                  status: agent.status === 'active' ? 'inactive' : 'active',
+                }
+              : agent
+          )
+        );
+      },
+      {
+        successMessage: t('admin.toasts.statusChange')
+      }
     );
-    
-    const agent = agents.find((a) => a.id === id);
-    if (agent) {
-      toast({
-        title: t('admin.toasts.statusChange'),
-        description: t('admin.toasts.statusChangeDesc'),
-      });
-    }
   };
 
   const statusConfig = {
@@ -215,98 +264,23 @@ const ManageAgents = () => {
     pending: { label: t('admin.agentsPage.pending'), color: 'bg-unlimited-warning text-white' },
   };
 
+  const selectedAgent = selectedAgentId ? agents.find(agent => agent.id === selectedAgentId) : null;
+
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.agentsPage.title')}</h2>
           
-          <div className="flex flex-col md:flex-row gap-2">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('admin.agentsPage.addAgent')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.agentsPage.addNewAgent')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.agentsPage.addNewAgentDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.name')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.email')}</label>
-                    <Input type="email" className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.phone')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.country')}</label>
-                    <Input className="col-span-3" />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.agentsPage.commissionRate')}</label>
-                    <Input type="number" className="col-span-3" />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleAddAgent}>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.save')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('admin.agentsPage.importAgents')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.agentsPage.importData')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.agentsPage.importDataDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
-                    <p className="mt-2 text-sm text-unlimited-gray">
-                      {t('admin.studentsPage.dragDrop')}
-                    </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      {t('admin.studentsPage.chooseFile')}
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleImportAgents}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.import')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button variant="outline" onClick={handleExportAgents}>
-              <Download className="h-4 w-4 mr-2" />
-              {t('admin.agentsPage.exportAgents')}
-            </Button>
-          </div>
+          <AdminPageActions 
+            onAdd={() => setIsAddDialogOpen(true)}
+            onImport={() => setIsImportDialogOpen(true)}
+            onExport={handleExportAgents}
+            addLabel={t('admin.agentsPage.addAgent')}
+            importLabel={t('admin.agentsPage.importAgents')}
+            exportLabel={t('admin.agentsPage.exportAgents')}
+            isLoading={isActionLoading}
+          />
         </div>
         
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -376,10 +350,20 @@ const ManageAgents = () => {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleViewAgent(agent.id)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleEditAgent(agent.id)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
                         <DropdownMenu>
@@ -433,6 +417,7 @@ const ManageAgents = () => {
           description={t('admin.agentsPage.addNewAgentDesc')}
           onSubmit={handleAddAgent}
           submitLabel={t('admin.studentsPage.save')}
+          isLoading={isActionLoading}
         >
           <div className="grid grid-cols-4 items-center gap-4">
             <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.name')}</label>
@@ -456,7 +441,195 @@ const ManageAgents = () => {
           </div>
         </FormDialog>
 
-        
+        <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>{t('admin.agentsPage.importData')}</DialogTitle>
+              <DialogDescription>
+                {t('admin.agentsPage.importDataDesc')}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
+                <p className="mt-2 text-sm text-unlimited-gray">
+                  {t('admin.studentsPage.dragDrop')}
+                </p>
+                <input type="file" className="hidden" />
+                <Button variant="outline" className="mt-4">
+                  {t('admin.studentsPage.chooseFile')}
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                onClick={handleImportAgents} 
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? (
+                  <CheckCircle className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-2" />
+                )}
+                {t('admin.studentsPage.import')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Agent Dialog */}
+        {selectedAgent && (
+          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+            <DialogContent className="sm:max-w-[600px]">
+              <DialogHeader>
+                <DialogTitle>{t('admin.agentsPage.viewAgent')}</DialogTitle>
+                <DialogDescription>
+                  {t('admin.agentsPage.viewAgentDesc')}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="flex justify-center mb-4">
+                  <div className="h-24 w-24 bg-gray-200 rounded-full flex items-center justify-center">
+                    <UserCheck className="h-12 w-12 text-unlimited-gray" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.name')}</p>
+                    <p>{selectedAgent.name}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.email')}</p>
+                    <p>{selectedAgent.email}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.phone')}</p>
+                    <p>{selectedAgent.phone}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.country')}</p>
+                    <p>{selectedAgent.country}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.students')}</p>
+                    <p>{selectedAgent.students}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.applications')}</p>
+                    <p>{selectedAgent.applications}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.commission')}</p>
+                    <p>{selectedAgent.commission} ريال</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.tableHeaders.status')}</p>
+                    <Badge className={statusConfig[selectedAgent.status].color}>
+                      {statusConfig[selectedAgent.status].label}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-unlimited-gray">{t('admin.agentsPage.registrationDate')}</p>
+                    <p>{new Date(selectedAgent.registrationDate).toLocaleDateString('ar-SA')}</p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsViewDialogOpen(false)}
+                >
+                  {t('admin.actions.close')}
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setIsViewDialogOpen(false);
+                    handleEditAgent(selectedAgent.id);
+                  }}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  {t('admin.actions.edit')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Edit Agent Dialog */}
+        {selectedAgent && (
+          <FormDialog
+            open={isEditDialogOpen}
+            onOpenChange={setIsEditDialogOpen}
+            title={t('admin.agentsPage.editAgent')}
+            description={t('admin.agentsPage.editAgentDesc')}
+            onSubmit={() => {
+              handleAction(
+                async () => {
+                  // Simulate API call
+                  await new Promise(resolve => setTimeout(resolve, 800));
+                  // Edit agent logic would go here
+                },
+                {
+                  successMessage: t('admin.toasts.editSuccess'),
+                  onSuccess: () => setIsEditDialogOpen(false)
+                }
+              );
+            }}
+            submitLabel={t('admin.actions.save')}
+            isLoading={isActionLoading}
+          >
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.name')}</label>
+              <Input className="col-span-3" defaultValue={selectedAgent.name} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.email')}</label>
+              <Input type="email" className="col-span-3" defaultValue={selectedAgent.email} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.phone')}</label>
+              <Input className="col-span-3" defaultValue={selectedAgent.phone} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.agentsPage.tableHeaders.country')}</label>
+              <Input className="col-span-3" defaultValue={selectedAgent.country} />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.agentsPage.commissionRate')}</label>
+              <Input 
+                type="number" 
+                className="col-span-3" 
+                defaultValue={selectedAgent.commission} 
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label className="text-right col-span-1">{t('admin.agentsPage.status')}</label>
+              <Select defaultValue={selectedAgent.status} className="col-span-3">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">{t('admin.agentsPage.active')}</SelectItem>
+                  <SelectItem value="inactive">{t('admin.agentsPage.inactive')}</SelectItem>
+                  <SelectItem value="pending">{t('admin.agentsPage.pending')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </FormDialog>
+        )}
+
+        {/* Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={isConfirmDialogOpen}
+          onClose={cancelConfirmAction}
+          onConfirm={executePendingAction}
+          title={t('admin.agentsPage.deleteConfirmTitle')}
+          description={t('admin.agentsPage.deleteConfirmDesc')}
+          confirmLabel={t('admin.actions.delete')}
+          cancelLabel={t('admin.actions.cancel')}
+          isLoading={isActionLoading}
+        />
       </div>
     </DashboardLayout>
   );
