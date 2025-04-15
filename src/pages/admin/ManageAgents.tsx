@@ -40,6 +40,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
 import { FormDialog } from '@/components/admin/FormDialog';
+import { TablePagination } from '@/components/admin/TablePagination';
+import { TableSkeleton } from '@/components/admin/TableSkeleton';
 
 type Agent = {
   id: string;
@@ -117,6 +119,8 @@ const initialAgents: Agent[] = [
   },
 ];
 
+const itemsPerPage = 10;
+
 const ManageAgents = () => {
   const [agents, setAgents] = useState<Agent[]>(initialAgents);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -137,6 +141,21 @@ const ManageAgents = () => {
       { field: 'status', defaultValue: 'all' }
     ]
   );
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Calculate pagination
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const totalPages = Math.ceil(filteredAgents.length / itemsPerPage);
+  const currentItems = filteredAgents.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
+  };
 
   const handleAddAgent = () => {
     toast({
@@ -314,7 +333,7 @@ const ManageAgents = () => {
           </Select>
         </div>
         
-        <div className="rounded-md border">
+        <div className="rounded-md border shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -331,14 +350,16 @@ const ManageAgents = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAgents.length === 0 ? (
+              {isLoading ? (
+                <TableSkeleton columns={10} rows={itemsPerPage} />
+              ) : currentItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
+                  <TableCell colSpan={10} className="text-center h-40 text-unlimited-gray">
                     {t('admin.agentsPage.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAgents.map((agent) => (
+                currentItems.map((agent) => (
                   <TableRow key={agent.id}>
                     <TableCell className="font-medium">{agent.id}</TableCell>
                     <TableCell>{agent.name}</TableCell>
@@ -394,6 +415,15 @@ const ManageAgents = () => {
               )}
             </TableBody>
           </Table>
+          {filteredAgents.length > itemsPerPage && (
+            <div className="py-4 flex justify-center">
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
 
         <FormDialog

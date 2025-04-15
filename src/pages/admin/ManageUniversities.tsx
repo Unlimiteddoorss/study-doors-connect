@@ -39,6 +39,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { TablePagination } from '@/components/admin/TablePagination';
+import { TableSkeleton } from '@/components/admin/TableSkeleton';
 
 interface University {
   id: string;
@@ -77,9 +79,13 @@ const dummyUniversities: University[] = [
   }
 ];
 
+const itemsPerPage = 10;
+
 const ManageUniversities = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -140,6 +146,17 @@ const ManageUniversities = () => {
   const statusConfig = {
     active: { label: t('admin.universitiesPage.active'), color: 'bg-unlimited-success text-white' },
     inactive: { label: t('admin.universitiesPage.inactive'), color: 'bg-unlimited-gray text-white' },
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
+  const currentItems = filteredUniversities.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
   };
 
   return (
@@ -219,14 +236,16 @@ const ManageUniversities = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredUniversities.length === 0 ? (
+              {isLoading ? (
+                <TableSkeleton columns={9} rows={itemsPerPage} />
+              ) : currentItems.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
                     {t('admin.universitiesPage.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredUniversities.map((university) => (
+                currentItems.map((university) => (
                   <TableRow key={university.id}>
                     <TableCell className="font-medium">{university.id}</TableCell>
                     <TableCell>
@@ -288,6 +307,15 @@ const ManageUniversities = () => {
               )}
             </TableBody>
           </Table>
+          {filteredUniversities.length > itemsPerPage && (
+            <div className="py-4 flex justify-center">
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
 
         <FormDialog

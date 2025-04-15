@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -41,6 +40,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { TablePagination } from '@/components/admin/TablePagination';
+import { TableSkeleton } from '@/components/admin/TableSkeleton';
 
 interface Student {
   id: string;
@@ -110,10 +111,14 @@ const nationalities = [
   'ليبي'
 ];
 
+const itemsPerPage = 10;
+
 const ManageStudents = () => {
   const [students, setStudents] = useState<Student[]>(dummyStudents);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { t } = useTranslation();
 
@@ -168,6 +173,17 @@ const ManageStudents = () => {
     inactive: { label: t('admin.studentsPage.inactive'), color: 'bg-unlimited-gray text-white' },
     pending: { label: t('admin.studentsPage.pending'), color: 'bg-unlimited-warning text-white' },
     graduated: { label: t('admin.studentsPage.graduated'), color: 'bg-unlimited-blue text-white' },
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
+  const currentItems = filteredStudents.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setIsLoading(true);
+    setTimeout(() => setIsLoading(false), 500);
   };
 
   return (
@@ -311,7 +327,7 @@ const ManageStudents = () => {
           </div>
         </div>
         
-        <div className="rounded-md border">
+        <div className="rounded-md border shadow-sm">
           <Table>
             <TableHeader>
               <TableRow>
@@ -327,14 +343,16 @@ const ManageStudents = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStudents.length === 0 ? (
+              {isLoading ? (
+                <TableSkeleton columns={9} rows={itemsPerPage} />
+              ) : currentItems.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
                     {t('admin.studentsPage.noData')}
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredStudents.map((student) => (
+                currentItems.map((student) => (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.id}</TableCell>
                     <TableCell>
@@ -391,6 +409,15 @@ const ManageStudents = () => {
               )}
             </TableBody>
           </Table>
+          {filteredStudents.length > itemsPerPage && (
+            <div className="py-4 flex justify-center">
+              <TablePagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
