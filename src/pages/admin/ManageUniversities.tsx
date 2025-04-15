@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Building, CheckCircle, Download, Edit, Eye, MoreHorizontal, Search, Trash, Upload } from 'lucide-react';
+import { Building, CheckCircle, Download, Edit, Eye, MoreHorizontal, Search, Trash, Upload, Loader2 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

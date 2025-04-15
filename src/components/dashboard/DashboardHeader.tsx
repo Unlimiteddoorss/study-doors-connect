@@ -1,8 +1,17 @@
 
 import { useState } from 'react';
-import { Bell, MessageSquare, Search, User } from 'lucide-react';
+import { 
+  Bell, 
+  Settings, 
+  User, 
+  LogOut, 
+  ChevronDown, 
+  Menu, 
+  Moon,
+  Sun,
+  Globe
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,118 +19,128 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslation } from 'react-i18next';
 
-type DashboardHeaderProps = {
+interface DashboardHeaderProps {
   userRole?: 'student' | 'admin' | 'agent';
-  userName?: string;
-};
+  toggleSidebar?: () => void;
+}
 
-const DashboardHeader = ({ 
-  userRole = 'student', 
-  userName = 'محمد أحمد'
-}: DashboardHeaderProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
+const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeaderProps) => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { t, i18n } = useTranslation();
+  
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    // Implement actual theme toggling here
+  };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Search for:', searchQuery);
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 py-3 px-6">
-      <div className="flex justify-between items-center">
-        {/* Left Section - Search */}
-        <form onSubmit={handleSearch} className="relative hidden md:block w-64">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          <Input
-            type="text"
-            placeholder="بحث سريع..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-10 pl-4 w-full"
-          />
-        </form>
-
-        {/* Right Section - User Actions */}
+    <header className="border-b sticky top-0 z-10 bg-white">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+            <Menu className="h-5 w-5" />
+          </Button>
+          
+          <div className="ml-4 md:ml-0">
+            <h1 className="text-lg font-medium text-unlimited-dark-blue">
+              {userRole === 'admin' ? t('admin.dashboard.title') : 
+               userRole === 'agent' ? t('agent.dashboard.title') : 
+               t('student.dashboard.title')}
+            </h1>
+          </div>
+        </div>
+        
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
-          {/* Notifications */}
+          {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-80 overflow-y-auto">
-                <DropdownMenuItem className="flex flex-col items-start py-3">
-                  <div className="font-medium">تم تحديث حالة طلبك</div>
-                  <div className="text-sm text-gray-500 mt-1">تم قبول طلبك للبرنامج الدراسي في جامعة أوزيجين</div>
-                  <div className="text-xs text-gray-400 mt-1">منذ ساعتين</div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start py-3">
-                  <div className="font-medium">رسالة جديدة</div>
-                  <div className="text-sm text-gray-500 mt-1">لديك رسالة جديدة من قسم الدعم</div>
-                  <div className="text-xs text-gray-400 mt-1">منذ 5 ساعات</div>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-unlimited-blue">
-                عرض جميع الإشعارات
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Messages */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
-                <MessageSquare className="h-5 w-5" />
-                <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>الرسائل</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-80 overflow-y-auto">
-                <DropdownMenuItem className="flex flex-col items-start py-3">
-                  <div className="font-medium">قسم الدعم</div>
-                  <div className="text-sm text-gray-500 mt-1 line-clamp-1">مرحباً، هل يمكنك تزويدنا بمعلومات إضافية عن طلبك؟</div>
-                  <div className="text-xs text-gray-400 mt-1">منذ ساعة</div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start py-3">
-                  <div className="font-medium">د. أحمد محمد</div>
-                  <div className="text-sm text-gray-500 mt-1 line-clamp-1">شكراً لاستفسارك، يسعدنا تقديم المساعدة...</div>
-                  <div className="text-xs text-gray-400 mt-1">منذ يومين</div>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center text-unlimited-blue">
-                عرض جميع الرسائل
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* User Profile */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 px-2">
-                <span className="hidden sm:inline-block">{userName}</span>
-                <div className="h-8 w-8 rounded-full bg-unlimited-blue text-white flex items-center justify-center">
-                  <User className="h-5 w-5" />
-                </div>
+              <Button variant="outline" size="icon">
+                <Globe className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>حسابي</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => changeLanguage('ar')}>
+                العربية
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                English
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Theme Toggle */}
+          <Button variant="outline" size="icon" onClick={toggleTheme}>
+            {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="relative">
+                <Bell className="h-4 w-4" />
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-unlimited-danger"></span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel>{t('notifications.title')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
-              <DropdownMenuItem>الإعدادات</DropdownMenuItem>
+              <div className="max-h-80 overflow-auto">
+                {[1, 2, 3].map((i) => (
+                  <DropdownMenuItem key={i} className="flex flex-col items-start py-2">
+                    <p className="font-medium">{t('notifications.item', { number: i })}</p>
+                    <p className="text-sm text-unlimited-gray">{t('notifications.time', { number: i })}</p>
+                  </DropdownMenuItem>
+                ))}
+              </div>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-500">تسجيل الخروج</DropdownMenuItem>
+              <DropdownMenuItem className="justify-center">
+                <Button variant="ghost" className="w-full">
+                  {t('notifications.viewAll')}
+                </Button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* User Menu */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src="/assets/avatar.png" />
+                  <AvatarFallback>
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden md:inline">{userRole === 'admin' ? 'أحمد المدير' : userRole === 'agent' ? 'محمد الوكيل' : 'عبدالله الطالب'}</span>
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{t('auth.profile')}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <User className="h-4 w-4 mr-2" />
+                {t('auth.viewProfile')}
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="h-4 w-4 mr-2" />
+                {t('auth.settings')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-unlimited-danger focus:text-unlimited-danger">
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('auth.logout')}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

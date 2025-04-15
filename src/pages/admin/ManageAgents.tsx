@@ -605,16 +605,18 @@ const ManageAgents = () => {
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <label className="text-right col-span-1">{t('admin.agentsPage.status')}</label>
-              <Select defaultValue={selectedAgent.status} className="col-span-3">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">{t('admin.agentsPage.active')}</SelectItem>
-                  <SelectItem value="inactive">{t('admin.agentsPage.inactive')}</SelectItem>
-                  <SelectItem value="pending">{t('admin.agentsPage.pending')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="col-span-3">
+                <Select defaultValue={selectedAgent.status}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">{t('admin.agentsPage.active')}</SelectItem>
+                    <SelectItem value="inactive">{t('admin.agentsPage.inactive')}</SelectItem>
+                    <SelectItem value="pending">{t('admin.agentsPage.pending')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </FormDialog>
         )}
