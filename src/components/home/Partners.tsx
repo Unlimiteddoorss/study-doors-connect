@@ -1,8 +1,10 @@
+
 import { useRef, useEffect, useState } from 'react';
 import SectionTitle from '../shared/SectionTitle';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Partners = () => {
   const [autoScroll, setAutoScroll] = useState(true);
@@ -37,37 +39,43 @@ const Partners = () => {
       name: 'Ozyegin University',
       logo: 'https://upload.wikimedia.org/wikipedia/en/7/7a/Ozyegin_University_logo.png',
       description: 'جامعة عريقة في تركيا تأسست عام 2007',
-      link: '/universities/ozyegin'
+      link: '/universities/ozyegin',
+      website: 'https://www.ozyegin.edu.tr'
     },
     {
       name: 'Fatih Sultan Mehmet University',
       logo: 'https://upload.wikimedia.org/wikipedia/en/2/27/Fatih_Sultan_Mehmet_Vak%C4%B1f_%C3%9Cniversitesi_logo.jpg',
       description: 'من أفضل الجامعات الخاصة في إسطنبول',
-      link: '/universities/fatih'
+      link: '/universities/fatih',
+      website: 'https://www.fsm.edu.tr'
     },
     {
       name: 'Budapest University of Technology',
       logo: 'https://upload.wikimedia.org/wikipedia/en/d/d4/BME_logo.jpg',
       description: 'رائدة في مجال الهندسة والتكنولوجيا',
-      link: '/universities/budapest'
+      link: '/universities/budapest',
+      website: 'https://www.bme.hu'
     },
     {
       name: 'University of Warsaw',
       logo: 'https://upload.wikimedia.org/wikipedia/en/1/13/University_of_Warsaw_logo.png',
       description: 'أقدم وأرقى الجامعات في بولندا',
-      link: '/universities/warsaw'
+      link: '/universities/warsaw',
+      website: 'https://en.uw.edu.pl'
     },
     {
       name: 'Cairo University',
       logo: 'https://upload.wikimedia.org/wikipedia/en/b/b3/Cairo_University_Crest.png',
       description: 'من أعرق الجامعات في الشرق الأوسط',
-      link: '/universities/cairo'
+      link: '/universities/cairo',
+      website: 'https://cu.edu.eg'
     },
     {
       name: 'Czech Technical University',
       logo: 'https://upload.wikimedia.org/wikipedia/commons/1/13/CVUT_logo.png',
       description: 'متميزة في الدراسات التقنية والهندسية',
-      link: '/universities/czech'
+      link: '/universities/czech',
+      website: 'https://www.cvut.cz'
     },
   ];
 
@@ -163,14 +171,25 @@ const Partners = () => {
                   {partner.name}
                 </motion.p>
                 <p className="text-unlimited-gray text-sm text-center mt-1">{partner.description}</p>
-                <Button 
-                  variant="link" 
-                  size="sm" 
-                  asChild
-                  className={`mt-2 transition-all duration-300 ${hoveredIndex === index ? 'text-unlimited-blue underline' : ''}`}
-                >
-                  <a href={partner.link}>تفاصيل أكثر</a>
-                </Button>
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    asChild
+                    className={`transition-all duration-300 ${hoveredIndex === index ? 'text-unlimited-blue underline' : ''}`}
+                  >
+                    <Link to={partner.link}>تفاصيل أكثر</Link>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-1 py-0 h-7"
+                    onClick={() => window.open(partner.website, '_blank')}
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    <span>موقع الجامعة</span>
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </div>

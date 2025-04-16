@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Users2, GraduationCap, Building2, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 import StatsCard from '../shared/StatsCard';
+import { useToast } from '@/components/ui/use-toast';
 
 const statsData = [
   {
@@ -44,7 +45,9 @@ const Stats = () => {
   const [hoveredStat, setHoveredStat] = useState<number | null>(null);
   const [animatedValues, setAnimatedValues] = useState<Record<number, string>>({});
   const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [selectedStat, setSelectedStat] = useState<number | null>(null);
   const statsRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const animateValue = (id: number, start: number, end: number, suffix: string, duration: number) => {
     if (isVisible) {
@@ -96,6 +99,40 @@ const Stats = () => {
     return animatedValues[stat.id] || stat.value;
   };
 
+  const handleStatClick = (statId: number) => {
+    setSelectedStat(statId);
+    const stat = statsData.find(s => s.id === statId);
+    
+    if (stat) {
+      let route = '';
+      let message = '';
+      
+      switch (statId) {
+        case 1:
+          route = '/dashboard';
+          message = 'عرض قائمة الطلاب المسجلين';
+          break;
+        case 2:
+          route = '/programs';
+          message = 'استكشاف البرامج الدراسية المتاحة';
+          break;
+        case 3:
+          route = '/universities';
+          message = 'استكشاف الجامعات الشريكة';
+          break;
+        case 4:
+          route = '/apply';
+          message = 'تقديم طلب التسجيل الآن';
+          break;
+      }
+      
+      toast({
+        title: stat.title,
+        description: message,
+      });
+    }
+  };
+
   return (
     <section className="py-16 bg-gradient-to-r from-gray-50 to-white">
       <div className="container mx-auto px-4">
@@ -119,21 +156,23 @@ const Stats = () => {
               animate={{ 
                 opacity: isVisible ? 1 : 0,
                 y: isVisible ? 0 : 20,
-                scale: hoveredStat === stat.id ? 1.05 : 1
+                scale: hoveredStat === stat.id ? 1.05 : selectedStat === stat.id ? 1.03 : 1
               }}
               onHoverStart={() => setHoveredStat(stat.id)}
               onHoverEnd={() => setHoveredStat(null)}
+              onClick={() => handleStatClick(stat.id)}
+              whileTap={{ scale: 0.98 }}
               transition={{ 
                 duration: 0.5,
                 delay: stat.id * 0.1
               }}
-              className="transform transition-all duration-300"
+              className="transform transition-all duration-300 cursor-pointer"
             >
               <StatsCard
                 title={stat.title}
                 value={getDisplayValue(stat)}
                 icon={<stat.icon className={`h-8 w-8 ${hoveredStat === stat.id ? 'text-unlimited-blue scale-110' : ''} transition-all duration-300`} />}
-                className={`h-full hover:shadow-lg ${hoveredStat === stat.id ? 'border-2 border-unlimited-blue/20' : ''}`}
+                className={`h-full hover:shadow-lg ${hoveredStat === stat.id ? 'border-2 border-unlimited-blue/20' : ''} ${selectedStat === stat.id ? 'bg-unlimited-blue/5' : ''}`}
                 iconClassName={`p-3 ${stat.color} bg-opacity-10 rounded-full transition-colors duration-300 ${hoveredStat === stat.id ? 'bg-opacity-20' : ''}`}
                 valueClassName={`text-3xl font-bold mb-2 ${hoveredStat === stat.id ? 'text-unlimited-blue scale-110' : 'text-unlimited-dark-blue'} transition-all duration-300`}
                 titleClassName="text-lg font-semibold text-unlimited-blue mb-2"

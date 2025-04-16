@@ -1,3 +1,4 @@
+
 import { Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -17,6 +18,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import StudentApplication from "./pages/StudentApplication";
+import Services from "./pages/Services";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageStudents from "./pages/admin/ManageStudents";
 import ManageAgents from "./pages/admin/ManageAgents";
@@ -39,6 +41,7 @@ function App() {
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
+      <Route path="/services" element={<Services />} />
       <Route path="/countries" element={<Countries />} />
       <Route path="/countries/:id" element={<CountryDetails />} />
       <Route path="/programs" element={<Programs />} />

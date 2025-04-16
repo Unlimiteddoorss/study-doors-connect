@@ -1,3 +1,4 @@
+
 import { 
   GraduationCap, 
   Building2, 
@@ -11,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useToast } from '@/components/ui/use-toast';
 
 const servicesData = [
   {
@@ -59,8 +61,10 @@ const servicesData = [
 
 const Services = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [hoveredService, setHoveredService] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [selectedService, setSelectedService] = useState<number | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -80,6 +84,19 @@ const Services = () => {
 
     return () => observer.disconnect();
   }, []);
+
+  const handleServiceClick = (serviceId: number, link: string) => {
+    setSelectedService(serviceId);
+    setTimeout(() => {
+      navigate(link);
+    }, 300);
+    
+    // Show feedback toast
+    toast({
+      title: "تم اختيار الخدمة بنجاح",
+      description: `سيتم توجيهك إلى صفحة ${servicesData.find(s => s.id === serviceId)?.title}`,
+    });
+  };
 
   return (
     <section className="py-16 services-section">
@@ -103,11 +120,14 @@ const Services = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               onHoverStart={() => setHoveredService(service.id)}
               onHoverEnd={() => setHoveredService(null)}
-              className={`bg-white p-6 rounded-lg shadow-sm transition-all duration-300 
-                ${hoveredService === service.id ? 'shadow-lg border-2 border-unlimited-blue/20' : ''}`}
+              onClick={() => handleServiceClick(service.id, service.link)}
+              className={`bg-white p-6 rounded-lg shadow-sm transition-all duration-300 cursor-pointer
+                ${hoveredService === service.id ? 'shadow-lg border-2 border-unlimited-blue/20' : ''}
+                ${selectedService === service.id ? 'bg-unlimited-blue/5' : ''}`}
             >
               <div className={`p-3 rounded-full w-fit mb-4 transition-all duration-300
                 ${hoveredService === service.id ? 'bg-unlimited-blue text-white scale-110' : 'bg-unlimited-blue/10 text-unlimited-blue'}`}>
@@ -124,7 +144,10 @@ const Services = () => {
                 variant="link" 
                 className={`text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2 group
                   ${hoveredService === service.id ? 'underline' : ''}`}
-                onClick={() => navigate(service.link)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(service.link);
+                }}
               >
                 اكتشف المزيد
                 <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
