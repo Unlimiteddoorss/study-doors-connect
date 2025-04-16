@@ -1,118 +1,128 @@
 
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Globe2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Logo from '../shared/Logo';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const Footer = () => {
   const { t } = useTranslation();
   const currentYear = new Date().getFullYear();
 
+  const contactInfo = {
+    phone: "+966 123 456 789",
+    email: "info@unlimited-edu.com",
+    address: t('footer.address')
+  };
+
+  const socialLinks = [
+    { icon: Youtube, href: "#", label: "Youtube" },
+    { icon: Instagram, href: "#", label: "Instagram" },
+    { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Facebook, href: "#", label: "Facebook" }
+  ];
+
+  const programLinks = [
+    { href: "/programs/bachelor", label: t('footer.bachelorPrograms') },
+    { href: "/programs/master", label: t('footer.masterPrograms') },
+    { href: "/programs/phd", label: t('footer.phdPrograms') },
+    { href: "/programs/diploma", label: t('footer.diplomaPrograms') },
+    { href: "/programs/language", label: t('footer.languagePrograms') }
+  ];
+
+  const quickLinks = [
+    { href: "/", label: t('footer.home') },
+    { href: "/about", label: t('footer.about') },
+    { href: "/universities", label: t('footer.universities') },
+    { href: "/programs", label: t('footer.programs') },
+    { href: "/contact", label: t('footer.contact') }
+  ];
+
   return (
     <footer className="bg-unlimited-dark-blue text-white">
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* الشعار ومعلومات الشركة */}
+          {/* Company Info */}
           <div className="space-y-4">
             <Logo variant="light" />
-            <p className="text-gray-300">
+            <p className="text-gray-300 leading-relaxed">
               {t('footer.companyDescription')}
             </p>
             <div className="flex space-x-4 rtl:space-x-reverse">
-              <a href="#" className="hover:text-unlimited-light-blue transition-colors">
-                <Facebook size={20} />
-              </a>
-              <a href="#" className="hover:text-unlimited-light-blue transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href="#" className="hover:text-unlimited-light-blue transition-colors">
-                <Instagram size={20} />
-              </a>
-              <a href="#" className="hover:text-unlimited-light-blue transition-colors">
-                <Youtube size={20} />
-              </a>
+              {socialLinks.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  className="hover:text-unlimited-light-blue transition-colors p-2 rounded-full hover:bg-white/10"
+                  aria-label={social.label}
+                >
+                  <social.icon size={20} />
+                </a>
+              ))}
             </div>
           </div>
 
-          {/* روابط سريعة */}
+          {/* Programs */}
           <div>
-            <h3 className="text-xl font-bold mb-4">{t('footer.quickLinks')}</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.home')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.about')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/universities" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.universities')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/programs" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.programs')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.contact')}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* البرامج */}
-          <div>
-            <h3 className="text-xl font-bold mb-4">{t('footer.programs')}</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/programs/bachelor" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.bachelorPrograms')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/programs/master" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.masterPrograms')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/programs/phd" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.phdPrograms')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/programs/diploma" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.diplomaPrograms')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/programs/language" className="hover:text-unlimited-light-blue transition-colors">
-                  {t('footer.languagePrograms')}
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* اتصل بنا */}
-          <div>
-            <h3 className="text-xl font-bold mb-4">{t('footer.contactUs')}</h3>
+            <h3 className="text-xl font-bold mb-6">{t('footer.programs')}</h3>
             <ul className="space-y-3">
-              <li className="flex items-start">
-                <MapPin className="h-5 w-5 mr-2 mt-0.5 flex-shrink-0" />
-                <span>{t('footer.address')}</span>
+              {programLinks.map((link) => (
+                <li key={link.href}>
+                  <Link 
+                    to={link.href}
+                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 inline-block"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-xl font-bold mb-6">{t('footer.quickLinks')}</h3>
+            <ul className="space-y-3">
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link 
+                    to={link.href}
+                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 inline-block"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-xl font-bold mb-6">{t('footer.contactUs')}</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 text-gray-300">
+                <MapPin className="h-5 w-5 flex-shrink-0 mt-1" />
+                <span>{contactInfo.address}</span>
               </li>
-              <li className="flex items-center">
-                <Phone className="h-5 w-5 mr-2 flex-shrink-0" />
-                <span dir="ltr">+966 123 456 789</span>
+              <li className="flex items-center gap-3 text-gray-300">
+                <Phone className="h-5 w-5 flex-shrink-0" />
+                <span dir="ltr">{contactInfo.phone}</span>
               </li>
-              <li className="flex items-center">
-                <Mail className="h-5 w-5 mr-2 flex-shrink-0" />
-                <span>info@unlimited-edu.com</span>
+              <li className="flex items-center gap-3 text-gray-300">
+                <Mail className="h-5 w-5 flex-shrink-0" />
+                <span>{contactInfo.email}</span>
+              </li>
+              <li className="flex items-center gap-3 text-gray-300">
+                <Globe2 className="h-5 w-5 flex-shrink-0" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => document.documentElement.dir = document.documentElement.dir === 'rtl' ? 'ltr' : 'rtl'}
+                  className="text-gray-300 hover:text-unlimited-light-blue p-0 h-auto font-normal"
+                >
+                  {document.documentElement.dir === 'rtl' ? 'English' : 'العربية'}
+                </Button>
               </li>
             </ul>
           </div>
@@ -120,18 +130,19 @@ const Footer = () => {
 
         <hr className="border-gray-700 my-8" />
 
-        <div className="flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-300">
+        {/* Bottom Footer */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-gray-400 text-sm">
             &copy; {currentYear} Unlimited Education. {t('footer.allRightsReserved')}
           </p>
-          <div className="flex space-x-4 rtl:space-x-reverse mt-4 md:mt-0">
-            <Link to="/terms" className="text-gray-300 hover:text-unlimited-light-blue transition-colors">
-              {t('footer.terms')}
-            </Link>
-            <Link to="/privacy" className="text-gray-300 hover:text-unlimited-light-blue transition-colors">
+          <div className="flex gap-6">
+            <Link to="/privacy" className="text-gray-400 hover:text-unlimited-light-blue text-sm transition-colors">
               {t('footer.privacy')}
             </Link>
-            <Link to="/cookies" className="text-gray-300 hover:text-unlimited-light-blue transition-colors">
+            <Link to="/terms" className="text-gray-400 hover:text-unlimited-light-blue text-sm transition-colors">
+              {t('footer.terms')}
+            </Link>
+            <Link to="/cookies" className="text-gray-400 hover:text-unlimited-light-blue text-sm transition-colors">
               {t('footer.cookies')}
             </Link>
           </div>
