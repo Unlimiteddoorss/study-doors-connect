@@ -7,6 +7,7 @@ import {
   Legend,
   Tooltip
 } from 'recharts';
+import { useToast } from '@/hooks/use-toast';
 
 const data = [
   { name: 'السعودية', value: 400, color: '#2563eb' },
@@ -20,6 +21,31 @@ const data = [
 ];
 
 export const StudentsByCountry = () => {
+  const { toast } = useToast();
+
+  const handleClick = (entry: any) => {
+    toast({
+      title: `إحصائيات ${entry.name}`,
+      description: `عدد الطلاب: ${entry.value} طالب (${((entry.value / 1504) * 100).toFixed(1)}%)`,
+    });
+  };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-4 border rounded-lg shadow-lg">
+          <p className="font-bold text-unlimited-dark-blue">{data.name}</p>
+          <p className="text-unlimited-gray">{data.value} طالب</p>
+          <p className="text-unlimited-blue">
+            {((data.value / 1504) * 100).toFixed(1)}%
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -33,16 +59,21 @@ export const StudentsByCountry = () => {
             fill="#8884d8"
             dataKey="value"
             label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+            onClick={handleClick}
+            className="animate-fade-in"
           >
             {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.color}
+                className="hover:opacity-80 transition-opacity cursor-pointer"
+              />
             ))}
           </Pie>
-          <Tooltip formatter={(value) => `${value} طالب`} />
+          <Tooltip content={<CustomTooltip />} />
           <Legend />
         </PieChart>
       </ResponsiveContainer>
     </div>
   );
 };
-
