@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
 
 export const ReportActions = () => {
   const { toast } = useToast();
@@ -26,7 +27,7 @@ export const ReportActions = () => {
       toast({
         title: "تم التحميل بنجاح",
         description: `تم تحميل التقرير بصيغة ${format === 'pdf' ? 'PDF' : 'Excel'} بنجاح`,
-        variant: "success",
+        variant: "default",
       });
     }, 2000);
   };
@@ -40,12 +41,12 @@ export const ReportActions = () => {
     window.print();
   };
 
-  const handleDateChange = (range: { from: Date; to: Date }) => {
+  const handleDateChange = (range: DateRange) => {
     if (range.from && range.to) {
       toast({
         title: "تم تحديث الفترة الزمنية",
         description: `تم تحديث التقرير للفترة من ${range.from.toLocaleDateString('ar-SA')} إلى ${range.to.toLocaleDateString('ar-SA')}`,
-        variant: "success",
+        variant: "default",
       });
     }
   };
