@@ -25,8 +25,8 @@ const StudentApplicationFormSubmit = ({
   const handleSubmit = () => {
     if (!canSubmit) {
       toast({
-        title: "تحقق من البيانات",
-        description: "يرجى إكمال جميع الحقول المطلوبة",
+        title: t('form.checkData'),
+        description: t('form.completeAllRequiredFields'),
         variant: "destructive"
       });
       return;
@@ -44,7 +44,7 @@ const StudentApplicationFormSubmit = ({
         className="order-2 sm:order-1 flex items-center gap-1"
       >
         <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-        السابق
+        {t('form.previous')}
       </Button>
       {isLastStep ? (
         <Button
@@ -55,11 +55,11 @@ const StudentApplicationFormSubmit = ({
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> جاري التقديم...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('form.submitting')}
             </>
           ) : (
             <>
-              <Check className="mr-2 h-4 w-4" /> تقديم الطلب
+              <Check className="mr-2 h-4 w-4" /> {t('form.submitApplication')}
             </>
           )}
         </Button>
@@ -70,7 +70,7 @@ const StudentApplicationFormSubmit = ({
           disabled={isSubmitting}
           className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1"
         >
-          التالي
+          {t('form.next')}
           <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
         </Button>
       )}

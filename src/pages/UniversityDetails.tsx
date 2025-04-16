@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
@@ -37,7 +38,8 @@ const translations: Record<string, string> = {
   'Nicosia': 'نيقوسيا',
   'Famagusta': 'فماغوستا',
   'Private': 'خاصة',
-  'Public': 'حكومية'
+  'Public': 'حكومية',
+  'Avcılar': 'أفجيلار'
 };
 
 const UniversityDetails = () => {
@@ -78,6 +80,9 @@ const UniversityDetails = () => {
     );
   }
 
+  // Special handling for Gelisim University logo
+  const universityLogo = universityId === 12 ? "/lovable-uploads/8d4752ed-a124-4362-9bf6-815d145af3e6.png" : null;
+
   return (
     <MainLayout>
       <UniversityAdminControls universityId={universityId} />
@@ -92,19 +97,28 @@ const UniversityDetails = () => {
             />
           </div>
           
-          <div className="absolute bottom-4 right-8 bg-white p-4 rounded-lg shadow-lg">
-            <div className="flex items-center gap-2">
-              {university.type === 'Private' ? (
-                <Badge className="bg-unlimited-blue">جامعة خاصة</Badge>
-              ) : (
-                <Badge className="bg-unlimited-dark-blue">جامعة حكومية</Badge>
-              )}
-              {university.isFeatured && <Badge className="bg-green-600">جامعة مميزة</Badge>}
-            </div>
-            <h1 className="text-2xl md:text-4xl font-bold mt-2">{university.nameAr || university.name}</h1>
-            <div className="flex items-center gap-2 text-gray-600 mt-2">
-              <MapPin className="h-4 w-4" />
-              <span>{translate(university.city)}، {translate(university.country)}</span>
+          <div className="absolute bottom-4 right-8 bg-white p-4 rounded-lg shadow-lg flex items-center">
+            {universityLogo && (
+              <img 
+                src={universityLogo}
+                alt="University Logo" 
+                className="w-16 h-16 rounded-full mr-4 object-contain"
+              />
+            )}
+            <div>
+              <div className="flex items-center gap-2">
+                {university.type === 'Private' ? (
+                  <Badge className="bg-unlimited-blue">جامعة خاصة</Badge>
+                ) : (
+                  <Badge className="bg-unlimited-dark-blue">جامعة حكومية</Badge>
+                )}
+                {university.isFeatured && <Badge className="bg-green-600">جامعة مميزة</Badge>}
+              </div>
+              <h1 className="text-2xl md:text-4xl font-bold mt-2">{university.nameAr || university.name}</h1>
+              <div className="flex items-center gap-2 text-gray-600 mt-2">
+                <MapPin className="h-4 w-4" />
+                <span>{translate(university.city)}، {translate(university.country)}</span>
+              </div>
             </div>
           </div>
         </div>
