@@ -109,21 +109,21 @@ const CTASection = () => {
                 <div className="p-2 rounded-full bg-white/10">
                   <Phone className="h-5 w-5" />
                 </div>
-                <a href="tel:+123456789" className="hover:underline">+123-456-789</a>
+                <a href="tel:+905524212214" className="hover:underline">+90 55 24 212 214</a>
               </div>
               
               <div className="flex items-center gap-3 text-white/80 hover:text-white transition-colors">
                 <div className="p-2 rounded-full bg-white/10">
                   <Mail className="h-5 w-5" />
                 </div>
-                <a href="mailto:info@unlimited-edu.com" className="hover:underline">info@unlimited-edu.com</a>
+                <a href="mailto:unlimiteddoorss@gmail.com" className="hover:underline">unlimiteddoorss@gmail.com</a>
               </div>
               
               <div className="flex items-center gap-3 text-white/80 hover:text-white transition-colors">
                 <div className="p-2 rounded-full bg-white/10">
                   <MapPin className="h-5 w-5" />
                 </div>
-                <address className="not-italic">إسطنبول، تركيا</address>
+                <address className="not-italic">اسطنبول Bahçelievler تركيا</address>
               </div>
             </motion.div>
           </motion.div>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -76,8 +75,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="font-semibold">العنوان</p>
-                      <p className="text-unlimited-gray">اسطنبول، تركيا</p>
-                      <p className="text-unlimited-gray">شارع الاستقلال، تقسيم</p>
+                      <p className="text-unlimited-gray">اسطنبول Bahçelievler تركيا</p>
                     </div>
                   </div>
                   
@@ -87,8 +85,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="font-semibold">رقم الهاتف</p>
-                      <p className="text-unlimited-gray">+90 555 123 4567</p>
-                      <p className="text-unlimited-gray">+90 216 987 6543</p>
+                      <p className="text-unlimited-gray">+90 55 24 212 214</p>
                     </div>
                   </div>
                   
@@ -98,8 +95,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="font-semibold">البريد الإلكتروني</p>
-                      <p className="text-unlimited-gray">info@studyabroad.com</p>
-                      <p className="text-unlimited-gray">support@studyabroad.com</p>
+                      <p className="text-unlimited-gray">unlimiteddoorss@gmail.com</p>
                     </div>
                   </div>
                   
@@ -138,7 +134,7 @@ const Contact = () => {
             
             <div className="rounded-lg overflow-hidden h-64 relative">
               <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48168.92169923646!2d28.935975!3d41.013924!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab7650656bd63%3A0x8ca058b28c20b6c3!2zxLBzdGFuYnVsLCBUdXJrZXk!5e0!3m2!1sen!2sus!4v1650483311272!5m2!1sen!2sus" 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12049.057396560262!2d28.836861676806638!3d41.00471749287244!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14caa42fac37da19%3A0x893d499a1e946ee7!2sBah%C3%A7elievler%2C%20Istanbul%2C%20Turkey!5e0!3m2!1sen!2sus!4v1683558961037!5m2!1sen!2sus" 
                 width="100%" 
                 height="100%" 
                 style={{ border: 0 }} 
@@ -484,7 +480,6 @@ const Contact = () => {
           </div>
         </div>
         
-        {/* الأسئلة الشائعة */}
         <div className="mt-16">
           <h2 className="text-2xl font-bold mb-8 text-center">الأسئلة الشائعة</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">

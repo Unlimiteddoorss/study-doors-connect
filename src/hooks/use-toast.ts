@@ -1,8 +1,15 @@
 
-import { useToast as useToastShad } from "@/components/ui/use-toast";
+import { 
+  type ToastActionElement, 
+  type ToastProps 
+} from "@/components/ui/toast"
 
-export const useToast = useToastShad;
+import {
+  useToast as useToastPrimitive,
+  toast as toastPrimitive
+} from "@/components/ui/toaster"
 
-import { toast as toastShad } from "@/components/ui/use-toast";
+export const useToast = useToastPrimitive;
+export const toast = toastPrimitive;
 
-export const toast = toastShad;
+export type { ToastActionElement, ToastProps };

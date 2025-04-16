@@ -11,9 +11,9 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   const contactInfo = {
-    phone: "+966 123 456 789",
-    email: "info@unlimited-edu.com",
-    address: t('footer.address')
+    phone: "+90 55 24 212 214",
+    email: "unlimiteddoorss@gmail.com",
+    address: "اسطنبول Bahçelievler تركيا"
   };
 
   const socialLinks = [
