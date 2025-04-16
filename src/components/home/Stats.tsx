@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Users2, GraduationCap, Building2, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -41,6 +42,7 @@ const statsData = [
 const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredStat, setHoveredStat] = useState<number | null>(null);
+  const [animatedValues, setAnimatedValues] = useState<Record<number, string>>({});
   const statsRef = useRef<HTMLDivElement>(null);
 
   const animateValue = (id: number, start: number, end: number, suffix: string, duration: number) => {

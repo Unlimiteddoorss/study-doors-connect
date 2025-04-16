@@ -1,4 +1,3 @@
-
 import { 
   GraduationCap, 
   Building2, 
@@ -11,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 const servicesData = [
   {
