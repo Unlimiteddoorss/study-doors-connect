@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Check, ArrowLeft, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
@@ -19,6 +20,7 @@ const StudentApplicationFormSubmit = ({
   onSubmit
 }: StudentApplicationFormSubmitProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const handleSubmit = () => {
     if (!canSubmit) {

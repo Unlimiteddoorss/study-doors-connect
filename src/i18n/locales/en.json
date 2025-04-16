@@ -1,4 +1,3 @@
-
 {
   "site": {
     "name": "Unlimited Doors",
@@ -268,5 +267,29 @@
       "statusChange": "Status changed",
       "statusChangeDesc": "Status changed successfully"
     }
+  },
+  "footer": {
+    "companyDescription": "Unlimited Doors is a trusted educational consulting company helping students navigate international education opportunities since 1992. We provide comprehensive support for study abroad programs worldwide.",
+    "programs": "Study Programs",
+    "bachelorPrograms": "Bachelor's Programs",
+    "masterPrograms": "Master's Programs",
+    "phdPrograms": "PhD Programs",
+    "diplomaPrograms": "Diploma Programs",
+    "languagePrograms": "Language Programs",
+    "quickLinks": "Quick Links",
+    "home": "Home",
+    "about": "About Us",
+    "universities": "Universities",
+    "programs": "Study Programs",
+    "contact": "Contact Us",
+    "contactUs": "Contact Information",
+    "allRightsReserved": "All Rights Reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions",
+    "cookies": "Cookie Policy",
+    "newsletter": "Subscribe to Newsletter",
+    "emailPlaceholder": "Your email address",
+    "subscribe": "Subscribe",
+    "followUs": "Follow Us"
   }
 }

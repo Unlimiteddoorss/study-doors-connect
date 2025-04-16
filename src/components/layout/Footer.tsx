@@ -1,14 +1,19 @@
 
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Globe2 } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Globe2, Send } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '@/i18n/config';
 import Logo from '../shared/Logo';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const Footer = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { toast } = useToast();
   const currentYear = new Date().getFullYear();
+  const currentLanguage = i18n.language;
 
   const contactInfo = {
     phone: "+90 55 24 212 214",
@@ -17,10 +22,10 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Youtube, href: "#", label: "Youtube" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Facebook, href: "#", label: "Facebook" }
+    { icon: Youtube, href: "https://youtube.com", label: "Youtube" },
+    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
+    { icon: Facebook, href: "https://facebook.com", label: "Facebook" }
   ];
 
   const programLinks = [
@@ -39,6 +44,28 @@ const Footer = () => {
     { href: "/contact", label: t('footer.contact') }
   ];
 
+  const handleLanguageChange = () => {
+    const newLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
+    changeLanguage(newLanguage);
+  };
+
+  const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    
+    if (email) {
+      toast({
+        title: currentLanguage === 'ar' ? "تم الاشتراك بنجاح" : "Subscription Successful",
+        description: currentLanguage === 'ar' ? 
+          "شكراً لاشتراكك في نشرتنا الإخبارية" : 
+          "Thank you for subscribing to our newsletter",
+        variant: "default",
+      });
+      (e.target as HTMLFormElement).reset();
+    }
+  };
+
   return (
     <footer className="bg-unlimited-dark-blue text-white">
       <div className="container mx-auto px-4 py-10">
@@ -54,6 +81,8 @@ const Footer = () => {
                 <a
                   key={social.label}
                   href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="hover:text-unlimited-light-blue transition-colors p-2 rounded-full hover:bg-white/10"
                   aria-label={social.label}
                 >
@@ -71,7 +100,7 @@ const Footer = () => {
                 <li key={link.href}>
                   <Link 
                     to={link.href}
-                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 inline-block"
+                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 rtl:hover:-translate-x-1 inline-block"
                   >
                     {link.label}
                   </Link>
@@ -88,7 +117,7 @@ const Footer = () => {
                 <li key={link.href}>
                   <Link 
                     to={link.href}
-                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 inline-block"
+                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 rtl:hover:-translate-x-1 inline-block"
                   >
                     {link.label}
                   </Link>
@@ -100,7 +129,7 @@ const Footer = () => {
           {/* Contact Info */}
           <div>
             <h3 className="text-xl font-bold mb-6">{t('footer.contactUs')}</h3>
-            <ul className="space-y-4">
+            <ul className="space-y-4 mb-6">
               <li className="flex items-start gap-3 text-gray-300">
                 <MapPin className="h-5 w-5 flex-shrink-0 mt-1" />
                 <span>{contactInfo.address}</span>
@@ -118,13 +147,34 @@ const Footer = () => {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  onClick={() => document.documentElement.dir = document.documentElement.dir === 'rtl' ? 'ltr' : 'rtl'}
+                  onClick={handleLanguageChange}
                   className="text-gray-300 hover:text-unlimited-light-blue p-0 h-auto font-normal"
                 >
-                  {document.documentElement.dir === 'rtl' ? 'English' : 'العربية'}
+                  {currentLanguage === 'ar' ? 'English' : 'العربية'}
                 </Button>
               </li>
             </ul>
+            
+            {/* Newsletter Subscription */}
+            <form onSubmit={handleSubscribe} className="mt-4">
+              <h4 className="text-sm font-semibold mb-2">{t('footer.newsletter')}</h4>
+              <div className="flex">
+                <Input
+                  type="email"
+                  name="email"
+                  placeholder={t('footer.emailPlaceholder')}
+                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 rounded-r-none rtl:rounded-r-md rtl:rounded-l-none"
+                  required
+                />
+                <Button 
+                  type="submit" 
+                  variant="unlimited" 
+                  className="rounded-l-none rtl:rounded-l-md rtl:rounded-r-none"
+                >
+                  <Send size={16} />
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
 
