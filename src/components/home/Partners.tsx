@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from 'react';
 import SectionTitle from '../shared/SectionTitle';
 import { motion } from 'framer-motion';
@@ -8,7 +7,31 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 const Partners = () => {
   const [autoScroll, setAutoScroll] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  
+  const [scrollPosition, setScrollPosition] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!autoScroll || !containerRef.current) return;
+
+    const scrollInterval = setInterval(() => {
+      if (containerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+        const maxScroll = scrollWidth - clientWidth;
+        const newPosition = scrollLeft + 1;
+
+        if (scrollLeft >= maxScroll) {
+          containerRef.current.scrollLeft = 0;
+          setScrollPosition(0);
+        } else {
+          containerRef.current.scrollLeft = newPosition;
+          setScrollPosition(newPosition);
+        }
+      }
+    }, 50);
+
+    return () => clearInterval(scrollInterval);
+  }, [autoScroll]);
+
   const partners = [
     {
       name: 'Ozyegin University',
@@ -47,48 +70,6 @@ const Partners = () => {
       link: '/universities/czech'
     },
   ];
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const animationRef = useRef<number | null>(null);
-
-  const startScrolling = () => {
-    if (!containerRef.current || !autoScroll) return;
-    
-    const scrollContainer = containerRef.current;
-    const scrollWidth = scrollContainer.scrollWidth;
-    const clientWidth = scrollContainer.clientWidth;
-    
-    let scrollPos = scrollContainer.scrollLeft;
-    const scrollSpeed = 0.5;
-    
-    const scroll = () => {
-      if (!scrollContainer || !autoScroll) return;
-      
-      scrollPos += scrollSpeed;
-      
-      if (scrollPos >= scrollWidth - clientWidth) {
-        scrollPos = 0;
-      }
-      
-      scrollContainer.scrollLeft = scrollPos;
-      animationRef.current = requestAnimationFrame(scroll);
-    };
-    
-    animationRef.current = requestAnimationFrame(scroll);
-  };
-
-  const stopScrolling = () => {
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    startScrolling();
-    
-    return () => stopScrolling();
-  }, [autoScroll]);
 
   const handleScroll = (direction: 'left' | 'right') => {
     if (!containerRef.current) return;
@@ -149,7 +130,7 @@ const Partners = () => {
           
           <div 
             ref={containerRef} 
-            className="flex items-center gap-12 overflow-x-auto scrollbar-none py-8"
+            className="flex items-center gap-12 overflow-x-auto scrollbar-none py-8 transition-all duration-300"
             onMouseEnter={() => setAutoScroll(false)}
             onMouseLeave={() => setAutoScroll(true)}
           >
@@ -158,21 +139,36 @@ const Partners = () => {
                 key={`${partner.name}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
+                whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="flex flex-col items-center justify-center min-w-[220px] cursor-pointer"
-                onMouseEnter={() => setHoveredIndex(index)}
-                onMouseLeave={() => setHoveredIndex(null)}
+                onHoverStart={() => setHoveredIndex(index)}
+                onHoverEnd={() => setHoveredIndex(null)}
               >
-                <div className="relative h-28 w-28 rounded-full overflow-hidden border-4 border-gray-100 hover:border-unlimited-blue transition-all duration-300 flex items-center justify-center bg-white p-2">
+                <div className={`relative h-28 w-28 rounded-full overflow-hidden transition-all duration-300
+                ${hoveredIndex === index ? 'border-4 border-unlimited-blue shadow-lg' : 'border-4 border-gray-100'}`}>
                   <img 
                     src={partner.logo} 
                     alt={partner.name} 
-                    className={`h-20 object-contain transition-all duration-300 ${hoveredIndex === index ? 'grayscale-0 scale-110' : 'grayscale hover:grayscale-0'}`}
+                    className={`h-20 w-20 object-contain transition-all duration-300 
+                    ${hoveredIndex === index ? 'scale-110 grayscale-0' : 'grayscale hover:grayscale-0'}`}
                   />
                 </div>
-                <p className="mt-3 text-unlimited-dark-blue font-medium text-center">{partner.name}</p>
+                <motion.p 
+                  className="mt-3 text-unlimited-dark-blue font-medium text-center"
+                  animate={{ 
+                    color: hoveredIndex === index ? '#2563eb' : '#1e293b'
+                  }}
+                >
+                  {partner.name}
+                </motion.p>
                 <p className="text-unlimited-gray text-sm text-center mt-1">{partner.description}</p>
-                <Button variant="link" size="sm" asChild className="mt-2">
+                <Button 
+                  variant="link" 
+                  size="sm" 
+                  asChild
+                  className={`mt-2 transition-all duration-300 ${hoveredIndex === index ? 'text-unlimited-blue underline' : ''}`}
+                >
                   <a href={partner.link}>تفاصيل أكثر</a>
                 </Button>
               </motion.div>

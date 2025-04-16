@@ -59,6 +59,7 @@ const servicesData = [
 
 const Services = () => {
   const navigate = useNavigate();
+  const [hoveredService, setHoveredService] = useState<number | null>(null);
 
   return (
     <section className="py-16">
@@ -81,11 +82,16 @@ const Services = () => {
               key={service.id}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+              onHoverStart={() => setHoveredService(service.id)}
+              onHoverEnd={() => setHoveredService(null)}
+              className={`bg-white p-6 rounded-lg shadow-sm transition-all duration-300 
+                ${hoveredService === service.id ? 'shadow-lg border-2 border-unlimited-blue/20' : ''}`}
             >
-              <div className="p-3 bg-unlimited-blue/10 rounded-full w-fit mb-4">
-                <service.icon className="h-6 w-6 text-unlimited-blue" />
+              <div className={`p-3 rounded-full w-fit mb-4 transition-all duration-300
+                ${hoveredService === service.id ? 'bg-unlimited-blue text-white' : 'bg-unlimited-blue/10 text-unlimited-blue'}`}>
+                <service.icon className="h-6 w-6" />
               </div>
               <h3 className="text-xl font-semibold text-unlimited-dark-blue mb-3">
                 {service.title}
@@ -95,11 +101,12 @@ const Services = () => {
               </p>
               <Button 
                 variant="link" 
-                className="text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2 group"
+                className={`text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2 group
+                  ${hoveredService === service.id ? 'underline' : ''}`}
                 onClick={() => navigate(service.link)}
               >
                 اكتشف المزيد
-                <ArrowLeft className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
+                <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
               </Button>
             </motion.div>
           ))}

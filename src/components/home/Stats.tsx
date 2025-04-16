@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Users2, GraduationCap, Building2, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -41,7 +40,7 @@ const statsData = [
 
 const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
-  const [animatedValues, setAnimatedValues] = useState<Record<number, string>>({});
+  const [hoveredStat, setHoveredStat] = useState<number | null>(null);
   const statsRef = useRef<HTMLDivElement>(null);
 
   const animateValue = (id: number, start: number, end: number, suffix: string, duration: number) => {
@@ -95,7 +94,7 @@ const Stats = () => {
   return (
     <section className="py-16 bg-gradient-to-r from-gray-50 to-white">
       <div className="container mx-auto px-4">
-        <motion.div
+        <motion.div 
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -110,29 +109,33 @@ const Stats = () => {
         <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {statsData.map((stat) => (
             <motion.div 
-              key={stat.id} 
+              key={stat.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ 
                 opacity: isVisible ? 1 : 0,
-                y: isVisible ? 0 : 20
+                y: isVisible ? 0 : 20,
+                scale: hoveredStat === stat.id ? 1.05 : 1
               }}
+              onHoverStart={() => setHoveredStat(stat.id)}
+              onHoverEnd={() => setHoveredStat(null)}
               transition={{ 
                 duration: 0.5,
                 delay: stat.id * 0.1
               }}
-              whileHover={{ scale: 1.05 }}
               className="transform transition-all duration-300"
             >
               <StatsCard
                 title={stat.title}
                 value={getDisplayValue(stat)}
-                icon={<stat.icon className="h-8 w-8" />}
-                className="h-full"
-                iconClassName={`p-3 ${stat.color} bg-opacity-10 text-${stat.color.split('-')[1]}-500 rounded-full`}
+                icon={<stat.icon className={`h-8 w-8 ${hoveredStat === stat.id ? 'text-unlimited-blue scale-110' : ''} transition-all duration-300`} />}
+                className={`h-full hover:shadow-lg ${hoveredStat === stat.id ? 'border-2 border-unlimited-blue/20' : ''}`}
+                iconClassName={`p-3 ${stat.color} bg-opacity-10 rounded-full transition-colors duration-300`}
                 valueClassName="text-3xl font-bold text-unlimited-dark-blue mb-2"
                 titleClassName="text-lg font-semibold text-unlimited-blue mb-2"
               />
-              <p className="text-unlimited-gray text-center mt-2">{stat.description}</p>
+              <p className="text-unlimited-gray text-center mt-2 transition-opacity duration-300">
+                {stat.description}
+              </p>
             </motion.div>
           ))}
         </div>
