@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Check, ArrowLeft } from 'lucide-react';
+import { ArrowRight, Check, ArrowLeft, Loader2 } from 'lucide-react';
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
@@ -38,6 +38,7 @@ const StudentApplicationFormSubmit = ({
         type="button"
         variant="outline"
         onClick={onBack}
+        disabled={isSubmitting}
         className="order-2 sm:order-1 flex items-center gap-1"
       >
         <ArrowRight className="h-4 w-4 rtl:rotate-180" />
@@ -51,7 +52,9 @@ const StudentApplicationFormSubmit = ({
           className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
         >
           {isSubmitting ? (
-            "جاري التقديم..."
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> جاري التقديم...
+            </>
           ) : (
             <>
               <Check className="mr-2 h-4 w-4" /> تقديم الطلب
@@ -62,6 +65,7 @@ const StudentApplicationFormSubmit = ({
         <Button
           type="button"
           onClick={onSubmit}
+          disabled={isSubmitting}
           className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1"
         >
           التالي

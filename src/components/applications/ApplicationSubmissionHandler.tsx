@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Check, FileText } from 'lucide-react';
+import { Check, FileText, Loader2 } from 'lucide-react';
 
 interface ApplicationSubmissionHandlerProps {
   formData?: any;
@@ -27,30 +27,37 @@ const ApplicationSubmissionHandler = ({
 }: ApplicationSubmissionHandlerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [applicationNumber, setApplicationNumber] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleFormSubmit = () => {
-    // Generate a random application number
-    const randomNumber = Math.floor(100000 + Math.random() * 900000);
-    const appNumber = `APP-${randomNumber}`;
-    setApplicationNumber(appNumber);
+    setIsSubmitting(true);
     
-    // Here you would normally save the data to a database
-    console.log('Submitting application data:', formData);
-    
-    // Show success message
-    toast({
-      title: "تم تقديم الطلب بنجاح",
-      description: `رقم الطلب الخاص بك هو ${appNumber}`,
-      variant: "default",
-    });
-    
-    // Open the confirmation dialog
-    setIsDialogOpen(true);
-    
-    // Call the onSubmit callback if provided
-    if (onSubmit) onSubmit();
+    // Simulate API call with timeout
+    setTimeout(() => {
+      // Generate a random application number
+      const randomNumber = Math.floor(100000 + Math.random() * 900000);
+      const appNumber = `APP-${randomNumber}`;
+      setApplicationNumber(appNumber);
+      
+      // Here you would normally save the data to a database
+      console.log('Submitting application data:', formData);
+      
+      // Show success message
+      toast({
+        title: "تم تقديم الطلب بنجاح",
+        description: `رقم الطلب الخاص بك هو ${appNumber}`,
+        variant: "default",
+      });
+      
+      // Open the confirmation dialog
+      setIsDialogOpen(true);
+      setIsSubmitting(false);
+      
+      // Call the onSubmit callback if provided
+      if (onSubmit) onSubmit();
+    }, 1500); // Simulating network delay
   };
 
   const viewApplicationStatus = () => {
@@ -58,20 +65,34 @@ const ApplicationSubmissionHandler = ({
     setIsDialogOpen(false);
   };
 
+  const goToHomePage = () => {
+    navigate('/');
+    setIsDialogOpen(false);
+  };
+
   return (
     <>
       <div className="flex justify-end space-x-4 rtl:space-x-reverse mt-6">
         {onCancel && (
-          <Button variant="outline" onClick={onCancel} className="flex items-center gap-2">
+          <Button variant="outline" onClick={onCancel} className="flex items-center gap-2" disabled={isSubmitting}>
             إلغاء
           </Button>
         )}
         <Button 
           onClick={handleFormSubmit} 
           className="bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-2"
+          disabled={isSubmitting}
         >
-          <Check className="h-4 w-4" />
-          تقديم الطلب
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> جاري التقديم...
+            </>
+          ) : (
+            <>
+              <Check className="h-4 w-4" />
+              تقديم الطلب
+            </>
+          )}
         </Button>
       </div>
 
@@ -98,7 +119,7 @@ const ApplicationSubmissionHandler = ({
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex justify-center sm:justify-center">
+          <AlertDialogFooter className="flex flex-col sm:flex-row gap-2 justify-center sm:justify-center">
             <AlertDialogAction 
               onClick={viewApplicationStatus}
               className="bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-2 w-full sm:w-auto"
@@ -106,6 +127,13 @@ const ApplicationSubmissionHandler = ({
               <FileText className="h-4 w-4" />
               متابعة حالة الطلب
             </AlertDialogAction>
+            <Button
+              variant="outline"
+              onClick={goToHomePage}
+              className="w-full sm:w-auto"
+            >
+              العودة للرئيسية
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

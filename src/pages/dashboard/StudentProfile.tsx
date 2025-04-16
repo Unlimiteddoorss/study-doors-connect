@@ -12,10 +12,36 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Globe, MapPin, Pencil, Upload, Camera, CalendarIcon, Save } from 'lucide-react';
+import { User, Mail, Phone, Globe, MapPin, Pencil, Upload, Camera, CalendarIcon, Save, MoreHorizontal, Trash2, FileEdit, RefreshCcw } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+// List of nationalities
+const nationalities = [
+  "الأردنية", "الإماراتية", "البحرينية", "التونسية", "الجزائرية", "السعودية", "السودانية",
+  "السورية", "العراقية", "العمانية", "الفلسطينية", "القطرية", "الكويتية", "اللبنانية", 
+  "الليبية", "المصرية", "المغربية", "اليمنية", "الموريتانية", "الصومالية", "الجيبوتية",
+  "جزر القمر", "التركية", "الأمريكية", "البريطانية", "الفرنسية", "الألمانية", "الإيطالية",
+  "الإسبانية", "الروسية", "الصينية", "اليابانية", "الكورية الجنوبية", "الهندية", "الباكستانية",
+  "الأفغانية", "الإيرانية", "الماليزية", "الإندونيسية", "الفلبينية", "النيجيرية", "الكينية",
+  "الإثيوبية", "الجنوب أفريقية", "الكندية", "الأسترالية"
+];
+
+// List of countries with visa options
+const visaCountries = [
+  "تركيا", "الإمارات", "السعودية", "قطر", "مصر", "المغرب", "الأردن", "لبنان", 
+  "ماليزيا", "إندونيسيا", "سنغافورة", "تايلاند", "الولايات المتحدة", "كندا", 
+  "المملكة المتحدة", "دول منطقة شينغن", "أستراليا", "نيوزيلندا", "اليابان", 
+  "كوريا الجنوبية", "البرازيل", "الصين", "روسيا", "جنوب أفريقيا"
+];
 
 const StudentProfile = () => {
   const { toast } = useToast();
@@ -37,6 +63,7 @@ const StudentProfile = () => {
     education: 'بكالوريوس علوم الحاسوب - جامعة دمشق',
     languages: 'العربية (أصلي)، الإنجليزية (جيد)، التركية (متوسط)',
     bio: 'طالب طموح يسعى لإكمال دراساته العليا في مجال علوم البيانات والذكاء الاصطناعي.',
+    visaCountries: ['تركيا'],
   });
 
   // Convert string dates to Date objects for the calendar
@@ -83,8 +110,27 @@ const StudentProfile = () => {
     });
   };
 
+  const handleCancel = () => {
+    setIsEditing(false);
+    setBirthDate(profileData.birthdate ? parseArabicDate(profileData.birthdate) : undefined);
+    setPassportExpiryDate(profileData.passportExpiry ? parseArabicDate(profileData.passportExpiry) : undefined);
+    
+    toast({
+      title: "تم الإلغاء",
+      description: "تم إلغاء التعديلات",
+      variant: "destructive"
+    });
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
     setProfileData(prev => ({
       ...prev,
       [name]: value
@@ -106,6 +152,21 @@ const StudentProfile = () => {
     });
   };
 
+  const handleResetProfile = () => {
+    toast({
+      title: "إعادة تعيين البيانات",
+      description: "هل أنت متأكد من إعادة تعيين بياناتك الشخصية؟",
+      variant: "destructive",
+    });
+  };
+
+  const handleVerifyAccount = () => {
+    toast({
+      title: "توثيق الحساب",
+      description: "سيتم إرسال رمز التحقق إلى بريدك الإلكتروني",
+    });
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -116,18 +177,58 @@ const StudentProfile = () => {
                 <CardTitle className="text-xl">الملف الشخصي</CardTitle>
                 <CardDescription>عرض وتحديث معلوماتك الشخصية</CardDescription>
               </div>
-              <Button 
-                variant={isEditing ? "outline" : "default"} 
-                onClick={handleEdit}
-                className="flex items-center gap-2"
-              >
-                {isEditing ? 'إلغاء' : (
+              <div className="flex items-center gap-2">
+                {isEditing ? (
                   <>
-                    <Pencil className="h-4 w-4" />
-                    تعديل البيانات
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCancel}
+                      className="flex items-center gap-2"
+                    >
+                      إلغاء
+                    </Button>
+                    <Button 
+                      onClick={handleSave}
+                      className="flex items-center gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      حفظ التغييرات
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button 
+                      variant="default" 
+                      onClick={handleEdit}
+                      className="flex items-center gap-2"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      تعديل البيانات
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={handleVerifyAccount} className="flex items-center gap-2 cursor-pointer">
+                          <FileEdit className="h-4 w-4" />
+                          <span>توثيق الحساب</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleUploadProfilePicture} className="flex items-center gap-2 cursor-pointer">
+                          <Camera className="h-4 w-4" />
+                          <span>تغيير الصورة الشخصية</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleResetProfile} className="text-red-500 flex items-center gap-2 cursor-pointer">
+                          <RefreshCcw className="h-4 w-4" />
+                          <span>إعادة تعيين البيانات</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </>
                 )}
-              </Button>
+              </div>
             </div>
           </CardHeader>
           
@@ -221,11 +322,19 @@ const StudentProfile = () => {
                     <div>
                       <label className="text-sm font-medium mb-1 block">البلد</label>
                       {isEditing ? (
-                        <Input 
-                          name="country" 
-                          value={profileData.country} 
-                          onChange={handleInputChange}
-                        />
+                        <Select
+                          value={profileData.country}
+                          onValueChange={(value) => handleSelectChange('country', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر الدولة" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {visaCountries.map((country) => (
+                              <SelectItem key={country} value={country}>{country}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <p className="p-2 border rounded-md bg-gray-50 flex items-center gap-2">
                           <Globe size={16} className="text-unlimited-gray" />
@@ -292,11 +401,19 @@ const StudentProfile = () => {
                     <div>
                       <label className="text-sm font-medium mb-1 block">الجنسية</label>
                       {isEditing ? (
-                        <Input 
-                          name="nationality" 
-                          value={profileData.nationality} 
-                          onChange={handleInputChange}
-                        />
+                        <Select
+                          value={profileData.nationality}
+                          onValueChange={(value) => handleSelectChange('nationality', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="اختر الجنسية" />
+                          </SelectTrigger>
+                          <SelectContent className="max-h-80">
+                            {nationalities.map((nationality) => (
+                              <SelectItem key={nationality} value={nationality}>{nationality}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       ) : (
                         <p className="p-2 border rounded-md bg-gray-50">{profileData.nationality}</p>
                       )}
@@ -389,15 +506,6 @@ const StudentProfile = () => {
               </Tabs>
             </div>
           </div>
-          
-          {isEditing && (
-            <CardFooter className="flex justify-end border-t p-4">
-              <Button onClick={handleSave} className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                حفظ التغييرات
-              </Button>
-            </CardFooter>
-          )}
         </Card>
       </div>
     </DashboardLayout>
