@@ -63,6 +63,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/apply" element={<StudentApplication />} />
         <Route path="/dashboard/applications" element={<StudentApplications />} />
+        <Route path="/dashboard/applications/:id" element={<StudentApplications />} />
         <Route path="/dashboard/profile" element={<StudentProfile />} />
         <Route path="/dashboard/notifications" element={<StudentNotifications />} />
         <Route path="/messages" element={<UserMessages />} />
