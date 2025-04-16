@@ -1,13 +1,21 @@
 
 import { useState } from 'react';
+import { format } from 'date-fns';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { User, Mail, Phone, Globe, MapPin, Pencil, Upload, Camera } from 'lucide-react';
+import { User, Mail, Phone, Globe, MapPin, Pencil, Upload, Camera, CalendarIcon, Save } from 'lucide-react';
 
 const StudentProfile = () => {
   const { toast } = useToast();
@@ -23,20 +31,52 @@ const StudentProfile = () => {
     city: 'إسطنبول',
     address: 'حي بشكتاش، شارع عثمان رقم 45',
     birthdate: '15/03/1998',
+    passportExpiry: '10/05/2028',
     nationality: 'سوري',
     passportNumber: 'S123456789',
-    passportExpiry: '10/05/2028',
     education: 'بكالوريوس علوم الحاسوب - جامعة دمشق',
     languages: 'العربية (أصلي)، الإنجليزية (جيد)، التركية (متوسط)',
     bio: 'طالب طموح يسعى لإكمال دراساته العليا في مجال علوم البيانات والذكاء الاصطناعي.',
   });
 
+  // Convert string dates to Date objects for the calendar
+  const [birthDate, setBirthDate] = useState<Date | undefined>(
+    profileData.birthdate ? parseArabicDate(profileData.birthdate) : undefined
+  );
+  const [passportExpiryDate, setPassportExpiryDate] = useState<Date | undefined>(
+    profileData.passportExpiry ? parseArabicDate(profileData.passportExpiry) : undefined
+  );
+
+  // Parse date in DD/MM/YYYY format
+  function parseArabicDate(dateStr: string): Date | undefined {
+    try {
+      const [day, month, year] = dateStr.split('/').map(Number);
+      return new Date(year, month - 1, day);
+    } catch (error) {
+      return undefined;
+    }
+  }
+
   const handleEdit = () => {
     setIsEditing(!isEditing);
+    if (isEditing) {
+      // If we're canceling edit mode, reset dates to the stored values
+      setBirthDate(profileData.birthdate ? parseArabicDate(profileData.birthdate) : undefined);
+      setPassportExpiryDate(profileData.passportExpiry ? parseArabicDate(profileData.passportExpiry) : undefined);
+    }
   };
 
   const handleSave = () => {
+    // Update the profileData with the formatted dates from the calendar
+    const updatedProfileData = {
+      ...profileData,
+      birthdate: birthDate ? format(birthDate, 'dd/MM/yyyy') : profileData.birthdate,
+      passportExpiry: passportExpiryDate ? format(passportExpiryDate, 'dd/MM/yyyy') : profileData.passportExpiry,
+    };
+    
+    setProfileData(updatedProfileData);
     setIsEditing(false);
+    
     toast({
       title: "تم الحفظ",
       description: "تم حفظ التغييرات بنجاح",
@@ -49,6 +89,14 @@ const StudentProfile = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleBirthDateChange = (date: Date | undefined) => {
+    setBirthDate(date);
+  };
+
+  const handlePassportExpiryChange = (date: Date | undefined) => {
+    setPassportExpiryDate(date);
   };
 
   const handleUploadProfilePicture = () => {
@@ -68,8 +116,17 @@ const StudentProfile = () => {
                 <CardTitle className="text-xl">الملف الشخصي</CardTitle>
                 <CardDescription>عرض وتحديث معلوماتك الشخصية</CardDescription>
               </div>
-              <Button variant={isEditing ? "default" : "outline"} onClick={handleEdit}>
-                {isEditing ? 'إلغاء' : 'تعديل البيانات'}
+              <Button 
+                variant={isEditing ? "outline" : "default"} 
+                onClick={handleEdit}
+                className="flex items-center gap-2"
+              >
+                {isEditing ? 'إلغاء' : (
+                  <>
+                    <Pencil className="h-4 w-4" />
+                    تعديل البيانات
+                  </>
+                )}
               </Button>
             </div>
           </CardHeader>
@@ -206,11 +263,28 @@ const StudentProfile = () => {
                     <div>
                       <label className="text-sm font-medium mb-1 block">تاريخ الميلاد</label>
                       {isEditing ? (
-                        <Input 
-                          name="birthdate" 
-                          value={profileData.birthdate} 
-                          onChange={handleInputChange}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-right"
+                            >
+                              <CalendarIcon className="ml-2 h-4 w-4" />
+                              {birthDate ? format(birthDate, "dd/MM/yyyy") : <span>اختر التاريخ</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={birthDate}
+                              onSelect={handleBirthDateChange}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                              fromYear={1940}
+                              toYear={new Date().getFullYear()}
+                            />
+                          </PopoverContent>
+                        </Popover>
                       ) : (
                         <p className="p-2 border rounded-md bg-gray-50">{profileData.birthdate}</p>
                       )}
@@ -242,11 +316,30 @@ const StudentProfile = () => {
                     <div>
                       <label className="text-sm font-medium mb-1 block">تاريخ انتهاء الجواز</label>
                       {isEditing ? (
-                        <Input 
-                          name="passportExpiry" 
-                          value={profileData.passportExpiry} 
-                          onChange={handleInputChange}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="w-full justify-start text-right"
+                            >
+                              <CalendarIcon className="ml-2 h-4 w-4" />
+                              {passportExpiryDate ? format(passportExpiryDate, "dd/MM/yyyy") : <span>اختر التاريخ</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                            <Calendar
+                              mode="single"
+                              selected={passportExpiryDate}
+                              onSelect={handlePassportExpiryChange}
+                              initialFocus
+                              className="p-3 pointer-events-auto"
+                              defaultMonth={new Date()}
+                              disabled={(date) => date < new Date()}
+                              fromYear={new Date().getFullYear()}
+                              toYear={new Date().getFullYear() + 20}
+                            />
+                          </PopoverContent>
+                        </Popover>
                       ) : (
                         <p className="p-2 border rounded-md bg-gray-50">{profileData.passportExpiry}</p>
                       )}
@@ -299,8 +392,8 @@ const StudentProfile = () => {
           
           {isEditing && (
             <CardFooter className="flex justify-end border-t p-4">
-              <Button onClick={handleSave}>
-                <Pencil className="mr-2 h-4 w-4" />
+              <Button onClick={handleSave} className="flex items-center gap-2">
+                <Save className="h-4 w-4" />
                 حفظ التغييرات
               </Button>
             </CardFooter>

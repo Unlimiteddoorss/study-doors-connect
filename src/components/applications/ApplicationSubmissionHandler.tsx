@@ -12,6 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Check, FileText } from 'lucide-react';
 
 interface ApplicationSubmissionHandlerProps {
   formData?: any;
@@ -42,6 +43,7 @@ const ApplicationSubmissionHandler = ({
     toast({
       title: "تم تقديم الطلب بنجاح",
       description: `رقم الطلب الخاص بك هو ${appNumber}`,
+      variant: "default",
     });
     
     // Open the confirmation dialog
@@ -60,33 +62,48 @@ const ApplicationSubmissionHandler = ({
     <>
       <div className="flex justify-end space-x-4 rtl:space-x-reverse mt-6">
         {onCancel && (
-          <Button variant="outline" onClick={onCancel}>
+          <Button variant="outline" onClick={onCancel} className="flex items-center gap-2">
             إلغاء
           </Button>
         )}
-        <Button onClick={handleFormSubmit}>
+        <Button 
+          onClick={handleFormSubmit} 
+          className="bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-2"
+        >
+          <Check className="h-4 w-4" />
           تقديم الطلب
         </Button>
       </div>
 
       <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>تم تقديم طلبك بنجاح</AlertDialogTitle>
-            <AlertDialogDescription>
-              <p>
+            <AlertDialogTitle className="text-xl text-center text-unlimited-blue">
+              تم تقديم طلبك بنجاح
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <div className="flex justify-center">
+                <div className="rounded-full bg-green-50 p-3">
+                  <Check className="h-10 w-10 text-green-500" />
+                </div>
+              </div>
+              <p className="text-center">
                 شكراً لتقديمك الطلب. تم تسجيل طلبك برقم:
                 <span className="block text-center font-bold text-xl my-3 text-unlimited-blue">
                   {applicationNumber}
                 </span>
               </p>
-              <p className="mt-2">
+              <p className="text-center">
                 يمكنك متابعة حالة طلبك من لوحة التحكم الخاصة بك، وسيتم إشعارك بأي تغييرات في حالة الطلب.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={viewApplicationStatus}>
+          <AlertDialogFooter className="flex justify-center sm:justify-center">
+            <AlertDialogAction 
+              onClick={viewApplicationStatus}
+              className="bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-2 w-full sm:w-auto"
+            >
+              <FileText className="h-4 w-4" />
               متابعة حالة الطلب
             </AlertDialogAction>
           </AlertDialogFooter>
