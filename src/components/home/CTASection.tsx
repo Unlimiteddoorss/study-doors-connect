@@ -11,7 +11,12 @@ const CTASection = () => {
     <section className="py-16 bg-unlimited-blue text-white relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-unlimited-dark-blue/20 to-transparent" />
       <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-3xl mx-auto text-center"
+        >
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -37,7 +42,7 @@ const CTASection = () => {
             <Button
               size="lg"
               variant="secondary"
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto hover:bg-white hover:text-unlimited-blue transition-colors"
               onClick={() => navigate('/register')}
             >
               سجل كطالب
@@ -52,7 +57,7 @@ const CTASection = () => {
               استكشف البرامج
             </Button>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

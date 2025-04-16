@@ -1,6 +1,6 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Users2, GraduationCap, Building2, Award } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const statsData = [
   {
@@ -60,14 +60,18 @@ const Stats = () => {
       <div className="container mx-auto px-4">
         <div ref={statsRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {statsData.map((stat) => (
-            <div 
+            <motion.div 
               key={stat.id} 
-              className={`flex flex-col items-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform ${
-                isVisible ? 'animate-fade-in opacity-100' : 'opacity-0'
-              }`}
-              style={{ 
-                transitionDelay: `${stat.id * 150}ms`
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: isVisible ? 1 : 0,
+                y: isVisible ? 0 : 20
               }}
+              transition={{ 
+                duration: 0.5,
+                delay: stat.id * 0.1
+              }}
+              className="flex flex-col items-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-300"
             >
               <div className="p-3 bg-unlimited-blue/10 rounded-full mb-4">
                 <stat.icon className="h-8 w-8 text-unlimited-blue" />
@@ -75,7 +79,7 @@ const Stats = () => {
               <h3 className="text-3xl font-bold text-unlimited-dark-blue mb-2">{stat.value}</h3>
               <p className="text-lg font-semibold text-unlimited-blue mb-2">{stat.title}</p>
               <p className="text-unlimited-gray text-center">{stat.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

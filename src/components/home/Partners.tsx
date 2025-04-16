@@ -1,6 +1,6 @@
-
 import { useRef, useEffect } from 'react';
 import SectionTitle from '../shared/SectionTitle';
+import { motion } from 'framer-motion';
 
 const Partners = () => {
   const partners = [
@@ -38,35 +38,27 @@ const Partners = () => {
 
     const scrollWidth = scrollContainer.scrollWidth;
     const clientWidth = scrollContainer.clientWidth;
-    
     let scrollPos = 0;
     const maxScroll = scrollWidth - clientWidth;
 
     const scroll = () => {
       if (!scrollContainer) return;
-      
-      // Increment scroll position
-      scrollPos += 0.5;
-      
-      // Reset when we reach the end
-      if (scrollPos >= maxScroll) {
-        scrollPos = 0;
-      }
-      
-      // Apply the scroll
+      scrollPos = (scrollPos + 0.5) % maxScroll;
       scrollContainer.scrollLeft = scrollPos;
     };
 
-    // Create interval for smooth scrolling
     const interval = setInterval(scroll, 30);
-
-    // Clear interval on component unmount
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section className="py-16">
-      <div className="container mx-auto px-4">
+    <section className="py-16 bg-white">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="container mx-auto px-4"
+      >
         <SectionTitle 
           title="شركاؤنا"
           subtitle="نتعاون مع أفضل الجامعات والمؤسسات التعليمية حول العالم"
@@ -74,32 +66,32 @@ const Partners = () => {
         />
         
         <div className="mt-10 relative overflow-hidden">
-          {/* Gradient overlays */}
           <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10"></div>
           <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10"></div>
           
-          {/* Scrolling container */}
           <div 
             ref={containerRef} 
             className="flex items-center gap-12 overflow-hidden whitespace-nowrap py-8"
           >
-            {/* Duplicate partners for continuous scrolling effect */}
             {[...partners, ...partners].map((partner, index) => (
-              <div 
-                key={`${partner.name}-${index}`} 
+              <motion.div 
+                key={`${partner.name}-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="flex flex-col items-center justify-center min-w-[180px]"
               >
                 <img 
                   src={partner.logo} 
                   alt={partner.name} 
-                  className="h-16 object-contain grayscale hover:grayscale-0 transition-all"
+                  className="h-16 object-contain grayscale hover:grayscale-0 transition-all duration-300"
                 />
                 <p className="mt-3 text-unlimited-gray text-sm">{partner.name}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };

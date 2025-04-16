@@ -62,17 +62,25 @@ const Services = () => {
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
           <h2 className="text-3xl md:text-4xl font-bold text-unlimited-dark-blue mb-4">خدماتنا</h2>
           <p className="text-unlimited-gray max-w-2xl mx-auto">
             نقدم مجموعة شاملة من الخدمات لمساعدتك في رحلتك التعليمية
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {servicesData.map((service) => (
-            <div 
-              key={service.id} 
+          {servicesData.map((service, index) => (
+            <motion.div 
+              key={service.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
               className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="p-3 bg-unlimited-blue/10 rounded-full w-fit mb-4">
@@ -86,13 +94,13 @@ const Services = () => {
               </p>
               <Button 
                 variant="link" 
-                className="text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2"
+                className="text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2 group"
                 onClick={() => navigate(service.link)}
               >
                 اكتشف المزيد
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 transform group-hover:translate-x-1 transition-transform" />
               </Button>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
