@@ -15,7 +15,7 @@ const Logo = ({ variant = 'dark', className = '' }: LogoProps) => {
       <img 
         src="/lovable-uploads/e82df0f6-f604-4cb3-86ba-54121ae30ce9.png" 
         alt="Unlimited Doors Logo" 
-        className="h-12 w-12 mr-2"
+        className="h-12 w-12 mr-2 rounded-full object-cover"
       />
       <div>
         <span className={`text-lg font-bold ${textColor}`}>
