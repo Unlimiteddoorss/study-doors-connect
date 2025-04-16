@@ -33,49 +33,56 @@ import StudentProfile from "./pages/dashboard/StudentProfile";
 import StudentNotifications from "./pages/dashboard/StudentNotifications";
 import UserMessages from "./pages/messaging/UserMessages";
 import Reports from "./pages/admin/Reports";
+import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/services" element={<Services />} />
-      <Route path="/countries" element={<Countries />} />
-      <Route path="/countries/:id" element={<CountryDetails />} />
-      <Route path="/programs" element={<Programs />} />
-      <Route path="/programs/:id" element={<ProgramDetails />} />
-      <Route path="/medical-programs" element={<MedicalPrograms />} />
-      <Route path="/engineering-programs" element={<EngineeringPrograms />} />
-      <Route path="/scholarships" element={<Scholarships />} />
-      <Route path="/universities" element={<Universities />} />
-      <Route path="/turkish-universities" element={<TurkishUniversities />} />
-      <Route path="/universities/:id" element={<UniversityDetails />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+    <>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/services/accommodation" element={<Services />} />
+        <Route path="/services/support" element={<Services />} />
+        <Route path="/countries" element={<Countries />} />
+        <Route path="/countries/:id" element={<CountryDetails />} />
+        <Route path="/programs" element={<Programs />} />
+        <Route path="/programs/:id" element={<ProgramDetails />} />
+        <Route path="/medical-programs" element={<MedicalPrograms />} />
+        <Route path="/engineering-programs" element={<EngineeringPrograms />} />
+        <Route path="/scholarships" element={<Scholarships />} />
+        <Route path="/universities" element={<Universities />} />
+        <Route path="/turkish-universities" element={<TurkishUniversities />} />
+        <Route path="/universities/:id" element={<UniversityDetails />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/apply" element={<StudentApplication />} />
-      <Route path="/dashboard/applications" element={<StudentApplications />} />
-      <Route path="/dashboard/profile" element={<StudentProfile />} />
-      <Route path="/dashboard/notifications" element={<StudentNotifications />} />
-      <Route path="/messages" element={<UserMessages />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/apply" element={<StudentApplication />} />
+        <Route path="/dashboard/applications" element={<StudentApplications />} />
+        <Route path="/dashboard/profile" element={<StudentProfile />} />
+        <Route path="/dashboard/notifications" element={<StudentNotifications />} />
+        <Route path="/messages" element={<UserMessages />} />
+        <Route path="/student/messages" element={<UserMessages />} />
 
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/students" element={<ManageStudents />} />
-      <Route path="/admin/agents" element={<ManageAgents />} />
-      <Route path="/admin/programs" element={<ManagePrograms />} />
-      <Route path="/admin/applications" element={<ManageApplications />} />
-      <Route path="/admin/universities" element={<ManageUniversities />} />
-      <Route path="/admin/notifications" element={<AdminNotifications />} />
-      <Route path="/admin/messages" element={<AdminMessages />} />
-      <Route path="/admin/reports" element={<Reports />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin/students" element={<ManageStudents />} />
+        <Route path="/admin/agents" element={<ManageAgents />} />
+        <Route path="/admin/programs" element={<ManagePrograms />} />
+        <Route path="/admin/applications" element={<ManageApplications />} />
+        <Route path="/admin/universities" element={<ManageUniversities />} />
+        <Route path="/admin/notifications" element={<AdminNotifications />} />
+        <Route path="/admin/messages" element={<AdminMessages />} />
+        <Route path="/admin/reports" element={<Reports />} />
 
-      <Route path="/agent" element={<AgentDashboard />} />
-      
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+        <Route path="/agent" element={<AgentDashboard />} />
+        
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+      <Toaster />
+    </>
   );
 }
 
