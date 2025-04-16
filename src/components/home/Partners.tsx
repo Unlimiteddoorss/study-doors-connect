@@ -1,55 +1,107 @@
-import { useRef, useEffect } from 'react';
+
+import { useRef, useEffect, useState } from 'react';
 import SectionTitle from '../shared/SectionTitle';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 const Partners = () => {
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  
   const partners = [
     {
       name: 'Ozyegin University',
       logo: 'https://upload.wikimedia.org/wikipedia/en/7/7a/Ozyegin_University_logo.png',
+      description: 'جامعة عريقة في تركيا تأسست عام 2007',
+      link: '/universities/ozyegin'
     },
     {
       name: 'Fatih Sultan Mehmet University',
       logo: 'https://upload.wikimedia.org/wikipedia/en/2/27/Fatih_Sultan_Mehmet_Vak%C4%B1f_%C3%9Cniversitesi_logo.jpg',
+      description: 'من أفضل الجامعات الخاصة في إسطنبول',
+      link: '/universities/fatih'
     },
     {
       name: 'Budapest University of Technology',
       logo: 'https://upload.wikimedia.org/wikipedia/en/d/d4/BME_logo.jpg',
+      description: 'رائدة في مجال الهندسة والتكنولوجيا',
+      link: '/universities/budapest'
     },
     {
       name: 'University of Warsaw',
       logo: 'https://upload.wikimedia.org/wikipedia/en/1/13/University_of_Warsaw_logo.png',
+      description: 'أقدم وأرقى الجامعات في بولندا',
+      link: '/universities/warsaw'
     },
     {
       name: 'Cairo University',
       logo: 'https://upload.wikimedia.org/wikipedia/en/b/b3/Cairo_University_Crest.png',
+      description: 'من أعرق الجامعات في الشرق الأوسط',
+      link: '/universities/cairo'
     },
     {
       name: 'Czech Technical University',
       logo: 'https://upload.wikimedia.org/wikipedia/commons/1/13/CVUT_logo.png',
+      description: 'متميزة في الدراسات التقنية والهندسية',
+      link: '/universities/czech'
     },
   ];
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number | null>(null);
 
-  useEffect(() => {
+  const startScrolling = () => {
+    if (!containerRef.current || !autoScroll) return;
+    
     const scrollContainer = containerRef.current;
-    if (!scrollContainer) return;
-
     const scrollWidth = scrollContainer.scrollWidth;
     const clientWidth = scrollContainer.clientWidth;
-    let scrollPos = 0;
-    const maxScroll = scrollWidth - clientWidth;
-
+    
+    let scrollPos = scrollContainer.scrollLeft;
+    const scrollSpeed = 0.5;
+    
     const scroll = () => {
-      if (!scrollContainer) return;
-      scrollPos = (scrollPos + 0.5) % maxScroll;
+      if (!scrollContainer || !autoScroll) return;
+      
+      scrollPos += scrollSpeed;
+      
+      if (scrollPos >= scrollWidth - clientWidth) {
+        scrollPos = 0;
+      }
+      
       scrollContainer.scrollLeft = scrollPos;
+      animationRef.current = requestAnimationFrame(scroll);
     };
+    
+    animationRef.current = requestAnimationFrame(scroll);
+  };
 
-    const interval = setInterval(scroll, 30);
-    return () => clearInterval(interval);
-  }, []);
+  const stopScrolling = () => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    startScrolling();
+    
+    return () => stopScrolling();
+  }, [autoScroll]);
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!containerRef.current) return;
+    
+    const scrollContainer = containerRef.current;
+    const scrollAmount = 300;
+    
+    if (direction === 'left') {
+      scrollContainer.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+      scrollContainer.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="py-16 bg-white">
@@ -65,28 +117,64 @@ const Partners = () => {
           centered
         />
         
-        <div className="mt-10 relative overflow-hidden">
+        <div className="flex justify-end mb-4 gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="rounded-full p-2 h-10 w-10" 
+            onClick={() => handleScroll('left')}
+          >
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="rounded-full p-2 h-10 w-10" 
+            onClick={() => handleScroll('right')}
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant={autoScroll ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setAutoScroll(!autoScroll)}
+          >
+            {autoScroll ? "إيقاف التمرير التلقائي" : "تشغيل التمرير التلقائي"}
+          </Button>
+        </div>
+        
+        <div className="mt-6 relative overflow-hidden">
           <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-white to-transparent z-10"></div>
           <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-white to-transparent z-10"></div>
           
           <div 
             ref={containerRef} 
-            className="flex items-center gap-12 overflow-hidden whitespace-nowrap py-8"
+            className="flex items-center gap-12 overflow-x-auto scrollbar-none py-8"
+            onMouseEnter={() => setAutoScroll(false)}
+            onMouseLeave={() => setAutoScroll(true)}
           >
-            {[...partners, ...partners].map((partner, index) => (
+            {partners.map((partner, index) => (
               <motion.div 
                 key={`${partner.name}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="flex flex-col items-center justify-center min-w-[180px]"
+                className="flex flex-col items-center justify-center min-w-[220px] cursor-pointer"
+                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseLeave={() => setHoveredIndex(null)}
               >
-                <img 
-                  src={partner.logo} 
-                  alt={partner.name} 
-                  className="h-16 object-contain grayscale hover:grayscale-0 transition-all duration-300"
-                />
-                <p className="mt-3 text-unlimited-gray text-sm">{partner.name}</p>
+                <div className="relative h-28 w-28 rounded-full overflow-hidden border-4 border-gray-100 hover:border-unlimited-blue transition-all duration-300 flex items-center justify-center bg-white p-2">
+                  <img 
+                    src={partner.logo} 
+                    alt={partner.name} 
+                    className={`h-20 object-contain transition-all duration-300 ${hoveredIndex === index ? 'grayscale-0 scale-110' : 'grayscale hover:grayscale-0'}`}
+                  />
+                </div>
+                <p className="mt-3 text-unlimited-dark-blue font-medium text-center">{partner.name}</p>
+                <p className="text-unlimited-gray text-sm text-center mt-1">{partner.description}</p>
+                <Button variant="link" size="sm" asChild className="mt-2">
+                  <a href={partner.link}>تفاصيل أكثر</a>
+                </Button>
               </motion.div>
             ))}
           </div>
