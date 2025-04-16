@@ -43,6 +43,7 @@ const Stats = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredStat, setHoveredStat] = useState<number | null>(null);
   const [animatedValues, setAnimatedValues] = useState<Record<number, string>>({});
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
   const statsRef = useRef<HTMLDivElement>(null);
 
   const animateValue = (id: number, start: number, end: number, suffix: string, duration: number) => {
@@ -64,8 +65,9 @@ const Stats = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && isFirstLoad) {
           setIsVisible(true);
+          setIsFirstLoad(false);
           observer.disconnect();
         }
       },
@@ -77,14 +79,15 @@ const Stats = () => {
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [isFirstLoad]);
 
   useEffect(() => {
     if (isVisible) {
-      animateValue(1, 0, 1500, '+', 1500);
-      animateValue(2, 0, 200, '+', 1500);
-      animateValue(3, 0, 50, '+', 1500);
-      animateValue(4, 0, 95, '%', 1500);
+      statsData.forEach(stat => {
+        const value = parseInt(stat.value.replace(/[^0-9]/g, ''));
+        const suffix = stat.value.replace(/[0-9]/g, '');
+        animateValue(stat.id, 0, value, suffix, 2000);
+      });
     }
   }, [isVisible]);
 
@@ -131,11 +134,11 @@ const Stats = () => {
                 value={getDisplayValue(stat)}
                 icon={<stat.icon className={`h-8 w-8 ${hoveredStat === stat.id ? 'text-unlimited-blue scale-110' : ''} transition-all duration-300`} />}
                 className={`h-full hover:shadow-lg ${hoveredStat === stat.id ? 'border-2 border-unlimited-blue/20' : ''}`}
-                iconClassName={`p-3 ${stat.color} bg-opacity-10 rounded-full transition-colors duration-300`}
-                valueClassName="text-3xl font-bold text-unlimited-dark-blue mb-2"
+                iconClassName={`p-3 ${stat.color} bg-opacity-10 rounded-full transition-colors duration-300 ${hoveredStat === stat.id ? 'bg-opacity-20' : ''}`}
+                valueClassName={`text-3xl font-bold mb-2 ${hoveredStat === stat.id ? 'text-unlimited-blue scale-110' : 'text-unlimited-dark-blue'} transition-all duration-300`}
                 titleClassName="text-lg font-semibold text-unlimited-blue mb-2"
               />
-              <p className="text-unlimited-gray text-center mt-2 transition-opacity duration-300">
+              <p className={`text-unlimited-gray text-center mt-2 transition-opacity duration-300 ${hoveredStat === stat.id ? 'opacity-100' : 'opacity-75'}`}>
                 {stat.description}
               </p>
             </motion.div>

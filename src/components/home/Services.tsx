@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const servicesData = [
   {
@@ -60,9 +60,29 @@ const servicesData = [
 const Services = () => {
   const navigate = useNavigate();
   const [hoveredService, setHoveredService] = useState<number | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const servicesSection = document.querySelector('.services-section');
+    if (servicesSection) {
+      observer.observe(servicesSection);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <section className="py-16">
+    <section className="py-16 services-section">
       <div className="container mx-auto px-4">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -90,10 +110,11 @@ const Services = () => {
                 ${hoveredService === service.id ? 'shadow-lg border-2 border-unlimited-blue/20' : ''}`}
             >
               <div className={`p-3 rounded-full w-fit mb-4 transition-all duration-300
-                ${hoveredService === service.id ? 'bg-unlimited-blue text-white' : 'bg-unlimited-blue/10 text-unlimited-blue'}`}>
+                ${hoveredService === service.id ? 'bg-unlimited-blue text-white scale-110' : 'bg-unlimited-blue/10 text-unlimited-blue'}`}>
                 <service.icon className="h-6 w-6" />
               </div>
-              <h3 className="text-xl font-semibold text-unlimited-dark-blue mb-3">
+              <h3 className={`text-xl font-semibold mb-3 transition-colors duration-300
+                ${hoveredService === service.id ? 'text-unlimited-blue' : 'text-unlimited-dark-blue'}`}>
                 {service.title}
               </h3>
               <p className="text-unlimited-gray mb-4">
