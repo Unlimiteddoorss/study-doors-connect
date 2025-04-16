@@ -6,11 +6,14 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
+  type ToastActionElement, 
+  type ToastProps
 } from "@/components/ui/toast";
-import { useToast } from "@/hooks/use-toast";
+
+import { useToast as useToastInternal } from "@/hooks/use-toast";
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts } = useToastInternal();
 
   return (
     <ToastProvider>
@@ -33,5 +36,4 @@ export function Toaster() {
   )
 }
 
-export { type ToastActionElement, type ToastProps } from "@/components/ui/toast";
 export { toast } from "@/hooks/use-toast";

@@ -14,6 +14,7 @@ import MedicalPrograms from "./pages/MedicalPrograms";
 import EngineeringPrograms from "./pages/EngineeringPrograms";
 import UniversityDetails from "./pages/UniversityDetails";
 import Login from "./pages/Login";
+import LoginPage from "./pages/LoginPage";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
@@ -56,7 +57,7 @@ function App() {
         <Route path="/universities" element={<Universities />} />
         <Route path="/turkish-universities" element={<TurkishUniversities />} />
         <Route path="/universities/:id" element={<UniversityDetails />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
