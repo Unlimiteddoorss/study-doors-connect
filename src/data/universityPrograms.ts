@@ -17,6 +17,10 @@ export interface UniversityProgram {
   universityId: number;
 }
 
+// Extract available degrees and languages from all university programs
+export const availableDegrees = ["Bachelor", "Master", "PhD", "Diploma", "Vocational School"];
+export const availableLanguages = ["English", "Turkish", "Arabic"];
+
 // Sample university programs for testing
 const sampleUniversityPrograms: UniversityProgram[] = [
   {
