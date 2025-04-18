@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
 import { turkishUniversities } from '@/data/programsData';
 import { getUniversityPrograms } from '@/data/universityPrograms';
@@ -45,6 +44,7 @@ const translations: Record<string, string> = {
 const UniversityDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   
   const universityId = id ? parseInt(id) : -1;
@@ -64,6 +64,11 @@ const UniversityDetails = () => {
 
   const translate = (text: string): string => {
     return translations[text] || text;
+  };
+
+  const handleApply = () => {
+    const applyUrl = `/apply?university=${universityId}`;
+    navigate(applyUrl);
   };
 
   if (!university) {
@@ -143,6 +148,12 @@ const UniversityDetails = () => {
                 {university.ranking ? `#${university.ranking}` : 'غير مصنفة'}
               </div>
               <div className="text-gray-600">التصنيف العالمي</div>
+              {university.localRanking && (
+                <div className="mt-2">
+                  <div className="text-lg font-semibold">#{university.localRanking}</div>
+                  <div className="text-gray-600">الترتيب المحلي</div>
+                </div>
+              )}
             </CardContent>
           </Card>
           
@@ -292,7 +303,7 @@ const UniversityDetails = () => {
                     
                     <Separator className="my-6" />
                     
-                    <h2 className="text-xl font-bold mb-4">معلومات الدراسة</h2>
+                    <h2 className="text-xl font-bold mb-4">�� informações الدراسة</h2>
                     
                     <div className="space-y-4">
                       <div>

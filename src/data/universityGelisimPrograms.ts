@@ -1,7 +1,5 @@
-
 import { UniversityProgram } from './universityPrograms';
 
-// Istanbul Gelisim University programs
 export const gelisimUniversityPrograms: UniversityProgram[] = [
   // Interior Architecture Programs
   {
@@ -619,7 +617,7 @@ export const gelisimUniversityPrograms: UniversityProgram[] = [
   {
     id: 138,
     name: "International Trade and Finance (English)",
-    nameAr: "التمويل والتجارة الدولية (إنجليزي)",
+    nameAr: "التمويل والتجار�� الدولية (إنجليزي)",
     degree: "Bachelor",
     language: "English",
     campus: "Avcılar",
@@ -1295,4 +1293,9 @@ export const gelisimUniversityPrograms: UniversityProgram[] = [
     prepFee: 1750,
     universityId: 12
   }
-];
+].map(program => ({
+  ...program,
+  universityId: 12,
+  available: true,
+  campus: "Avcılar"
+}));
