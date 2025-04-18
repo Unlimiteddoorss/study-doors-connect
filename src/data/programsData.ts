@@ -16,6 +16,12 @@ export interface UniversityProgram {
   universityId: number;
 }
 
+// Add missing exports
+export const availableCountries = ["Turkey", "Cyprus"];
+export const degreeTypes = ["Bachelor", "Master", "PhD", "Diploma", "Vocational School"];
+export const programSpecialties = ["Medical", "Engineering", "Business", "Arts", "Science"];
+export const dummyPrograms = []; // Empty array for now, will be populated later
+
 // Extract available degrees and languages from all university programs
 export const availableDegrees = ["Bachelor", "Master", "PhD", "Diploma", "Vocational School"];
 export const availableLanguages = ["English", "Turkish", "Arabic"];
@@ -313,7 +319,7 @@ export const turkishUniversities: University[] = [
     ranking: 1019,
     localRanking: 13,
     fees: "3,000 - 12,000 USD",
-    image: "/lovable-uploads/90ecfe3b-ced0-494c-8426-7b319fd74f5c.png",
+    image: "/lovable-uploads/11b99485-b751-436b-a9df-3035e5ce21a1.png",
     languages: ["English", "Turkish", "Arabic"],
     accreditations: [
       "YÖK",
