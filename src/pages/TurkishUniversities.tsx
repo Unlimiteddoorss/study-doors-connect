@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -47,7 +48,7 @@ const adaptedUniversities = turkishUniversities.map(uni => ({
   fees: uni.fees,
   image: uni.image,
   languages: ['Turkish', 'English'],
-  accreditations: [uni.accreditation],
+  accreditations: uni.accreditations || ['YÖK'], // Fixed accreditation reference
   isFeatured: Math.random() > 0.7
 }));
 

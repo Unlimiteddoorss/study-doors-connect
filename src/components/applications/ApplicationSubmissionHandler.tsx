@@ -18,12 +18,16 @@ interface ApplicationSubmissionHandlerProps {
   formData?: any;
   onSubmit?: () => void;
   onCancel?: () => void;
+  universityId?: number;
+  programId?: number;
 }
 
 const ApplicationSubmissionHandler = ({ 
   formData, 
   onSubmit, 
-  onCancel 
+  onCancel,
+  universityId,
+  programId
 }: ApplicationSubmissionHandlerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [applicationNumber, setApplicationNumber] = useState<string>('');
@@ -34,6 +38,14 @@ const ApplicationSubmissionHandler = ({
   const handleFormSubmit = () => {
     setIsSubmitting(true);
     
+    // Include university and program ID in the form data if available
+    const submitData = {
+      ...formData,
+      universityId: universityId || null,
+      programId: programId || null,
+      submissionDate: new Date().toISOString(),
+    };
+    
     // Simulate API call with timeout
     setTimeout(() => {
       // Generate a random application number
@@ -42,7 +54,7 @@ const ApplicationSubmissionHandler = ({
       setApplicationNumber(appNumber);
       
       // Here you would normally save the data to a database
-      console.log('Submitting application data:', formData);
+      console.log('Submitting application data:', submitData);
       
       // Show success message
       toast({
@@ -57,6 +69,19 @@ const ApplicationSubmissionHandler = ({
       
       // Call the onSubmit callback if provided
       if (onSubmit) onSubmit();
+      
+      // Store application in local storage for demo purposes
+      const applications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+      applications.push({
+        id: appNumber,
+        status: 'pending',
+        lastUpdate: new Date().toLocaleDateString('ar-SA'),
+        program: submitData.programName || 'برنامج جامعي',
+        university: submitData.universityName || 'جامعة إسطنبول جيليشيم',
+        date: new Date().toLocaleDateString('ar-SA'),
+      });
+      localStorage.setItem('studentApplications', JSON.stringify(applications));
+      
     }, 1500); // Simulating network delay
   };
 

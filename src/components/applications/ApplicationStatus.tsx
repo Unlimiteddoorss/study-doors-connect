@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, FileText, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface ApplicationStatusProps {
   applicationId: string;
@@ -21,6 +22,8 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
   program,
   university
 }) => {
+  const { toast } = useToast();
+  
   const getStatusColor = () => {
     switch (status) {
       case 'accepted': return 'bg-green-500';
@@ -39,8 +42,22 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
     }
   };
 
+  const handleViewDetails = () => {
+    toast({
+      title: "تم الانتقال إلى تفاصيل الطلب",
+      description: `عرض تفاصيل الطلب رقم ${applicationId}`,
+    });
+  };
+
+  const handleContactUs = () => {
+    toast({
+      title: "تم فتح المحادثة",
+      description: "يمكنك الآن التواصل مع مستشارينا بخصوص طلبك",
+    });
+  };
+
   return (
-    <Card>
+    <Card className="hover:shadow-md transition-shadow">
       <CardHeader>
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold">طلب رقم: {applicationId}</h3>
@@ -65,13 +82,13 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
           </div>
           
           <div className="flex gap-2 mt-4">
-            <Button asChild className="flex-1">
+            <Button asChild className="flex-1" onClick={handleContactUs}>
               <Link to={`/messages?application=${applicationId}`}>
                 <MessageCircle className="w-4 h-4 ml-2" />
                 تواصل معنا
               </Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1">
+            <Button asChild variant="outline" className="flex-1" onClick={handleViewDetails}>
               <Link to={`/applications/${applicationId}`}>
                 <FileText className="w-4 h-4 ml-2" />
                 التفاصيل

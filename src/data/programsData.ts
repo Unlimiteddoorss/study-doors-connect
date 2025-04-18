@@ -1,3 +1,4 @@
+
 // Define the UniversityProgram type
 export interface UniversityProgram {
   id: number;
@@ -79,19 +80,21 @@ const sampleUniversityPrograms: UniversityProgram[] = [
 // Import specific university program data
 import { gelisimUniversityPrograms } from './universityGelisimPrograms';
 import { University } from '@/components/universities/UniversityCard';
-import { bahcesehirUniversityPrograms } from './universityBahcesehirPrograms';
-import { aydinUniversityPrograms } from './universityAydinPrograms';
-import { arelUniversityPrograms } from './universityArelPrograms';
-import { altinbasUniversityPrograms } from './universityAltinbasPrograms';
-import { biruniUniversityPrograms } from './universityBiruniPrograms';
-import { demirogluUniversityPrograms } from './universityDemirogluPrograms';
-import { halicUniversityPrograms } from './universityHalicPrograms';
-import { istinyeUniversityPrograms } from './universityIstinyePrograms';
-import { kentUniversityPrograms } from './universityKentPrograms';
-import { medipolUniversityPrograms } from './universityMedipolPrograms';
-import { okanUniversityPrograms } from './universityOkanPrograms';
-import { sabanciUniversityPrograms } from './universitySabanciPrograms';
-import { bilgiUniversityPrograms } from './universityBilgiPrograms';
+
+// Create empty arrays for university programs that were imported but don't exist
+export const bahcesehirUniversityPrograms: UniversityProgram[] = [];
+export const aydinUniversityPrograms: UniversityProgram[] = [];
+export const arelUniversityPrograms: UniversityProgram[] = [];
+export const altinbasUniversityPrograms: UniversityProgram[] = [];
+export const biruniUniversityPrograms: UniversityProgram[] = [];
+export const demirogluUniversityPrograms: UniversityProgram[] = [];
+export const halicUniversityPrograms: UniversityProgram[] = [];
+export const istinyeUniversityPrograms: UniversityProgram[] = [];
+export const kentUniversityPrograms: UniversityProgram[] = [];
+export const medipolUniversityPrograms: UniversityProgram[] = [];
+export const okanUniversityPrograms: UniversityProgram[] = [];
+export const sabanciUniversityPrograms: UniversityProgram[] = [];
+export const bilgiUniversityPrograms: UniversityProgram[] = [];
 
 export const turkishUniversities: University[] = [
   {
@@ -375,41 +378,41 @@ export const turkishUniversities: University[] = [
 
 // Function to get programs for a specific university
 export const getUniversityPrograms = (universityId: number): UniversityProgram[] => {
-  // Check if the universityId is for Istanbul Gelisim University (id: 12)
+  // Check if the universityId matches any of our universities
   if (universityId === 1) {
     return bahcesehirUniversityPrograms;
   }
   if (universityId === 2) {
     return aydinUniversityPrograms;
   }
-   if (universityId === 3) {
+  if (universityId === 3) {
     return arelUniversityPrograms;
   }
   if (universityId === 4) {
     return altinbasUniversityPrograms;
   }
-   if (universityId === 5) {
+  if (universityId === 5) {
     return biruniUniversityPrograms;
   }
   if (universityId === 6) {
     return demirogluUniversityPrograms;
   }
-   if (universityId === 7) {
+  if (universityId === 7) {
     return halicUniversityPrograms;
   }
   if (universityId === 8) {
     return istinyeUniversityPrograms;
   }
-   if (universityId === 9) {
+  if (universityId === 9) {
     return kentUniversityPrograms;
   }
   if (universityId === 10) {
     return medipolUniversityPrograms;
   }
-   if (universityId === 11) {
+  if (universityId === 11) {
     return okanUniversityPrograms;
   }
-   if (universityId === 13) {
+  if (universityId === 13) {
     return sabanciUniversityPrograms;
   }
   if (universityId === 14) {
@@ -420,6 +423,5 @@ export const getUniversityPrograms = (universityId: number): UniversityProgram[]
   }
   
   // For other universities, return sample data filtered by university ID
-  // In a real app, you would fetch this from an API or database
   return sampleUniversityPrograms.filter(program => program.universityId === universityId);
 };
