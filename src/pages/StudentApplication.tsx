@@ -1,12 +1,13 @@
+
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
-import StudentApplicationForm from '@/components/applications/StudentApplicationForm';
+import ApplicationForm from '@/components/applications/ApplicationForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
-import { Search, FilterIcon, GraduationCap, Building, Globe, Check, Clock, Plus, FileText, AlertCircle } from 'lucide-react';
+import { Search, FilterIcon, GraduationCap, Building, Globe, Check, Clock, Plus, FileText, AlertCircle, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -290,8 +291,11 @@ const StudentApplication = () => {
             </TabsList>
             
             <TabsContent value="new-application" className="space-y-4">
-              <StudentApplicationForm 
-                selectedProgram={selectedProgram}
+              <ApplicationForm 
+                programId={selectedProgramId || undefined}
+                programName={selectedProgram?.titleAr || selectedProgram?.title}
+                universityId={selectedProgram?.universityId}
+                universityName={selectedProgram?.universityAr || selectedProgram?.university}
                 onApplicationSubmitted={handleApplicationSubmitted}
               />
             </TabsContent>

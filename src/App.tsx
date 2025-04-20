@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
@@ -17,11 +18,11 @@ import Scholarships from './pages/Scholarships';
 import LoginPage from './pages/LoginPage';
 import Register from './pages/Register';
 import StudentApplication from './pages/StudentApplication';
-import Dashboard from './pages/dashboard/Dashboard';
+import Dashboard from './pages/Dashboard'; // Fixed import path
 import StudentApplications from './pages/dashboard/StudentApplications';
 import StudentNotifications from './pages/dashboard/StudentNotifications';
 import StudentProfile from './pages/dashboard/StudentProfile';
-import UserMessages from './pages/dashboard/UserMessages';
+import UserMessages from './pages/messaging/UserMessages'; // Fixed import path
 import AgentDashboard from './pages/agent/AgentDashboard';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageUniversities from './pages/admin/ManageUniversities';

@@ -1,27 +1,15 @@
 
-import { useState } from 'react';
-import { Archive, CheckCircle, Clock, Download, Edit, Eye, FileText, MoreHorizontal, Search, Trash, Upload, X } from 'lucide-react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Input } from '@/components/ui/input';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import AdminPageActions from '@/components/admin/AdminPageActions';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import TablePagination from '@/components/admin/TablePagination';
+import TableSkeleton from '@/components/admin/TableSkeleton';
+import { Check, Clock, FileText, Search, User, X } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import {
   Table,
   TableBody,
@@ -36,666 +24,513 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/select";
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { FormDialog } from '@/components/admin/FormDialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 
-type ApplicationStatus = 'pending' | 'processing' | 'approved' | 'rejected' | 'completed' | 'archived';
-
-type Application = {
+interface Application {
   id: string;
-  studentId: string;
+  status: string;
   studentName: string;
-  program: string;
+  studentEmail: string;
   university: string;
-  createdDate: string;
-  updatedDate: string;
-  status: ApplicationStatus;
-  agentName?: string;
-  hasDocs: boolean;
-};
-
-const initialApplications: Application[] = [
-  {
-    id: 'APP-2023-001',
-    studentId: 'STD-001',
-    studentName: 'أحمد محمد',
-    program: 'هندسة البرمجيات',
-    university: 'جامعة لندن',
-    createdDate: '2023-04-01',
-    updatedDate: '2023-04-05',
-    status: 'approved',
-    agentName: 'محمد العلي',
-    hasDocs: true,
-  },
-  {
-    id: 'APP-2023-002',
-    studentId: 'STD-002',
-    studentName: 'سارة عبدالله',
-    program: 'علوم الحاسب',
-    university: 'جامعة تورنتو',
-    createdDate: '2023-04-02',
-    updatedDate: '2023-04-02',
-    status: 'pending',
-    hasDocs: true,
-  },
-  {
-    id: 'APP-2023-003',
-    studentId: 'STD-003',
-    studentName: 'عمر خالد',
-    program: 'إدارة الأعمال',
-    university: 'جامعة ملبورن',
-    createdDate: '2023-04-03',
-    updatedDate: '2023-04-07',
-    status: 'processing',
-    agentName: 'فهد الراشد',
-    hasDocs: true,
-  },
-  {
-    id: 'APP-2023-004',
-    studentId: 'STD-004',
-    studentName: 'فاطمة علي',
-    program: 'الطب البشري',
-    university: 'جامعة برلين',
-    createdDate: '2023-04-04',
-    updatedDate: '2023-04-09',
-    status: 'rejected',
-    hasDocs: true,
-  },
-  {
-    id: 'APP-2023-005',
-    studentId: 'STD-005',
-    studentName: 'محمد أحمد',
-    program: 'علوم البيانات',
-    university: 'جامعة طوكيو',
-    createdDate: '2023-04-05',
-    updatedDate: '2023-04-12',
-    status: 'completed',
-    agentName: 'سارة المحمود',
-    hasDocs: true,
-  },
-  {
-    id: 'APP-2023-006',
-    studentId: 'STD-006',
-    studentName: 'نورة سعيد',
-    program: 'الهندسة المدنية',
-    university: 'جامعة السوربون',
-    createdDate: '2023-04-06',
-    updatedDate: '2023-04-15',
-    status: 'archived',
-    agentName: 'خالد الأحمد',
-    hasDocs: true,
-  },
-  {
-    id: 'APP-2023-007',
-    studentId: 'STD-007',
-    studentName: 'خالد سعد',
-    program: 'الذكاء الاصطناعي',
-    university: 'جامعة أكسفورد',
-    createdDate: '2023-04-07',
-    updatedDate: '2023-04-07',
-    status: 'pending',
-    hasDocs: false,
-  },
-];
-
-const statusConfig: Record<ApplicationStatus, { label: string; color: string; icon: React.ElementType }> = {
-  pending: { label: 'قيد الانتظار', color: 'bg-unlimited-warning text-white', icon: Clock },
-  processing: { label: 'قيد المعالجة', color: 'bg-unlimited-info text-white', icon: FileText },
-  approved: { label: 'مقبول', color: 'bg-unlimited-success text-white', icon: CheckCircle },
-  rejected: { label: 'مرفوض', color: 'bg-unlimited-danger text-white', icon: X },
-  completed: { label: 'مكتمل', color: 'bg-unlimited-blue text-white', icon: CheckCircle },
-  archived: { label: 'مؤرشف', color: 'bg-unlimited-gray text-white', icon: Archive },
-};
-
-const ManageApplications = () => {
-  const [applications, setApplications] = useState<Application[]>(initialApplications);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all');
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const { toast } = useToast();
-
-  const filteredApplications = applications.filter((application) => {
-    const matchesSearch = 
-      application.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      application.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      application.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      application.program.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
-  const handleImportApplications = () => {
-    // محاكاة استيراد بيانات الطلبات
-    toast({
-      title: "تم استيراد البيانات",
-      description: "تم استيراد بيانات الطلبات بنجاح",
-    });
-    setIsImportDialogOpen(false);
-  };
-
-  const handleExportApplications = () => {
-    // محاكاة تصدير بيانات الطلبات
-    toast({
-      title: "تم تصدير البيانات",
-      description: "تم تصدير بيانات الطلبات بنجاح",
-    });
-  };
-
-  const handleDeleteApplication = (id: string) => {
-    setApplications(applications.filter((application) => application.id !== id));
-    toast({
-      title: "تم حذف الطلب",
-      description: `تم حذف الطلب رقم ${id} بنجاح`,
-    });
-  };
-
-  const handleViewApplication = (application: Application) => {
-    setSelectedApplication(application);
-    setIsViewDialogOpen(true);
-  };
-
-  const handleUpdateStatus = (id: string, newStatus: ApplicationStatus) => {
-    setApplications(
-      applications.map((application) =>
-        application.id === id
-          ? {
-              ...application,
-              status: newStatus,
-              updatedDate: new Date().toISOString().split('T')[0],
-            }
-          : application
-      )
-    );
-    
-    toast({
-      title: "تم تحديث الحالة",
-      description: `تم تغيير حالة الطلب ${id} إلى ${statusConfig[newStatus].label}`,
-    });
-  };
-
-  const applicationsByStatus = {
-    all: filteredApplications.length,
-    pending: filteredApplications.filter(a => a.status === 'pending').length,
-    processing: filteredApplications.filter(a => a.status === 'processing').length,
-    approved: filteredApplications.filter(a => a.status === 'approved').length,
-    rejected: filteredApplications.filter(a => a.status === 'rejected').length,
-    completed: filteredApplications.filter(a => a.status === 'completed').length,
-    archived: filteredApplications.filter(a => a.status === 'archived').length,
-  };
-
-  return (
-    <DashboardLayout userRole="admin">
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة طلبات التسجيل</h2>
-          
-          <div className="flex flex-col md:flex-row gap-2">
-            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  استيراد
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>استيراد بيانات الطلبات</DialogTitle>
-                  <DialogDescription>
-                    يرجى تحميل ملف CSV أو Excel يحتوي على بيانات الطلبات.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
-                    <p className="mt-2 text-sm text-unlimited-gray">
-                      اسحب وأفلت الملف هنا أو انقر للاختيار
-                    </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      اختيار ملف
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleImportApplications}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    استيراد البيانات
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button variant="outline" onClick={handleExportApplications}>
-              <Download className="h-4 w-4 mr-2" />
-              تصدير
-            </Button>
-          </div>
-        </div>
-        
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
-            <Input
-              placeholder="البحث عن طلب..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full md:w-[300px]"
-            />
-          </div>
-        </div>
-        
-        <Tabs defaultValue="all" onValueChange={(value) => setStatusFilter(value as ApplicationStatus | 'all')}>
-          <div className="overflow-x-auto">
-            <TabsList className="mb-4 inline-flex">
-              <TabsTrigger value="all" className="min-w-[80px]">
-                الكل
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.all}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="min-w-[80px]">
-                قيد الانتظار
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.pending}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="processing" className="min-w-[80px]">
-                قيد المعالجة
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.processing}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="approved" className="min-w-[80px]">
-                مقبول
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.approved}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="rejected" className="min-w-[80px]">
-                مرفوض
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.rejected}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="min-w-[80px]">
-                مكتمل
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.completed}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="archived" className="min-w-[80px]">
-                مؤرشف
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.archived}</Badge>
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="all">
-            <ApplicationsTable 
-              applications={filteredApplications} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="pending">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'pending')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="processing">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'processing')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="approved">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'approved')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="rejected">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'rejected')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'completed')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="archived">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'archived')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-        </Tabs>
-        
-        {/* عرض تفاصيل الطلب */}
-        {selectedApplication && (
-          <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>تفاصيل الطلب {selectedApplication.id}</DialogTitle>
-              </DialogHeader>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="text-lg font-bold mb-4">معلومات الطلب</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-unlimited-gray text-sm">رقم الطلب</p>
-                      <p className="font-medium">{selectedApplication.id}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">الحالة</p>
-                      <Badge className={statusConfig[selectedApplication.status].color}>
-                        {statusConfig[selectedApplication.status].label}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">تاريخ التقديم</p>
-                      <p>{selectedApplication.createdDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">آخر تحديث</p>
-                      <p>{selectedApplication.updatedDate}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">الوكيل</p>
-                      <p>{selectedApplication.agentName || 'لا يوجد'}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-bold mb-4">معلومات الطالب</h3>
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-unlimited-gray text-sm">رقم الطالب</p>
-                      <p className="font-medium">{selectedApplication.studentId}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">اسم الطالب</p>
-                      <p>{selectedApplication.studentName}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">البرنامج</p>
-                      <p>{selectedApplication.program}</p>
-                    </div>
-                    <div>
-                      <p className="text-unlimited-gray text-sm">الجامعة</p>
-                      <p>{selectedApplication.university}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="col-span-1 md:col-span-2">
-                  <h3 className="text-lg font-bold mb-4">المستندات</h3>
-                  
-                  {selectedApplication.hasDocs ? (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">جواز السفر</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 1.2MB</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">السجل الأكاديمي</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 3.5MB</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">شهادة اللغة</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 0.8MB</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">السيرة الذاتية</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 1.0MB</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center p-8 border rounded-md bg-gray-50">
-                      <FileText className="h-12 w-12 text-unlimited-gray mx-auto mb-2" />
-                      <p className="text-unlimited-gray">لم يتم رفع أي مستندات لهذا الطلب</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <DialogFooter>
-                <div className="flex flex-wrap gap-2">
-                  {selectedApplication.status !== 'processing' && (
-                    <Button 
-                      onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'processing');
-                        setIsViewDialogOpen(false);
-                      }}
-                      className="bg-unlimited-info hover:bg-unlimited-info/90"
-                    >
-                      بدء المعالجة
-                    </Button>
-                  )}
-                  
-                  {selectedApplication.status !== 'approved' && (
-                    <Button 
-                      onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'approved');
-                        setIsViewDialogOpen(false);
-                      }}
-                      className="bg-unlimited-success hover:bg-unlimited-success/90"
-                    >
-                      قبول الطلب
-                    </Button>
-                  )}
-                  
-                  {selectedApplication.status !== 'rejected' && (
-                    <Button 
-                      onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'rejected');
-                        setIsViewDialogOpen(false);
-                      }}
-                      className="bg-unlimited-danger hover:bg-unlimited-danger/90"
-                    >
-                      رفض الطلب
-                    </Button>
-                  )}
-                  
-                  {selectedApplication.status !== 'completed' && selectedApplication.status !== 'archived' && (
-                    <Button 
-                      onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'completed');
-                        setIsViewDialogOpen(false);
-                      }}
-                      className="bg-unlimited-blue hover:bg-unlimited-blue/90"
-                    >
-                      إكمال الطلب
-                    </Button>
-                  )}
-                  
-                  {selectedApplication.status !== 'archived' && (
-                    <Button 
-                      variant="outline"
-                      onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'archived');
-                        setIsViewDialogOpen(false);
-                      }}
-                    >
-                      أرشفة الطلب
-                    </Button>
-                  )}
-                  
-                  <Button 
-                    variant="outline"
-                    onClick={() => setIsViewDialogOpen(false)}
-                  >
-                    إغلاق
-                  </Button>
-                </div>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
-      </div>
-    </DashboardLayout>
-  );
-};
-
-interface ApplicationsTableProps {
-  applications: Application[];
-  handleViewApplication: (application: Application) => void;
-  handleDeleteApplication: (id: string) => void;
-  handleUpdateStatus: (id: string, status: ApplicationStatus) => void;
+  program: string;
+  submissionDate: string;
+  lastUpdate: string;
+  important: boolean;
+  unread: boolean;
 }
 
-const ApplicationsTable = ({ 
-  applications,
-  handleViewApplication,
-  handleDeleteApplication,
-  handleUpdateStatus 
-}: ApplicationsTableProps) => {
+const statusOptions = [
+  { value: 'all', label: 'كل الحالات' },
+  { value: 'pending', label: 'قيد الانتظار' },
+  { value: 'reviewing', label: 'قيد المراجعة' },
+  { value: 'accepted', label: 'تم القبول' },
+  { value: 'rejected', label: 'تم الرفض' },
+];
+
+const ManageApplications = () => {
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [noteDialog, setNoteDialog] = useState(false);
+  const [noteText, setNoteText] = useState('');
+  const [statusDialog, setStatusDialog] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  const rowsPerPage = 10;
+  const totalPages = Math.ceil(filteredApplications.length / rowsPerPage);
+
+  // Load applications from localStorage
+  useEffect(() => {
+    const loadApplications = () => {
+      try {
+        const savedApplications = localStorage.getItem('adminApplications');
+        if (savedApplications) {
+          const parsed = JSON.parse(savedApplications);
+          setApplications(parsed);
+          setFilteredApplications(parsed);
+        }
+      } catch (error) {
+        console.error('Error loading applications:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Simulate API call delay
+    setTimeout(loadApplications, 800);
+  }, []);
+
+  // Filter applications when search query or status filter changes
+  useEffect(() => {
+    const filtered = applications.filter(application => {
+      const matchesSearch = 
+        application.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        application.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        application.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        application.program.toLowerCase().includes(searchQuery.toLowerCase());
+        
+      const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+    
+    setFilteredApplications(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
+  }, [searchQuery, statusFilter, applications]);
+
+  const handleAddNote = () => {
+    setIsSubmitting(true);
+    
+    if (!selectedApplication) return;
+    
+    setTimeout(() => {
+      // Update in local storage
+      const updatedApplications = applications.map(app => {
+        if (app.id === selectedApplication.id) {
+          // Add note to application
+          const appData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+          const appIndex = appData.findIndex((a: any) => a.id === selectedApplication.id);
+          
+          if (appIndex !== -1) {
+            if (!appData[appIndex].notes) {
+              appData[appIndex].notes = [];
+            }
+            appData[appIndex].notes.push({
+              text: noteText,
+              date: new Date().toLocaleDateString('ar-SA'),
+              addedBy: 'مدير النظام'
+            });
+            localStorage.setItem('adminApplications', JSON.stringify(appData));
+          }
+          
+          return {
+            ...app,
+            lastUpdate: new Date().toLocaleDateString('ar-SA')
+          };
+        }
+        return app;
+      });
+      
+      setApplications(updatedApplications);
+      
+      toast({
+        title: "تمت إضافة الملاحظة بنجاح",
+        description: `تم إضافة ملاحظة إلى الطلب ${selectedApplication.id}`,
+      });
+      
+      setNoteText('');
+      setNoteDialog(false);
+      setIsSubmitting(false);
+    }, 500);
+  };
+
+  const handleUpdateStatus = () => {
+    setIsSubmitting(true);
+    
+    if (!selectedApplication || !newStatus) return;
+    
+    setTimeout(() => {
+      // Update in both admin and student storage
+      const updatedApplications = applications.map(app => {
+        if (app.id === selectedApplication.id) {
+          // Update admin applications
+          const adminAppData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+          const adminAppIndex = adminAppData.findIndex((a: any) => a.id === selectedApplication.id);
+          
+          if (adminAppIndex !== -1) {
+            adminAppData[adminAppIndex].status = newStatus;
+            adminAppData[adminAppIndex].lastUpdate = new Date().toLocaleDateString('ar-SA');
+            localStorage.setItem('adminApplications', JSON.stringify(adminAppData));
+          }
+          
+          // Update student applications
+          const studentAppData = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+          const studentAppIndex = studentAppData.findIndex((a: any) => a.id === selectedApplication.id);
+          
+          if (studentAppIndex !== -1) {
+            studentAppData[studentAppIndex].status = newStatus;
+            studentAppData[studentAppIndex].lastUpdate = new Date().toLocaleDateString('ar-SA');
+            localStorage.setItem('studentApplications', JSON.stringify(studentAppData));
+          }
+          
+          return {
+            ...app,
+            status: newStatus,
+            lastUpdate: new Date().toLocaleDateString('ar-SA')
+          };
+        }
+        return app;
+      });
+      
+      setApplications(updatedApplications);
+      
+      toast({
+        title: "تم تحديث حالة الطلب بنجاح",
+        description: `تم تغيير حالة الطلب ${selectedApplication.id} إلى ${getStatusText(newStatus)}`,
+      });
+      
+      setStatusDialog(false);
+      setIsSubmitting(false);
+    }, 500);
+  };
+
+  const handleDeleteApplication = () => {
+    setIsSubmitting(true);
+    
+    if (!selectedApplication) return;
+    
+    setTimeout(() => {
+      // Remove from both admin and student storage
+      const updatedApplications = applications.filter(app => app.id !== selectedApplication.id);
+      setApplications(updatedApplications);
+      
+      // Update admin applications
+      const adminAppData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+      const filteredAdminApps = adminAppData.filter((a: any) => a.id !== selectedApplication.id);
+      localStorage.setItem('adminApplications', JSON.stringify(filteredAdminApps));
+      
+      // Update student applications
+      const studentAppData = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+      const filteredStudentApps = studentAppData.filter((a: any) => a.id !== selectedApplication.id);
+      localStorage.setItem('studentApplications', JSON.stringify(filteredStudentApps));
+      
+      toast({
+        title: "تم حذف الطلب بنجاح",
+        description: `تم حذف الطلب ${selectedApplication.id}`,
+      });
+      
+      setDeleteDialog(false);
+      setIsSubmitting(false);
+    }, 500);
+  };
+
+  const handleToggleImportant = (application: Application) => {
+    const updatedApplications = applications.map(app => {
+      if (app.id === application.id) {
+        // Update in localStorage
+        const appData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+        const appIndex = appData.findIndex((a: any) => a.id === application.id);
+        
+        if (appIndex !== -1) {
+          appData[appIndex].important = !application.important;
+          localStorage.setItem('adminApplications', JSON.stringify(appData));
+        }
+        
+        return {
+          ...app,
+          important: !app.important
+        };
+      }
+      return app;
+    });
+    
+    setApplications(updatedApplications);
+    
+    toast({
+      title: application.important ? "تم إزالة التمييز من الطلب" : "تم تمييز الطلب كهام",
+      description: `تم تحديث حالة الطلب ${application.id}`,
+    });
+  };
+
+  const handleMarkAsRead = (application: Application) => {
+    if (!application.unread) return;
+    
+    const updatedApplications = applications.map(app => {
+      if (app.id === application.id) {
+        // Update in localStorage
+        const appData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+        const appIndex = appData.findIndex((a: any) => a.id === application.id);
+        
+        if (appIndex !== -1) {
+          appData[appIndex].unread = false;
+          localStorage.setItem('adminApplications', JSON.stringify(appData));
+        }
+        
+        return {
+          ...app,
+          unread: false
+        };
+      }
+      return app;
+    });
+    
+    setApplications(updatedApplications);
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'accepted': return 'تم القبول';
+      case 'rejected': return 'تم الرفض';
+      case 'reviewing': return 'قيد المراجعة';
+      default: return 'قيد الانتظار';
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'accepted':
+        return <Badge className="bg-green-500">تم القبول</Badge>;
+      case 'rejected':
+        return <Badge className="bg-red-500">تم الرفض</Badge>;
+      case 'reviewing':
+        return <Badge className="bg-yellow-500">قيد المراجعة</Badge>;
+      default:
+        return <Badge className="bg-blue-500">قيد الانتظار</Badge>;
+    }
+  };
+
+  const openApplicationDetails = (application: Application) => {
+    // Mark as read first
+    handleMarkAsRead(application);
+    
+    // Navigate to application details or perform action
+    toast({
+      title: "عرض تفاصيل الطلب",
+      description: `مشاهدة تفاصيل الطلب ${application.id}`,
+    });
+    
+    // In a real application, we would navigate to a details page
+    // navigate(`/admin/applications/${application.id}`);
+  };
+
+  const displayedApplications = filteredApplications.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
+
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[120px]">رقم الطلب</TableHead>
-            <TableHead>الطالب</TableHead>
-            <TableHead className="hidden md:table-cell">البرنامج</TableHead>
-            <TableHead className="hidden lg:table-cell">الجامعة</TableHead>
-            <TableHead>الحالة</TableHead>
-            <TableHead className="hidden md:table-cell">تاريخ التقديم</TableHead>
-            <TableHead>الإجراءات</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {applications.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="text-center h-40 text-unlimited-gray">
-                لا توجد بيانات متطابقة مع البحث
-              </TableCell>
-            </TableRow>
-          ) : (
-            applications.map((application) => (
-              <TableRow key={application.id}>
-                <TableCell className="font-medium">{application.id}</TableCell>
-                <TableCell>
-                  <div>
-                    <p>{application.studentName}</p>
-                    {application.agentName && (
-                      <p className="text-xs text-unlimited-gray">وكيل: {application.agentName}</p>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">{application.program}</TableCell>
-                <TableCell className="hidden lg:table-cell">{application.university}</TableCell>
-                <TableCell>
-                  <Badge className={statusConfig[application.status].color}>
-                    {statusConfig[application.status].label}
-                  </Badge>
-                </TableCell>
-                <TableCell className="hidden md:table-cell">{application.createdDate}</TableCell>
-                <TableCell>
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => handleViewApplication(application)}
+    <div className="p-6">
+      <AdminPageActions 
+        title="إدارة طلبات الالتحاق" 
+        subtitle="استعراض وإدارة طلبات الالتحاق المقدمة من الطلاب"
+      />
+      
+      <div className="bg-white rounded-lg shadow overflow-hidden mt-6">
+        <div className="p-4 border-b">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <Input
+                placeholder="البحث عن طلب..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-3 pr-10 w-full"
+              />
+            </div>
+            <Select
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+            >
+              <SelectTrigger className="w-full sm:w-[220px]">
+                <SelectValue placeholder="فلترة حسب الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {loading ? (
+          <TableSkeleton columns={7} rows={5} />
+        ) : (
+          <>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]"></TableHead>
+                  <TableHead>رقم الطلب</TableHead>
+                  <TableHead>الطالب</TableHead>
+                  <TableHead>البرنامج</TableHead>
+                  <TableHead>الجامعة</TableHead>
+                  <TableHead>تاريخ التقديم</TableHead>
+                  <TableHead>الحالة</TableHead>
+                  <TableHead className="text-left">الإجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayedApplications.length > 0 ? (
+                  displayedApplications.map((application) => (
+                    <TableRow 
+                      key={application.id} 
+                      className={`${application.unread ? 'bg-blue-50' : ''} ${application.important ? 'bg-amber-50' : ''}`}
                     >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {application.status !== 'approved' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'approved')}>
-                            <CheckCircle className="h-4 w-4 mr-2 text-unlimited-success" />
-                            قبول الطلب
-                          </DropdownMenuItem>
-                        )}
-                        {application.status !== 'rejected' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'rejected')}>
-                            <X className="h-4 w-4 mr-2 text-unlimited-danger" />
-                            رفض الطلب
-                          </DropdownMenuItem>
-                        )}
-                        {application.status !== 'archived' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'archived')}>
-                            <Archive className="h-4 w-4 mr-2" />
-                            أرشفة الطلب
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-unlimited-danger focus:text-unlimited-danger"
-                          onClick={() => handleDeleteApplication(application.id)}
-                        >
-                          <Trash className="h-4 w-4 mr-2" />
-                          حذف
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+                      <TableCell>
+                        <Checkbox 
+                          checked={application.important}
+                          onCheckedChange={() => handleToggleImportant(application)}
+                        />
+                      </TableCell>
+                      <TableCell 
+                        className="font-medium cursor-pointer"
+                        onClick={() => openApplicationDetails(application)}
+                      >
+                        {application.id}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 ml-2 text-unlimited-gray" />
+                          {application.studentName}
+                        </div>
+                      </TableCell>
+                      <TableCell>{application.program}</TableCell>
+                      <TableCell>{application.university}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 ml-2 text-unlimited-gray" />
+                          {application.submissionDate}
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(application.status)}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2 rtl:space-x-reverse">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedApplication(application);
+                              setStatusDialog(true);
+                              setNewStatus(application.status);
+                            }}
+                          >
+                            تحديث الحالة
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedApplication(application);
+                              setNoteDialog(true);
+                            }}
+                          >
+                            إضافة ملاحظة
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-10">
+                      <div className="flex flex-col items-center justify-center text-unlimited-gray">
+                        <FileText className="h-12 w-12 mb-2" />
+                        <h3 className="text-lg font-medium mb-1">لا توجد طلبات</h3>
+                        <p className="text-sm">
+                          {searchQuery || statusFilter !== 'all' 
+                            ? 'لا توجد طلبات مطابقة للفلاتر المحددة'
+                            : 'لم يتم العثور على أي طلبات في النظام'}
+                        </p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            
+            {filteredApplications.length > 0 && (
+              <div className="p-4 border-t">
+                <TablePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      
+      {/* Add Note Dialog */}
+      <FormDialog
+        open={noteDialog}
+        onOpenChange={setNoteDialog}
+        title="إضافة ملاحظة"
+        description={`إضافة ملاحظة للطلب رقم: ${selectedApplication?.id || ''}`}
+        onSubmit={handleAddNote}
+        submitLabel="إضافة"
+        cancelLabel="إلغاء"
+        isLoading={isSubmitting}
+      >
+        <Textarea
+          value={noteText}
+          onChange={(e) => setNoteText(e.target.value)}
+          placeholder="أدخل الملاحظة هنا..."
+          className="h-32"
+        />
+      </FormDialog>
+      
+      {/* Update Status Dialog */}
+      <FormDialog
+        open={statusDialog}
+        onOpenChange={setStatusDialog}
+        title="تحديث حالة الطلب"
+        description={`تغيير حالة الطلب رقم: ${selectedApplication?.id || ''}`}
+        onSubmit={handleUpdateStatus}
+        submitLabel="تحديث"
+        cancelLabel="إلغاء"
+        isLoading={isSubmitting}
+      >
+        <Select value={newStatus} onValueChange={setNewStatus}>
+          <SelectTrigger>
+            <SelectValue placeholder="اختر الحالة الجديدة" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">قيد الانتظار</SelectItem>
+            <SelectItem value="reviewing">قيد المراجعة</SelectItem>
+            <SelectItem value="accepted">تم القبول</SelectItem>
+            <SelectItem value="rejected">تم الرفض</SelectItem>
+          </SelectContent>
+        </Select>
+      </FormDialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deleteDialog}
+        onOpenChange={setDeleteDialog}
+        title="حذف الطلب"
+        description={`هل أنت متأكد من حذف الطلب رقم ${selectedApplication?.id || ''}؟ هذا الإجراء غير قابل للتراجع.`}
+        onConfirm={handleDeleteApplication}
+        confirmLabel="حذف"
+        cancelLabel="إلغاء"
+        isLoading={isSubmitting}
+        variant="destructive"
+      />
     </div>
   );
 };

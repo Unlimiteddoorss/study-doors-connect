@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -52,55 +51,81 @@ const ApplicationSubmissionHandler = ({
       submissionDate: new Date().toISOString(),
     };
     
-    // API call simulation with timeout
+    // Generate a random application number
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
+    const appNumber = `APP-${randomNumber}`;
+    setApplicationNumber(appNumber);
+    
+    console.log('Submitting application data:', submitData);
+    
+    // Store application in local storage with complete details for students to track
+    const currentDate = new Date();
+    
+    // Student applications storage
+    const applications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+    applications.push({
+      id: appNumber,
+      status: 'pending',
+      lastUpdate: currentDate.toLocaleDateString('ar-SA'),
+      program: submitData.programName,
+      university: submitData.universityName,
+      date: currentDate.toLocaleDateString('ar-SA'),
+      personalInfo: {
+        name: submitData.fullName || formData?.personalInfo?.fullName,
+        email: submitData.email || formData?.personalInfo?.email,
+        phone: submitData.phone || formData?.personalInfo?.phone,
+        nationality: submitData.nationality || formData?.personalInfo?.nationality,
+      },
+      programDetails: {
+        programId: submitData.programId,
+        universityId: submitData.universityId,
+        image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png" // Default university image
+      },
+      documents: submitData.documents || [],
+      submissionTimestamp: currentDate.getTime()
+    });
+    localStorage.setItem('studentApplications', JSON.stringify(applications));
+    
+    // Admin applications storage - separate to keep admin data isolated
+    const adminApplications = JSON.parse(localStorage.getItem('adminApplications') || '[]');
+    adminApplications.push({
+      id: appNumber,
+      status: 'pending',
+      lastUpdate: currentDate.toLocaleDateString('ar-SA'),
+      submissionDate: currentDate.toLocaleDateString('ar-SA'),
+      program: submitData.programName,
+      university: submitData.universityName,
+      studentName: submitData.fullName || formData?.personalInfo?.fullName,
+      studentEmail: submitData.email || formData?.personalInfo?.email,
+      studentPhone: submitData.phone || formData?.personalInfo?.phone,
+      nationality: submitData.nationality || formData?.personalInfo?.nationality,
+      unread: true,
+      important: false,
+      notes: [],
+      programDetails: {
+        programId: submitData.programId,
+        universityId: submitData.universityId,
+      },
+      documents: submitData.documents || [],
+      submissionTimestamp: currentDate.getTime()
+    });
+    localStorage.setItem('adminApplications', JSON.stringify(adminApplications));
+    
+    // Show success message
+    toast({
+      title: "تم تقديم الطلب بنجاح",
+      description: `رقم الطلب الخاص بك هو ${appNumber}`,
+      variant: "default",
+    });
+    
+    // Open the confirmation dialog
     setTimeout(() => {
-      // Generate a random application number
-      const randomNumber = Math.floor(100000 + Math.random() * 900000);
-      const appNumber = `APP-${randomNumber}`;
-      setApplicationNumber(appNumber);
-      
-      console.log('Submitting application data:', submitData);
-      
-      // Show success message
-      toast({
-        title: "تم تقديم الطلب بنجاح",
-        description: `رقم الطلب الخاص بك هو ${appNumber}`,
-        variant: "default",
-      });
-      
-      // Open the confirmation dialog
       setIsDialogOpen(true);
       setIsSubmitting(false);
       
       // Call the onSubmit callback if provided
       if (onSubmit) onSubmit();
-      
-      // Store application in local storage with complete details
-      const currentDate = new Date();
-      const applications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
-      applications.push({
-        id: appNumber,
-        status: 'pending',
-        lastUpdate: currentDate.toLocaleDateString('ar-SA'),
-        program: submitData.programName,
-        university: submitData.universityName,
-        date: currentDate.toLocaleDateString('ar-SA'),
-        personalInfo: {
-          name: submitData.name || formData?.personalInfo?.fullName,
-          email: submitData.email || formData?.personalInfo?.email,
-          phone: submitData.phone || formData?.personalInfo?.phone,
-          nationality: submitData.nationality || formData?.personalInfo?.nationality,
-        },
-        programDetails: {
-          programId: submitData.programId,
-          universityId: submitData.universityId,
-        },
-        documents: submitData.documents || [],
-        submissionTimestamp: currentDate.getTime()
-      });
-      localStorage.setItem('studentApplications', JSON.stringify(applications));
-      
-    }, 1500); // Simulating network delay
+    }, 1000);
   };
 
   const viewApplicationStatus = () => {
