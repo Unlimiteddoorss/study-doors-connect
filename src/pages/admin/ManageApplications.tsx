@@ -316,8 +316,9 @@ const ManageApplications = () => {
   return (
     <div className="p-6">
       <AdminPageActions 
-        title="إدارة طلبات الالتحاق" 
-        subtitle="استعراض وإدارة طلبات الالتحاق المقدمة من الطلاب"
+        addLabel="إدارة طلبات الالتحاق" 
+        importLabel="استيراد"
+        exportLabel="تصدير"
       />
       
       <div className="bg-white rounded-lg shadow overflow-hidden mt-6">
