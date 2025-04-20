@@ -32,18 +32,47 @@ const ApplicationSubmissionHandler = ({
   const navigate = useNavigate();
 
   const handleFormSubmit = () => {
+    if (!formData) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى التأكد من إدخال جميع البيانات المطلوبة",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
-    // Simulate API call with timeout
+    // Save application data to localStorage to persist it
+    const existingApplications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+    
+    // Generate a random application number
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
+    const appNumber = `APP-${randomNumber}`;
+    setApplicationNumber(appNumber);
+    
+    // Create the application object
+    const newApplication = {
+      id: randomNumber,
+      applicationNumber: appNumber,
+      programId: formData.programId || formData.program?.id || 1,
+      status: "review",
+      submissionDate: new Date().toISOString().split('T')[0],
+      studentData: formData,
+      notes: "قيد المراجعة من قبل المختصين",
+      notesAr: "قيد المراجعة من قبل المختصين"
+    };
+    
+    // Add the application to the list and save back to localStorage
+    existingApplications.push(newApplication);
+    localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
+    
+    // Log for debugging
+    console.log('Application submitted:', newApplication);
+    console.log('All applications:', existingApplications);
+    
+    // Simulate API delay for better UX
     setTimeout(() => {
-      // Generate a random application number
-      const randomNumber = Math.floor(100000 + Math.random() * 900000);
-      const appNumber = `APP-${randomNumber}`;
-      setApplicationNumber(appNumber);
-      
-      // Here you would normally save the data to a database
-      console.log('Submitting application data:', formData);
-      
       // Show success message
       toast({
         title: "تم تقديم الطلب بنجاح",
