@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, FileText, Clock } from 'lucide-react';
+import { MessageCircle, FileText, Clock, Calendar, User, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,6 +13,9 @@ interface ApplicationStatusProps {
   lastUpdate: string;
   program: string;
   university: string;
+  submissionDate?: string;
+  studentName?: string;
+  country?: string;
 }
 
 const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
@@ -20,7 +23,10 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
   status,
   lastUpdate,
   program,
-  university
+  university,
+  submissionDate,
+  studentName,
+  country
 }) => {
   const { toast } = useToast();
   
@@ -68,28 +74,72 @@ const ApplicationStatus: React.FC<ApplicationStatusProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {studentName && (
+            <div>
+              <p className="text-unlimited-gray mb-1">اسم الطالب</p>
+              <div className="flex items-center">
+                <User className="h-4 w-4 text-unlimited-blue ml-2" />
+                <p className="font-semibold">{studentName}</p>
+              </div>
+            </div>
+          )}
+          
           <div>
             <p className="text-unlimited-gray mb-1">البرنامج</p>
             <p className="font-semibold">{program}</p>
           </div>
+          
           <div>
             <p className="text-unlimited-gray mb-1">الجامعة</p>
             <p className="font-semibold">{university}</p>
           </div>
+          
+          {country && (
+            <div>
+              <p className="text-unlimited-gray mb-1">البلد</p>
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 text-unlimited-blue ml-2" />
+                <p className="font-semibold">{country}</p>
+              </div>
+            </div>
+          )}
+          
+          {submissionDate && (
+            <div>
+              <p className="text-unlimited-gray mb-1">تاريخ التقديم</p>
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 text-unlimited-blue ml-2" />
+                <p className="font-semibold">{submissionDate}</p>
+              </div>
+            </div>
+          )}
+          
           <div>
             <p className="text-unlimited-gray mb-1">آخر تحديث</p>
-            <p className="font-semibold">{lastUpdate}</p>
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 text-unlimited-blue ml-2" />
+              <p className="font-semibold">{lastUpdate}</p>
+            </div>
           </div>
           
           <div className="flex gap-2 mt-4">
-            <Button asChild className="flex-1" onClick={handleContactUs}>
+            <Button 
+              asChild 
+              className="flex-1" 
+              onClick={handleContactUs}
+            >
               <Link to={`/messages?application=${applicationId}`}>
                 <MessageCircle className="w-4 h-4 ml-2" />
                 تواصل معنا
               </Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1" onClick={handleViewDetails}>
-              <Link to={`/applications/${applicationId}`}>
+            <Button 
+              asChild 
+              variant="outline" 
+              className="flex-1" 
+              onClick={handleViewDetails}
+            >
+              <Link to={`/dashboard/applications/${applicationId}`}>
                 <FileText className="w-4 h-4 ml-2" />
                 التفاصيل
               </Link>

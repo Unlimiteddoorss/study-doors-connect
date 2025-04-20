@@ -20,6 +20,8 @@ interface ApplicationSubmissionHandlerProps {
   onCancel?: () => void;
   universityId?: number;
   programId?: number;
+  universityName?: string;
+  programName?: string;
 }
 
 const ApplicationSubmissionHandler = ({ 
@@ -27,7 +29,9 @@ const ApplicationSubmissionHandler = ({
   onSubmit, 
   onCancel,
   universityId,
-  programId
+  programId,
+  universityName,
+  programName
 }: ApplicationSubmissionHandlerProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [applicationNumber, setApplicationNumber] = useState<string>('');
@@ -43,17 +47,18 @@ const ApplicationSubmissionHandler = ({
       ...formData,
       universityId: universityId || null,
       programId: programId || null,
+      universityName: universityName || 'جامعة إسطنبول جيليشيم',
+      programName: programName || 'برنامج جامعي',
       submissionDate: new Date().toISOString(),
     };
     
-    // Simulate API call with timeout
+    // API call simulation with timeout
     setTimeout(() => {
       // Generate a random application number
       const randomNumber = Math.floor(100000 + Math.random() * 900000);
       const appNumber = `APP-${randomNumber}`;
       setApplicationNumber(appNumber);
       
-      // Here you would normally save the data to a database
       console.log('Submitting application data:', submitData);
       
       // Show success message
@@ -70,15 +75,28 @@ const ApplicationSubmissionHandler = ({
       // Call the onSubmit callback if provided
       if (onSubmit) onSubmit();
       
-      // Store application in local storage for demo purposes
+      // Store application in local storage with complete details
+      const currentDate = new Date();
       const applications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
       applications.push({
         id: appNumber,
         status: 'pending',
-        lastUpdate: new Date().toLocaleDateString('ar-SA'),
-        program: submitData.programName || 'برنامج جامعي',
-        university: submitData.universityName || 'جامعة إسطنبول جيليشيم',
-        date: new Date().toLocaleDateString('ar-SA'),
+        lastUpdate: currentDate.toLocaleDateString('ar-SA'),
+        program: submitData.programName,
+        university: submitData.universityName,
+        date: currentDate.toLocaleDateString('ar-SA'),
+        personalInfo: {
+          name: submitData.name || formData?.personalInfo?.fullName,
+          email: submitData.email || formData?.personalInfo?.email,
+          phone: submitData.phone || formData?.personalInfo?.phone,
+          nationality: submitData.nationality || formData?.personalInfo?.nationality,
+        },
+        programDetails: {
+          programId: submitData.programId,
+          universityId: submitData.universityId,
+        },
+        documents: submitData.documents || [],
+        submissionTimestamp: currentDate.getTime()
       });
       localStorage.setItem('studentApplications', JSON.stringify(applications));
       
