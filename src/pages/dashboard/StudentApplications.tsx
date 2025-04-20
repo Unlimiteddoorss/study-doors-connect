@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,75 +14,47 @@ import {
   Check, 
   Clock, 
   AlertCircle,
-  PlusCircle
+  PlusCircle,
+  FileX
 } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
 
 type ApplicationStatus = 'pending' | 'review' | 'approved' | 'rejected' | 'documents';
 
+interface ApplicationDocument {
+  name: string;
+  status: 'uploaded' | 'required' | 'approved';
+}
+
 interface Application {
   id: number;
-  program: string;
-  university: string;
+  applicationNumber: string;
+  programId: number;
   status: ApplicationStatus;
-  date: string;
-  statusColor: string;
-  messages: number;
-  documents: {
-    name: string;
-    status: 'uploaded' | 'required' | 'approved';
-  }[];
+  submissionDate: string;
+  studentData: any;
+  notes: string;
+  notesAr: string;
 }
 
 const StudentApplications = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [applications, setApplications] = useState<Application[]>([]);
+  const { id: applicationId } = useParams();
   
-  const applications: Application[] = [
-    {
-      id: 1,
-      program: 'بكالوريوس إدارة الأعمال',
-      university: 'جامعة أوزيجين',
-      status: 'approved',
-      date: '15/04/2025',
-      statusColor: 'text-green-600 bg-green-100',
-      messages: 2,
-      documents: [
-        { name: 'جواز السفر', status: 'approved' },
-        { name: 'الشهادة الثانوية', status: 'approved' },
-        { name: 'صورة شخصية', status: 'approved' }
-      ]
-    },
-    {
-      id: 2,
-      program: 'ماجستير علوم الحاسوب',
-      university: 'جامعة فاتح سلطان محمد',
-      status: 'review',
-      date: '10/04/2025',
-      statusColor: 'text-yellow-600 bg-yellow-100',
-      messages: 0,
-      documents: [
-        { name: 'جواز السفر', status: 'uploaded' },
-        { name: 'الشهادة الجامعية', status: 'uploaded' },
-        { name: 'السيرة الذاتية', status: 'required' }
-      ]
-    },
-    {
-      id: 3,
-      program: 'دكتوراه الهندسة المدنية',
-      university: 'جامعة المجر للتكنولوجيا',
-      status: 'documents',
-      date: '05/04/2025',
-      statusColor: 'text-blue-600 bg-blue-100',
-      messages: 1,
-      documents: [
-        { name: 'جواز السفر', status: 'uploaded' },
-        { name: 'شهادة الماجستير', status: 'required' },
-        { name: 'خطاب التوصية', status: 'required' },
-        { name: 'مقترح البحث', status: 'required' }
-      ]
-    },
-  ];
-
+  // Fetch applications from localStorage on component mount
+  useEffect(() => {
+    const storedApplications = localStorage.getItem('studentApplications');
+    if (storedApplications) {
+      const parsedApplications = JSON.parse(storedApplications);
+      setApplications(parsedApplications);
+      
+      // Log for debugging
+      console.log('Loaded applications from localStorage:', parsedApplications);
+    }
+  }, []);
+  
   const getFilteredApplications = () => {
     if (activeTab === 'all') return applications;
     return applications.filter(app => app.status === activeTab);
@@ -129,6 +101,50 @@ const StudentApplications = () => {
       description: `يرجى اختيار المستند لرفعه للطلب رقم ${applicationId}`,
     });
   };
+  
+  // Get program name by ID (simplified version)
+  const getProgramName = (programId: number) => {
+    // This is a simplified version - in a real app, you would fetch this from your database or API
+    const programNames: Record<number, string> = {
+      1: 'بكالوريوس إدارة الأعمال',
+      2: 'ماجستير علوم الحاسوب',
+      3: 'دكتوراه الهندسة المدنية',
+      4: 'بكالوريوس هندسة الحاسوب',
+      5: 'ماجستير إدارة الأعمال'
+    };
+    
+    return programNames[programId] || 'برنامج غير محدد';
+  };
+  
+  // Get university name (simplified)
+  const getUniversityName = (programId: number) => {
+    const universityNames: Record<number, string> = {
+      1: 'جامعة أوزيجين',
+      2: 'جامعة فاتح سلطان محمد',
+      3: 'جامعة المجر للتكنولوجيا',
+      4: 'جامعة باهتشه شهير',
+      5: 'جامعة اسطنبول'
+    };
+    
+    return universityNames[programId] || 'جامعة غير محددة';
+  };
+  
+  // Generate mock documents based on application status
+  const getApplicationDocuments = (application: Application): ApplicationDocument[] => {
+    const documents: ApplicationDocument[] = [
+      { name: 'جواز السفر', status: 'uploaded' },
+      { name: 'الشهادة الثانوية', status: 'uploaded' }
+    ];
+    
+    if (application.status === 'documents') {
+      documents.push({ name: 'خطاب التوصية', status: 'required' });
+      documents.push({ name: 'السيرة الذاتية', status: 'required' });
+    } else if (application.status === 'approved') {
+      documents.push({ name: 'خطاب القبول', status: 'approved' });
+    }
+    
+    return documents;
+  };
 
   return (
     <DashboardLayout>
@@ -154,87 +170,107 @@ const StudentApplications = () => {
               <CardContent>
                 <div className="space-y-4">
                   {getFilteredApplications().length > 0 ? (
-                    getFilteredApplications().map((app) => (
-                      <div 
-                        key={app.id}
-                        className="border rounded-lg overflow-hidden"
-                      >
-                        <div className="p-4 border-b bg-gray-50">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                              <div className="bg-unlimited-blue/10 p-2 rounded-full">
-                                <FileText className="h-5 w-5 text-unlimited-blue" />
-                              </div>
-                              <div>
-                                <h3 className="font-medium text-lg">{app.program}</h3>
-                                <p className="text-unlimited-gray">{app.university}</p>
-                              </div>
-                            </div>
-                            <Badge className={app.statusColor}>
-                              <span className="flex items-center gap-1">
-                                {getStatusIcon(app.status)}
-                                {getStatusLabel(app.status)}
-                              </span>
-                            </Badge>
-                          </div>
-                        </div>
-                        
-                        <div className="p-4">
-                          <h4 className="font-medium mb-2">المستندات المطلوبة:</h4>
-                          <div className="space-y-2">
-                            {app.documents.map((doc, idx) => (
-                              <div key={idx} className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <Badge variant={doc.status === 'required' ? 'destructive' : doc.status === 'uploaded' ? 'outline' : 'default'}>
-                                    {doc.status === 'required' ? 'مطلوب' : doc.status === 'uploaded' ? 'تم الرفع' : 'معتمد'}
-                                  </Badge>
-                                  <span>{doc.name}</span>
+                    getFilteredApplications().map((app) => {
+                      const documents = getApplicationDocuments(app);
+                      return (
+                        <div 
+                          key={app.id}
+                          className="border rounded-lg overflow-hidden"
+                        >
+                          <div className="p-4 border-b bg-gray-50">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                <div className="bg-unlimited-blue/10 p-2 rounded-full">
+                                  <FileText className="h-5 w-5 text-unlimited-blue" />
                                 </div>
-                                
-                                {doc.status === 'required' ? (
-                                  <Button size="sm" variant="outline" onClick={() => handleUploadDocument(app.id)}>
-                                    رفع
-                                  </Button>
-                                ) : (
-                                  <Button size="sm" variant="outline" onClick={() => handleDownloadDocument(app.id, doc.name)}>
-                                    <Download className="h-4 w-4 mr-1" />
-                                    تنزيل
-                                  </Button>
-                                )}
+                                <div>
+                                  <h3 className="font-medium text-lg">{getProgramName(app.programId)}</h3>
+                                  <p className="text-unlimited-gray">{getUniversityName(app.programId)}</p>
+                                  <p className="text-xs text-unlimited-gray mt-1">رقم الطلب: {app.applicationNumber}</p>
+                                </div>
                               </div>
-                            ))}
+                              <Badge className={
+                                app.status === 'approved' ? 'text-green-600 bg-green-100' : 
+                                app.status === 'rejected' ? 'text-red-600 bg-red-100' : 
+                                app.status === 'review' ? 'text-yellow-600 bg-yellow-100' : 
+                                app.status === 'documents' ? 'text-blue-600 bg-blue-100' : 
+                                'text-gray-600 bg-gray-100'
+                              }>
+                                <span className="flex items-center gap-1">
+                                  {getStatusIcon(app.status)}
+                                  {getStatusLabel(app.status)}
+                                </span>
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <div className="p-4">
+                            <h4 className="font-medium mb-2">المستندات المطلوبة:</h4>
+                            <div className="space-y-2">
+                              {documents.map((doc, idx) => (
+                                <div key={idx} className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={doc.status === 'required' ? 'destructive' : doc.status === 'uploaded' ? 'outline' : 'default'}>
+                                      {doc.status === 'required' ? 'مطلوب' : doc.status === 'uploaded' ? 'تم الرفع' : 'معتمد'}
+                                    </Badge>
+                                    <span>{doc.name}</span>
+                                  </div>
+                                  
+                                  {doc.status === 'required' ? (
+                                    <Button size="sm" variant="outline" onClick={() => handleUploadDocument(app.id)}>
+                                      رفع
+                                    </Button>
+                                  ) : (
+                                    <Button size="sm" variant="outline" onClick={() => handleDownloadDocument(app.id, doc.name)}>
+                                      <Download className="h-4 w-4 mr-1" />
+                                      تنزيل
+                                    </Button>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="p-4 border-t flex items-center justify-between bg-gray-50">
+                            <div className="text-sm text-unlimited-gray">
+                              تاريخ التقديم: {app.submissionDate}
+                            </div>
+                            <div className="flex space-x-2 rtl:space-x-reverse">
+                              <Button size="sm" variant="outline" onClick={() => handleMessageClick(app.id)}>
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                الرسائل
+                              </Button>
+                              <Button size="sm" variant="default">
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                تفاصيل الطلب
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        
-                        <div className="p-4 border-t flex items-center justify-between bg-gray-50">
-                          <div className="text-sm text-unlimited-gray">
-                            تاريخ التقديم: {app.date}
-                          </div>
-                          <div className="flex space-x-2 rtl:space-x-reverse">
-                            <Button size="sm" variant="outline" onClick={() => handleMessageClick(app.id)}>
-                              <MessageSquare className="h-4 w-4 mr-1" />
-                              الرسائل {app.messages > 0 && <Badge className="ml-1 bg-unlimited-blue">{app.messages}</Badge>}
-                            </Button>
-                            <Button size="sm" variant="default">
-                              <ExternalLink className="h-4 w-4 mr-1" />
-                              تفاصيل الطلب
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-unlimited-gray mb-4">لم يتم العثور على طلبات في هذه الفئة</p>
+                    <div className="text-center py-12 flex flex-col items-center">
+                      <FileX className="h-16 w-16 text-unlimited-gray/50 mb-4" />
+                      <p className="text-unlimited-gray text-lg mb-2">لم يتم العثور على طلبات في هذه الفئة</p>
+                      <p className="text-unlimited-gray/70 mb-6">قم بتقديم طلب جديد للبدء في رحلتك الدراسية</p>
+                      <Link to="/apply">
+                        <Button className="gap-2">
+                          <PlusCircle className="h-4 w-4" />
+                          تقديم طلب جديد
+                        </Button>
+                      </Link>
                     </div>
                   )}
                 </div>
                 
                 <div className="mt-6 text-center">
-                  <Button className="gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    تقديم طلب جديد
-                  </Button>
+                  <Link to="/apply">
+                    <Button className="gap-2">
+                      <PlusCircle className="h-4 w-4" />
+                      تقديم طلب جديد
+                    </Button>
+                  </Link>
                 </div>
               </CardContent>
             </TabsContent>
