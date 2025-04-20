@@ -85,6 +85,7 @@ const UniversityDetails = () => {
     );
   }
 
+  // Special handling for Gelisim University logo
   const universityLogo = universityId === 12 ? "/lovable-uploads/8d4752ed-a124-4362-9bf6-815d145af3e6.png" : null;
 
   return (
@@ -302,7 +303,7 @@ const UniversityDetails = () => {
                     
                     <Separator className="my-6" />
                     
-                    <h2 className="text-xl font-bold mb-4">�� informations الدراسة</h2>
+                    <h2 className="text-xl font-bold mb-4">�� informações الدراسة</h2>
                     
                     <div className="space-y-4">
                       <div>
@@ -323,13 +324,7 @@ const UniversityDetails = () => {
                       
                       <div>
                         <p className="font-semibold">الاعتمادات</p>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {university.accreditations?.map((accreditation, index) => (
-                            <Badge key={index} variant="outline">
-                              {accreditation}
-                            </Badge>
-                          ))}
-                        </div>
+                        <p className="text-gray-600">{university.accreditation}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -422,7 +417,7 @@ const UniversityDetails = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="font-medium">من�� الاحتياجات المالية</p>
+                        <p className="font-medium">منح الاحتياجات المالية</p>
                         <p className="text-gray-600">
                           تتوفر منح للطلاب ذوي الاحتياجات المالية تتراوح بين 10% و30% من الرسوم الدراسية.
                         </p>

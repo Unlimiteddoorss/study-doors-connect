@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
-import ApplicationForm from '@/components/applications/ApplicationForm';
+import StudentApplicationForm from '@/components/applications/StudentApplicationForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
-import { Search, FilterIcon, GraduationCap, Building, Globe, Check, Clock, Plus, FileText, AlertCircle, MessageCircle } from 'lucide-react';
+import { Search, FilterIcon, GraduationCap, Building, Globe, Check, Clock, Plus, FileText, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -19,8 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import ApplicationStatus from '@/components/applications/ApplicationStatus';
 
+// Sample data - in a real app, this would come from an API
 const programs = [
   {
     id: 1,
@@ -124,6 +124,25 @@ const programs = [
   },
 ];
 
+const myApplications = [
+  {
+    id: 101,
+    programId: 1,
+    status: "review",
+    submissionDate: "2025-03-15",
+    notes: "Under review by admissions team",
+    notesAr: "قيد المراجعة من قبل المختصين"
+  },
+  {
+    id: 102,
+    programId: 3,
+    status: "incomplete",
+    submissionDate: "2025-03-10",
+    notes: "Please complete required documents",
+    notesAr: "يرجى استكمال المستندات المطلوبة"
+  }
+];
+
 const StudentApplication = () => {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -133,12 +152,9 @@ const StudentApplication = () => {
   const [activeTab, setActiveTab] = useState('new-application');
   const { toast } = useToast();
   const navigate = useNavigate();
-  const location = useLocation();
   const isRtl = i18n.language === 'ar';
-  const [applications, setApplications] = useState<any[]>([]);
-  const [selectedProgramId, setSelectedProgramId] = useState<number | null>(null);
-  const [selectedProgram, setSelectedProgram] = useState<any>(null);
   
+  // Function to get localized field values
   const getLocalizedValue = (enValue: string, arValue: string) => {
     return i18n.language === 'ar' ? arValue : enValue;
   };
@@ -171,31 +187,14 @@ const StudentApplication = () => {
   };
 
   const handleApplyNow = (programId: number) => {
-    const program = programs.find(p => p.id === programId);
-    if (program) {
-      setSelectedProgramId(programId);
-      setSelectedProgram(program);
-      toast({
-        title: t("application.notifications.applyStart"),
-        description: getLocalizedValue(
-          `You are applying to ${program.title} at ${program.university}`, 
-          `أنت تقوم بالتقديم على ${program.titleAr} في ${program.universityAr}`
-        ),
-      });
-      setActiveTab('new-application');
-    }
+    toast({
+      title: t("application.notifications.applyStart"),
+      description: t("application.notifications.applyStartDesc"),
+    });
+    setActiveTab('new-application');
   };
   
-  const handleContinueApplication = (applicationId: string) => {
-    const appToComplete = applications.find(app => app.id === applicationId);
-    if (appToComplete) {
-      const program = programs.find(p => p.id === appToComplete.programDetails?.programId);
-      if (program) {
-        setSelectedProgramId(program.id);
-        setSelectedProgram(program);
-      }
-    }
-    
+  const handleContinueApplication = (applicationId: number) => {
     toast({
       title: t("application.notifications.continueApplication"),
       description: t("application.notifications.continueApplicationDesc"),
@@ -203,17 +202,17 @@ const StudentApplication = () => {
     setActiveTab('new-application');
   };
   
-  const handleViewApplication = (applicationId: string) => {
+  const handleViewApplication = (applicationId: number) => {
     navigate(`/dashboard/applications/${applicationId}`);
   };
 
   const getStatusBadge = (status: string) => {
     switch(status) {
-      case 'accepted':
+      case 'approved':
         return <Badge className="bg-green-500">{t("application.status.approved")}</Badge>;
       case 'rejected':
         return <Badge className="bg-red-500">{t("application.status.rejected")}</Badge>;
-      case 'reviewing':
+      case 'review':
         return <Badge className="bg-amber-500">{t("application.status.review")}</Badge>;
       case 'incomplete':
         return <Badge className="bg-blue-500">{t("application.status.incomplete")}</Badge>;
@@ -232,47 +231,19 @@ const StudentApplication = () => {
     };
   };
   
+  // Get countries, levels and languages for filters
   const countries = [...new Set(programs.map(p => p.country))];
   const levels = [...new Set(programs.map(p => p.level))];
   const languages = [...new Set(programs.map(p => p.language))];
 
+  // Effect to set the tab from URL params
   useEffect(() => {
-    const storedApplications = localStorage.getItem('studentApplications');
-    if (storedApplications) {
-      setApplications(JSON.parse(storedApplications));
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search);
+    const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
     if (tab && ['new-application', 'browse-programs', 'my-applications'].includes(tab)) {
       setActiveTab(tab);
     }
-    
-    const programId = urlParams.get('programId');
-    if (programId) {
-      const programIdNum = parseInt(programId);
-      setSelectedProgramId(programIdNum);
-      const program = programs.find(p => p.id === programIdNum);
-      if (program) {
-        setSelectedProgram(program);
-        setActiveTab('new-application');
-      }
-    }
-    
-    const universityId = urlParams.get('universityId');
-    if (universityId) {
-      setActiveTab('browse-programs');
-    }
-  }, [location]);
-
-  const handleApplicationSubmitted = () => {
-    const storedApplications = localStorage.getItem('studentApplications');
-    if (storedApplications) {
-      setApplications(JSON.parse(storedApplications));
-    }
-  };
+  }, []);
 
   return (
     <MainLayout>
@@ -291,13 +262,7 @@ const StudentApplication = () => {
             </TabsList>
             
             <TabsContent value="new-application" className="space-y-4">
-              <ApplicationForm 
-                programId={selectedProgramId || undefined}
-                programName={selectedProgram?.titleAr || selectedProgram?.title}
-                universityId={selectedProgram?.universityId}
-                universityName={selectedProgram?.universityAr || selectedProgram?.university}
-                onApplicationSubmitted={handleApplicationSubmitted}
-              />
+              <StudentApplicationForm />
             </TabsContent>
             
             <TabsContent value="browse-programs" className="space-y-4">
@@ -458,15 +423,16 @@ const StudentApplication = () => {
                   <p className="text-unlimited-gray">{t("application.myApplications.subtitle")}</p>
                 </div>
                 
-                {applications.length > 0 ? (
+                {myApplications.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6">
-                    {applications.map((application) => {
+                    {myApplications.map((application) => {
+                      const program = getProgramById(application.programId);
                       return (
                         <Card key={application.id} className="overflow-hidden hover:shadow-lg transition-shadow animate-fade-in">
                           <div className="flex flex-col md:flex-row">
                             <img 
-                              src={application.programDetails?.image || "/placeholder.svg"} 
-                              alt={application.program} 
+                              src={program.image} 
+                              alt={getLocalizedValue(program.title, program.titleAr)} 
                               className="w-full md:w-48 h-36 object-cover"
                             />
                             <div className="flex-1 flex flex-col">
@@ -474,10 +440,10 @@ const StudentApplication = () => {
                                 <div className="flex justify-between items-start">
                                   <div>
                                     <CardTitle className="text-lg">
-                                      {application.program}
+                                      {getLocalizedValue(program.title, program.titleAr)}
                                     </CardTitle>
                                     <CardDescription>
-                                      {application.university}
+                                      {getLocalizedValue(program.university, program.universityAr)}
                                     </CardDescription>
                                   </div>
                                   {getStatusBadge(application.status)}
@@ -488,15 +454,15 @@ const StudentApplication = () => {
                                   <div className="flex items-center text-unlimited-gray">
                                     <Clock className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
                                     <span>
-                                      {isRtl ? `تاريخ التقديم: ${application.date}` : 
-                                             `Submission Date: ${application.date}`}
+                                      {isRtl ? `تاريخ التقديم: ${application.submissionDate}` : 
+                                             `Submission Date: ${application.submissionDate}`}
                                     </span>
                                   </div>
                                   <div className="flex items-center text-unlimited-gray">
                                     <FileText className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
                                     <span>
-                                      {isRtl ? `رقم الطلب: ${application.id}` : 
-                                             `Application ID: ${application.id}`}
+                                      {isRtl ? `ملاحظات: ${application.notesAr}` : 
+                                             `Notes: ${application.notes}`}
                                     </span>
                                   </div>
                                 </div>
@@ -511,22 +477,12 @@ const StudentApplication = () => {
                                     {t("application.myApplications.completeApplication")}
                                   </Button>
                                 ) : (
-                                  <>
-                                    <Button 
-                                      onClick={() => handleViewApplication(application.id)}
-                                      variant="outline"
-                                    >
-                                      <FileText className="h-4 w-4 ml-2" />
-                                      {t("application.myApplications.viewDetails")}
-                                    </Button>
-                                    
-                                    <Button asChild>
-                                      <Link to={`/messages?application=${application.id}`}>
-                                        <MessageCircle className="h-4 w-4 ml-2" />
-                                        {t("application.myApplications.contactAdvisor")}
-                                      </Link>
-                                    </Button>
-                                  </>
+                                  <Button 
+                                    onClick={() => handleViewApplication(application.id)}
+                                    variant="outline"
+                                  >
+                                    {t("application.myApplications.viewDetails")}
+                                  </Button>
                                 )}
                               </CardFooter>
                             </div>
