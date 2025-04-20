@@ -1,13 +1,12 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AdminPageActions from '@/components/admin/AdminPageActions';
+import { AdminPageActions } from '@/components/admin/AdminPageActions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import TablePagination from '@/components/admin/TablePagination';
-import TableSkeleton from '@/components/admin/TableSkeleton';
+import { TablePagination } from '@/components/admin/TablePagination';
+import { TableSkeleton } from '@/components/admin/TableSkeleton';
 import { Check, Clock, FileText, Search, User, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -71,7 +70,6 @@ const ManageApplications = () => {
   const rowsPerPage = 10;
   const totalPages = Math.ceil(filteredApplications.length / rowsPerPage);
 
-  // Load applications from localStorage
   useEffect(() => {
     const loadApplications = () => {
       try {
@@ -88,11 +86,9 @@ const ManageApplications = () => {
       }
     };
 
-    // Simulate API call delay
     setTimeout(loadApplications, 800);
   }, []);
 
-  // Filter applications when search query or status filter changes
   useEffect(() => {
     const filtered = applications.filter(application => {
       const matchesSearch = 
@@ -107,7 +103,7 @@ const ManageApplications = () => {
     });
     
     setFilteredApplications(filtered);
-    setCurrentPage(1); // Reset to first page when filters change
+    setCurrentPage(1);
   }, [searchQuery, statusFilter, applications]);
 
   const handleAddNote = () => {
@@ -116,10 +112,8 @@ const ManageApplications = () => {
     if (!selectedApplication) return;
     
     setTimeout(() => {
-      // Update in local storage
       const updatedApplications = applications.map(app => {
         if (app.id === selectedApplication.id) {
-          // Add note to application
           const appData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
           const appIndex = appData.findIndex((a: any) => a.id === selectedApplication.id);
           
@@ -162,10 +156,8 @@ const ManageApplications = () => {
     if (!selectedApplication || !newStatus) return;
     
     setTimeout(() => {
-      // Update in both admin and student storage
       const updatedApplications = applications.map(app => {
         if (app.id === selectedApplication.id) {
-          // Update admin applications
           const adminAppData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
           const adminAppIndex = adminAppData.findIndex((a: any) => a.id === selectedApplication.id);
           
@@ -175,7 +167,6 @@ const ManageApplications = () => {
             localStorage.setItem('adminApplications', JSON.stringify(adminAppData));
           }
           
-          // Update student applications
           const studentAppData = JSON.parse(localStorage.getItem('studentApplications') || '[]');
           const studentAppIndex = studentAppData.findIndex((a: any) => a.id === selectedApplication.id);
           
@@ -212,16 +203,13 @@ const ManageApplications = () => {
     if (!selectedApplication) return;
     
     setTimeout(() => {
-      // Remove from both admin and student storage
       const updatedApplications = applications.filter(app => app.id !== selectedApplication.id);
       setApplications(updatedApplications);
       
-      // Update admin applications
       const adminAppData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
       const filteredAdminApps = adminAppData.filter((a: any) => a.id !== selectedApplication.id);
       localStorage.setItem('adminApplications', JSON.stringify(filteredAdminApps));
       
-      // Update student applications
       const studentAppData = JSON.parse(localStorage.getItem('studentApplications') || '[]');
       const filteredStudentApps = studentAppData.filter((a: any) => a.id !== selectedApplication.id);
       localStorage.setItem('studentApplications', JSON.stringify(filteredStudentApps));
@@ -239,7 +227,6 @@ const ManageApplications = () => {
   const handleToggleImportant = (application: Application) => {
     const updatedApplications = applications.map(app => {
       if (app.id === application.id) {
-        // Update in localStorage
         const appData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
         const appIndex = appData.findIndex((a: any) => a.id === application.id);
         
@@ -269,7 +256,6 @@ const ManageApplications = () => {
     
     const updatedApplications = applications.map(app => {
       if (app.id === application.id) {
-        // Update in localStorage
         const appData = JSON.parse(localStorage.getItem('adminApplications') || '[]');
         const appIndex = appData.findIndex((a: any) => a.id === application.id);
         
@@ -312,17 +298,14 @@ const ManageApplications = () => {
   };
 
   const openApplicationDetails = (application: Application) => {
-    // Mark as read first
     handleMarkAsRead(application);
     
-    // Navigate to application details or perform action
     toast({
       title: "عرض تفاصيل الطلب",
       description: `مشاهدة تفاصيل الطلب ${application.id}`,
     });
     
-    // In a real application, we would navigate to a details page
-    // navigate(`/admin/applications/${application.id}`);
+    navigate(`/admin/applications/${application.id}`);
   };
 
   const displayedApplications = filteredApplications.slice(
@@ -476,7 +459,6 @@ const ManageApplications = () => {
         )}
       </div>
       
-      {/* Add Note Dialog */}
       <FormDialog
         open={noteDialog}
         onOpenChange={setNoteDialog}
@@ -495,7 +477,6 @@ const ManageApplications = () => {
         />
       </FormDialog>
       
-      {/* Update Status Dialog */}
       <FormDialog
         open={statusDialog}
         onOpenChange={setStatusDialog}
@@ -519,17 +500,16 @@ const ManageApplications = () => {
         </Select>
       </FormDialog>
       
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        open={deleteDialog}
-        onOpenChange={setDeleteDialog}
+        isOpen={deleteDialog}
+        onClose={() => setDeleteDialog(false)}
+        onConfirm={handleDeleteApplication}
         title="حذف الطلب"
         description={`هل أنت متأكد من حذف الطلب رقم ${selectedApplication?.id || ''}؟ هذا الإجراء غير قابل للتراجع.`}
-        onConfirm={handleDeleteApplication}
         confirmLabel="حذف"
         cancelLabel="إلغاء"
         isLoading={isSubmitting}
-        variant="destructive"
+        destructive={true}
       />
     </div>
   );
