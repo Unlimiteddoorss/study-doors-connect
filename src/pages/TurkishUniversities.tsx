@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -10,7 +9,6 @@ import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import { useToast } from '@/hooks/use-toast';
 import { turkishUniversities } from '@/data/programsData';
 
-// ترجمة أسماء المدن والدول إلى العربية
 const cityTranslations: Record<string, string> = {
   'Turkey': 'تركيا',
   'Istanbul': 'إسطنبول',
@@ -34,24 +32,23 @@ const cityTranslations: Record<string, string> = {
   'Famagusta': 'فماغوستا',
 };
 
-// Adapt our universities data to match the University interface
 const adaptedUniversities = turkishUniversities.map(uni => ({
   id: uni.id,
   name: uni.name,
-  nameAr: uni.name, // Use name as nameAr since it doesn't exist
+  nameAr: uni.name,
   location: uni.location,
   country: 'Turkey',
-  city: uni.location, // Use location as city
+  city: uni.location,
   type: uni.type as 'Public' | 'Private',
-  founded: String(uni.founded), // Convert to string as per University interface
+  founded: String(uni.founded),
   programs: uni.programs,
-  students: 5000 + Math.floor(Math.random() * 20000), // Generate random student number
-  ranking: Math.floor(Math.random() * 1000) + 1, // Generate random ranking
+  students: 5000 + Math.floor(Math.random() * 20000),
+  ranking: Math.floor(Math.random() * 1000) + 1,
   fees: uni.fees,
   image: uni.image,
   languages: ['Turkish', 'English'],
   accreditations: [uni.accreditation],
-  isFeatured: Math.random() > 0.7 // Randomly set some universities as featured
+  isFeatured: Math.random() > 0.7
 }));
 
 const TurkishUniversities = () => {
@@ -66,14 +63,11 @@ const TurkishUniversities = () => {
   
   const universitiesPerPage = 9;
 
-  // Get unique cities
   const cities = Array.from(new Set(adaptedUniversities.map(uni => uni.city)));
 
-  // Effect to filter universities
   useEffect(() => {
     let result = [...adaptedUniversities];
     
-    // Apply search filter
     if (searchTerm) {
       result = result.filter(
         uni =>
@@ -82,20 +76,16 @@ const TurkishUniversities = () => {
       );
     }
     
-    // Apply city filter
     if (selectedCity !== 'all') {
       result = result.filter(uni => uni.city === selectedCity);
     }
     
-    // Apply type filter
     if (selectedType !== 'all') {
       result = result.filter(uni => uni.type === selectedType);
     }
     
-    // Apply sorting
     switch (sortOrder) {
       case "ranking":
-        // Sort by ranking, universities without ranking at the end
         result = [...result].sort((a, b) => {
           if (a.ranking && b.ranking) return a.ranking - b.ranking;
           if (!a.ranking && b.ranking) return 1;
@@ -117,7 +107,7 @@ const TurkishUniversities = () => {
         result = [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
         break;
       case "programs":
-        result = [...result].sort((a, b) => b.programs - a.programs); // Sort by program count (highest first)
+        result = [...result].sort((a, b) => b.programs - a.programs);
         break;
       default:
         break;
@@ -157,13 +147,11 @@ const TurkishUniversities = () => {
     });
   };
 
-  // حساب الصفحات
   const indexOfLastUniversity = currentPage * universitiesPerPage;
   const indexOfFirstUniversity = indexOfLastUniversity - universitiesPerPage;
   const currentUniversities = filteredUniversities.slice(indexOfFirstUniversity, indexOfLastUniversity);
   const totalPages = Math.ceil(filteredUniversities.length / universitiesPerPage);
 
-  // التنقل بين الصفحات
   const paginate = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
@@ -179,7 +167,6 @@ const TurkishUniversities = () => {
           subtitle="استكشف أفضل الجامعات التركية الخاصة وتعرف على برامجها وميزاتها"
         />
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-white shadow-md rounded-lg p-4 text-center">
             <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.length}</div>
@@ -199,7 +186,6 @@ const TurkishUniversities = () => {
           </div>
         </div>
 
-        {/* Search Component */}
         <UniversitySearch 
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -213,7 +199,6 @@ const TurkishUniversities = () => {
           countryTranslations={cityTranslations}
         />
 
-        {/* Results info and Filters */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
             <p className="text-unlimited-gray">
@@ -237,7 +222,6 @@ const TurkishUniversities = () => {
           </div>
         </div>
 
-        {/* Universities Grid */}
         <UniversitiesGrid 
           universities={currentUniversities}
           currentPage={currentPage}
@@ -247,7 +231,6 @@ const TurkishUniversities = () => {
           countryTranslations={cityTranslations}
         />
 
-        {/* Information Section */}
         <div className="mt-16 bg-white shadow-md rounded-lg p-6">
           <div className="flex items-center gap-2 mb-4">
             <Info className="h-5 w-5 text-unlimited-blue" />
@@ -262,7 +245,7 @@ const TurkishUniversities = () => {
               تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
             </p>
             <p>
-              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
+              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجي�� فرص عمل واسعة في مختلف أنحاء العالم.
             </p>
           </div>
 

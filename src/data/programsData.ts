@@ -1,5 +1,30 @@
 import { Program } from '../components/programs/ProgramCard';
-import { University } from '../components/universities/UniversityCard';
+
+export interface University {
+  id: number;
+  name: string;
+  nameAr?: string;
+  location: string;
+  country: string;
+  city?: string;
+  district?: string;
+  type?: string;
+  image?: string;
+  programs?: number;
+  founded?: string;
+  students?: number;
+  ranking?: number;
+  localRanking?: number;
+  fees?: string;
+  website?: string;
+  accreditation?: string;
+  accreditations?: string[];
+  languages?: string[];
+  isFeatured?: boolean;
+  description?: string;
+  campuses?: string[];
+  faculties?: string[];
+}
 
 // Turkish universities data with accurate program counts
 export const turkishUniversities: University[] = [

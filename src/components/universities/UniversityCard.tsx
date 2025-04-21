@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,17 +10,24 @@ export interface University {
   nameAr?: string;
   location: string;
   country: string;
-  city: string;
-  type: 'Public' | 'Private';
-  founded: string;
-  programs: number;
-  students: number;
+  city?: string;
+  district?: string;
+  type?: string;
+  image?: string;
+  programs?: number;
+  founded?: string;
+  students?: number;
   ranking?: number;
-  fees: string;
-  image: string;
-  languages?: string[];
+  localRanking?: number;
+  fees?: string;
+  website?: string;
+  accreditation?: string;
   accreditations?: string[];
+  languages?: string[];
   isFeatured?: boolean;
+  description?: string;
+  campuses?: string[];
+  faculties?: string[];
 }
 
 interface UniversityCardProps {
