@@ -1,15 +1,19 @@
+
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '@/components/layout/MainLayout';
 import { turkishUniversities, University } from '@/data/programsData';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 const UniversityDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Find the university by ID
   const university: University | undefined = turkishUniversities.find(
@@ -25,6 +29,16 @@ const UniversityDetails = () => {
       </MainLayout>
     );
   }
+
+  const handleApplyNow = () => {
+    // Navigate to the apply page with university ID as a parameter
+    navigate(`/apply?university=${university.id}`);
+    
+    toast({
+      title: t('universityDetails.applyStarted'),
+      description: t('universityDetails.applyStartedDesc', { university: university.name }),
+    });
+  };
 
   return (
     <MainLayout>
@@ -109,7 +123,10 @@ const UniversityDetails = () => {
               </div>
             </div>
 
-            <Button className="mt-6 bg-unlimited-blue hover:bg-unlimited-dark-blue text-white">
+            <Button 
+              onClick={handleApplyNow}
+              className="mt-6 bg-unlimited-blue hover:bg-unlimited-dark-blue text-white"
+            >
               {t('universityDetails.applyNow')}
             </Button>
           </div>

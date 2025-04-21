@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Check, ArrowLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
@@ -21,6 +22,7 @@ const StudentApplicationFormSubmit = ({
 }: StudentApplicationFormSubmitProps) => {
   const { toast } = useToast();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const handleSubmit = () => {
     if (!canSubmit) {
@@ -31,7 +33,16 @@ const StudentApplicationFormSubmit = ({
       });
       return;
     }
+    
+    // Log submission attempt for debugging
+    console.log('Submitting student application form');
+    
     onSubmit();
+    
+    if (isLastStep) {
+      // After successful submission, we'll redirect to dashboard in ApplicationSubmissionHandler
+      console.log('Final step submission completed');
+    }
   };
 
   return (
@@ -66,7 +77,7 @@ const StudentApplicationFormSubmit = ({
       ) : (
         <Button
           type="button"
-          onClick={onSubmit}
+          onClick={handleSubmit}
           disabled={isSubmitting}
           className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1"
         >

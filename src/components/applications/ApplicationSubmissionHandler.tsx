@@ -51,17 +51,24 @@ const ApplicationSubmissionHandler = ({
     const appNumber = `APP-${randomNumber}`;
     setApplicationNumber(appNumber);
     
-    // Create the application object
+    // Get current timestamp for submission date
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    // Create the application object with more details
     const newApplication = {
       id: randomNumber,
       applicationNumber: appNumber,
-      programId: formData.programId || formData.program?.id || 1,
+      programId: formData.programId || formData.program?.id || formData.preferredProgram || 1,
       status: "review",
-      submissionDate: new Date().toISOString().split('T')[0],
+      submissionDate: currentDate,
       studentData: formData,
       notes: "قيد المراجعة من قبل المختصين",
-      notesAr: "قيد المراجعة من قبل المختصين"
+      notesAr: "قيد المراجعة من قبل المختصين",
+      lastUpdate: currentDate,
+      university: formData.preferredUniversity || "unknown"
     };
+    
+    console.log('Submitting application:', newApplication);
     
     // Add the application to the list and save back to localStorage
     existingApplications.push(newApplication);

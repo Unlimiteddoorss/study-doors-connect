@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,7 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
         <h3 className="font-bold text-xl mb-2">{university.nameAr || university.name}</h3>
         <div className="flex items-center text-unlimited-gray">
           <MapPin className="h-4 w-4 ml-2" />
-          <span>{translateLocation(university.city)}، {translateLocation(university.country)}</span>
+          <span>{translateLocation(university.city || '')}، {translateLocation(university.country)}</span>
         </div>
       </CardHeader>
       

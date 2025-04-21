@@ -1,10 +1,12 @@
+
 import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye } from 'lucide-react';
+import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye, Clock, Award } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface Application {
   id: number;
@@ -15,22 +17,51 @@ interface Application {
   studentData: any;
   notes: string;
   notesAr: string;
+  university?: string;
 }
 
 const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState<Application[]>([]);
+  const { t, i18n } = useTranslation();
   
   useEffect(() => {
-    const storedApplications = localStorage.getItem('studentApplications');
-    if (storedApplications) {
-      const parsedApplications: Application[] = JSON.parse(storedApplications);
-      const sortedApplications = [...parsedApplications].sort((a, b) => 
-        new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
-      ).slice(0, 3);
-      
-      setRecentApplications(sortedApplications);
-      console.log('Loaded recent applications:', sortedApplications);
-    }
+    // Fetch applications from localStorage when component mounts
+    const fetchApplications = () => {
+      const storedApplications = localStorage.getItem('studentApplications');
+      if (storedApplications) {
+        try {
+          const parsedApplications: Application[] = JSON.parse(storedApplications);
+          const sortedApplications = [...parsedApplications].sort((a, b) => 
+            new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
+          ).slice(0, 3);
+          
+          setRecentApplications(sortedApplications);
+          console.log('Dashboard: Loaded recent applications:', sortedApplications);
+        } catch (error) {
+          console.error('Error parsing applications:', error);
+          setRecentApplications([]);
+        }
+      } else {
+        console.log('No applications found in localStorage');
+        setRecentApplications([]);
+      }
+    };
+
+    fetchApplications();
+    
+    // Add event listener for localStorage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'studentApplications') {
+        fetchApplications();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
   
   const getProgramName = (programId: number) => {
@@ -39,22 +70,32 @@ const Dashboard = () => {
       2: 'ماجستير علوم الحاسوب',
       3: 'دكتوراه الهندسة المدنية',
       4: 'بكالوريوس هندسة الحاسوب',
-      5: 'ماجستير إدارة الأعمال'
+      5: 'ماجستير إدارة الأعمال',
+      'computer_science': 'علوم الحاسوب',
+      'medicine': 'الطب البشري',
+      'engineering': 'الهندسة',
+      'business': 'إدارة الأعمال',
+      'humanities': 'العلوم الإنسانية'
     };
     
     return programNames[programId] || 'برنامج غير محدد';
   };
   
-  const getUniversityName = (programId: number) => {
-    const universityNames: Record<number, string> = {
+  const getUniversityName = (universityId: string | number) => {
+    const universityNames: Record<string, string> = {
       1: 'جامعة أوزيجين',
       2: 'جامعة فاتح سلطان محمد',
       3: 'جامعة المجر للتكنولوجيا',
       4: 'جامعة باهتشه شهير',
-      5: 'جامعة اسطنبول'
+      5: 'جامعة اسطنبول',
+      'istanbul': 'جامعة اسطنبول',
+      'marmara': 'جامعة مرمرة',
+      'ankara': 'جامعة أنقرة',
+      'bogazici': 'جامعة بوغازيتشي',
+      'yildiz': 'جامعة يلدز التقنية',
     };
     
-    return universityNames[programId] || 'جامعة غير محددة';
+    return universityNames[universityId] || 'جامعة غير محددة';
   };
   
   const getStatusLabel = (status: string): string => {
@@ -133,8 +174,12 @@ const Dashboard = () => {
                             <FileText className="h-5 w-5 text-unlimited-blue" />
                           </div>
                           <div>
-                            <h4 className="font-medium">{getProgramName(app.programId)}</h4>
-                            <p className="text-sm text-unlimited-gray">{getUniversityName(app.programId)}</p>
+                            <h4 className="font-medium">
+                              {getProgramName(app.programId)}
+                            </h4>
+                            <p className="text-sm text-unlimited-gray">
+                              {getUniversityName(app.university || app.programId)}
+                            </p>
                             <p className="text-xs text-unlimited-gray mt-1">رقم الطلب: {app.applicationNumber}</p>
                           </div>
                         </div>
@@ -265,7 +310,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <h4 className="font-medium">تأكيد موعد المقابلة</h4>
-                    <p className="text-sm text-unlimited-gray">تم الر�� بواسطة: سارة المستشارة</p>
+                    <p className="text-sm text-unlimited-gray">تم الرد بواسطة: سارة المستشارة</p>
                     <span className="text-xs text-unlimited-gray mt-1">منذ أسبوع</span>
                   </div>
                 </div>
