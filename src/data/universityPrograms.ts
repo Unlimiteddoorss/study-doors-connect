@@ -1,10 +1,11 @@
+
 import { University } from '@/components/universities/UniversityCard';
 import { gelisimPrograms } from './universities/gelisimPrograms';
 
 // نموذج لبرنامج دراسي
 export interface UniversityProgram {
   id: number;
-  universityId: number;
+  universityId?: number;
   name: string;
   nameAr: string;
   degree: 'Bachelor' | 'Master' | 'PhD' | 'Diploma' | 'Vocational School';
@@ -14,6 +15,7 @@ export interface UniversityProgram {
   discountedFee: number;
   depositFee: number;
   prepFee: number;
+  cashPaymentFee?: number;
   available: boolean;
   description?: string;
   duration?: string;
@@ -1647,8 +1649,7 @@ export const bahcesehirPrograms: UniversityProgram[] = [
 
 // قائمة بجميع برامج الجامعات المتوفرة
 export const allUniversityPrograms: UniversityProgram[] = [
-  ...bahcesehirPrograms,
-  // يمكن إضافة برامج جامعات أخرى هنا
+  ...bahcesehirPrograms
 ];
 
 // وظيفة للحصول على برامج جامعة معينة
@@ -1656,6 +1657,8 @@ export const getUniversityPrograms = (universityId: number) => {
   switch(universityId) {
     case 5: // Gelisim University ID
       return gelisimPrograms;
+    case 26: // Bahcesehir University ID
+      return bahcesehirPrograms;
     default:
       return [];
   }
