@@ -1,5 +1,22 @@
+
 import { Program } from '@/components/programs/ProgramCard';
 import { University } from '@/components/universities/UniversityCard';
+
+// Export the countries, degrees and specialties that are used across the app
+export const availableCountries = [
+  'Turkey', 'United Kingdom', 'Germany', 'United States', 'Malaysia', 
+  'Ireland', 'Spain', 'Australia', 'Egypt', 'Azerbaijan', 
+  'Poland', 'Czech Republic', 'Malta', 'Montenegro', 'Macedonia', 
+  'Kosovo', 'Bosnia and Herzegovina', 'Serbia', 'Scotland', 'Northern Cyprus',
+  'Georgia', 'United Arab Emirates', 'Hungary'
+];
+
+export const degreeTypes = ['Bachelor', 'Master', 'Doctorate'];
+
+export const programSpecialties = [
+  'Business', 'Engineering', 'Medicine', 'Computer Science', 
+  'Arts', 'Law', 'Education', 'Science', 'Social Sciences'
+];
 
 export const dummyPrograms: Program[] = [
   {
