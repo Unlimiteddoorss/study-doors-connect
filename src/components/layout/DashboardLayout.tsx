@@ -1,5 +1,5 @@
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
 import Sidebar from '@/components/dashboard/Sidebar';
@@ -31,16 +31,6 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
       { label: t('admin.breadcrumbs.home'), href: '/' },
       { label: t('admin.breadcrumbs.dashboard'), href: '/dashboard' },
       { label: t('application.myApplications.title'), href: '/dashboard/applications' },
-    ];
-  } else if (pathname.startsWith('/dashboard/applications/')) {
-    // For individual application details
-    const appId = pathname.split('/').pop();
-    title = `${t('application.applicationDetails')} #${appId}`;
-    breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.dashboard'), href: '/dashboard' },
-      { label: t('application.myApplications.title'), href: '/dashboard/applications' },
-      { label: `${t('application.applicationDetails')} #${appId}`, href: pathname },
     ];
   } else if (pathname === '/admin') {
     title = t('admin.breadcrumbs.adminDashboard');
@@ -84,29 +74,7 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
       { label: t('admin.breadcrumbs.universities'), href: '/admin/universities' },
     ];
   }
-  
-  // Custom event for real-time application updates
-  useEffect(() => {
-    const updateApplicationData = () => {
-      // Dispatch a custom event that components can listen for
-      const event = new CustomEvent('applicationDataUpdated');
-      window.dispatchEvent(event);
-    };
-    
-    // Add event listener for storage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'studentApplications') {
-        updateApplicationData();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Clean up
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
+  // Add more conditions for different paths
 
   return (
     <div className="flex h-screen bg-gray-50">

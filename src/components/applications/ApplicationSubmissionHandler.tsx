@@ -32,54 +32,18 @@ const ApplicationSubmissionHandler = ({
   const navigate = useNavigate();
 
   const handleFormSubmit = () => {
-    if (!formData) {
-      toast({
-        title: "خطأ في البيانات",
-        description: "يرجى التأكد من إدخال جميع البيانات المطلوبة",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     
-    // Save application data to localStorage to persist it
-    const existingApplications = JSON.parse(localStorage.getItem('studentApplications') || '[]');
-    
-    // Generate a random application number
-    const randomNumber = Math.floor(100000 + Math.random() * 900000);
-    const appNumber = `APP-${randomNumber}`;
-    setApplicationNumber(appNumber);
-    
-    // Get current timestamp for submission date
-    const currentDate = new Date().toISOString().split('T')[0];
-    
-    // Create the application object with more details
-    const newApplication = {
-      id: randomNumber,
-      applicationNumber: appNumber,
-      programId: formData.programId || formData.program?.id || formData.preferredProgram || 1,
-      status: "review",
-      submissionDate: currentDate,
-      studentData: formData,
-      notes: "قيد المراجعة من قبل المختصين",
-      notesAr: "قيد المراجعة من قبل المختصين",
-      lastUpdate: currentDate,
-      university: formData.preferredUniversity || "unknown"
-    };
-    
-    console.log('Submitting application:', newApplication);
-    
-    // Add the application to the list and save back to localStorage
-    existingApplications.push(newApplication);
-    localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
-    
-    // Log for debugging
-    console.log('Application submitted:', newApplication);
-    console.log('All applications:', existingApplications);
-    
-    // Simulate API delay for better UX
+    // Simulate API call with timeout
     setTimeout(() => {
+      // Generate a random application number
+      const randomNumber = Math.floor(100000 + Math.random() * 900000);
+      const appNumber = `APP-${randomNumber}`;
+      setApplicationNumber(appNumber);
+      
+      // Here you would normally save the data to a database
+      console.log('Submitting application data:', formData);
+      
       // Show success message
       toast({
         title: "تم تقديم الطلب بنجاح",

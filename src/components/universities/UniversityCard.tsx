@@ -11,24 +11,17 @@ export interface University {
   nameAr?: string;
   location: string;
   country: string;
-  city?: string;
-  district?: string;
-  type?: string;
-  image?: string;
-  programs?: number;
-  founded?: string;
-  students?: number;
+  city: string;
+  type: 'Public' | 'Private';
+  founded: string;
+  programs: number;
+  students: number;
   ranking?: number;
-  localRanking?: number;
-  fees?: string;
-  website?: string;
-  accreditation?: string;
-  accreditations?: string[];
+  fees: string;
+  image: string;
   languages?: string[];
+  accreditations?: string[];
   isFeatured?: boolean;
-  description?: string;
-  campuses?: string[];
-  faculties?: string[];
 }
 
 interface UniversityCardProps {
@@ -74,7 +67,7 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
         <h3 className="font-bold text-xl mb-2">{university.nameAr || university.name}</h3>
         <div className="flex items-center text-unlimited-gray">
           <MapPin className="h-4 w-4 ml-2" />
-          <span>{translateLocation(university.city || '')}، {translateLocation(university.country)}</span>
+          <span>{translateLocation(university.city)}، {translateLocation(university.country)}</span>
         </div>
       </CardHeader>
       

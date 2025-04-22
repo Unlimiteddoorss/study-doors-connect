@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Sample data - in a real app, this would come from an API
 const programs = [
   {
     id: 1,
@@ -122,6 +124,25 @@ const programs = [
   },
 ];
 
+const myApplications = [
+  {
+    id: 101,
+    programId: 1,
+    status: "review",
+    submissionDate: "2025-03-15",
+    notes: "Under review by admissions team",
+    notesAr: "قيد المراجعة من قبل المختصين"
+  },
+  {
+    id: 102,
+    programId: 3,
+    status: "incomplete",
+    submissionDate: "2025-03-10",
+    notes: "Please complete required documents",
+    notesAr: "يرجى استكمال المستندات المطلوبة"
+  }
+];
+
 const StudentApplication = () => {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -132,22 +153,8 @@ const StudentApplication = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const isRtl = i18n.language === 'ar';
-  const [myApplications, setMyApplications] = useState<any[]>([]);
-
-  useEffect(() => {
-    const storedApplications = localStorage.getItem('studentApplications');
-    if (storedApplications) {
-      try {
-        setMyApplications(JSON.parse(storedApplications));
-        console.log('Loaded my applications:', JSON.parse(storedApplications));
-      } catch (err) {
-        setMyApplications([]);
-      }
-    } else {
-      setMyApplications([]);
-    }
-  }, [activeTab]);
-
+  
+  // Function to get localized field values
   const getLocalizedValue = (enValue: string, arValue: string) => {
     return i18n.language === 'ar' ? arValue : enValue;
   };
@@ -223,11 +230,13 @@ const StudentApplication = () => {
       image: "/placeholder.svg"
     };
   };
-
+  
+  // Get countries, levels and languages for filters
   const countries = [...new Set(programs.map(p => p.country))];
   const levels = [...new Set(programs.map(p => p.level))];
   const languages = [...new Set(programs.map(p => p.language))];
 
+  // Effect to set the tab from URL params
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
@@ -243,6 +252,7 @@ const StudentApplication = () => {
           title={t("application.title")}
           subtitle={t("application.subtitle")}
         />
+        
         <div className="max-w-7xl mx-auto mt-10">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <TabsList className="grid w-full md:w-[600px] grid-cols-3">
@@ -412,16 +422,17 @@ const StudentApplication = () => {
                   <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t("application.myApplications.title")}</h2>
                   <p className="text-unlimited-gray">{t("application.myApplications.subtitle")}</p>
                 </div>
+                
                 {myApplications.length > 0 ? (
                   <div className="grid grid-cols-1 gap-6">
-                    {myApplications.map((application: any) => {
+                    {myApplications.map((application) => {
                       const program = getProgramById(application.programId);
                       return (
                         <Card key={application.id} className="overflow-hidden hover:shadow-lg transition-shadow animate-fade-in">
                           <div className="flex flex-col md:flex-row">
-                            <img
-                              src={program.image}
-                              alt={getLocalizedValue(program.title, program.titleAr)}
+                            <img 
+                              src={program.image} 
+                              alt={getLocalizedValue(program.title, program.titleAr)} 
                               className="w-full md:w-48 h-36 object-cover"
                             />
                             <div className="flex-1 flex flex-col">
@@ -443,22 +454,22 @@ const StudentApplication = () => {
                                   <div className="flex items-center text-unlimited-gray">
                                     <Clock className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
                                     <span>
-                                      {isRtl ? `تاريخ التقديم: ${application.submissionDate}` :
-                                        `Submission Date: ${application.submissionDate}`}
+                                      {isRtl ? `تاريخ التقديم: ${application.submissionDate}` : 
+                                             `Submission Date: ${application.submissionDate}`}
                                     </span>
                                   </div>
                                   <div className="flex items-center text-unlimited-gray">
                                     <FileText className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
                                     <span>
-                                      {isRtl ? `ملاحظات: ${application.notesAr ?? ''}` :
-                                        `Notes: ${application.notes ?? ''}`}
+                                      {isRtl ? `ملاحظات: ${application.notesAr}` : 
+                                             `Notes: ${application.notes}`}
                                     </span>
                                   </div>
                                 </div>
                               </CardContent>
                               <CardFooter className="pt-0 flex flex-wrap gap-2 justify-end">
                                 {application.status === 'incomplete' ? (
-                                  <Button
+                                  <Button 
                                     onClick={() => handleContinueApplication(application.id)}
                                     variant="default"
                                     className="hover-scale"
@@ -466,7 +477,7 @@ const StudentApplication = () => {
                                     {t("application.myApplications.completeApplication")}
                                   </Button>
                                 ) : (
-                                  <Button
+                                  <Button 
                                     onClick={() => handleViewApplication(application.id)}
                                     variant="outline"
                                   >
@@ -485,8 +496,8 @@ const StudentApplication = () => {
                     <FileText className="h-12 w-12 mx-auto mb-4 text-unlimited-blue" />
                     <h3 className="text-xl font-medium mb-2">{t("application.myApplications.empty.title")}</h3>
                     <p>{t("application.myApplications.empty.description")}</p>
-                    <Button
-                      className="mt-4 hover-scale"
+                    <Button 
+                      className="mt-4 hover-scale" 
                       onClick={() => setActiveTab('browse-programs')}
                     >
                       {t("application.myApplications.empty.browsePrograms")}

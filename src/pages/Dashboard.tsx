@@ -1,124 +1,38 @@
 
-import { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye, Clock, Award } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-
-interface Application {
-  id: number;
-  applicationNumber: string;
-  programId: number;
-  status: string;
-  submissionDate: string;
-  studentData: any;
-  notes: string;
-  notesAr: string;
-  university?: string;
-}
+import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye } from 'lucide-react';
 
 const Dashboard = () => {
-  const [recentApplications, setRecentApplications] = useState<Application[]>([]);
-  const { t, i18n } = useTranslation();
-  
-  useEffect(() => {
-    // Fetch applications from localStorage when component mounts
-    const fetchApplications = () => {
-      const storedApplications = localStorage.getItem('studentApplications');
-      if (storedApplications) {
-        try {
-          const parsedApplications: Application[] = JSON.parse(storedApplications);
-          const sortedApplications = [...parsedApplications].sort((a, b) => 
-            new Date(b.submissionDate).getTime() - new Date(a.submissionDate).getTime()
-          ).slice(0, 3);
-          
-          setRecentApplications(sortedApplications);
-          console.log('Dashboard: Loaded recent applications:', sortedApplications);
-        } catch (error) {
-          console.error('Error parsing applications:', error);
-          setRecentApplications([]);
-        }
-      } else {
-        console.log('No applications found in localStorage');
-        setRecentApplications([]);
-      }
-    };
-
-    fetchApplications();
-    
-    // Add event listener for localStorage changes
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'studentApplications') {
-        fetchApplications();
-      }
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Clean up
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-  
-  const getProgramName = (programId: number) => {
-    const programNames: Record<number, string> = {
-      1: 'بكالوريوس إدارة الأعمال',
-      2: 'ماجستير علوم الحاسوب',
-      3: 'دكتوراه الهندسة المدنية',
-      4: 'بكالوريوس هندسة الحاسوب',
-      5: 'ماجستير إدارة الأعمال',
-      'computer_science': 'علوم الحاسوب',
-      'medicine': 'الطب البشري',
-      'engineering': 'الهندسة',
-      'business': 'إدارة الأعمال',
-      'humanities': 'العلوم الإنسانية'
-    };
-    
-    return programNames[programId] || 'برنامج غير محدد';
-  };
-  
-  const getUniversityName = (universityId: string | number) => {
-    const universityNames: Record<string, string> = {
-      1: 'جامعة أوزيجين',
-      2: 'جامعة فاتح سلطان محمد',
-      3: 'جامعة المجر للتكنولوجيا',
-      4: 'جامعة باهتشه شهير',
-      5: 'جامعة اسطنبول',
-      'istanbul': 'جامعة اسطنبول',
-      'marmara': 'جامعة مرمرة',
-      'ankara': 'جامعة أنقرة',
-      'bogazici': 'جامعة بوغازيتشي',
-      'yildiz': 'جامعة يلدز التقنية',
-    };
-    
-    return universityNames[universityId] || 'جامعة غير محددة';
-  };
-  
-  const getStatusLabel = (status: string): string => {
-    const statusMap: Record<string, string> = {
-      pending: 'قيد الانتظار',
-      review: 'قيد المراجعة',
-      approved: 'مقبول',
-      rejected: 'مرفوض',
-      documents: 'بانتظار المستندات'
-    };
-    return statusMap[status] || 'قيد المعالجة';
-  };
-  
-  const getStatusColor = (status: string): string => {
-    const statusColors: Record<string, string> = {
-      pending: 'text-gray-600 bg-gray-100',
-      review: 'text-yellow-600 bg-yellow-100',
-      approved: 'text-green-600 bg-green-100',
-      rejected: 'text-red-600 bg-red-100',
-      documents: 'text-blue-600 bg-blue-100'
-    };
-    return statusColors[status] || 'text-gray-600 bg-gray-100';
-  };
+  const recentApplications = [
+    {
+      id: 1,
+      program: 'بكالوريوس إدارة الأعمال',
+      university: 'جامعة أوزيجين',
+      status: 'مقبول',
+      date: '15/04/2025',
+      statusColor: 'text-green-600 bg-green-100',
+    },
+    {
+      id: 2,
+      program: 'ماجستير علوم الحاسوب',
+      university: 'جامعة فاتح سلطان محمد',
+      status: 'قيد المراجعة',
+      date: '10/04/2025',
+      statusColor: 'text-yellow-600 bg-yellow-100',
+    },
+    {
+      id: 3,
+      program: 'دكتوراه الهندسة المدنية',
+      university: 'جامعة المجر للتكنولوجيا',
+      status: 'بانتظار المستندات',
+      date: '05/04/2025',
+      statusColor: 'text-blue-600 bg-blue-100',
+    },
+  ];
 
   const notifications = [
     {
@@ -144,9 +58,11 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Stats */}
         <DashboardStats />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Applications */}
           <Card className="lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>
@@ -161,52 +77,48 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recentApplications.length > 0 ? (
-                  recentApplications.map((app) => (
-                    <Link 
-                      key={app.id}
-                      to={`/dashboard/applications/${app.id}`}
-                      className="block"
-                    >
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <div className="bg-unlimited-blue/10 p-2 rounded-full">
-                            <FileText className="h-5 w-5 text-unlimited-blue" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">
-                              {getProgramName(app.programId)}
-                            </h4>
-                            <p className="text-sm text-unlimited-gray">
-                              {getUniversityName(app.university || app.programId)}
-                            </p>
-                            <p className="text-xs text-unlimited-gray mt-1">رقم الطلب: {app.applicationNumber}</p>
-                          </div>
+                {recentApplications.map((app) => (
+                  <Link 
+                    key={app.id}
+                    to={`/dashboard/applications`}
+                    className="block"
+                  >
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-unlimited-blue/10 p-2 rounded-full">
+                          <FileText className="h-5 w-5 text-unlimited-blue" />
                         </div>
-                        <div className="flex flex-col items-end">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(app.status)}`}>
-                            {getStatusLabel(app.status)}
-                          </span>
-                          <span className="text-xs text-unlimited-gray mt-1">{app.submissionDate}</span>
+                        <div>
+                          <h4 className="font-medium">{app.program}</h4>
+                          <p className="text-sm text-unlimited-gray">{app.university}</p>
                         </div>
                       </div>
-                    </Link>
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
-                    <Link to="/apply">
-                      <Button>
-                        تقديم طلب جديد
-                        <ArrowRight className="mr-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                )}
+                      <div className="flex flex-col items-end">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${app.statusColor}`}>
+                          {app.status}
+                        </span>
+                        <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
               </div>
+              
+              {recentApplications.length === 0 && (
+                <div className="text-center py-8">
+                  <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
+                  <Link to="/programs">
+                    <Button>
+                      استكشف البرامج
+                      <ArrowRight className="mr-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </CardContent>
           </Card>
 
+          {/* Notifications */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>
@@ -244,6 +156,7 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Student Profile & Messages */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="pb-2">
@@ -327,6 +240,7 @@ const Dashboard = () => {
           </Card>
         </div>
 
+        {/* Recommended Programs */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>

@@ -1,33 +1,8 @@
 import { Program } from '../components/programs/ProgramCard';
-
-export interface University {
-  id: number;
-  name: string;
-  nameAr?: string;
-  location: string;
-  country: string;
-  city?: string;
-  district?: string;
-  type?: string;
-  image?: string;
-  programs?: number;
-  founded?: string;
-  students?: number;
-  ranking?: number;
-  localRanking?: number;
-  fees?: string;
-  website?: string;
-  accreditation?: string;
-  accreditations?: string[];
-  languages?: string[];
-  isFeatured?: boolean;
-  description?: string;
-  campuses?: string[];
-  faculties?: string[];
-}
+import { University } from '../components/universities/UniversityCard';
 
 // Turkish universities data with accurate program counts
-export const turkishUniversities: University[] = [
+export const turkishUniversities = [
   {
     id: 11,
     name: 'Istanbul Okan University',
@@ -68,36 +43,22 @@ export const turkishUniversities: University[] = [
   },
   {
     id: 12,
-    name: "Istanbul Gelisim University",
-    nameAr: "جامعة جيليشيم إسطنبول",
-    location: "Istanbul",
-    country: "Turkey",
-    city: "Istanbul",
-    district: "Avcılar",
-    type: "Private",
-    founded: "2011",
-    programs: 80,
+    name: 'Istanbul Gelisim University',
+    nameAr: 'جامعة إسطنبول جيليشيم',
+    location: 'Istanbul',
+    country: 'Turkey',
+    city: 'Istanbul',
+    type: 'Private',
+    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
+    programs: 257,
+    founded: '2008',
     students: 35000,
-    ranking: 1019,
-    localRanking: 13,
-    fees: "3,500 - 17,250 USD",
-    image: "/lovable-uploads/8d4752ed-a124-4362-9bf6-815d145af3e6.png",
-    website: "https://www.gelisim.edu.tr",
-    languages: ["English", "Turkish"],
-    accreditation: "YÖK, YÖDEK",
-    isFeatured: true,
-    description: `جامعة جيليشيم إسطنبول هي جامعة خاصة تأسست عام 2011 في منطقة أفجيلار في إسطنبول. تتميز الجامعة بموقعها الاستراتيجي وبرامجها المتنوعة التي تدرس باللغتين الإنجليزية والتركية. تضم الجامعة أكثر من 35000 طالب وتقدم أكثر من 80 برنامجاً في مختلف التخصصات.`,
-    campuses: ["Avcılar"],
-    faculties: [
-      "كلية الطب",
-      "كلية طب الأسنان",
-      "كلية الهندسة والعمارة",
-      "كلية العلوم الإدارية والاقتصادية",
-      "كلية العلوم الصحية",
-      "كلية الآداب والعلوم",
-      "كلية الفنون التطبيقية",
-      "المدرسة المهنية العليا"
-    ]
+    ranking: 28,
+    fees: 'From $6,800 / year',
+    website: 'https://www.gelisim.edu.tr',
+    accreditation: 'YÖK',
+    languages: ['Turkish', 'English', 'Arabic'],
+    isFeatured: true
   },
   {
     id: 25,
