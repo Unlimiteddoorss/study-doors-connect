@@ -1,4 +1,7 @@
-export const gelisimPrograms = [
+
+import { UniversityProgram } from "../universityPrograms";
+
+export const gelisimPrograms: UniversityProgram[] = [
   {
     id: 1,
     name: "Interior Architecture",
@@ -907,8 +910,9 @@ export const universityInfo = {
   nameAr: "جامعة جيليشيم اسطنبول",
   city: "Istanbul",
   country: "Turkey",
-  type: "Private",
+  type: "Private" as const,
   founded: "2008",
+  programsCount: 60,
   globalRanking: 1019,
   localRanking: 13,
   campus: "Avcılar",
@@ -917,7 +921,8 @@ export const universityInfo = {
   website: "https://gelisim.edu.tr",
   languages: ["Turkish", "English"],
   description: "جامعة اسطنبول جيليشيم هي جامعة خاصة تأسست عام 2008 في اسطنبول. تقدم الجامعة برامج بكالوريوس وماجستير ودكتوراه في مختلف التخصصات.",
-  accreditation: "معتمدة من مجلس التعليم العالي التركي YÖK",
+  accreditations: ["YÖK", "International Recognition"],
   fees: "تتراوح الرسوم الدراسية بين 3500-17250 دولار سنوياً",
   isFeatured: true
 };
+

@@ -2,137 +2,30 @@ import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal, Info } from 'lucide-react';
-import UniversitySearch from '@/components/universities/UniversitySearch';
-import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
-import { useToast } from '@/hooks/use-toast';
+import { Search } from 'lucide-react';
 import { turkishUniversities } from '@/data/programsData';
-
-const cityTranslations: Record<string, string> = {
-  'Turkey': 'تركيا',
-  'Istanbul': 'إسطنبول',
-  'Ankara': 'أنقرة',
-  'Antalya': 'أنطاليا',
-  'Izmir': 'إزمير',
-  'Bursa': 'بورصة',
-  'Konya': 'قونيا',
-  'Adana': 'أضنة',
-  'Gaziantep': 'غازي عنتاب',
-  'Mersin': 'مرسين',
-  'Kayseri': 'قيصري',
-  'Alanya': 'ألانيا',
-  'Eskisehir': 'إسكي شهير',
-  'Trabzon': 'طرابزون',
-  'Samsun': 'سامسون',
-  'Sakarya': 'سكاريا',
-  'Cyprus': 'قبرص',
-  'Kyrenia': 'كيرينيا',
-  'Nicosia': 'نيقوسيا',
-  'Famagusta': 'فماغوستا',
-};
-
-const adaptedUniversities = turkishUniversities.map(uni => ({
-  ...uni,
-  ranking: uni.globalRanking,
-  programs: uni.programsCount || 0
-}));
+import UniversityCard from '@/components/universities/UniversityCard';
+import Pagination from '@/components/shared/Pagination';
 
 const TurkishUniversities = () => {
-  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCity, setSelectedCity] = useState('all');
-  const [selectedType, setSelectedType] = useState('all');
-  const [sortOrder, setSortOrder] = useState("ranking");
+  const [filteredUniversities, setFilteredUniversities] = useState(turkishUniversities);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filteredUniversities, setFilteredUniversities] = useState(adaptedUniversities);
-  const [totalUniversities, setTotalUniversities] = useState(adaptedUniversities.length);
-  
-  const universitiesPerPage = 9;
-
-  const cities = Array.from(new Set(adaptedUniversities.map(uni => uni.city)));
+  const universitiesPerPage = 12;
 
   useEffect(() => {
-    let result = [...adaptedUniversities];
-    
     if (searchTerm) {
-      result = result.filter(
-        uni =>
-          uni.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (uni.nameAr && uni.nameAr.toLowerCase().includes(searchTerm.toLowerCase()))
+      setFilteredUniversities(
+        turkishUniversities.filter(
+          university =>
+            university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            university.city.toLowerCase().includes(searchTerm.toLowerCase())
+        )
       );
+    } else {
+      setFilteredUniversities(turkishUniversities);
     }
-    
-    if (selectedCity !== 'all') {
-      result = result.filter(uni => uni.city === selectedCity);
-    }
-    
-    if (selectedType !== 'all') {
-      result = result.filter(uni => uni.type === selectedType);
-    }
-    
-    switch (sortOrder) {
-      case "ranking":
-        result = [...result].sort((a, b) => {
-          if (a.ranking && b.ranking) return a.ranking - b.ranking;
-          if (!a.ranking && b.ranking) return 1;
-          if (a.ranking && !b.ranking) return -1;
-          return 0;
-        });
-        break;
-      case "name":
-        result = [...result].sort((a, b) => (a.name > b.name ? 1 : -1));
-        break;
-      case "founded":
-        result = [...result].sort((a, b) => {
-          const aYear = parseInt(a.founded);
-          const bYear = parseInt(b.founded);
-          return aYear - bYear;
-        });
-        break;
-      case "featured":
-        result = [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-        break;
-      case "programs":
-        result = [...result].sort((a, b) => b.programs - a.programs);
-        break;
-      default:
-        break;
-    }
-    
-    setTotalUniversities(result.length);
-    setFilteredUniversities(result);
-    setCurrentPage(1);
-  }, [searchTerm, selectedCity, selectedType, sortOrder]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "تم البحث",
-      description: `تم البحث عن: ${searchTerm || 'جميع الجامعات'}`,
-    });
-  };
-
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedCity('all');
-    setSelectedType('all');
-    setSortOrder('ranking');
-    
-    toast({
-      title: "تم إعادة ضبط التصفية",
-      description: "تم مسح جميع عوامل التصفية والبحث",
-    });
-  };
-
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortOrder(e.target.value);
-    
-    toast({
-      title: "تم تغيير الترتيب",
-      description: `تم ترتيب الجامعات حسب: ${e.target.options[e.target.selectedIndex].text}`,
-    });
-  };
+  }, [searchTerm]);
 
   const indexOfLastUniversity = currentPage * universitiesPerPage;
   const indexOfFirstUniversity = indexOfLastUniversity - universitiesPerPage;
@@ -146,111 +39,61 @@ const TurkishUniversities = () => {
     }
   };
 
+  const countryTranslations: Record<string, string> = {
+    'Turkey': 'تركيا',
+    'Istanbul': 'إسطنبول',
+    'Ankara': 'أنقرة',
+    'Antalya': 'أنطاليا',
+    'Alanya': 'ألانيا',
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
         <SectionTitle
           title="الجامعات التركية"
-          subtitle="استكشف أفضل الجامعات التركية الخاصة وتعرف على برامجها وميزاتها"
+          subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.length}</div>
-            <div className="text-unlimited-gray mt-2">جامعة خاصة في تركيا</div>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">{turkishUniversities.reduce((sum, uni) => sum + uni.programs, 0)}+</div>
-            <div className="text-unlimited-gray mt-2">برنامج دراسي</div>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">{cities.length}</div>
-            <div className="text-unlimited-gray mt-2">مدينة تركية</div>
-          </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">100%</div>
-            <div className="text-unlimited-gray mt-2">معترف بها عالمياً</div>
+        <div className="max-w-2xl mx-auto mb-10">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="ابحث عن جامعة..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4"
+            />
           </div>
         </div>
 
-        <UniversitySearch 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedCity={selectedCity}
-          setSelectedCity={setSelectedCity}
-          selectedType={selectedType}
-          setSelectedType={setSelectedType}
-          handleSearch={handleSearch}
-          resetFilters={resetFilters}
-          cities={cities}
-          countryTranslations={cityTranslations}
-        />
-
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <p className="text-unlimited-gray">
-              تم العثور على <span className="font-semibold text-unlimited-blue">{totalUniversities}</span> جامعة
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-unlimited-gray" />
-            <span className="text-unlimited-gray">ترتيب حسب:</span>
-            <select 
-              className="px-3 py-1 border border-gray-300 rounded-md text-unlimited-gray focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-              value={sortOrder}
-              onChange={handleSortChange}
-            >
-              <option value="ranking">التصنيف العالمي</option>
-              <option value="name">الاسم</option>
-              <option value="founded">تاريخ التأسيس</option>
-              <option value="featured">الجامعات المميزة</option>
-              <option value="programs">عدد البرامج</option>
-            </select>
-          </div>
+        <div className="mb-6">
+          <p className="text-unlimited-gray">
+            تم العثور على <span className="font-semibold text-unlimited-blue">{filteredUniversities.length}</span> جامعة
+          </p>
         </div>
-
-        <UniversitiesGrid 
-          universities={currentUniversities}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={paginate}
-          onResetFilters={resetFilters}
-          countryTranslations={cityTranslations}
-        />
-
-        <div className="mt-16 bg-white shadow-md rounded-lg p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Info className="h-5 w-5 text-unlimited-blue" />
-            <h3 className="text-xl font-bold">معلومات عن الجامعات التركية الخاصة</h3>
-          </div>
-          
-          <div className="space-y-4 text-unlimited-gray">
-            <p>
-              تعتبر الجامعات التركية الخاصة من أفضل الخيارات للدراسة في الخارج، حيث تقدم برامج معتمدة عالمياً بلغات متعددة وبرسوم دراسية تنافسية.
-            </p>
-            <p>
-              تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
-            </p>
-            <p>
-              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مم�� يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
-            </p>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-semibold text-unlimited-blue mb-2">لغات التدريس</h4>
-              <p className="text-unlimited-gray">تقدم الجامعات التركية برامج باللغات الإنجليزية والتركية، وبعضها يوفر برامج باللغة العربية أيضاً.</p>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-semibold text-unlimited-blue mb-2">الرسوم الدراسية</h4>
-              <p className="text-unlimited-gray">تتراوح الرسوم الدراسية السنوية بين 6,000 و15,000 دولار أمريكي، اعتماداً على الجامعة والتخصص.</p>
-            </div>
-            <div className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-semibold text-unlimited-blue mb-2">المنح الدراسية</h4>
-              <p className="text-unlimited-gray">تقدم العديد من الجامعات منحاً دراسية تصل إلى 50% من الرسوم للطلاب المتميزين أكاديمياً.</p>
-            </div>
-          </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {currentUniversities.map(university => (
+            <UniversityCard 
+              key={university.id} 
+              university={{
+                ...university,
+                programsCount: university.programsCount
+              }}
+              countryTranslations={countryTranslations}
+            />
+          ))}
         </div>
+        
+        {filteredUniversities.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={paginate}
+          />
+        )}
       </div>
     </MainLayout>
   );

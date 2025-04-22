@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ export interface University {
   country: string;
   type: 'Public' | 'Private';
   founded: string;
-  programsCount?: number;
+  programsCount: number;
   students: number;
   globalRanking?: number;
   localRanking?: number;

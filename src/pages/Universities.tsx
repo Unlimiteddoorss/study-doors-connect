@@ -95,7 +95,7 @@ const Universities = () => {
                   <h3 className="font-bold text-xl mb-2">{university.name}</h3>
                   <div className="flex items-center text-unlimited-gray">
                     <MapPin className="h-4 w-4 ml-2" />
-                    <span>{translateLocation(university.location)}، {translateLocation('Turkey')}</span>
+                    <span>{translateLocation(university.city)}، {translateLocation('Turkey')}</span>
                   </div>
                 </CardHeader>
                 
@@ -111,7 +111,7 @@ const Universities = () => {
                     </div>
                     <div>
                       <p className="text-unlimited-gray">البرامج:</p>
-                      <p className="font-medium">{university.programs}+ برنامج</p>
+                      <p className="font-medium">{university.programsCount}+ برنامج</p>
                     </div>
                     <div>
                       <p className="text-unlimited-gray">الرسوم:</p>

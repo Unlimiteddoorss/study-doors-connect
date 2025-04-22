@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
@@ -115,7 +116,7 @@ const UniversityDetails = () => {
               <div className="text-unlimited-blue">
                 <Book className="mx-auto h-8 w-8 mb-2" />
               </div>
-              <div className="text-2xl font-bold">{university.programs}</div>
+              <div className="text-2xl font-bold">{university.programsCount}</div>
               <div className="text-gray-600">برنامج دراسي</div>
             </CardContent>
           </Card>
@@ -126,7 +127,7 @@ const UniversityDetails = () => {
                 <Award className="mx-auto h-8 w-8 mb-2" />
               </div>
               <div className="text-2xl font-bold">
-                {university.ranking ? `#${university.ranking}` : 'غير مصنفة'}
+                {university.globalRanking ? `#${university.globalRanking}` : 'غير مصنفة'}
               </div>
               <div className="text-gray-600">التصنيف العالمي</div>
             </CardContent>
@@ -188,7 +189,7 @@ const UniversityDetails = () => {
                       </p>
                       
                       <p className="mb-4 text-gray-600">
-                        تتميز الجامعة بتقديم أكثر من {university.programs} برنامج دراسي في مختلف التخصصات، وتضم أكثر من {university.students.toLocaleString()} طالب من مختلف أنحاء العالم.
+                        تتميز الجامعة بتقديم أكثر من {university.programsCount} برنامج دراسي في مختلف التخصصات، وتضم أكثر من {university.students.toLocaleString()} طالب من مختلف أنحاء العالم.
                       </p>
                       
                       <p className="text-gray-600">
@@ -200,8 +201,8 @@ const UniversityDetails = () => {
                     <div className="mb-6 text-gray-600">
                       <p className="mb-2">- معتمدة من مجلس التعليم العالي التركي (YÖK)</p>
                       <p className="mb-2">- معترف بها دولياً</p>
-                      {university.ranking && (
-                        <p>- مصنفة عالمياً في المرتبة #{university.ranking}</p>
+                      {university.globalRanking && (
+                        <p>- مصنفة عالمياً في المرتبة #{university.globalRanking}</p>
                       )}
                     </div>
                     
@@ -299,7 +300,11 @@ const UniversityDetails = () => {
                       
                       <div>
                         <p className="font-semibold">الاعتمادات</p>
-                        <p className="text-gray-600">{university.accreditation}</p>
+                        <p className="text-gray-600">
+                          {university.accreditations ? 
+                            university.accreditations.join(', ') : 
+                            'معتمدة من مجلس التعليم العالي التركي (YÖK)'}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -469,11 +474,11 @@ const UniversityDetails = () => {
                     <div className="flex justify-between mb-4 text-sm">
                       <span className="flex items-center">
                         <Book className="h-4 w-4 ml-1 text-unlimited-blue" />
-                        {uni.programs} برنامج
+                        {uni.programsCount} برنامج
                       </span>
                       <span className="flex items-center">
                         <Award className="h-4 w-4 ml-1 text-unlimited-blue" />
-                        {uni.ranking ? `#${uni.ranking}` : 'غير مصنفة'}
+                        {uni.globalRanking ? `#${uni.globalRanking}` : 'غير مصنفة'}
                       </span>
                     </div>
                     <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">

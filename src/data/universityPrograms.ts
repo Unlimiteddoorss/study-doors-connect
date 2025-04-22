@@ -1,3 +1,4 @@
+
 export interface UniversityProgram {
   id: number;
   name: string;
@@ -17,6 +18,10 @@ export interface UniversityProgram {
 
 import { gelisimPrograms } from "./universities/gelisimPrograms";
 
+// تصدير القيم للبحث والتصفية
+export const availableDegrees = ["Bachelor", "Master", "PhD", "Diploma", "Vocational School"];
+export const availableLanguages = ["English", "Turkish", "Arabic"];
+
 export const getUniversityPrograms = (universityId: number): UniversityProgram[] => {
   switch(universityId) {
     case 5: // Gelisim University
@@ -25,3 +30,4 @@ export const getUniversityPrograms = (universityId: number): UniversityProgram[]
       return [];
   }
 };
+
