@@ -1,5 +1,5 @@
-
 import { University } from '@/components/universities/UniversityCard';
+import { gelisimPrograms } from './universities/gelisimPrograms';
 
 // نموذج لبرنامج دراسي
 export interface UniversityProgram {
@@ -1652,8 +1652,13 @@ export const allUniversityPrograms: UniversityProgram[] = [
 ];
 
 // وظيفة للحصول على برامج جامعة معينة
-export const getUniversityPrograms = (universityId: number): UniversityProgram[] => {
-  return allUniversityPrograms.filter(program => program.universityId === universityId);
+export const getUniversityPrograms = (universityId: number) => {
+  switch(universityId) {
+    case 5: // Gelisim University ID
+      return gelisimPrograms;
+    default:
+      return [];
+  }
 };
 
 // وظيفة للحصول على عدد برامج الجامعة
@@ -1709,4 +1714,3 @@ export const getFilteredPrograms = (
     return true;
   });
 };
-

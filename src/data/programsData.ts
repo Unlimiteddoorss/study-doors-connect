@@ -1,5 +1,6 @@
 import { Program } from '../components/programs/ProgramCard';
 import { University } from '../components/universities/UniversityCard';
+import { gelisimPrograms, universityInfo as gelisimInfo } from './universities/gelisimPrograms';
 
 // Turkish universities data with accurate program counts
 export const turkishUniversities = [
@@ -667,7 +668,8 @@ export const turkishUniversities = [
     accreditation: 'YÖK',
     languages: ['Turkish', 'English'],
     isFeatured: false
-  }
+  },
+  gelisimInfo
 ];
 
 // Sample program data - expanded with more programs
@@ -851,7 +853,7 @@ export const dummyPrograms: Program[] = [
     id: 14,
     title: 'ماجستير الذكاء الاصطناعي',
     university: 'جامعة بيلكنت',
-    location: 'Turkey، أنقرة',
+    location: 'Turkey، أنق��ة',
     language: 'الإنجليزية',
     duration: 'سنتان',
     deadline: '15 يوليو 2025',
