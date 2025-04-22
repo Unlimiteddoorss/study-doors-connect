@@ -7,7 +7,6 @@ import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { dummyPrograms } from '@/data/programsData';
-import { Program } from '@/components/programs/ProgramCard';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -36,10 +35,10 @@ const countryTranslations: Record<string, string> = {
   'United Arab Emirates': 'الإمارات العربية المتحدة'
 };
 
-// Create engineering programs data - convert to proper Program interface
-const engineeringPrograms: Program[] = dummyPrograms
+// Create engineering programs data
+const engineeringPrograms = dummyPrograms
   .filter(program => 
-    program.title && program.title.includes('هندسة')
+    program.title.includes('هندسة')
   )
   .concat([
     {

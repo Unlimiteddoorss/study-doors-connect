@@ -7,7 +7,6 @@ import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { dummyPrograms } from '@/data/programsData';
-import { Program } from '@/components/programs/ProgramCard';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -37,14 +36,12 @@ const countryTranslations: Record<string, string> = {
 };
 
 // Create medical programs data
-const medicalPrograms: Program[] = dummyPrograms
+const medicalPrograms = dummyPrograms
   .filter(program => 
-    program.title && (
-      program.title.includes('طب') || 
-      program.title.includes('صيدلة') || 
-      program.title.includes('طبي') ||
-      program.title.includes('تمريض')
-    )
+    program.title.includes('طب') || 
+    program.title.includes('صيدلة') || 
+    program.title.includes('طبي') ||
+    program.title.includes('تمريض')
   )
   .concat([
     {
