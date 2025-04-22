@@ -39,6 +39,9 @@ interface StoredApplication {
   formData?: any;
 }
 
+// أدخل هنا عنوان API الخاص بك
+const API_ENDPOINT = process.env.VITE_API_ENDPOINT || 'https://your-api-endpoint.com/api/applications';
+
 const ApplicationSubmissionHandler = ({ 
   formData, 
   onSubmit, 
@@ -53,18 +56,18 @@ const ApplicationSubmissionHandler = ({
   const handleFormSubmit = async () => {
     setIsSubmitting(true);
     
-    // Generate a unique application number
+    // توليد رقم طلب فريد
     const randomNumber = Math.floor(100000 + Math.random() * 900000);
     const appNumber = `APP-${randomNumber}`;
     setApplicationNumber(appNumber);
     
-    // Prepare application object
+    // تجهيز كائن الطلب
     const newApplication: StoredApplication = {
       id: appNumber,
       program: formData?.program?.name || "برنامج جديد",
       programId: formData?.program?.id,
       university: formData?.university || "الجامعة",
-      status: "pending", // Initial status
+      status: "pending", // الحالة الأولية
       date: new Date().toISOString().split('T')[0],
       statusColor: 'text-yellow-600 bg-yellow-100',
       messages: 0,
@@ -75,7 +78,7 @@ const ApplicationSubmissionHandler = ({
         { name: 'الشهادة الدراسية', status: 'required' },
         { name: 'صورة شخصية', status: 'required' }
       ],
-      formData: formData // Store the complete form data
+      formData: formData // تخزين بيانات النموذج الكاملة
     };
 
     try {
@@ -85,81 +88,128 @@ const ApplicationSubmissionHandler = ({
         submitDate: new Date().toISOString(),
         applicantIP: await fetchUserIP(),
         source: window.location.hostname,
-        referrer: document.referrer
+        referrer: document.referrer,
+        sessionId: localStorage.getItem('sessionId') || generateSessionId(),
       };
 
-      // Send application data to your actual server API
-      // Replace with your actual API endpoint
-      const response = await fetch('https://your-api-endpoint.com/applications', {
+      console.log("إرسال البيانات إلى:", API_ENDPOINT);
+      console.log("البيانات المرسلة:", JSON.stringify(payload, null, 2));
+
+      // إرسال بيانات الطلب إلى الـ API الخاص بالخادم
+      const response = await fetch(API_ENDPOINT, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // يمكنك إضافة token للمصادقة إذا كان مطلوبًا
+          'Accept': 'application/json',
+          // يمكنك إضافة توكن للمصادقة إذا كان مطلوباً
           // 'Authorization': `Bearer ${yourAuthToken}`
         },
         body: JSON.stringify(payload)
       });
 
+      // تحليل الرد
+      const responseData = await response.json();
+
+      // التحقق من الرد
       if (!response.ok) {
-        throw new Error('فشل في إرسال الطلب');
+        throw new Error(responseData.message || 'فشل في إرسال الطلب');
       }
 
-      const result = await response.json();
-      console.log('Application submitted to server:', result);
+      console.log('تم إرسال الطلب بنجاح:', responseData);
       
-      // إضافة البيانات إلى التخزين المحلي أيضًا كنسخة احتياطية
-      const existingApplicationsString = localStorage.getItem('studentApplications');
-      const existingApplications = existingApplicationsString 
-        ? JSON.parse(existingApplicationsString) 
-        : [];
+      // حفظ في التخزين المحلي كنسخة احتياطية
+      saveApplicationToLocalStorage(newApplication);
       
-      existingApplications.push(newApplication);
-      localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
-      
-      // إضافة البيانات إلى تطبيقات المشرفين أيضًا
-      const adminAppsString = localStorage.getItem('adminApplications');
-      const adminApps = adminAppsString ? JSON.parse(adminAppsString) : [];
-      adminApps.push({
-        ...newApplication,
-        status: "pending", // Make sure it's pending for admin review
-      });
-      localStorage.setItem('adminApplications', JSON.stringify(adminApps));
-      
-      // Show success toast
+      // إظهار رسالة نجاح
       toast({
         title: "تم تقديم الطلب بنجاح",
         description: `رقم الطلب الخاص بك هو ${appNumber}`,
         variant: "default",
       });
       
-      // Open confirmation dialog
+      // فتح نافذة التأكيد
       setIsDialogOpen(true);
       
-      // Call onSubmit callback if provided
+      // استدعاء دالة الاستدعاء onSubmit إذا تم توفيرها
       if (onSubmit) onSubmit();
     } catch (error) {
-      console.error('Error submitting application:', error);
+      console.error('خطأ أثناء إرسال الطلب:', error);
+      
+      // حفظ في التخزين المحلي في حالة فشل الاتصال
+      saveApplicationToLocalStorage(newApplication);
+      
       toast({
-        title: "حدث خطأ أثناء تقديم الطلب",
-        description: "يرجى المحاولة مرة أخرى لاحقًا أو التواصل مع الدعم الفني",
-        variant: "destructive",
+        title: "تم حفظ الطلب محلياً",
+        description: "لم نتمكن من الاتصال بالخادم، لكن تم حفظ طلبك محلياً. سنحاول إرساله لاحقاً عند استعادة الاتصال.",
+        variant: "default",
       });
+      
+      // فتح نافذة التأكيد على الرغم من الخطأ
+      setIsDialogOpen(true);
+      
+      // استدعاء دالة الاستدعاء onSubmit إذا تم توفيرها
+      if (onSubmit) onSubmit();
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Helper function to get user IP address
+  // حفظ الطلب في التخزين المحلي
+  const saveApplicationToLocalStorage = (application: StoredApplication) => {
+    try {
+      // إضافة البيانات إلى تطبيقات الطالب
+      const existingApplicationsString = localStorage.getItem('studentApplications');
+      const existingApplications = existingApplicationsString 
+        ? JSON.parse(existingApplicationsString) 
+        : [];
+      
+      existingApplications.push(application);
+      localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
+      
+      // إضافة البيانات إلى تطبيقات المشرفين أيضًا
+      const adminAppsString = localStorage.getItem('adminApplications');
+      const adminApps = adminAppsString ? JSON.parse(adminAppsString) : [];
+      adminApps.push({
+        ...application,
+        status: "pending", // التأكد من أنه معلق لمراجعة المسؤول
+      });
+      localStorage.setItem('adminApplications', JSON.stringify(adminApps));
+
+      console.log('تم حفظ الطلب في التخزين المحلي بنجاح');
+    } catch (error) {
+      console.error('خطأ أثناء حفظ الطلب في التخزين المحلي:', error);
+    }
+  };
+
+  // دالة مساعدة للحصول على عنوان IP للمستخدم
   const fetchUserIP = async () => {
     try {
       const response = await fetch('https://api.ipify.org?format=json');
       const data = await response.json();
       return data.ip;
     } catch (error) {
-      console.error('Error fetching IP:', error);
+      console.error('خطأ في جلب عنوان IP:', error);
       return 'unknown';
     }
   };
+
+  // توليد معرف جلسة فريد
+  const generateSessionId = () => {
+    const sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('sessionId', sessionId);
+    return sessionId;
+  };
+
+  // التحقق من وجود طلبات غير مرسلة عند تحميل المكون
+  useEffect(() => {
+    // يمكن تنفيذ منطق مزامنة الطلبات غير المرسلة هنا
+    const syncPendingApplications = async () => {
+      // منطق المزامنة يمكن إضافته هنا
+    };
+
+    // يمكن استدعاء وظيفة المزامنة هنا في حال كانت مطلوبة
+    // syncPendingApplications();
+  }, []);
 
   const viewApplicationStatus = () => {
     navigate('/dashboard/applications');

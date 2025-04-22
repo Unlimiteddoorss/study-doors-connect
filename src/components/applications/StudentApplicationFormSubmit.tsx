@@ -4,6 +4,13 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Check, ArrowLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+// تعريف واجهة لـ window لدعم gtag
+declare global {
+  interface Window {
+    gtag?: (command: string, action: string, params: any) => void;
+  }
+}
+
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
   isSubmitting: boolean;
