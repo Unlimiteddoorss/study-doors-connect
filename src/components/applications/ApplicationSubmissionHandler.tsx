@@ -50,7 +50,7 @@ const ApplicationSubmissionHandler = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = async () => {
     setIsSubmitting(true);
     
     // Generate a unique application number
@@ -58,7 +58,7 @@ const ApplicationSubmissionHandler = ({
     const appNumber = `APP-${randomNumber}`;
     setApplicationNumber(appNumber);
     
-    // Prepare application object for storage
+    // Prepare application object
     const newApplication: StoredApplication = {
       id: appNumber,
       program: formData?.program?.name || "برنامج جديد",
@@ -77,22 +77,46 @@ const ApplicationSubmissionHandler = ({
       ],
       formData: formData // Store the complete form data
     };
-    
-    // Store the application in localStorage
-    setTimeout(() => {
-      // Get existing applications (if any)
+
+    try {
+      // تجهيز البيانات للإرسال
+      const payload = {
+        application: newApplication,
+        submitDate: new Date().toISOString(),
+        applicantIP: await fetchUserIP(),
+        source: window.location.hostname,
+        referrer: document.referrer
+      };
+
+      // Send application data to your actual server API
+      // Replace with your actual API endpoint
+      const response = await fetch('https://your-api-endpoint.com/applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // يمكنك إضافة token للمصادقة إذا كان مطلوبًا
+          // 'Authorization': `Bearer ${yourAuthToken}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('فشل في إرسال الطلب');
+      }
+
+      const result = await response.json();
+      console.log('Application submitted to server:', result);
+      
+      // إضافة البيانات إلى التخزين المحلي أيضًا كنسخة احتياطية
       const existingApplicationsString = localStorage.getItem('studentApplications');
       const existingApplications = existingApplicationsString 
         ? JSON.parse(existingApplicationsString) 
         : [];
       
-      // Add new application
       existingApplications.push(newApplication);
-      
-      // Store back in localStorage
       localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
       
-      // Also store in admin applications
+      // إضافة البيانات إلى تطبيقات المشرفين أيضًا
       const adminAppsString = localStorage.getItem('adminApplications');
       const adminApps = adminAppsString ? JSON.parse(adminAppsString) : [];
       adminApps.push({
@@ -100,8 +124,6 @@ const ApplicationSubmissionHandler = ({
         status: "pending", // Make sure it's pending for admin review
       });
       localStorage.setItem('adminApplications', JSON.stringify(adminApps));
-      
-      console.log('Application submitted:', newApplication);
       
       // Show success toast
       toast({
@@ -112,11 +134,31 @@ const ApplicationSubmissionHandler = ({
       
       // Open confirmation dialog
       setIsDialogOpen(true);
-      setIsSubmitting(false);
       
       // Call onSubmit callback if provided
       if (onSubmit) onSubmit();
-    }, 1500); // Simulate network delay
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      toast({
+        title: "حدث خطأ أثناء تقديم الطلب",
+        description: "يرجى المحاولة مرة أخرى لاحقًا أو التواصل مع الدعم الفني",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Helper function to get user IP address
+  const fetchUserIP = async () => {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error('Error fetching IP:', error);
+      return 'unknown';
+    }
   };
 
   const viewApplicationStatus = () => {

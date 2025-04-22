@@ -35,7 +35,13 @@ const StudentApplicationFormSubmit = ({
     // Track submission in analytics
     try {
       console.log("Tracking form submission");
-      // Here you would add real analytics tracking
+      // يمكنك إضافة تتبع التحليلات الحقيقي هنا
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'form_submission', {
+          'event_category': 'application',
+          'event_label': 'student_application'
+        });
+      }
     } catch (error) {
       console.error("Analytics error:", error);
     }
@@ -53,7 +59,7 @@ const StudentApplicationFormSubmit = ({
         className="order-2 sm:order-1 flex items-center gap-1"
       >
         <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-        السابق
+        {t('application.navigation.previous')}
       </Button>
       {isLastStep ? (
         <Button
@@ -64,11 +70,11 @@ const StudentApplicationFormSubmit = ({
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> جاري التقديم...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('application.buttons.submitting')}
             </>
           ) : (
             <>
-              <Check className="mr-2 h-4 w-4" /> تقديم الطلب
+              <Check className="mr-2 h-4 w-4" /> {t('application.buttons.submit')}
             </>
           )}
         </Button>
@@ -79,7 +85,7 @@ const StudentApplicationFormSubmit = ({
           disabled={isSubmitting}
           className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1"
         >
-          التالي
+          {t('application.navigation.next')}
           <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
         </Button>
       )}
