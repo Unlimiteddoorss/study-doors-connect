@@ -1,39 +1,44 @@
 
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Badge } from '@/components/ui/badge';
 import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye } from 'lucide-react';
 
-const Dashboard = () => {
-  const recentApplications = [
-    {
-      id: 1,
-      program: 'بكالوريوس إدارة الأعمال',
-      university: 'جامعة أوزيجين',
-      status: 'مقبول',
-      date: '15/04/2025',
-      statusColor: 'text-green-600 bg-green-100',
-    },
-    {
-      id: 2,
-      program: 'ماجستير علوم الحاسوب',
-      university: 'جامعة فاتح سلطان محمد',
-      status: 'قيد المراجعة',
-      date: '10/04/2025',
-      statusColor: 'text-yellow-600 bg-yellow-100',
-    },
-    {
-      id: 3,
-      program: 'دكتوراه الهندسة المدنية',
-      university: 'جامعة المجر للتكنولوجيا',
-      status: 'بانتظار المستندات',
-      date: '05/04/2025',
-      statusColor: 'text-blue-600 bg-blue-100',
-    },
-  ];
+interface Application {
+  id: string | number;
+  program: string;
+  university: string;
+  status: string;
+  date: string;
+  statusColor: string;
+}
 
+const Dashboard = () => {
+  const [recentApplications, setRecentApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load applications from localStorage
+  useEffect(() => {
+    setIsLoading(true);
+    try {
+      const storedApps = localStorage.getItem('studentApplications');
+      if (storedApps) {
+        const parsedApps = JSON.parse(storedApps);
+        // Take only the 3 most recent applications
+        setRecentApplications(parsedApps.slice(0, 3));
+      }
+    } catch (error) {
+      console.error("Error loading applications:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Sample notifications - in real app these would come from backend
   const notifications = [
     {
       id: 1,
@@ -54,6 +59,33 @@ const Dashboard = () => {
       time: 'منذ يوم واحد',
     },
   ];
+
+  // Get the status display classes
+  const getStatusClass = (status: string) => {
+    switch(status) {
+      case 'approved': return 'text-green-600 bg-green-100';
+      case 'rejected': return 'text-red-600 bg-red-100';
+      case 'pending': return 'text-yellow-600 bg-yellow-100';
+      case 'review': return 'text-yellow-600 bg-yellow-100';
+      case 'documents': return 'text-blue-600 bg-blue-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+  
+  // Get status label in Arabic
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'pending': 'قيد الانتظار',
+      'review': 'قيد المراجعة',
+      'approved': 'مقبول',
+      'rejected': 'مرفوض',
+      'documents': 'بانتظار المستندات',
+      'completed': 'مكتمل',
+      'archived': 'مؤرشف'
+    };
+    
+    return statusMap[status] || status;
+  };
 
   return (
     <DashboardLayout>
@@ -76,43 +108,49 @@ const Dashboard = () => {
               </Link>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {recentApplications.map((app) => (
-                  <Link 
-                    key={app.id}
-                    to={`/dashboard/applications`}
-                    className="block"
-                  >
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="flex items-start gap-3">
-                        <div className="bg-unlimited-blue/10 p-2 rounded-full">
-                          <FileText className="h-5 w-5 text-unlimited-blue" />
+              {isLoading ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentApplications.length > 0 ? (
+                    recentApplications.map((app) => (
+                      <Link 
+                        key={app.id}
+                        to={`/dashboard/applications`}
+                        className="block"
+                      >
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className="bg-unlimited-blue/10 p-2 rounded-full">
+                              <FileText className="h-5 w-5 text-unlimited-blue" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{app.program}</h4>
+                              <p className="text-sm text-unlimited-gray">{app.university}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(app.status)}`}>
+                              {getStatusLabel(app.status)}
+                            </span>
+                            <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-medium">{app.program}</h4>
-                          <p className="text-sm text-unlimited-gray">{app.university}</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${app.statusColor}`}>
-                          {app.status}
-                        </span>
-                        <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
-                      </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
+                      <Link to="/programs">
+                        <Button>
+                          استكشف البرامج
+                          <ArrowRight className="mr-2 h-4 w-4" />
+                        </Button>
+                      </Link>
                     </div>
-                  </Link>
-                ))}
-              </div>
-              
-              {recentApplications.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
-                  <Link to="/programs">
-                    <Button>
-                      استكشف البرامج
-                      <ArrowRight className="mr-2 h-4 w-4" />
-                    </Button>
-                  </Link>
+                  )}
                 </div>
               )}
             </CardContent>

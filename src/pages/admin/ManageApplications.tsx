@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Archive, CheckCircle, Clock, Download, Edit, Eye, FileText, MoreHorizontal, Search, Trash, Upload, X } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
@@ -44,15 +43,20 @@ type ApplicationStatus = 'pending' | 'processing' | 'approved' | 'rejected' | 'c
 
 type Application = {
   id: string;
-  studentId: string;
-  studentName: string;
+  studentId?: string;
+  studentName?: string;
   program: string;
   university: string;
-  createdDate: string;
-  updatedDate: string;
+  createdDate?: string;
+  updatedDate?: string;
+  date?: string;
   status: ApplicationStatus;
   agentName?: string;
-  hasDocs: boolean;
+  hasDocs?: boolean;
+  documents?: {
+    name: string;
+    status: 'uploaded' | 'required' | 'approved';
+  }[];
 };
 
 const initialApplications: Application[] = [
@@ -64,7 +68,7 @@ const initialApplications: Application[] = [
     university: 'جامعة لندن',
     createdDate: '2023-04-01',
     updatedDate: '2023-04-05',
-    status: 'approved',
+    status: 'approved' as ApplicationStatus,
     agentName: 'محمد العلي',
     hasDocs: true,
   },
@@ -76,7 +80,7 @@ const initialApplications: Application[] = [
     university: 'جامعة تورنتو',
     createdDate: '2023-04-02',
     updatedDate: '2023-04-02',
-    status: 'pending',
+    status: 'pending' as ApplicationStatus,
     hasDocs: true,
   },
   {
@@ -149,17 +153,49 @@ const statusConfig: Record<ApplicationStatus, { label: string; color: string; ic
 };
 
 const ManageApplications = () => {
-  const [applications, setApplications] = useState<Application[]>(initialApplications);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all');
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setIsLoading(true);
+    
+    try {
+      const adminAppsString = localStorage.getItem('adminApplications');
+      let adminApps = adminAppsString ? JSON.parse(adminAppsString) : [];
+      
+      if (adminApps.length === 0) {
+        const studentAppsString = localStorage.getItem('studentApplications');
+        const studentApps = studentAppsString ? JSON.parse(studentAppsString) : [];
+        
+        if (studentApps.length > 0) {
+          adminApps = [...studentApps];
+          localStorage.setItem('adminApplications', JSON.stringify(adminApps));
+        }
+      }
+      
+      if (adminApps.length === 0) {
+        adminApps = initialApplications;
+        localStorage.setItem('adminApplications', JSON.stringify(adminApps));
+      }
+      
+      setApplications(adminApps);
+    } catch (error) {
+      console.error("Error loading applications:", error);
+      setApplications(initialApplications);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   const filteredApplications = applications.filter((application) => {
     const matchesSearch = 
-      application.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (application.studentName?.toLowerCase().includes(searchQuery.toLowerCase()) || '') ||
       application.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       application.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
       application.program.toLowerCase().includes(searchQuery.toLowerCase());
@@ -170,7 +206,6 @@ const ManageApplications = () => {
   });
 
   const handleImportApplications = () => {
-    // محاكاة استيراد بيانات الطلبات
     toast({
       title: "تم استيراد البيانات",
       description: "تم استيراد بيانات الطلبات بنجاح",
@@ -179,7 +214,6 @@ const ManageApplications = () => {
   };
 
   const handleExportApplications = () => {
-    // محاكاة تصدير بيانات الطلبات
     toast({
       title: "تم تصدير البيانات",
       description: "تم تصدير بيانات الطلبات بنجاح",
@@ -187,7 +221,21 @@ const ManageApplications = () => {
   };
 
   const handleDeleteApplication = (id: string) => {
-    setApplications(applications.filter((application) => application.id !== id));
+    const updatedApplications = applications.filter((application) => application.id !== id);
+    setApplications(updatedApplications);
+    localStorage.setItem('adminApplications', JSON.stringify(updatedApplications));
+    
+    try {
+      const studentAppsString = localStorage.getItem('studentApplications');
+      if (studentAppsString) {
+        const studentApps = JSON.parse(studentAppsString);
+        const updatedStudentApps = studentApps.filter((app: any) => app.id !== id);
+        localStorage.setItem('studentApplications', JSON.stringify(updatedStudentApps));
+      }
+    } catch (error) {
+      console.error("Error updating student applications:", error);
+    }
+    
     toast({
       title: "تم حذف الطلب",
       description: `تم حذف الطلب رقم ${id} بنجاح`,
@@ -200,22 +248,54 @@ const ManageApplications = () => {
   };
 
   const handleUpdateStatus = (id: string, newStatus: ApplicationStatus) => {
-    setApplications(
-      applications.map((application) =>
-        application.id === id
-          ? {
-              ...application,
-              status: newStatus,
-              updatedDate: new Date().toISOString().split('T')[0],
-            }
-          : application
-      )
+    const updatedApplications = applications.map((application) =>
+      application.id === id
+        ? {
+            ...application,
+            status: newStatus,
+            updatedDate: new Date().toISOString().split('T')[0],
+          }
+        : application
     );
+    
+    setApplications(updatedApplications);
+    localStorage.setItem('adminApplications', JSON.stringify(updatedApplications));
+    
+    try {
+      const studentAppsString = localStorage.getItem('studentApplications');
+      if (studentAppsString) {
+        const studentApps = JSON.parse(studentAppsString);
+        const updatedStudentApps = studentApps.map((app: any) => 
+          app.id === id
+            ? { 
+                ...app, 
+                status: newStatus,
+                statusColor: getStatusColorClass(newStatus)
+              }
+            : app
+        );
+        localStorage.setItem('studentApplications', JSON.stringify(updatedStudentApps));
+      }
+    } catch (error) {
+      console.error("Error updating student applications:", error);
+    }
     
     toast({
       title: "تم تحديث الحالة",
       description: `تم تغيير حالة الطلب ${id} إلى ${statusConfig[newStatus].label}`,
     });
+  };
+
+  const getStatusColorClass = (status: ApplicationStatus): string => {
+    switch(status) {
+      case 'approved': return 'text-green-600 bg-green-100';
+      case 'rejected': return 'text-red-600 bg-red-100';
+      case 'pending': 
+      case 'processing': return 'text-yellow-600 bg-yellow-100';
+      case 'completed': return 'text-blue-600 bg-blue-100';
+      case 'archived': return 'text-gray-600 bg-gray-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
   };
 
   const applicationsByStatus = {
@@ -289,105 +369,110 @@ const ManageApplications = () => {
           </div>
         </div>
         
-        <Tabs defaultValue="all" onValueChange={(value) => setStatusFilter(value as ApplicationStatus | 'all')}>
-          <div className="overflow-x-auto">
-            <TabsList className="mb-4 inline-flex">
-              <TabsTrigger value="all" className="min-w-[80px]">
-                الكل
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.all}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="min-w-[80px]">
-                قيد الانتظار
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.pending}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="processing" className="min-w-[80px]">
-                قيد المعالجة
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.processing}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="approved" className="min-w-[80px]">
-                مقبول
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.approved}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="rejected" className="min-w-[80px]">
-                مرفوض
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.rejected}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="completed" className="min-w-[80px]">
-                مكتمل
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.completed}</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="archived" className="min-w-[80px]">
-                مؤرشف
-                <Badge variant="outline" className="ml-2">{applicationsByStatus.archived}</Badge>
-              </TabsTrigger>
-            </TabsList>
+        {isLoading ? (
+          <div className="flex justify-center items-center h-40">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
           </div>
+        ) : (
+          <Tabs defaultValue="all" onValueChange={(value) => setStatusFilter(value as ApplicationStatus | 'all')}>
+            <div className="overflow-x-auto">
+              <TabsList className="mb-4 inline-flex">
+                <TabsTrigger value="all" className="min-w-[80px]">
+                  الكل
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.all}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="min-w-[80px]">
+                  قيد الانتظار
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.pending}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="processing" className="min-w-[80px]">
+                  قيد المعالجة
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.processing}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="approved" className="min-w-[80px]">
+                  مقبول
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.approved}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="rejected" className="min-w-[80px]">
+                  مرفوض
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.rejected}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="completed" className="min-w-[80px]">
+                  مكتمل
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.completed}</Badge>
+                </TabsTrigger>
+                <TabsTrigger value="archived" className="min-w-[80px]">
+                  مؤرشف
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.archived}</Badge>
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          <TabsContent value="all">
-            <ApplicationsTable 
-              applications={filteredApplications} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="pending">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'pending')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="processing">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'processing')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="approved">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'approved')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="rejected">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'rejected')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="completed">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'completed')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-          
-          <TabsContent value="archived">
-            <ApplicationsTable 
-              applications={filteredApplications.filter(a => a.status === 'archived')} 
-              handleViewApplication={handleViewApplication}
-              handleDeleteApplication={handleDeleteApplication}
-              handleUpdateStatus={handleUpdateStatus}
-            />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="all">
+              <ApplicationsTable 
+                applications={filteredApplications} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+            
+            <TabsContent value="pending">
+              <ApplicationsTable 
+                applications={filteredApplications.filter(a => a.status === 'pending')} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+            
+            <TabsContent value="processing">
+              <ApplicationsTable 
+                applications={filteredApplications.filter(a => a.status === 'processing')} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+            
+            <TabsContent value="approved">
+              <ApplicationsTable 
+                applications={filteredApplications.filter(a => a.status === 'approved')} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+            
+            <TabsContent value="rejected">
+              <ApplicationsTable 
+                applications={filteredApplications.filter(a => a.status === 'rejected')} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+            
+            <TabsContent value="completed">
+              <ApplicationsTable 
+                applications={filteredApplications.filter(a => a.status === 'completed')} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+            
+            <TabsContent value="archived">
+              <ApplicationsTable 
+                applications={filteredApplications.filter(a => a.status === 'archived')} 
+                handleViewApplication={handleViewApplication}
+                handleDeleteApplication={handleDeleteApplication}
+                handleUpdateStatus={handleUpdateStatus}
+              />
+            </TabsContent>
+          </Tabs>
+        )}
         
-        {/* عرض تفاصيل الطلب */}
         {selectedApplication && (
           <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
             <DialogContent className="max-w-4xl">
@@ -410,11 +495,11 @@ const ManageApplications = () => {
                     </div>
                     <div>
                       <p className="text-unlimited-gray text-sm">تاريخ التقديم</p>
-                      <p>{selectedApplication.createdDate}</p>
+                      <p>{selectedApplication.createdDate || selectedApplication.date}</p>
                     </div>
                     <div>
                       <p className="text-unlimited-gray text-sm">آخر تحديث</p>
-                      <p>{selectedApplication.updatedDate}</p>
+                      <p>{selectedApplication.updatedDate || selectedApplication.date}</p>
                     </div>
                     <div>
                       <p className="text-unlimited-gray text-sm">الوكيل</p>
@@ -428,11 +513,11 @@ const ManageApplications = () => {
                   <div className="space-y-4">
                     <div>
                       <p className="text-unlimited-gray text-sm">رقم الطالب</p>
-                      <p className="font-medium">{selectedApplication.studentId}</p>
+                      <p className="font-medium">{selectedApplication.studentId || 'غير متوفر'}</p>
                     </div>
                     <div>
                       <p className="text-unlimited-gray text-sm">اسم الطالب</p>
-                      <p>{selectedApplication.studentName}</p>
+                      <p>{selectedApplication.studentName || 'غير متوفر'}</p>
                     </div>
                     <div>
                       <p className="text-unlimited-gray text-sm">البرنامج</p>
@@ -448,59 +533,57 @@ const ManageApplications = () => {
                 <div className="col-span-1 md:col-span-2">
                   <h3 className="text-lg font-bold mb-4">المستندات</h3>
                   
-                  {selectedApplication.hasDocs ? (
+                  {(selectedApplication.hasDocs || selectedApplication.documents?.length) ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">جواز السفر</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 1.2MB</p>
+                      {selectedApplication.documents && selectedApplication.documents.map((doc, idx) => (
+                        <div key={idx} className="border rounded p-4 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
+                            <div>
+                              <p className="font-medium">{doc.name}</p>
+                              <p className="text-xs text-unlimited-gray">
+                                {doc.status === 'uploaded' ? 'تم الرفع' : 
+                                 doc.status === 'approved' ? 'معتمد' : 'مطلوب'}
+                              </p>
+                            </div>
                           </div>
+                          {doc.status !== 'required' && (
+                            <Button variant="ghost" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      ))}
                       
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">السجل الأكاديمي</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 3.5MB</p>
+                      {!selectedApplication.documents && (
+                        <>
+                          <div className="border rounded p-4 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
+                              <div>
+                                <p className="font-medium">جواز السفر</p>
+                                <p className="text-xs text-unlimited-gray">PDF - 1.2MB</p>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
                           </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">شهادة اللغة</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 0.8MB</p>
+                          
+                          <div className="border rounded p-4 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
+                              <div>
+                                <p className="font-medium">السجل الأكاديمي</p>
+                                <p className="text-xs text-unlimited-gray">PDF - 3.5MB</p>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm">
+                              <Download className="h-4 w-4" />
+                            </Button>
                           </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="border rounded p-4 flex items-center justify-between">
-                        <div className="flex items-center">
-                          <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
-                          <div>
-                            <p className="font-medium">السيرة الذاتية</p>
-                            <p className="text-xs text-unlimited-gray">PDF - 1.0MB</p>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="sm">
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center p-8 border rounded-md bg-gray-50">
@@ -515,7 +598,7 @@ const ManageApplications = () => {
                   {selectedApplication.status !== 'processing' && (
                     <Button 
                       onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'processing');
+                        handleUpdateStatus(String(selectedApplication.id), 'processing');
                         setIsViewDialogOpen(false);
                       }}
                       className="bg-unlimited-info hover:bg-unlimited-info/90"
@@ -527,7 +610,7 @@ const ManageApplications = () => {
                   {selectedApplication.status !== 'approved' && (
                     <Button 
                       onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'approved');
+                        handleUpdateStatus(String(selectedApplication.id), 'approved');
                         setIsViewDialogOpen(false);
                       }}
                       className="bg-unlimited-success hover:bg-unlimited-success/90"
@@ -539,7 +622,7 @@ const ManageApplications = () => {
                   {selectedApplication.status !== 'rejected' && (
                     <Button 
                       onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'rejected');
+                        handleUpdateStatus(String(selectedApplication.id), 'rejected');
                         setIsViewDialogOpen(false);
                       }}
                       className="bg-unlimited-danger hover:bg-unlimited-danger/90"
@@ -551,7 +634,7 @@ const ManageApplications = () => {
                   {selectedApplication.status !== 'completed' && selectedApplication.status !== 'archived' && (
                     <Button 
                       onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'completed');
+                        handleUpdateStatus(String(selectedApplication.id), 'completed');
                         setIsViewDialogOpen(false);
                       }}
                       className="bg-unlimited-blue hover:bg-unlimited-blue/90"
@@ -564,7 +647,7 @@ const ManageApplications = () => {
                     <Button 
                       variant="outline"
                       onClick={() => {
-                        handleUpdateStatus(selectedApplication.id, 'archived');
+                        handleUpdateStatus(String(selectedApplication.id), 'archived');
                         setIsViewDialogOpen(false);
                       }}
                     >
@@ -628,7 +711,7 @@ const ApplicationsTable = ({
                 <TableCell className="font-medium">{application.id}</TableCell>
                 <TableCell>
                   <div>
-                    <p>{application.studentName}</p>
+                    <p>{application.studentName || 'لا يوجد اسم'}</p>
                     {application.agentName && (
                       <p className="text-xs text-unlimited-gray">وكيل: {application.agentName}</p>
                     )}
@@ -641,7 +724,7 @@ const ApplicationsTable = ({
                     {statusConfig[application.status].label}
                   </Badge>
                 </TableCell>
-                <TableCell className="hidden md:table-cell">{application.createdDate}</TableCell>
+                <TableCell className="hidden md:table-cell">{application.createdDate || application.date || 'غير متوفر'}</TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-2 rtl:space-x-reverse">
                     <Button 
@@ -662,19 +745,19 @@ const ApplicationsTable = ({
                         <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         {application.status !== 'approved' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'approved')}>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(String(application.id), 'approved')}>
                             <CheckCircle className="h-4 w-4 mr-2 text-unlimited-success" />
                             قبول الطلب
                           </DropdownMenuItem>
                         )}
                         {application.status !== 'rejected' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'rejected')}>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(String(application.id), 'rejected')}>
                             <X className="h-4 w-4 mr-2 text-unlimited-danger" />
                             رفض الطلب
                           </DropdownMenuItem>
                         )}
                         {application.status !== 'archived' && (
-                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'archived')}>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(String(application.id), 'archived')}>
                             <Archive className="h-4 w-4 mr-2" />
                             أرشفة الطلب
                           </DropdownMenuItem>
@@ -682,7 +765,7 @@ const ApplicationsTable = ({
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-unlimited-danger focus:text-unlimited-danger"
-                          onClick={() => handleDeleteApplication(application.id)}
+                          onClick={() => handleDeleteApplication(String(application.id))}
                         >
                           <Trash className="h-4 w-4 mr-2" />
                           حذف

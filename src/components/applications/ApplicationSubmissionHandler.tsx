@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,25 @@ interface ApplicationSubmissionHandlerProps {
   onCancel?: () => void;
 }
 
+// Interface for stored application
+interface StoredApplication {
+  id: string;
+  program: string;
+  programId?: number;
+  university: string;
+  status: string;
+  date: string;
+  statusColor: string;
+  messages: number;
+  studentId?: string;
+  studentName?: string;
+  documents: {
+    name: string;
+    status: 'uploaded' | 'required' | 'approved';
+  }[];
+  formData?: any;
+}
+
 const ApplicationSubmissionHandler = ({ 
   formData, 
   onSubmit, 
@@ -34,30 +53,70 @@ const ApplicationSubmissionHandler = ({
   const handleFormSubmit = () => {
     setIsSubmitting(true);
     
-    // Simulate API call with timeout
+    // Generate a unique application number
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
+    const appNumber = `APP-${randomNumber}`;
+    setApplicationNumber(appNumber);
+    
+    // Prepare application object for storage
+    const newApplication: StoredApplication = {
+      id: appNumber,
+      program: formData?.program?.name || "برنامج جديد",
+      programId: formData?.program?.id,
+      university: formData?.university || "الجامعة",
+      status: "pending", // Initial status
+      date: new Date().toISOString().split('T')[0],
+      statusColor: 'text-yellow-600 bg-yellow-100',
+      messages: 0,
+      studentName: formData?.personalInfo?.fullName || localStorage.getItem('userName') || "طالب",
+      studentId: localStorage.getItem('userId') || "user-" + Date.now(),
+      documents: [
+        { name: 'جواز السفر', status: 'required' },
+        { name: 'الشهادة الدراسية', status: 'required' },
+        { name: 'صورة شخصية', status: 'required' }
+      ],
+      formData: formData // Store the complete form data
+    };
+    
+    // Store the application in localStorage
     setTimeout(() => {
-      // Generate a random application number
-      const randomNumber = Math.floor(100000 + Math.random() * 900000);
-      const appNumber = `APP-${randomNumber}`;
-      setApplicationNumber(appNumber);
+      // Get existing applications (if any)
+      const existingApplicationsString = localStorage.getItem('studentApplications');
+      const existingApplications = existingApplicationsString 
+        ? JSON.parse(existingApplicationsString) 
+        : [];
       
-      // Here you would normally save the data to a database
-      console.log('Submitting application data:', formData);
+      // Add new application
+      existingApplications.push(newApplication);
       
-      // Show success message
+      // Store back in localStorage
+      localStorage.setItem('studentApplications', JSON.stringify(existingApplications));
+      
+      // Also store in admin applications
+      const adminAppsString = localStorage.getItem('adminApplications');
+      const adminApps = adminAppsString ? JSON.parse(adminAppsString) : [];
+      adminApps.push({
+        ...newApplication,
+        status: "pending", // Make sure it's pending for admin review
+      });
+      localStorage.setItem('adminApplications', JSON.stringify(adminApps));
+      
+      console.log('Application submitted:', newApplication);
+      
+      // Show success toast
       toast({
         title: "تم تقديم الطلب بنجاح",
         description: `رقم الطلب الخاص بك هو ${appNumber}`,
         variant: "default",
       });
       
-      // Open the confirmation dialog
+      // Open confirmation dialog
       setIsDialogOpen(true);
       setIsSubmitting(false);
       
-      // Call the onSubmit callback if provided
+      // Call onSubmit callback if provided
       if (onSubmit) onSubmit();
-    }, 1500); // Simulating network delay
+    }, 1500); // Simulate network delay
   };
 
   const viewApplicationStatus = () => {

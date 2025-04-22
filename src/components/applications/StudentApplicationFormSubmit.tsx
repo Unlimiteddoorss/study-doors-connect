@@ -31,6 +31,15 @@ const StudentApplicationFormSubmit = ({
       });
       return;
     }
+    
+    // Track submission in analytics
+    try {
+      console.log("Tracking form submission");
+      // Here you would add real analytics tracking
+    } catch (error) {
+      console.error("Analytics error:", error);
+    }
+    
     onSubmit();
   };
 
