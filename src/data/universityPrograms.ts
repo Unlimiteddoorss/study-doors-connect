@@ -26,8 +26,19 @@ export const getUniversityPrograms = (universityId: number): UniversityProgram[]
   switch(universityId) {
     case 5: // Gelisim University
       return gelisimPrograms;
+    case 1: // Istanbul Technical University
+      // Will add these later
+      return [];
+    case 2: // Bahcesehir University
+      // Will add these later
+      return [];
+    case 3: // Medipol University
+      // Will add these later
+      return [];
+    case 4: // Okan University
+      // Will add these later
+      return [];
     default:
       return [];
   }
 };
-
