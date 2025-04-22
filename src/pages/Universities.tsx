@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -9,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { Search, MapPin, School } from 'lucide-react';
 import { turkishUniversities } from '@/data/programsData';
 
-// ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
   'Turkey': 'تركيا',
   'Istanbul': 'إسطنبول',
@@ -30,7 +28,7 @@ const Universities = () => {
         turkishUniversities.filter(
           university =>
             university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            university.location.toLowerCase().includes(searchTerm.toLowerCase())
+            university.city.toLowerCase().includes(searchTerm.toLowerCase())
         )
       );
     } else {
@@ -38,13 +36,11 @@ const Universities = () => {
     }
   }, [searchTerm]);
 
-  // حساب صفحة العرض الحالية
   const indexOfLastUniversity = currentPage * universitiesPerPage;
   const indexOfFirstUniversity = indexOfLastUniversity - universitiesPerPage;
   const currentUniversities = filteredUniversities.slice(indexOfFirstUniversity, indexOfLastUniversity);
   const totalPages = Math.ceil(filteredUniversities.length / universitiesPerPage);
 
-  // التنقل بين الصفحات
   const paginate = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= totalPages) {
       setCurrentPage(pageNumber);
@@ -52,7 +48,6 @@ const Universities = () => {
     }
   };
 
-  // ترجمة الموقع من الإنجليزية إلى العربية
   const translateLocation = (location: string): string => {
     return countryTranslations[location] || location;
   };
@@ -65,7 +60,6 @@ const Universities = () => {
           subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
         />
 
-        {/* Search Component */}
         <div className="max-w-2xl mx-auto mb-10">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -79,14 +73,12 @@ const Universities = () => {
           </div>
         </div>
 
-        {/* Results info */}
         <div className="mb-6">
           <p className="text-unlimited-gray">
             تم العثور على <span className="font-semibold text-unlimited-blue">{filteredUniversities.length}</span> جامعة
           </p>
         </div>
 
-        {/* Universities Grid */}
         {currentUniversities.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {currentUniversities.map((university) => (
@@ -143,7 +135,6 @@ const Universities = () => {
           </div>
         )}
         
-        {/* Pagination */}
         {filteredUniversities.length > 0 && (
           <div className="flex justify-center mt-12">
             <div className="flex items-center gap-2">
@@ -156,7 +147,6 @@ const Universities = () => {
               </Button>
               
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                // إذا كان عدد الصفحات أكثر من 5، نعرض الصفحات المحيطة بالصفحة الحالية
                 let pageNum: number;
                 if (totalPages <= 5) {
                   pageNum = i + 1;
