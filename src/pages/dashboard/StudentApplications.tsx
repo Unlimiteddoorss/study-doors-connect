@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -92,7 +91,6 @@ const StudentApplications = () => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
   
-  // Status map for labels and colors
   const statusConfig = {
     pending: { label: t('application.status.pending'), color: 'bg-yellow-100 text-yellow-800', icon: <Clock className="h-4 w-4" /> },
     review: { label: t('application.status.review'), color: 'bg-blue-100 text-blue-800', icon: <Clock className="h-4 w-4" /> },
@@ -104,12 +102,10 @@ const StudentApplications = () => {
     registered: { label: t('application.status.registered'), color: 'bg-teal-100 text-teal-800', icon: <Check className="h-4 w-4" /> },
   };
   
-  // Load applications from localStorage and API if available
   useEffect(() => {
     const fetchApplications = async () => {
       setIsLoading(true);
       try {
-        // First check if there's an API endpoint configured
         const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
         
         if (apiEndpoint) {
@@ -119,7 +115,6 @@ const StudentApplications = () => {
             if (response.ok) {
               const data = await response.json();
               setApplications(data);
-              // Update local storage with the latest data
               localStorage.setItem('studentApplications', JSON.stringify(data));
               return;
             }
@@ -128,11 +123,9 @@ const StudentApplications = () => {
           }
         }
         
-        // Fallback to local storage
         const storedApps = localStorage.getItem('studentApplications');
         if (storedApps) {
           const parsedApps = JSON.parse(storedApps);
-          // Ensure all applications have the required fields
           const processedApps = parsedApps.map((app: any) => ({
             ...app,
             statusColor: app.statusColor || getStatusColorFromStatus(app.status),
@@ -158,26 +151,21 @@ const StudentApplications = () => {
     fetchApplications();
   }, [toast, t]);
 
-  // Get status color from status string
   const getStatusColorFromStatus = (status: ApplicationStatus) => {
     return statusConfig[status]?.color || 'bg-gray-100 text-gray-800';
   };
   
-  // Generate random PIN code for applications that don't have one
   const generateRandomPinCode = () => {
     return Math.floor(10000000 + Math.random() * 90000000).toString();
   };
 
-  // Filter applications based on active tab and search query
   const getFilteredApplications = () => {
     let filtered = applications;
     
-    // Apply tab filter
     if (activeTab !== 'all') {
       filtered = filtered.filter(app => app.status === activeTab);
     }
     
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(app => 
@@ -187,7 +175,6 @@ const StudentApplications = () => {
       );
     }
     
-    // Apply sorting
     filtered = [...filtered].sort((a, b) => {
       let compareA = a[sortField];
       let compareB = b[sortField];
@@ -210,7 +197,6 @@ const StudentApplications = () => {
     return filtered;
   };
 
-  // Toggle sort direction when clicking a column header
   const handleSort = (field: keyof Application) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -225,7 +211,6 @@ const StudentApplications = () => {
       title: t("application.notifications.messageOpen"),
       description: t("application.notifications.messageOpenDesc", { id: applicationId }),
     });
-    // Navigate to messages with application context
     navigate(`/messages?applicationId=${applicationId}`);
   };
 
@@ -235,23 +220,20 @@ const StudentApplications = () => {
       description: t("application.notifications.downloadingDesc", { document }),
     });
     
-    // In a real app, this would download from your server/storage
-    // For now, we'll create a sample PDF and trigger download
     const samplePDF = new Blob(['This is a sample document'], { type: 'application/pdf' });
     const url = URL.createObjectURL(samplePDF);
-    const a = document.createElement('a');
+    const a = window.document.createElement('a');
     a.href = url;
     a.download = `${document}_${applicationId}.pdf`;
-    document.body.appendChild(a);
+    window.document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    window.document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
   const handleUploadDocument = (applicationId: number | string, docName: string) => {
     setSelectedDocument({ applicationId, docName });
     setIsUploadDialogOpen(true);
-    // Reset the file input when opening dialog
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -261,10 +243,8 @@ const StudentApplications = () => {
     if (!files || !files.length || !selectedDocument) return;
     
     const file = files[0];
-    // In a real app, you would upload this to a server
     console.log(`Uploading ${file.name} for application ${selectedDocument.applicationId}`);
     
-    // Update the application's document status
     const updatedApplications = applications.map(app => {
       if (app.id === selectedDocument.applicationId) {
         const updatedDocuments = app.documents.map(doc => {
@@ -278,11 +258,9 @@ const StudentApplications = () => {
       return app;
     });
     
-    // Update state and localStorage
     setApplications(updatedApplications);
     localStorage.setItem('studentApplications', JSON.stringify(updatedApplications));
     
-    // If we have an API endpoint, attempt to update there too
     const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
     if (apiEndpoint) {
       const formData = new FormData();
@@ -298,13 +276,11 @@ const StudentApplications = () => {
       });
     }
     
-    // Show success message
     toast({
       title: t("application.notifications.uploadSuccess"),
       description: t("application.notifications.uploadSuccessDesc", { document: selectedDocument.docName }),
     });
     
-    // Close dialog
     setIsUploadDialogOpen(false);
   };
 
@@ -318,7 +294,6 @@ const StudentApplications = () => {
   };
   
   const exportToExcel = () => {
-    // Create CSV content
     const headers = ['ID', 'Program', 'University', 'Status', 'Date', 'Academic Year', 'Semester', 'PIN Code'];
     const filteredApps = getFilteredApplications();
     
@@ -327,7 +302,7 @@ const StudentApplications = () => {
     filteredApps.forEach(app => {
       const row = [
         app.id,
-        `"${app.program.replace(/"/g, '""')}"`, // Escape quotes in CSV
+        `"${app.program.replace(/"/g, '""')}"`,
         `"${app.university.replace(/"/g, '""')}"`,
         statusConfig[app.status].label,
         app.date,
@@ -338,18 +313,15 @@ const StudentApplications = () => {
       csvContent += row.join(',') + '\n';
     });
     
-    // Create a downloadable blob
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     
-    // Create a download link and click it
     if (exportRef.current) {
       exportRef.current.href = url;
       exportRef.current.download = 'my_applications.csv';
       exportRef.current.click();
     }
     
-    // Clean up
     setTimeout(() => URL.revokeObjectURL(url), 100);
     
     toast({
@@ -376,7 +348,6 @@ const StudentApplications = () => {
                 <Download className="h-4 w-4" />
                 {t("application.export.toExcel")}
               </Button>
-              {/* Hidden anchor for exports */}
               <a ref={exportRef} className="hidden"></a>
             </div>
           </CardHeader>
@@ -398,7 +369,6 @@ const StudentApplications = () => {
             
             <TabsContent value={activeTab} className="p-0 pt-4">
               <CardContent>
-                {/* Search and filters */}
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray" />
@@ -553,7 +523,6 @@ const StudentApplications = () => {
         </Card>
       </div>
       
-      {/* Document Upload Dialog */}
       <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -591,7 +560,6 @@ const StudentApplications = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Application Details Dialog */}
       <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           {selectedApplication && (
