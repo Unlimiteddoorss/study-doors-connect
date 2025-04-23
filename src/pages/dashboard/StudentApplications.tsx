@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -391,131 +391,128 @@ const StudentApplications = () => {
                   </Select>
                 </div>
               
-                {isLoading ? (
-                  <div className="flex justify-center items-center h-40">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
+                {!isLoading && applications.length === 0 && (
+                  <div className="text-center py-8">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-2 text-unlimited-gray" />
+                    <p className="text-unlimited-gray mb-4">{t("application.noApplications.message")}</p>
+                    <Button onClick={handleNewApplication} className="gap-2">
+                      <PlusCircle className="h-4 w-4" />
+                      {t("application.noApplications.apply")}
+                    </Button>
                   </div>
-                ) : (
-                  <>
-                    {getFilteredApplications().length > 0 ? (
-                      <div className="border rounded-md overflow-hidden">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead 
-                                className={`cursor-pointer ${sortField === 'id' ? 'bg-gray-50' : ''}`}
-                                onClick={() => handleSort('id')}
-                              >
-                                {t("application.table.id")} 
-                                {sortField === 'id' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                              </TableHead>
-                              <TableHead 
-                                className={`cursor-pointer ${sortField === 'program' ? 'bg-gray-50' : ''}`}
-                                onClick={() => handleSort('program')}
-                              >
-                                {t("application.table.program")}
-                                {sortField === 'program' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                              </TableHead>
-                              <TableHead 
-                                className={`cursor-pointer ${sortField === 'university' ? 'bg-gray-50' : ''}`}
-                                onClick={() => handleSort('university')}
-                              >
-                                {t("application.table.university")}
-                                {sortField === 'university' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                              </TableHead>
-                              <TableHead 
-                                className={`cursor-pointer ${sortField === 'status' ? 'bg-gray-50' : ''}`}
-                                onClick={() => handleSort('status')}
-                              >
-                                {t("application.table.status")}
-                                {sortField === 'status' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                              </TableHead>
-                              <TableHead 
-                                className={`cursor-pointer ${sortField === 'date' ? 'bg-gray-50' : ''}`}
-                                onClick={() => handleSort('date')}
-                              >
-                                {t("application.table.date")}
-                                {sortField === 'date' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                              </TableHead>
-                              <TableHead>{t("application.table.documents")}</TableHead>
-                              <TableHead>{t("application.table.actions")}</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {getFilteredApplications().map((app) => (
-                              <TableRow key={app.id} className="hover:bg-gray-50">
-                                <TableCell className="font-medium">{app.id}</TableCell>
-                                <TableCell>{app.program}</TableCell>
-                                <TableCell>{app.university}</TableCell>
-                                <TableCell>
-                                  <Badge className={statusConfig[app.status].color + " flex w-fit items-center gap-1"}>
-                                    {statusConfig[app.status].icon}
-                                    {statusConfig[app.status].label}
+                )}
+                
+                {!isLoading && getFilteredApplications().length > 0 && (
+                  <div className="border rounded-md overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead 
+                            className={`cursor-pointer ${sortField === 'id' ? 'bg-gray-50' : ''}`}
+                            onClick={() => handleSort('id')}
+                          >
+                            {t("application.table.id")} 
+                            {sortField === 'id' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                          </TableHead>
+                          <TableHead 
+                            className={`cursor-pointer ${sortField === 'program' ? 'bg-gray-50' : ''}`}
+                            onClick={() => handleSort('program')}
+                          >
+                            {t("application.table.program")}
+                            {sortField === 'program' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                          </TableHead>
+                          <TableHead 
+                            className={`cursor-pointer ${sortField === 'university' ? 'bg-gray-50' : ''}`}
+                            onClick={() => handleSort('university')}
+                          >
+                            {t("application.table.university")}
+                            {sortField === 'university' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                          </TableHead>
+                          <TableHead 
+                            className={`cursor-pointer ${sortField === 'status' ? 'bg-gray-50' : ''}`}
+                            onClick={() => handleSort('status')}
+                          >
+                            {t("application.table.status")}
+                            {sortField === 'status' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                          </TableHead>
+                          <TableHead 
+                            className={`cursor-pointer ${sortField === 'date' ? 'bg-gray-50' : ''}`}
+                            onClick={() => handleSort('date')}
+                          >
+                            {t("application.table.date")}
+                            {sortField === 'date' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
+                          </TableHead>
+                          <TableHead>{t("application.table.documents")}</TableHead>
+                          <TableHead>{t("application.table.actions")}</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {getFilteredApplications().map((app) => (
+                          <TableRow key={app.id} className="hover:bg-gray-50">
+                            <TableCell className="font-medium">{app.id}</TableCell>
+                            <TableCell>{app.program}</TableCell>
+                            <TableCell>{app.university}</TableCell>
+                            <TableCell>
+                              <Badge className={statusConfig[app.status].color + " flex w-fit items-center gap-1"}>
+                                {statusConfig[app.status].icon}
+                                {statusConfig[app.status].label}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{app.date}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                {app.documents.filter(d => d.status === 'required').length > 0 ? (
+                                  <Badge variant="destructive" className="rounded-full px-2 py-0 text-xs">
+                                    {app.documents.filter(d => d.status === 'required').length}
                                   </Badge>
-                                </TableCell>
-                                <TableCell>{app.date}</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-1">
-                                    {app.documents.filter(d => d.status === 'required').length > 0 ? (
-                                      <Badge variant="destructive" className="rounded-full px-2 py-0 text-xs">
-                                        {app.documents.filter(d => d.status === 'required').length}
-                                      </Badge>
-                                    ) : null}
-                                    {app.documents.filter(d => d.status === 'uploaded').length > 0 ? (
-                                      <Badge variant="outline" className="rounded-full px-2 py-0 text-xs">
-                                        {app.documents.filter(d => d.status === 'uploaded').length}
-                                      </Badge>
-                                    ) : null}
-                                    {app.documents.filter(d => d.status === 'approved').length > 0 ? (
-                                      <Badge variant="default" className="rounded-full px-2 py-0 text-xs">
-                                        {app.documents.filter(d => d.status === 'approved').length}
-                                      </Badge>
-                                    ) : null}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-1">
-                                    <Button size="icon" variant="ghost" onClick={() => handleViewDetails(app)}>
-                                      <ExternalLink className="h-4 w-4" />
-                                      <span className="sr-only">View Details</span>
-                                    </Button>
-                                    <Button size="icon" variant="ghost" onClick={() => handleMessageClick(app.id)}>
-                                      <MessageSquare className="h-4 w-4" />
-                                      <span className="sr-only">Messages</span>
-                                      {app.messages > 0 && (
-                                        <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 flex items-center justify-center" variant="destructive">
-                                          {app.messages}
-                                        </Badge>
-                                      )}
-                                    </Button>
-                                    <Button size="icon" variant="ghost" onClick={() => navigate(`/dashboard/applications/${app.id}`)}>
-                                      <FileText className="h-4 w-4" />
-                                      <span className="sr-only">View Application</span>
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <AlertCircle className="h-12 w-12 mx-auto mb-2 text-unlimited-gray" />
-                        <p className="text-unlimited-gray mb-4">{t("application.noApplications.message")}</p>
-                        <Button onClick={handleNewApplication} className="gap-2">
-                          <PlusCircle className="h-4 w-4" />
-                          {t("application.noApplications.apply")}
-                        </Button>
-                      </div>
-                    )}
-                    
-                    {getFilteredApplications().length > 0 && (
-                      <div className="mt-4 text-sm text-unlimited-gray text-center">
-                        {t("application.table.showing", { count: getFilteredApplications().length, total: applications.length })}
-                      </div>
-                    )}
-                  </>
+                                ) : null}
+                                {app.documents.filter(d => d.status === 'uploaded').length > 0 ? (
+                                  <Badge variant="outline" className="rounded-full px-2 py-0 text-xs">
+                                    {app.documents.filter(d => d.status === 'uploaded').length}
+                                  </Badge>
+                                ) : null}
+                                {app.documents.filter(d => d.status === 'approved').length > 0 ? (
+                                  <Badge variant="default" className="rounded-full px-2 py-0 text-xs">
+                                    {app.documents.filter(d => d.status === 'approved').length}
+                                  </Badge>
+                                ) : null}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button size="icon" variant="ghost" onClick={() => handleViewDetails(app)}>
+                                  <ExternalLink className="h-4 w-4" />
+                                  <span className="sr-only">View Details</span>
+                                </Button>
+                                <Button size="icon" variant="ghost" onClick={() => handleMessageClick(app.id)}>
+                                  <MessageSquare className="h-4 w-4" />
+                                  <span className="sr-only">Messages</span>
+                                  {app.messages > 0 && (
+                                    <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 flex items-center justify-center" variant="destructive">
+                                      {app.messages}
+                                    </Badge>
+                                  )}
+                                </Button>
+                                <Button size="icon" variant="ghost" onClick={() => navigate(`/dashboard/applications/${app.id}`)}>
+                                  <FileText className="h-4 w-4" />
+                                  <span className="sr-only">View Application</span>
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+                
+                {!isLoading && getFilteredApplications().length > 0 && (
+                  <div className="mt-4 text-sm text-unlimited-gray text-center">
+                    {t("application.table.showing", { 
+                      count: getFilteredApplications().length, 
+                      total: applications.length 
+                    })}
+                  </div>
                 )}
               </CardContent>
             </TabsContent>
