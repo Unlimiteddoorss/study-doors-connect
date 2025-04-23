@@ -110,7 +110,7 @@ const StudentApplications = () => {
       setIsLoading(true);
       try {
         // First check if there's an API endpoint configured
-        const apiEndpoint = process.env.VITE_API_ENDPOINT;
+        const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
         
         if (apiEndpoint) {
           try {
@@ -283,7 +283,7 @@ const StudentApplications = () => {
     localStorage.setItem('studentApplications', JSON.stringify(updatedApplications));
     
     // If we have an API endpoint, attempt to update there too
-    const apiEndpoint = process.env.VITE_API_ENDPOINT;
+    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
     if (apiEndpoint) {
       const formData = new FormData();
       formData.append('file', file);

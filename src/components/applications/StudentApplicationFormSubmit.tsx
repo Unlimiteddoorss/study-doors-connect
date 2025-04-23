@@ -28,8 +28,9 @@ const StudentApplicationFormSubmit = ({
   onSubmit
 }: StudentApplicationFormSubmitProps) => {
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const isRtl = i18n.language === 'ar';
 
   const handleSubmit = () => {
     // Reset validation errors
@@ -59,18 +60,16 @@ const StudentApplicationFormSubmit = ({
       console.log("Tracking form submission event");
       
       // Handle Google Analytics tracking properly
-      if (typeof window !== 'undefined') {
-        if (window.gtag) {
-          window.gtag('event', 'form_submission', {
-            'event_category': 'application',
-            'event_label': 'student_application',
-            'value': isLastStep ? 'final_submit' : 'next_step'
-          });
-        } else {
-          // Fallback tracking for when gtag is not available
-          console.log("Google Analytics not available, tracking locally");
-          // You could implement a custom event tracking solution here
-        }
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'form_submission', {
+          'event_category': 'application',
+          'event_label': 'student_application',
+          'value': isLastStep ? 'final_submit' : 'next_step'
+        });
+      } else {
+        // Fallback tracking for when gtag is not available
+        console.log("Google Analytics not available, tracking locally");
+        // You could implement a custom event tracking solution here
       }
       
       // Additional tracking services could be added here
@@ -112,8 +111,17 @@ const StudentApplicationFormSubmit = ({
           disabled={isSubmitting}
           className="order-2 sm:order-1 flex items-center gap-1"
         >
-          <ArrowRight className="h-4 w-4 rtl:rotate-180" />
-          {t('application.navigation.previous')}
+          {isRtl ? (
+            <>
+              {t('application.navigation.previous')}
+              <ArrowRight className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              <ArrowLeft className="h-4 w-4" />
+              {t('application.navigation.previous')}
+            </>
+          )}
         </Button>
         {isLastStep ? (
           <Button
@@ -139,8 +147,17 @@ const StudentApplicationFormSubmit = ({
             disabled={isSubmitting}
             className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1"
           >
-            {t('application.navigation.next')}
-            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+            {isRtl ? (
+              <>
+                <ArrowLeft className="h-4 w-4" />
+                {t('application.navigation.next')}
+              </>
+            ) : (
+              <>
+                {t('application.navigation.next')}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
           </Button>
         )}
       </div>

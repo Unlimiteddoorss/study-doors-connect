@@ -59,22 +59,25 @@ const ApplicationSubmissionHandler = ({
   const [submissionProgress, setSubmissionProgress] = useState<number>(0);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
 
+  // Function to handle form submission
   const handleFormSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
     setSubmissionProgress(10);
     
     try {
-      // Generate unique application number
-      const randomNumber = Math.floor(100000 + Math.random() * 900000);
-      const appNumber = `APP-${randomNumber}`;
+      // Generate unique application number with current date prefix
+      const now = new Date();
+      const datePrefix = `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}`;
+      const randomNumber = Math.floor(10000 + Math.random() * 90000);
+      const appNumber = `APP-${datePrefix}-${randomNumber}`;
       setApplicationNumber(appNumber);
       setSubmissionProgress(20);
       
       // Get current semester based on date
-      const now = new Date();
       const semester = now.getMonth() >= 8 || now.getMonth() <= 1 ? 'Fall' : 'Spring';
       const academicYear = `${now.getFullYear()}-${now.getFullYear() + 1}`;
       
@@ -106,7 +109,7 @@ const ApplicationSubmissionHandler = ({
       setSubmissionProgress(40);
 
       try {
-        // Prepare payload for API
+        // Prepare payload for API with additional metadata
         const payload = {
           application: newApplication,
           submitDate: new Date().toISOString(),
@@ -114,44 +117,58 @@ const ApplicationSubmissionHandler = ({
           source: window.location.hostname,
           referrer: document.referrer,
           sessionId: localStorage.getItem('sessionId') || generateSessionId(),
-          language: localStorage.getItem('language') || 'ar',
+          language: localStorage.getItem('language') || i18n.language,
+          userAgent: navigator.userAgent,
+          screen: {
+            width: window.screen.width,
+            height: window.screen.height
+          },
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
         };
 
-        console.log("Sending data to API:", API_ENDPOINT);
+        console.log("Sending application data to API:", API_ENDPOINT);
         setSubmissionProgress(60);
 
-        // Send application data to API
-        const response = await fetch(API_ENDPOINT, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-Application-Source': 'web',
-            // Add auth token if available
-            ...(localStorage.getItem('authToken') ? {
-              'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-            } : {})
-          },
-          body: JSON.stringify(payload)
-        });
+        // Check if we have a valid API endpoint before attempting API call
+        if (API_ENDPOINT && API_ENDPOINT !== 'https://api.unlimited-education.com/api/applications') {
+          // Send application data to API with retry mechanism
+          const response = await fetchWithRetry(API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-Application-Source': 'web',
+              // Add auth token if available
+              ...(localStorage.getItem('authToken') ? {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+              } : {})
+            },
+            body: JSON.stringify(payload)
+          }, 3); // Retry up to 3 times
 
-        setSubmissionProgress(80);
+          setSubmissionProgress(80);
 
-        // Parse response
-        const responseData = await response.json();
+          // Parse response
+          const responseData = await response.json();
 
-        // Validate response
-        if (!response.ok) {
-          throw new Error(responseData.message || t('application.error.submitFailed'));
-        }
+          // Validate response
+          if (!response.ok) {
+            throw new Error(responseData.message || t('application.error.submitFailed'));
+          }
 
-        console.log('Application submitted successfully:', responseData);
-        
-        // If API returns updated application data, use it
-        if (responseData.application) {
-          saveApplicationToLocalStorage(responseData.application);
+          console.log('Application submitted successfully:', responseData);
+          
+          // If API returns updated application data, use it
+          if (responseData.application) {
+            saveApplicationToLocalStorage(responseData.application);
+          } else {
+            // Otherwise use our local version
+            saveApplicationToLocalStorage(newApplication);
+          }
         } else {
-          // Otherwise use our local version
+          // No valid API endpoint, just use local storage
+          console.log('No valid API endpoint specified, saving to local storage only');
+          setSubmissionProgress(80);
           saveApplicationToLocalStorage(newApplication);
         }
         
@@ -211,6 +228,22 @@ const ApplicationSubmissionHandler = ({
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Fetch with retry mechanism for handling network issues
+  const fetchWithRetry = async (url: string, options: RequestInit, retries = 3, delay = 1000) => {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (retries <= 1) throw err;
+      
+      // Wait for the specified delay
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      // Retry with one fewer retry remaining
+      console.log(`Retrying fetch, ${retries-1} retries left`);
+      return fetchWithRetry(url, options, retries - 1, delay * 2);
     }
   };
 
@@ -282,10 +315,47 @@ const ApplicationSubmissionHandler = ({
   useEffect(() => {
     // Sync pending applications function
     const syncPendingApplications = async () => {
-      // Add sync logic here if needed
+      try {
+        // Check if there's anything to sync
+        const pendingSync = localStorage.getItem('pendingApplicationSync');
+        if (!pendingSync) return;
+        
+        const pendingApps = JSON.parse(pendingSync);
+        if (!pendingApps.length) return;
+        
+        console.log(`Found ${pendingApps.length} pending applications to sync`);
+        
+        // Try to sync each pending application
+        for (const app of pendingApps) {
+          try {
+            const response = await fetch(`${API_ENDPOINT}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Application-Source': 'web-sync',
+              },
+              body: JSON.stringify(app)
+            });
+            
+            if (response.ok) {
+              // Remove from pending list
+              const updatedPending = pendingApps.filter((a: any) => a.application.id !== app.application.id);
+              localStorage.setItem('pendingApplicationSync', JSON.stringify(updatedPending));
+              
+              console.log(`Successfully synced application ${app.application.id}`);
+            }
+          } catch (syncError) {
+            console.error(`Failed to sync application ${app.application.id}:`, syncError);
+            // Keep in pending list for next attempt
+          }
+        }
+      } catch (error) {
+        console.error("Error syncing pending applications:", error);
+      }
     };
 
-    // Only sync if API endpoint is available
+    // Only sync if API endpoint is available and valid
     if (API_ENDPOINT && API_ENDPOINT !== 'https://api.unlimited-education.com/api/applications') {
       syncPendingApplications();
     }
@@ -332,7 +402,7 @@ const ApplicationSubmissionHandler = ({
         <div className="mt-4">
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
             <div 
-              className="bg-unlimited-blue h-2.5 rounded-full" 
+              className="bg-unlimited-blue h-2.5 rounded-full transition-all duration-300" 
               style={{ width: `${submissionProgress}%` }}
             ></div>
           </div>
@@ -392,7 +462,7 @@ const ApplicationSubmissionHandler = ({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-unlimited-gray">{t('application.summary.date')}:</span>
-                    <span>{new Date().toLocaleDateString()}</span>
+                    <span>{new Date().toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-US')}</span>
                   </div>
                 </div>
               </div>
