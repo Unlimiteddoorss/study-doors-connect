@@ -19,6 +19,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import StudentApplication from "./pages/StudentApplication";
+import ProgramApplication from "./pages/ProgramApplication";
 import Services from "./pages/Services";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageStudents from "./pages/admin/ManageStudents";
@@ -51,6 +52,7 @@ function App() {
         <Route path="/countries/:id" element={<CountryDetails />} />
         <Route path="/programs" element={<Programs />} />
         <Route path="/programs/:id" element={<ProgramDetails />} />
+        <Route path="/program-application/:programId" element={<ProgramApplication />} />
         <Route path="/medical-programs" element={<MedicalPrograms />} />
         <Route path="/engineering-programs" element={<EngineeringPrograms />} />
         <Route path="/scholarships" element={<Scholarships />} />
