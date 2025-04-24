@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -19,13 +18,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ApplicationDocuments from '@/components/applications/ApplicationDocuments';
+import ApplicationMessages from '@/components/applications/ApplicationMessages';
 
-// Sample data - in a real app, this would come from an API
 const programs = [
   {
     id: 1,
     title: "Medicine (English)",
-    titleAr: "الطب البشري (بالإنجليزية)",
+    titleAr: "الط�� البشري (بالإنجليزية)",
     university: "Istanbul University",
     universityAr: "جامعة اسطنبول",
     country: "Turkey",
@@ -144,17 +144,19 @@ const myApplications = [
 ];
 
 const StudentApplication = () => {
+  const [searchParams] = useSearchParams();
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('all_countries');
   const [selectedLevel, setSelectedLevel] = useState('all_levels');
   const [selectedLanguage, setSelectedLanguage] = useState('all_languages');
   const [activeTab, setActiveTab] = useState('new-application');
+  const [applicationDetailTab, setApplicationDetailTab] = useState('form');
+  const [selectedApplication, setSelectedApplication] = useState<number | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
   const isRtl = i18n.language === 'ar';
   
-  // Function to get localized field values
   const getLocalizedValue = (enValue: string, arValue: string) => {
     return i18n.language === 'ar' ? arValue : enValue;
   };
@@ -199,11 +201,15 @@ const StudentApplication = () => {
       title: t("application.notifications.continueApplication"),
       description: t("application.notifications.continueApplicationDesc"),
     });
-    setActiveTab('new-application');
+    setSelectedApplication(applicationId);
+    setApplicationDetailTab('form');
+    setActiveTab('application-detail');
   };
   
   const handleViewApplication = (applicationId: number) => {
-    navigate(`/dashboard/applications/${applicationId}`);
+    setSelectedApplication(applicationId);
+    setApplicationDetailTab('form');
+    setActiveTab('application-detail');
   };
 
   const getStatusBadge = (status: string) => {
@@ -231,19 +237,36 @@ const StudentApplication = () => {
     };
   };
   
-  // Get countries, levels and languages for filters
+  const getApplicationById = (id: number) => {
+    return myApplications.find(app => app.id === id);
+  };
+  
   const countries = [...new Set(programs.map(p => p.country))];
   const levels = [...new Set(programs.map(p => p.level))];
   const languages = [...new Set(programs.map(p => p.language))];
 
-  // Effect to set the tab from URL params
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
+    const programId = searchParams.get('program');
+    const applicationId = searchParams.get('application');
+    
+    if (applicationId) {
+      const appId = parseInt(applicationId);
+      if (!isNaN(appId)) {
+        setSelectedApplication(appId);
+        setActiveTab('application-detail');
+        return;
+      }
+    }
+    
+    const tab = searchParams.get('tab');
     if (tab && ['new-application', 'browse-programs', 'my-applications'].includes(tab)) {
       setActiveTab(tab);
+      return;
     }
-  }, []);
+  }, [searchParams]);
+
+  const currentApplication = selectedApplication ? getApplicationById(selectedApplication) : null;
+  const currentProgram = currentApplication ? getProgramById(currentApplication.programId) : null;
 
   return (
     <MainLayout>
@@ -259,16 +282,179 @@ const StudentApplication = () => {
               <TabsTrigger value="new-application">{t("application.tabs.newApplication")}</TabsTrigger>
               <TabsTrigger value="browse-programs">{t("application.tabs.browsePrograms")}</TabsTrigger>
               <TabsTrigger value="my-applications">{t("application.tabs.myApplications")}</TabsTrigger>
+              <TabsTrigger value="application-detail" className="hidden"></TabsTrigger>
             </TabsList>
             
             <TabsContent value="new-application" className="space-y-4">
               <StudentApplicationForm />
             </TabsContent>
             
+            <TabsContent value="application-detail" className="space-y-4">
+              {currentApplication && currentProgram && (
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h2 className="text-2xl font-bold text-unlimited-blue">
+                        {getLocalizedValue(currentProgram.title, currentProgram.titleAr)}
+                      </h2>
+                      <p className="text-unlimited-gray">
+                        {getLocalizedValue(currentProgram.university, currentProgram.universityAr)} | 
+                        {getLocalizedValue("Application", "رقم الطلب")}: #{selectedApplication}
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-col md:flex-row items-end md:items-center gap-2">
+                      {getStatusBadge(currentApplication.status)}
+                      
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => setActiveTab('my-applications')}
+                      >
+                        Back to Applications
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6">
+                    <Tabs value={applicationDetailTab} onValueChange={setApplicationDetailTab}>
+                      <TabsList className="grid w-full md:w-[600px] grid-cols-3">
+                        <TabsTrigger value="form">
+                          <FileText className="h-4 w-4 mr-2" />
+                          Application Form
+                        </TabsTrigger>
+                        <TabsTrigger value="documents">
+                          <FileText className="h-4 w-4 mr-2" />
+                          {t("application.documents.title")}
+                        </TabsTrigger>
+                        <TabsTrigger value="messages">
+                          <FileText className="h-4 w-4 mr-2" />
+                          {t("application.messages.title")}
+                        </TabsTrigger>
+                      </TabsList>
+                      
+                      <TabsContent value="form" className="mt-6">
+                        <div className="space-y-4">
+                          {currentApplication.status === 'incomplete' ? (
+                            <StudentApplicationForm />
+                          ) : (
+                            <Card>
+                              <CardHeader>
+                                <CardTitle>Application Details</CardTitle>
+                                <CardDescription>
+                                  Submitted on {currentApplication.submissionDate}
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent className="space-y-6">
+                                <div className="border-b pb-4">
+                                  <h3 className="font-semibold text-lg mb-3">{t("application.personal.title")}</h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.personal.firstName")}</p>
+                                      <p>محمد</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.personal.lastName")}</p>
+                                      <p>أحمد</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.personal.email")}</p>
+                                      <p>mohamed@example.com</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.personal.phone")}</p>
+                                      <p>+965 1234 5678</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.personal.dateOfBirth")}</p>
+                                      <p>15/07/2000</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.personal.nationality")}</p>
+                                      <p>Kuwait</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="border-b pb-4">
+                                  <h3 className="font-semibold text-lg mb-3">{t("application.academic.title")}</h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.academic.highSchoolName")}</p>
+                                      <p>Kuwait International School</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.academic.yearOfGraduation")}</p>
+                                      <p>2023</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.academic.gpa")}</p>
+                                      <p>3.8</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.academic.certificateType")}</p>
+                                      <p>{t("application.academic.scientificTrack")}</p>
+                                    </div>
+                                    <div className="md:col-span-2">
+                                      <p className="text-sm text-unlimited-gray">{t("application.academic.englishProficiency")}</p>
+                                      <p>IELTS: 7.5</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div>
+                                  <h3 className="font-semibold text-lg mb-3">{t("application.program.title")}</h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.program.selectProgram")}</p>
+                                      <p>{getLocalizedValue(currentProgram.title, currentProgram.titleAr)}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.program.selectUniversity")}</p>
+                                      <p>{getLocalizedValue(currentProgram.university, currentProgram.universityAr)}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.program.intakeDate")}</p>
+                                      <p>{getLocalizedValue("Fall 2025", "خريف 2025")}</p>
+                                    </div>
+                                    <div>
+                                      <p className="text-sm text-unlimited-gray">{t("application.program.programLevel")}</p>
+                                      <p>{getLocalizedValue(currentProgram.level, currentProgram.levelAr)}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
+                      </TabsContent>
+                      
+                      <TabsContent value="documents" className="mt-6">
+                        <ApplicationDocuments 
+                          programName={getLocalizedValue(currentProgram.title, currentProgram.titleAr)}
+                          universityName={getLocalizedValue(currentProgram.university, currentProgram.universityAr)}
+                          applicationId={selectedApplication}
+                          readOnly={currentApplication.status !== 'incomplete'}
+                        />
+                      </TabsContent>
+                      
+                      <TabsContent value="messages" className="mt-6">
+                        <ApplicationMessages
+                          programName={getLocalizedValue(currentProgram.title, currentProgram.titleAr)}
+                          universityName={getLocalizedValue(currentProgram.university, currentProgram.universityAr)}
+                          applicationId={selectedApplication}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+            
             <TabsContent value="browse-programs" className="space-y-4">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t("application.tabs.browsePrograms")}</h2>
+                  <h2 className="text-2xl font-bold text-unlimited-blue">{t("application.tabs.browsePrograms")}</h2>
                   <p className="text-unlimited-gray">
                     {isRtl ? 
                       "اختر من بين مجموعة متنوعة من البرامج الدراسية المتاحة" : 
@@ -419,7 +605,7 @@ const StudentApplication = () => {
             <TabsContent value="my-applications" className="space-y-4">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t("application.myApplications.title")}</h2>
+                  <h2 className="text-2xl font-bold text-unlimited-blue">{t("application.myApplications.title")}</h2>
                   <p className="text-unlimited-gray">{t("application.myApplications.subtitle")}</p>
                 </div>
                 
