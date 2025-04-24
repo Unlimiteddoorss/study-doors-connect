@@ -1,11 +1,9 @@
-
 import { useState, useEffect } from 'react';
-import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload } from 'lucide-react';
+import { Download, Edit, Eye, Search, Upload, MoreHorizontal, Plus, Trash, CheckCircle } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FormDialog } from '@/components/admin/FormDialog';
 import {
   Dialog,
   DialogContent,
@@ -16,28 +14,18 @@ import {
   DialogTrigger
 } from '@/components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useTranslation } from 'react-i18next';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { TablePagination } from '@/components/admin/TablePagination';
+import { TableSkeleton } from '@/components/admin/TableSkeleton';
+import { FilterableTable } from '@/components/admin/FilterableTable';
+import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,11 +36,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
-import { useTableFilters } from '@/hooks/admin/useTableFilters';
-import { TablePagination } from '@/components/admin/TablePagination';
-import { TableSkeleton } from '@/components/admin/TableSkeleton';
 
 interface Student {
   id: string;
@@ -122,16 +105,23 @@ const nationalities = [
   'ليبي'
 ];
 
-const itemsPerPage = 10;
+const statusConfig = {
+  active: { label: 'Active', color: 'bg-green-500 text-white' },
+  inactive: { label: 'Inactive', color: 'bg-gray-500 text-white' },
+  pending: { label: 'Pending', color: 'bg-yellow-500 text-white' },
+  graduated: { label: 'Graduated', color: 'bg-blue-500 text-white' },
+};
 
 const ManageStudents = () => {
   const [students, setStudents] = useState<Student[]>(dummyStudents);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const { toast } = useToast();
+  const { t } = useTranslation();
   const [newStudent, setNewStudent] = useState<Partial<Student>>({
     name: '',
     email: '',
@@ -141,10 +131,7 @@ const ManageStudents = () => {
     university: '',
     status: 'pending'
   });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-  const { t } = useTranslation();
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const {
     searchQuery,
@@ -160,6 +147,59 @@ const ManageStudents = () => {
       { field: 'status', defaultValue: 'all' }
     ]
   );
+
+  const handleImportStudents = () => {
+    // Simulate importing students
+    const importedStudents = [
+      {
+        id: `ST${String(students.length + 1).padStart(3, '0')}`,
+        name: "عبدالرحمن ناصر",
+        email: "abdulrahman@example.com",
+        phone: "+966512345678",
+        nationality: "سعودي",
+        program: "علوم الحاسب",
+        university: "جامعة الإمام",
+        status: "active" as const
+      },
+      {
+        id: `ST${String(students.length + 2).padStart(3, '0')}`,
+        name: "نورة علي",
+        email: "noura@example.com",
+        phone: "+966523456789",
+        nationality: "سعودي",
+        program: "طب أسنان",
+        university: "جامعة الملك سعود",
+        status: "pending" as const
+      }
+    ];
+
+    setStudents([...students, ...importedStudents]);
+    setIsImportDialogOpen(false);
+    toast({
+      title: t('admin.toasts.importSuccess'),
+      description: t('admin.toasts.importSuccessDesc'),
+    });
+  };
+
+  const handleExportStudents = () => {
+    // Here you would implement the actual export logic
+    const csvContent = students.map(student => 
+      Object.values(student).join(',')
+    ).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'students.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: t('admin.toasts.exportSuccess'),
+      description: t('admin.toasts.exportSuccessDesc'),
+    });
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -253,65 +293,6 @@ const ManageStudents = () => {
       title: t('admin.toasts.deleteSuccess'),
       description: t('admin.toasts.deleteSuccessDesc'),
     });
-  };
-
-  const handleImportStudents = () => {
-    // Simulate importing students
-    const importedStudents = [
-      {
-        id: `ST${String(students.length + 1).padStart(3, '0')}`,
-        name: "عبدالرحمن ناصر",
-        email: "abdulrahman@example.com",
-        phone: "+966512345678",
-        nationality: "سعودي",
-        program: "علوم الحاسب",
-        university: "جامعة الإمام",
-        status: "active" as const
-      },
-      {
-        id: `ST${String(students.length + 2).padStart(3, '0')}`,
-        name: "نورة علي",
-        email: "noura@example.com",
-        phone: "+966523456789",
-        nationality: "سعودي",
-        program: "طب أسنان",
-        university: "جامعة الملك سعود",
-        status: "pending" as const
-      }
-    ];
-
-    setStudents([...students, ...importedStudents]);
-    setIsImportDialogOpen(false);
-    toast({
-      title: t('admin.toasts.importSuccess'),
-      description: t('admin.toasts.importSuccessDesc'),
-    });
-  };
-
-  const handleExportStudents = () => {
-    // Simulate exporting students
-    toast({
-      title: t('admin.toasts.exportSuccess'),
-      description: t('admin.toasts.exportSuccessDesc'),
-    });
-  };
-
-  const statusConfig = {
-    active: { label: t('admin.studentsPage.active'), color: 'bg-unlimited-success text-white' },
-    inactive: { label: t('admin.studentsPage.inactive'), color: 'bg-unlimited-gray text-white' },
-    pending: { label: t('admin.studentsPage.pending'), color: 'bg-unlimited-warning text-white' },
-    graduated: { label: t('admin.studentsPage.graduated'), color: 'bg-unlimited-blue text-white' },
-  };
-
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
-  const currentItems = filteredStudents.slice(startIndex, endIndex);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 500);
   };
 
   return (
@@ -516,115 +497,32 @@ const ManageStudents = () => {
             </Select>
           </div>
         </div>
-        
-        <div className="rounded-md border shadow-sm">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">{t('admin.studentsPage.tableHeaders.id')}</TableHead>
-                <TableHead>{t('admin.studentsPage.tableHeaders.name')}</TableHead>
-                <TableHead className="hidden md:table-cell">{t('admin.studentsPage.tableHeaders.email')}</TableHead>
-                <TableHead className="hidden lg:table-cell">{t('admin.studentsPage.tableHeaders.phone')}</TableHead>
-                <TableHead className="hidden lg:table-cell">{t('admin.studentsPage.tableHeaders.nationality')}</TableHead>
-                <TableHead className="hidden lg:table-cell">{t('admin.studentsPage.tableHeaders.program')}</TableHead>
-                <TableHead className="hidden md:table-cell">{t('admin.studentsPage.tableHeaders.university')}</TableHead>
-                <TableHead>{t('admin.studentsPage.tableHeaders.status')}</TableHead>
-                <TableHead className="text-left">{t('admin.studentsPage.tableHeaders.actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableSkeleton columns={9} rows={itemsPerPage} />
-              ) : currentItems.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
-                    {t('admin.studentsPage.noData')}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                currentItems.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell className="font-medium">{student.id}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p>{student.name}</p>
-                        {student.agentName && (
-                          <p className="text-xs text-unlimited-gray">{t('admin.studentsPage.agent')}: {student.agentName}</p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{student.email}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{student.phone}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{student.nationality}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{student.program}</TableCell>
-                    <TableCell className="hidden md:table-cell">{student.university}</TableCell>
-                    <TableCell>
-                      <Badge className={statusConfig[student.status].color}>
-                        {statusConfig[student.status].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => handleViewStudent(student)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => handleOpenEditDialog(student)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>{student.name}</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleViewStudent(student)}>
-                              <Eye className="h-4 w-4 mr-2" />
-                              {t('admin.actions.view')}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleOpenEditDialog(student)}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              {t('admin.actions.edit')}
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-unlimited-danger focus:text-unlimited-danger"
-                              onClick={() => handleOpenDeleteDialog(student)}
-                            >
-                              <Trash className="h-4 w-4 mr-2" />
-                              {t('admin.actions.delete')}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          {filteredStudents.length > itemsPerPage && (
-            <div className="py-4 flex justify-center">
-              <TablePagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={handlePageChange}
-              />
-            </div>
-          )}
-        </div>
+
+        <FilterableTable
+          data={filteredStudents}
+          isLoading={isLoading}
+          onViewDetails={(student) => handleViewStudent(student)}
+          onEdit={(student) => handleOpenEditDialog(student)}
+          onDelete={(student) => handleOpenDeleteDialog(student)}
+          columns={[
+            { header: t('admin.studentsPage.tableHeaders.id'), accessor: 'id' },
+            { header: t('admin.studentsPage.tableHeaders.name'), accessor: 'name' },
+            { header: t('admin.studentsPage.tableHeaders.email'), accessor: 'email', hideOnMobile: true },
+            { header: t('admin.studentsPage.tableHeaders.phone'), accessor: 'phone', hideOnMobile: true },
+            { header: t('admin.studentsPage.tableHeaders.nationality'), accessor: 'nationality', hideOnMobile: true },
+            { header: t('admin.studentsPage.tableHeaders.program'), accessor: 'program', hideOnMobile: true },
+            { header: t('admin.studentsPage.tableHeaders.university'), accessor: 'university', hideOnMobile: true },
+            { 
+              header: t('admin.studentsPage.tableHeaders.status'), 
+              accessor: 'status',
+              render: (status) => (
+                <Badge className={statusConfig[status].color}>
+                  {statusConfig[status].label}
+                </Badge>
+              )
+            }
+          ]}
+        />
       </div>
 
       {/* View Student Dialog */}
