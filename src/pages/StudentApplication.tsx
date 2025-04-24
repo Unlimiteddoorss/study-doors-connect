@@ -233,7 +233,19 @@ const StudentApplication = () => {
       titleAr: "غير معروف",
       university: "Unknown",
       universityAr: "غير معروف",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      level: "Unknown",
+      levelAr: "غير معروف",
+      country: "Unknown",
+      countryAr: "غير معروف",
+      duration: "Unknown",
+      durationAr: "غير معروف",
+      language: "Unknown",
+      languageAr: "غير معروف",
+      tuitionFee: "$0",
+      tuitionFeeAr: "0 دولار أمريكي",
+      discountedFee: "$0",
+      discountedFeeAr: "0 دولار أمريكي",
     };
   };
   
