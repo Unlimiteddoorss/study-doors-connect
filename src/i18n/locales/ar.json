@@ -12,7 +12,14 @@
     "myApplications": {
       "title": "طلباتي",
       "subtitle": "تتبع حالة طلباتك وتحديثاتها",
-      "newApplication": "تقديم طلب جديد"
+      "newApplication": "تقديم طلب جديد",
+      "completeApplication": "استكمال الطلب",
+      "viewDetails": "عرض التفاصيل",
+      "empty": {
+        "title": "لا يوجد طلبات",
+        "description": "لم تقم بتقديم أي طلبات حتى الآن",
+        "browsePrograms": "استعراض البرامج"
+      }
     },
     "export": {
       "toExcel": "تصدير إلى Excel",
@@ -20,7 +27,14 @@
       "successDesc": "تم تصدير بيانات الطلبات بنجاح إلى ملف Excel"
     },
     "tabs": {
-      "all": "الكل"
+      "all": "الكل",
+      "pending": "قيد الانتظار",
+      "inProgress": "قيد المعالجة",
+      "completed": "مكتملة",
+      "rejected": "مرفوضة",
+      "newApplication": "طلب جديد",
+      "browsePrograms": "تصفح البرامج",
+      "myApplications": "طلباتي"
     },
     "status": {
       "pending": "قيد الانتظار",
@@ -30,10 +44,20 @@
       "approved": "تمت الموافقة",
       "paid": "تم الدفع",
       "registered": "تم التسجيل",
-      "rejected": "مرفوض"
+      "rejected": "مرفوض",
+      "processing": "قيد المعالجة",
+      "incomplete": "غير مكتمل"
     },
     "search": {
-      "applications": "البحث في الطلبات..."
+      "applications": "البحث في الطلبات...",
+      "placeholder": "ابحث عن البرامج أو الجامعات...",
+      "country": "الدولة",
+      "level": "المستوى",
+      "language": "لغة الدراسة",
+      "allCountries": "جميع الدول",
+      "allLevels": "جميع المستويات",
+      "allLanguages": "جميع اللغات",
+      "resetFilters": "إعادة تعيين التصفية"
     },
     "noApplications": {
       "message": "لا توجد طلبات حالياً",
@@ -51,6 +75,50 @@
       "documents": "المستندات",
       "actions": "الإجراءات",
       "showing": "عرض {count} من {total} طلب"
+    },
+    "programCard": {
+      "tuitionFees": "الرسوم الدراسية",
+      "applyNow": "تقديم طلب"
+    },
+    "noPrograms": {
+      "title": "لا توجد برامج متطابقة",
+      "description": "جرب تغيير معايير البحث أو إعادة ضبط الفلاتر",
+      "resetFilters": "إعادة ضبط الفلاتر"
+    },
+    "notifications": {
+      "applyStart": "تم بدء التقديم",
+      "applyStartDesc": "يمكنك الآن بدء عملية التقديم للبرنامج",
+      "continueApplication": "متابعة التقديم",
+      "continueApplicationDesc": "يمكنك متابعة عملية التقديم من حيث توقفت"
+    },
+    "actions": {
+      "viewDetails": "عرض التفاصيل",
+      "messages": "الرسائل",
+      "documents": "المستندات"
+    },
+    "documents": {
+      "title": "المستندات المطلوبة",
+      "subtitle": "المستندات المطلوبة لطلب {program} في {university}",
+      "statusUploaded": "تم الرفع",
+      "statusRequired": "مطلوب",
+      "statusApproved": "تمت الموافقة",
+      "upload": "رفع",
+      "download": "تنزيل",
+      "approved": "تمت الموافقة",
+      "noDocuments": "لا توجد مستندات مطلوبة لهذا الطلب",
+      "viewUpload": "عرض ورفع المستندات"
+    },
+    "messages": {
+      "title": "المراسلات",
+      "subtitle": "المراسلات الخاصة بطلب {program} في {university}",
+      "send": "إرسال",
+      "inputPlaceholder": "اكتب رسالتك هنا...",
+      "sampleMessage1": "مرحبًا، لدي استفسار بخصوص المستندات المطلوبة لطلب التقديم.",
+      "sampleTime1": "اليوم 10:30 صباحًا",
+      "sampleMessage2": "مرحبًا، يمكنك الاطلاع على قائمة المستندات المطلوبة في صفحة المستندات. هل لديك أي سؤال محدد؟",
+      "sampleTime2": "اليوم 11:15 صباحًا",
+      "sampleMessage3": "نعم، هل المستندات المترجمة يجب أن تكون معتمدة من وزارة الخارجية؟",
+      "sampleTime3": "اليوم 11:30 صباحًا"
     }
   }
 }
