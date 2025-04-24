@@ -80,6 +80,13 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
       { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
       { label: t('admin.breadcrumbs.universities'), href: '/admin/universities' },
     ];
+  } else if (pathname === '/admin/reports') {
+    title = t('admin.reports.title');
+    breadcrumbs = [
+      { label: t('admin.breadcrumbs.home'), href: '/' },
+      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
+      { label: t('admin.reports.title'), href: '/admin/reports' },
+    ];
   }
   
   // Handle hash change to update UI
@@ -100,7 +107,7 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
     <div className={`flex h-screen bg-gray-50 ${isRtl ? 'rtl' : 'ltr'}`}>
       {userRole === 'admin' ? <AdminSidebar /> : <Sidebar userRole={userRole} />}
       
-      <div className="flex flex-col flex-1 lg:pr-[250px] transition-all duration-300">
+      <div className={`flex flex-col flex-1 ${isRtl ? 'lg:pl-[250px]' : 'lg:pr-[250px]'} transition-all duration-300`}>
         <DashboardHeader userRole={userRole} />
         
         <main className="flex-1 p-6 overflow-y-auto">

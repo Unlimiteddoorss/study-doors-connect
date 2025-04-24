@@ -9,6 +9,8 @@
     }
   },
   "application": {
+    "title": "طلبات التسجيل",
+    "subtitle": "إدارة طلبات التسجيل في البرامج التعليمية",
     "myApplications": {
       "title": "طلباتي",
       "subtitle": "تتبع حالة طلباتك وتحديثاتها",
@@ -25,6 +27,14 @@
       "toExcel": "تصدير إلى Excel",
       "success": "تم التصدير بنجاح",
       "successDesc": "تم تصدير بيانات الطلبات بنجاح إلى ملف Excel"
+    },
+    "import": {
+      "fromExcel": "استيراد من Excel",
+      "success": "تم الاستيراد بنجاح",
+      "successDesc": "تم استيراد بيانات الطلبات بنجاح من ملف Excel",
+      "instructions": "يرجى تحميل ملف Excel يحتوي على بيانات الطلبات",
+      "selectFile": "اختيار ملف",
+      "dragDrop": "اسحب وأفلت الملف هنا أو انقر للاختيار"
     },
     "tabs": {
       "all": "الكل",
@@ -46,7 +56,9 @@
       "registered": "تم التسجيل",
       "rejected": "مرفوض",
       "processing": "قيد المعالجة",
-      "incomplete": "غير مكتمل"
+      "incomplete": "غير مكتمل",
+      "archived": "مؤرشف",
+      "completed": "مكتمل"
     },
     "search": {
       "applications": "البحث في الطلبات...",
@@ -64,7 +76,8 @@
       "apply": "تقديم طلب جديد"
     },
     "filter": {
-      "academicYear": "السنة الدراسية"
+      "academicYear": "السنة الدراسية",
+      "allYears": "جميع السنوات"
     },
     "table": {
       "id": "رقم الطلب",
@@ -74,7 +87,12 @@
       "date": "التاريخ",
       "documents": "المستندات",
       "actions": "الإجراءات",
-      "showing": "عرض {count} من {total} طلب"
+      "showing": "عرض {count} من {total} طلب",
+      "studentId": "رقم الطالب",
+      "studentName": "اسم الطالب",
+      "submissionDate": "تاريخ التقديم",
+      "lastUpdated": "آخر تحديث",
+      "agent": "الوكيل"
     },
     "programCard": {
       "tuitionFees": "الرسوم الدراسية",
@@ -94,7 +112,22 @@
     "actions": {
       "viewDetails": "عرض التفاصيل",
       "messages": "الرسائل",
-      "documents": "المستندات"
+      "documents": "المستندات",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "approve": "قبول الطلب",
+      "reject": "رفض الطلب",
+      "process": "بدء المعالجة",
+      "complete": "إكمال الطلب",
+      "archive": "أرشفة الطلب",
+      "close": "إغلاق",
+      "options": "خيارات الطلب",
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "add": "إضافة",
+      "update": "تحديث",
+      "import": "استيراد",
+      "export": "تصدير"
     },
     "documents": {
       "title": "المستندات المطلوبة",
@@ -119,6 +152,59 @@
       "sampleTime2": "اليوم 11:15 صباحًا",
       "sampleMessage3": "نعم، هل المستندات المترجمة يجب أن تكون معتمدة من وزارة الخارجية؟",
       "sampleTime3": "اليوم 11:30 صباحًا"
+    }
+  },
+  "admin": {
+    "title": "لوحة الإدارة",
+    "subtitle": "إدارة البرامج والطلبات والطلاب والجامعات",
+    "breadcrumbs": {
+      "home": "الرئيسية",
+      "adminDashboard": "لوحة الإدارة",
+      "students": "الطلاب",
+      "applications": "الطلبات",
+      "programs": "البرامج",
+      "universities": "الجامعات",
+      "agents": "الوكلاء"
+    },
+    "sidebar": {
+      "dashboard": "لوحة الإدارة",
+      "studentsManagement": "إدارة الطلاب",
+      "agentsManagement": "إدارة الوكلاء",
+      "universitiesManagement": "إدارة الجامعات",
+      "programsManagement": "إدارة البرامج",
+      "applicationsManagement": "إدارة الطلبات",
+      "messagingSystem": "نظام المراسلات",
+      "notifications": "الإشعارات",
+      "reportsStatistics": "التقارير والإحصائيات",
+      "settings": "الإعدادات",
+      "adminPanel": "لوحة الإدارة"
+    },
+    "communication": "التواصل",
+    "additional": "إضافي",
+    "students": "الطلاب",
+    "applications": "الطلبات",
+    "programs": "البرامج",
+    "universities": "الجامعات",
+    "agents": "الوكلاء",
+    "reports": {
+      "title": "التقارير والإحصائيات",
+      "subtitle": "عرض التقارير والإحصائيات الخاصة بالنظام",
+      "applications": "تقرير الطلبات",
+      "students": "تقرير الطلاب",
+      "programs": "تقرير البرامج",
+      "universities": "تقرير الجامعات",
+      "export": "تصدير التقرير",
+      "print": "طباعة التقرير",
+      "filter": "تصفية البيانات",
+      "dateRange": "نطاق التاريخ",
+      "status": "الحالة"
+    },
+    "dataManagement": {
+      "title": "إدارة البيانات",
+      "import": "استيراد البيانات",
+      "export": "تصدير البيانات",
+      "backup": "النسخ الاحتياطي",
+      "restore": "استعادة البيانات"
     }
   }
 }

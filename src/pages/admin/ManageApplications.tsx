@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { Archive, CheckCircle, Clock, Download, Edit, Eye, FileText, MoreHorizontal, Search, Trash, Upload, X } from 'lucide-react';
+import { Archive, CheckCircle, Clock, Download, FileText, MoreHorizontal, Search, Trash, Upload, X, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
 
 type ApplicationStatus = 'pending' | 'processing' | 'approved' | 'rejected' | 'completed' | 'archived';
 
@@ -161,6 +163,10 @@ const ManageApplications = () => {
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { t } = useTranslation();
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [academicYearFilter, setAcademicYearFilter] = useState<string>('all');
+  const academicYears = ['2023-2024', '2024-2025', '2025-2026', '2026-2027'];
 
   useEffect(() => {
     setIsLoading(true);
@@ -201,23 +207,58 @@ const ManageApplications = () => {
       application.program.toLowerCase().includes(searchQuery.toLowerCase());
       
     const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
+    const matchesAcademicYear = academicYearFilter === 'all' || 
+      (application.createdDate && application.createdDate.includes(academicYearFilter));
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesAcademicYear;
   });
 
   const handleImportApplications = () => {
-    toast({
-      title: "تم استيراد البيانات",
-      description: "تم استيراد بيانات الطلبات بنجاح",
-    });
-    setIsImportDialogOpen(false);
+    if (!importFile) {
+      toast({
+        title: t("application.import.selectFile"),
+        description: t("application.import.instructions"),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // В реальном приложении здесь был бы код для обработки файла Excel
+    // Имитируем успешный импорт
+    setTimeout(() => {
+      toast({
+        title: t("application.import.success"),
+        description: t("application.import.successDesc"),
+      });
+      setIsImportDialogOpen(false);
+      setImportFile(null);
+    }, 1000);
   };
 
   const handleExportApplications = () => {
-    toast({
-      title: "تم تصدير البيانات",
-      description: "تم تصدير بيانات الطلبات بنجاح",
-    });
+    // В реальном приложении здесь был бы код для экспорта в Excel
+    // Имитируем успешный экспорт
+    setTimeout(() => {
+      toast({
+        title: t("application.export.success"),
+        description: t("application.export.successDesc"),
+      });
+      
+      // Создаем фиктивный элемент для "скачивания" файла
+      const element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,');
+      element.setAttribute('download', `applications_export_${new Date().toISOString().slice(0,10)}.xlsx`);
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }, 500);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImportFile(e.target.files[0]);
+    }
   };
 
   const handleDeleteApplication = (id: string) => {
@@ -312,39 +353,53 @@ const ManageApplications = () => {
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة طلبات التسجيل</h2>
+          <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.applications')}</h2>
           
           <div className="flex flex-col md:flex-row gap-2">
             <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">
                   <Upload className="h-4 w-4 mr-2" />
-                  استيراد
+                  {t('application.actions.import')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                  <DialogTitle>استيراد بيانات الطلبات</DialogTitle>
+                  <DialogTitle>{t('admin.dataManagement.import')}</DialogTitle>
                   <DialogDescription>
-                    يرجى تحميل ملف CSV أو Excel يحتوي على بيانات الطلبات.
+                    {t('application.import.instructions')}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
+                  <div 
+                    className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center"
+                    onClick={() => document.getElementById('import-file-input')?.click()}
+                  >
                     <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
                     <p className="mt-2 text-sm text-unlimited-gray">
-                      اسحب وأفلت الملف هنا أو انقر للاختيار
+                      {t('application.import.dragDrop')}
                     </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      اختيار ملف
+                    <input 
+                      id="import-file-input"
+                      type="file" 
+                      className="hidden" 
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleFileChange}
+                    />
+                    <Button variant="outline" className="mt-4" onClick={() => document.getElementById('import-file-input')?.click()}>
+                      {t('application.import.selectFile')}
                     </Button>
+                    {importFile && (
+                      <p className="mt-2 text-sm text-unlimited-success">
+                        {importFile.name}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <DialogFooter>
                   <Button type="submit" onClick={handleImportApplications}>
                     <Upload className="h-4 w-4 mr-2" />
-                    استيراد البيانات
+                    {t('application.actions.import')}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -352,7 +407,7 @@ const ManageApplications = () => {
             
             <Button variant="outline" onClick={handleExportApplications}>
               <Download className="h-4 w-4 mr-2" />
-              تصدير
+              {t('application.actions.export')}
             </Button>
           </div>
         </div>
@@ -361,12 +416,24 @@ const ManageApplications = () => {
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
             <Input
-              placeholder="البحث عن طلب..."
+              placeholder={t('application.search.applications')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-full md:w-[300px]"
             />
           </div>
+          
+          <Select value={academicYearFilter} onValueChange={setAcademicYearFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder={t('application.filter.academicYear')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t('application.filter.allYears')}</SelectItem>
+              {academicYears.map(year => (
+                <SelectItem key={year} value={year}>{year}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         
         {isLoading ? (
@@ -378,32 +445,32 @@ const ManageApplications = () => {
             <div className="overflow-x-auto">
               <TabsList className="mb-4 inline-flex">
                 <TabsTrigger value="all" className="min-w-[80px]">
-                  الكل
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.all}</Badge>
+                  {t('application.tabs.all')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.all}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="min-w-[80px]">
-                  قيد الانتظار
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.pending}</Badge>
+                  {t('application.status.pending')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.pending}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="processing" className="min-w-[80px]">
-                  قيد المعالجة
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.processing}</Badge>
+                  {t('application.status.processing')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.processing}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="approved" className="min-w-[80px]">
-                  مقبول
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.approved}</Badge>
+                  {t('application.status.approved')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.approved}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="rejected" className="min-w-[80px]">
-                  مرفوض
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.rejected}</Badge>
+                  {t('application.status.rejected')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.rejected}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="completed" className="min-w-[80px]">
-                  مكتمل
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.completed}</Badge>
+                  {t('application.status.completed')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.completed}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="archived" className="min-w-[80px]">
-                  مؤرشف
-                  <Badge variant="outline" className="ml-2">{applicationsByStatus.archived}</Badge>
+                  {t('application.status.archived')}
+                  <Badge variant="outline" className="mr-2">{applicationsByStatus.archived}</Badge>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -414,6 +481,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
             
@@ -423,6 +491,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
             
@@ -432,6 +501,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
             
@@ -441,6 +511,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
             
@@ -450,6 +521,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
             
@@ -459,6 +531,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
             
@@ -468,6 +541,7 @@ const ManageApplications = () => {
                 handleViewApplication={handleViewApplication}
                 handleDeleteApplication={handleDeleteApplication}
                 handleUpdateStatus={handleUpdateStatus}
+                t={t}
               />
             </TabsContent>
           </Tabs>
@@ -477,73 +551,73 @@ const ManageApplications = () => {
           <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
             <DialogContent className="max-w-4xl">
               <DialogHeader>
-                <DialogTitle>تفاصيل الطلب {selectedApplication.id}</DialogTitle>
+                <DialogTitle>{t('application.actions.viewDetails')} {selectedApplication.id}</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-bold mb-4">معلومات الطلب</h3>
+                  <h3 className="text-lg font-bold mb-4">{t('application.title')}</h3>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-unlimited-gray text-sm">رقم الطلب</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.id')}</p>
                       <p className="font-medium">{selectedApplication.id}</p>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">الحالة</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.status')}</p>
                       <Badge className={statusConfig[selectedApplication.status].color}>
-                        {statusConfig[selectedApplication.status].label}
+                        {t(`application.status.${selectedApplication.status}`)}
                       </Badge>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">تاريخ التقديم</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.submissionDate')}</p>
                       <p>{selectedApplication.createdDate || selectedApplication.date}</p>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">آخر تحديث</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.lastUpdated')}</p>
                       <p>{selectedApplication.updatedDate || selectedApplication.date}</p>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">الوكيل</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.agent')}</p>
                       <p>{selectedApplication.agentName || 'لا يوجد'}</p>
                     </div>
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="text-lg font-bold mb-4">معلومات الطالب</h3>
+                  <h3 className="text-lg font-bold mb-4">{t('admin.students')}</h3>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-unlimited-gray text-sm">رقم الطالب</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.studentId')}</p>
                       <p className="font-medium">{selectedApplication.studentId || 'غير متوفر'}</p>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">اسم الطالب</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.studentName')}</p>
                       <p>{selectedApplication.studentName || 'غير متوفر'}</p>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">البرنامج</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.program')}</p>
                       <p>{selectedApplication.program}</p>
                     </div>
                     <div>
-                      <p className="text-unlimited-gray text-sm">الجامعة</p>
+                      <p className="text-unlimited-gray text-sm">{t('application.table.university')}</p>
                       <p>{selectedApplication.university}</p>
                     </div>
                   </div>
                 </div>
                 
                 <div className="col-span-1 md:col-span-2">
-                  <h3 className="text-lg font-bold mb-4">المستندات</h3>
+                  <h3 className="text-lg font-bold mb-4">{t('application.documents.title')}</h3>
                   
                   {(selectedApplication.hasDocs || selectedApplication.documents?.length) ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {selectedApplication.documents && selectedApplication.documents.map((doc, idx) => (
                         <div key={idx} className="border rounded p-4 flex items-center justify-between">
                           <div className="flex items-center">
-                            <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
+                            <FileText className="h-8 w-8 text-unlimited-blue ml-2" />
                             <div>
                               <p className="font-medium">{doc.name}</p>
                               <p className="text-xs text-unlimited-gray">
-                                {doc.status === 'uploaded' ? 'تم الرفع' : 
-                                 doc.status === 'approved' ? 'معتمد' : 'مطلوب'}
+                                {doc.status === 'uploaded' ? t('application.documents.statusUploaded') : 
+                                 doc.status === 'approved' ? t('application.documents.approved') : t('application.documents.statusRequired')}
                               </p>
                             </div>
                           </div>
@@ -559,7 +633,7 @@ const ManageApplications = () => {
                         <>
                           <div className="border rounded p-4 flex items-center justify-between">
                             <div className="flex items-center">
-                              <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
+                              <FileText className="h-8 w-8 text-unlimited-blue ml-2" />
                               <div>
                                 <p className="font-medium">جواز السفر</p>
                                 <p className="text-xs text-unlimited-gray">PDF - 1.2MB</p>
@@ -572,7 +646,7 @@ const ManageApplications = () => {
                           
                           <div className="border rounded p-4 flex items-center justify-between">
                             <div className="flex items-center">
-                              <FileText className="h-8 w-8 text-unlimited-blue mr-2" />
+                              <FileText className="h-8 w-8 text-unlimited-blue ml-2" />
                               <div>
                                 <p className="font-medium">السجل الأكاديمي</p>
                                 <p className="text-xs text-unlimited-gray">PDF - 3.5MB</p>
@@ -588,7 +662,7 @@ const ManageApplications = () => {
                   ) : (
                     <div className="text-center p-8 border rounded-md bg-gray-50">
                       <FileText className="h-12 w-12 text-unlimited-gray mx-auto mb-2" />
-                      <p className="text-unlimited-gray">لم يتم رفع أي مستندات لهذا الطلب</p>
+                      <p className="text-unlimited-gray">{t('application.documents.noDocuments')}</p>
                     </div>
                   )}
                 </div>
@@ -603,7 +677,7 @@ const ManageApplications = () => {
                       }}
                       className="bg-unlimited-info hover:bg-unlimited-info/90"
                     >
-                      بدء المعالجة
+                      {t('application.actions.process')}
                     </Button>
                   )}
                   
@@ -615,7 +689,7 @@ const ManageApplications = () => {
                       }}
                       className="bg-unlimited-success hover:bg-unlimited-success/90"
                     >
-                      قبول الطلب
+                      {t('application.actions.approve')}
                     </Button>
                   )}
                   
@@ -627,7 +701,7 @@ const ManageApplications = () => {
                       }}
                       className="bg-unlimited-danger hover:bg-unlimited-danger/90"
                     >
-                      رفض الطلب
+                      {t('application.actions.reject')}
                     </Button>
                   )}
                   
@@ -639,7 +713,7 @@ const ManageApplications = () => {
                       }}
                       className="bg-unlimited-blue hover:bg-unlimited-blue/90"
                     >
-                      إكمال الطلب
+                      {t('application.actions.complete')}
                     </Button>
                   )}
                   
@@ -651,7 +725,7 @@ const ManageApplications = () => {
                         setIsViewDialogOpen(false);
                       }}
                     >
-                      أرشفة الطلب
+                      {t('application.actions.archive')}
                     </Button>
                   )}
                   
@@ -659,7 +733,7 @@ const ManageApplications = () => {
                     variant="outline"
                     onClick={() => setIsViewDialogOpen(false)}
                   >
-                    إغلاق
+                    {t('application.actions.close')}
                   </Button>
                 </div>
               </DialogFooter>
@@ -676,33 +750,35 @@ interface ApplicationsTableProps {
   handleViewApplication: (application: Application) => void;
   handleDeleteApplication: (id: string) => void;
   handleUpdateStatus: (id: string, status: ApplicationStatus) => void;
+  t: (key: string) => string;
 }
 
 const ApplicationsTable = ({ 
   applications,
   handleViewApplication,
   handleDeleteApplication,
-  handleUpdateStatus 
+  handleUpdateStatus,
+  t
 }: ApplicationsTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[120px]">رقم الطلب</TableHead>
-            <TableHead>الطالب</TableHead>
-            <TableHead className="hidden md:table-cell">البرنامج</TableHead>
-            <TableHead className="hidden lg:table-cell">الجامعة</TableHead>
-            <TableHead>الحالة</TableHead>
-            <TableHead className="hidden md:table-cell">تاريخ التقديم</TableHead>
-            <TableHead>الإجراءات</TableHead>
+            <TableHead className="w-[120px]">{t('application.table.id')}</TableHead>
+            <TableHead>{t('application.table.studentName')}</TableHead>
+            <TableHead className="hidden md:table-cell">{t('application.table.program')}</TableHead>
+            <TableHead className="hidden lg:table-cell">{t('application.table.university')}</TableHead>
+            <TableHead>{t('application.table.status')}</TableHead>
+            <TableHead className="hidden md:table-cell">{t('application.table.submissionDate')}</TableHead>
+            <TableHead>{t('application.table.actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {applications.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} className="text-center h-40 text-unlimited-gray">
-                لا توجد بيانات متطابقة مع البحث
+                {t('application.noApplications.message')}
               </TableCell>
             </TableRow>
           ) : (
@@ -720,8 +796,13 @@ const ApplicationsTable = ({
                 <TableCell className="hidden md:table-cell">{application.program}</TableCell>
                 <TableCell className="hidden lg:table-cell">{application.university}</TableCell>
                 <TableCell>
-                  <Badge className={statusConfig[application.status].color}>
-                    {statusConfig[application.status].label}
+                  <Badge className={application.status === 'approved' ? 'bg-unlimited-success text-white' : 
+                                  application.status === 'rejected' ? 'bg-unlimited-danger text-white' :
+                                  application.status === 'pending' ? 'bg-unlimited-warning text-white' :
+                                  application.status === 'processing' ? 'bg-unlimited-info text-white' :
+                                  application.status === 'completed' ? 'bg-unlimited-blue text-white' :
+                                  'bg-unlimited-gray text-white'}>
+                    {t(`application.status.${application.status}`)}
                   </Badge>
                 </TableCell>
                 <TableCell className="hidden md:table-cell">{application.createdDate || application.date || 'غير متوفر'}</TableCell>
@@ -742,24 +823,24 @@ const ApplicationsTable = ({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
+                        <DropdownMenuLabel>{t('application.actions.options')}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         {application.status !== 'approved' && (
                           <DropdownMenuItem onClick={() => handleUpdateStatus(String(application.id), 'approved')}>
-                            <CheckCircle className="h-4 w-4 mr-2 text-unlimited-success" />
-                            قبول الطلب
+                            <CheckCircle className="h-4 w-4 ml-2 text-unlimited-success" />
+                            {t('application.actions.approve')}
                           </DropdownMenuItem>
                         )}
                         {application.status !== 'rejected' && (
                           <DropdownMenuItem onClick={() => handleUpdateStatus(String(application.id), 'rejected')}>
-                            <X className="h-4 w-4 mr-2 text-unlimited-danger" />
-                            رفض الطلب
+                            <X className="h-4 w-4 ml-2 text-unlimited-danger" />
+                            {t('application.actions.reject')}
                           </DropdownMenuItem>
                         )}
                         {application.status !== 'archived' && (
                           <DropdownMenuItem onClick={() => handleUpdateStatus(String(application.id), 'archived')}>
-                            <Archive className="h-4 w-4 mr-2" />
-                            أرشفة الطلب
+                            <Archive className="h-4 w-4 ml-2" />
+                            {t('application.actions.archive')}
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuSeparator />
@@ -767,8 +848,8 @@ const ApplicationsTable = ({
                           className="text-unlimited-danger focus:text-unlimited-danger"
                           onClick={() => handleDeleteApplication(String(application.id))}
                         >
-                          <Trash className="h-4 w-4 mr-2" />
-                          حذف
+                          <Trash className="h-4 w-4 ml-2" />
+                          {t('application.actions.delete')}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
