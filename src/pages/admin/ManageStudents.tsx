@@ -1,9 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Download, Edit, Eye, Search, Upload, MoreHorizontal, Plus, Trash, CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
+import { useTableFilters } from '@/hooks/admin/useTableFilters';
+import { FilterableTable } from '@/components/admin/FilterableTable';
+import { StudentFilters } from '@/components/admin/students/StudentFilters';
+import { StudentActions } from '@/components/admin/students/StudentActions';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useToast } from '@/hooks/use-toast';
+import { Download, Edit, Eye, Search, Upload, MoreHorizontal, Plus, Trash, CheckCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -20,12 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useTranslation } from 'react-i18next';
-import { useTableFilters } from '@/hooks/admin/useTableFilters';
-import { TablePagination } from '@/components/admin/TablePagination';
-import { TableSkeleton } from '@/components/admin/TableSkeleton';
-import { FilterableTable } from '@/components/admin/FilterableTable';
-import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -299,211 +299,33 @@ const ManageStudents = () => {
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.studentsPage.title')}</h2>
+          <h2 className="text-2xl font-bold text-unlimited-dark-blue">
+            {t('admin.studentsPage.title')}
+          </h2>
           
-          <div className="flex flex-col md:flex-row gap-2">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  {t('admin.studentsPage.addStudent')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.studentsPage.addNewStudent')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.studentsPage.addNewStudentDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.name')}</label>
-                    <Input 
-                      name="name" 
-                      value={newStudent.name} 
-                      onChange={handleInputChange} 
-                      className="col-span-3" 
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.email')}</label>
-                    <Input 
-                      name="email" 
-                      type="email" 
-                      value={newStudent.email} 
-                      onChange={handleInputChange} 
-                      className="col-span-3" 
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.phone')}</label>
-                    <Input 
-                      name="phone" 
-                      value={newStudent.phone} 
-                      onChange={handleInputChange} 
-                      className="col-span-3" 
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.nationality')}</label>
-                    <Select 
-                      name="nationality" 
-                      value={newStudent.nationality} 
-                      onValueChange={(value) => handleSelectChange("nationality", value)}
-                    >
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder={t('admin.studentsPage.tableHeaders.nationality')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {nationalities.map((nationality) => (
-                          <SelectItem key={nationality} value={nationality}>{nationality}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.program')}</label>
-                    <Input 
-                      name="program" 
-                      value={newStudent.program} 
-                      onChange={handleInputChange} 
-                      className="col-span-3" 
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.university')}</label>
-                    <Input 
-                      name="university" 
-                      value={newStudent.university} 
-                      onChange={handleInputChange} 
-                      className="col-span-3" 
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.status')}</label>
-                    <Select 
-                      name="status" 
-                      value={newStudent.status} 
-                      onValueChange={(value) => handleSelectChange("status", value)}
-                    >
-                      <SelectTrigger className="col-span-3">
-                        <SelectValue placeholder={t('admin.studentsPage.status')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">{t('admin.studentsPage.active')}</SelectItem>
-                        <SelectItem value="inactive">{t('admin.studentsPage.inactive')}</SelectItem>
-                        <SelectItem value="pending">{t('admin.studentsPage.pending')}</SelectItem>
-                        <SelectItem value="graduated">{t('admin.studentsPage.graduated')}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">{t('admin.studentsPage.agent')}</label>
-                    <Input 
-                      name="agentName" 
-                      value={newStudent.agentName || ''} 
-                      onChange={handleInputChange} 
-                      className="col-span-3" 
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleAddStudent}>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.save')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('admin.studentsPage.importStudents')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.studentsPage.importData')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.studentsPage.importDataDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
-                    <p className="mt-2 text-sm text-unlimited-gray">
-                      {t('admin.studentsPage.dragDrop')}
-                    </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      {t('admin.studentsPage.chooseFile')}
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleImportStudents}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.import')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button variant="outline" onClick={handleExportStudents}>
-              <Download className="h-4 w-4 mr-2" />
-              {t('admin.studentsPage.exportStudents')}
-            </Button>
-          </div>
+          <StudentActions
+            onImport={handleImportStudents}
+            onExport={handleExportStudents}
+            isImportDialogOpen={isImportDialogOpen}
+            setIsImportDialogOpen={setIsImportDialogOpen}
+            setIsAddDialogOpen={setIsAddDialogOpen}
+          />
         </div>
         
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
-            <Input
-              placeholder={t('admin.studentsPage.searchPlaceholder')}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full md:w-[300px]"
-            />
-          </div>
-          
-          <div className="flex flex-row gap-2 items-center">
-            <Select value={filters.nationality} onValueChange={(value) => setFilters({ ...filters, nationality: value })}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('admin.studentsPage.nationality')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('admin.studentsPage.allNationalities')}</SelectItem>
-                {nationalities.map((nationality) => (
-                  <SelectItem key={nationality} value={nationality}>{nationality}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={filters.status} onValueChange={(value) => setFilters({ ...filters, status: value })}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('admin.studentsPage.status')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('admin.studentsPage.allStatuses')}</SelectItem>
-                <SelectItem value="active">{t('admin.studentsPage.active')}</SelectItem>
-                <SelectItem value="inactive">{t('admin.studentsPage.inactive')}</SelectItem>
-                <SelectItem value="pending">{t('admin.studentsPage.pending')}</SelectItem>
-                <SelectItem value="graduated">{t('admin.studentsPage.graduated')}</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <StudentFilters
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          filters={filters}
+          setFilters={setFilters}
+          nationalities={nationalities}
+        />
 
         <FilterableTable
           data={filteredStudents}
           isLoading={isLoading}
-          onViewDetails={(student) => handleViewStudent(student)}
-          onEdit={(student) => handleOpenEditDialog(student)}
-          onDelete={(student) => handleOpenDeleteDialog(student)}
+          onViewDetails={handleViewStudent}
+          onEdit={handleOpenEditDialog}
+          onDelete={handleOpenDeleteDialog}
           columns={[
             { header: t('admin.studentsPage.tableHeaders.id'), accessor: 'id' },
             { header: t('admin.studentsPage.tableHeaders.name'), accessor: 'name' },
@@ -517,7 +339,7 @@ const ManageStudents = () => {
               accessor: 'status',
               render: (status) => (
                 <Badge className={statusConfig[status].color}>
-                  {statusConfig[status].label}
+                  {t(`admin.studentsPage.${status}`)}
                 </Badge>
               )
             }
@@ -565,7 +387,7 @@ const ManageStudents = () => {
                 <div>
                   <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.status')}</p>
                   <Badge className={statusConfig[selectedStudent.status].color}>
-                    {statusConfig[selectedStudent.status].label}
+                    {t(`admin.studentsPage.${selectedStudent.status}`)}
                   </Badge>
                 </div>
                 {selectedStudent.agentName && (

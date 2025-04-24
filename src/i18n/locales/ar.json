@@ -1,4 +1,3 @@
-
 {
   "dashboard": {
     "title": "لوحة التحكم",
@@ -205,6 +204,41 @@
       "export": "تصدير البيانات",
       "backup": "النسخ الاحتياطي",
       "restore": "استعادة البيانات"
+    },
+    "studentsPage": {
+      "title": "إدارة الطلاب",
+      "addStudent": "إضافة طالب",
+      "addNewStudent": "إضافة طالب جديد",
+      "addNewStudentDesc": "أدخل معلومات الطالب الجديد",
+      "importStudents": "استيراد بيانات الطلاب",
+      "exportStudents": "تصدير بيانات الطلاب",
+      "importData": "استيراد البيانات",
+      "importDataDesc": "قم بتحميل ملف Excel يحتوي على بيانات الطلاب",
+      "chooseFile": "اختيار ملف",
+      "dragDrop": "اسحب وأفلت الملف هنا أو انقر للاختيار",
+      "searchPlaceholder": "البحث عن طالب...",
+      "nationality": "الجنسية",
+      "allNationalities": "جميع الجنسيات",
+      "status": "الحالة",
+      "allStatuses": "جميع الحالات",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "pending": "قيد الانتظار",
+      "graduated": "متخرج",
+      "agent": "الوكيل",
+      "save": "حفظ",
+      "editStudent": "تعديل بيانات الطالب",
+      "viewStudentDetails": "تفاصيل الطالب",
+      "tableHeaders": {
+        "id": "رقم الطالب",
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "nationality": "الجنسية",
+        "program": "البرنامج",
+        "university": "الجامعة",
+        "status": "الحالة"
+      }
     }
   }
 }
