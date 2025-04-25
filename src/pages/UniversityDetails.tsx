@@ -37,7 +37,12 @@ const translations: Record<string, string> = {
   'Nicosia': 'نيقوسيا',
   'Famagusta': 'فماغوستا',
   'Private': 'خاصة',
-  'Public': 'حكومية'
+  'Public': 'حكومية',
+  'English': 'الإنجليزية',
+  'Turkish': 'التركية',
+  'Arabic': 'العربية',
+  'French': 'الفرنسية',
+  'German': 'الألمانية'
 };
 
 const UniversityDetails = () => {

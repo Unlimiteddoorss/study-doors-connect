@@ -19,7 +19,7 @@ const cityTranslations: Record<string, string> = {
   'Bursa': 'بورصة',
   'Konya': 'قونيا',
   'Adana': 'أضنة',
-  'Gaziantep': 'غازي عنتاب',
+  'Gaziantep': 'غazi عنتاب',
   'Mersin': 'مرسين',
   'Kayseri': 'قيصري',
   'Alanya': 'ألانيا',
@@ -48,7 +48,7 @@ const adaptedUniversities = turkishUniversities.map(uni => ({
   ranking: Math.floor(Math.random() * 1000) + 1, // Generate random ranking
   fees: uni.fees,
   image: uni.image,
-  languages: ['Turkish', 'English'] as string[],
+  languages: uni.languages as string[], // Ensure languages is an array of strings
   accreditations: [uni.accreditation] as string[],
   isFeatured: Math.random() > 0.7 // Randomly set some universities as featured
 }));

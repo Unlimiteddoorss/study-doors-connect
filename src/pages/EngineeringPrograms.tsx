@@ -65,7 +65,9 @@ const engineeringPrograms = dummyPrograms
       fee: "$4,800 / سنة",
       discount: "$4,200 / سنة",
       image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["وظائف مضمونة", "تقنيات حديثة"]
+      badges: ["وظائف مضمونة", "تقنيات حديثة"],
+      isFeatured: false,
+      scholarshipAvailable: false
     },
     {
       id: 203,
@@ -78,6 +80,7 @@ const engineeringPrograms = dummyPrograms
       fee: "$5,500 / سنة",
       image: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       scholarshipAvailable: true,
+      isFeatured: false,
       badges: ["معدات حديثة", "برامج تبادل طلابي"]
     },
     {
@@ -91,7 +94,9 @@ const engineeringPrograms = dummyPrograms
       fee: "$4,900 / سنة",
       discount: "$4,500 / سنة",
       image: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["معامل متطورة", "تدريب صناعي"]
+      badges: ["معامل متطورة", "تدريب صناعي"],
+      isFeatured: false,
+      scholarshipAvailable: false
     },
     {
       id: 205,
@@ -104,6 +109,7 @@ const engineeringPrograms = dummyPrograms
       fee: "$6,800 / سنة",
       image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
+      scholarshipAvailable: false,
       badges: ["بحث متقدم", "فرص عمل دولية"]
     },
     {
@@ -117,6 +123,7 @@ const engineeringPrograms = dummyPrograms
       fee: "$7,200 / سنة",
       image: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       scholarshipAvailable: true,
+      isFeatured: false,
       badges: ["فرص تدريب في شركات الطيران", "معامل محاكاة حديثة"]
     }
   ]);
