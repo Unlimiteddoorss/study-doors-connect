@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, ShieldCheck } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
+import { Progress } from '@/components/ui/progress';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -32,6 +33,43 @@ const RegisterForm = () => {
   
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Calculate password strength
+  const calculatePasswordStrength = (password: string): number => {
+    if (!password) return 0;
+    
+    let strength = 0;
+    
+    // Length check
+    if (password.length >= 8) strength += 25;
+    
+    // Contains lowercase
+    if (/[a-z]/.test(password)) strength += 25;
+    
+    // Contains uppercase
+    if (/[A-Z]/.test(password)) strength += 25;
+    
+    // Contains number or special char
+    if (/[0-9!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 25;
+    
+    return strength;
+  };
+  
+  const passwordStrength = calculatePasswordStrength(formData.password);
+  
+  const getPasswordStrengthText = () => {
+    if (passwordStrength <= 25) return 'ضعيفة';
+    if (passwordStrength <= 50) return 'متوسطة';
+    if (passwordStrength <= 75) return 'جيدة';
+    return 'قوية';
+  };
+  
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 25) return 'bg-unlimited-danger';
+    if (passwordStrength <= 50) return 'bg-yellow-500';
+    if (passwordStrength <= 75) return 'bg-blue-500';
+    return 'bg-green-500';
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,6 +106,15 @@ const RegisterForm = () => {
       return;
     }
     
+    if (passwordStrength < 50) {
+      toast({
+        title: 'كلمة مرور ضعيفة',
+        description: 'الرجاء اختيار كلمة مرور أقوى',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     // Simulate API call
@@ -78,7 +125,23 @@ const RegisterForm = () => {
         title: 'تم إنشاء الحساب بنجاح',
         description: 'مرحباً بك في منصة أبواب غير محدودة',
       });
-      navigate('/dashboard');
+      
+      // Store in localStorage for demo purposes
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      users.push({
+        ...formData,
+        id: Date.now(),
+        password: '*****', // don't store actual password in local storage
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem('users', JSON.stringify(users));
+      
+      // Redirect based on user type
+      if (formData.userType === 'student') {
+        navigate('/dashboard');
+      } else if (formData.userType === 'agent') {
+        navigate('/agent');
+      }
     }, 1500);
   };
 
@@ -86,39 +149,51 @@ const RegisterForm = () => {
     <form onSubmit={handleRegister} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="fullName">الاسم الكامل</Label>
-        <Input
-          id="fullName"
-          name="fullName"
-          placeholder="أدخل اسمك الكامل"
-          value={formData.fullName}
-          onChange={handleChange}
-          required
-        />
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+          <Input
+            id="fullName"
+            name="fullName"
+            placeholder="أدخل اسمك الكامل"
+            value={formData.fullName}
+            onChange={handleChange}
+            className="pl-10"
+            required
+          />
+        </div>
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="email">البريد الإلكتروني</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="أدخل بريدك الإلكتروني"
-          value={formData.email}
-          onChange={handleChange}
-          required
-        />
+        <div className="relative">
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="أدخل بريدك الإلكتروني"
+            value={formData.email}
+            onChange={handleChange}
+            className="pl-10"
+            required
+          />
+        </div>
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="phone">رقم الهاتف</Label>
-        <Input
-          id="phone"
-          name="phone"
-          placeholder="أدخل رقم هاتفك"
-          value={formData.phone}
-          onChange={handleChange}
-          required
-        />
+        <div className="relative">
+          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+          <Input
+            id="phone"
+            name="phone"
+            placeholder="أدخل رقم هاتفك"
+            value={formData.phone}
+            onChange={handleChange}
+            className="pl-10"
+            required
+          />
+        </div>
       </div>
       
       <div className="space-y-2">
@@ -140,6 +215,7 @@ const RegisterForm = () => {
       <div className="space-y-2">
         <Label htmlFor="password">كلمة المرور</Label>
         <div className="relative">
+          <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-unlimited-gray h-4 w-4" />
           <Input
             id="password"
             name="password"
@@ -147,25 +223,57 @@ const RegisterForm = () => {
             placeholder="أدخل كلمة المرور"
             value={formData.password}
             onChange={handleChange}
+            className="pl-10"
             required
           />
-          <button
+          <Button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0 h-full px-3"
           >
             {showPassword ? (
-              <EyeOff className="h-5 w-5" />
+              <EyeOff className="h-4 w-4" />
             ) : (
-              <Eye className="h-5 w-5" />
+              <Eye className="h-4 w-4" />
             )}
-          </button>
+          </Button>
         </div>
+        
+        {/* Password strength indicator */}
+        {formData.password && (
+          <div className="mt-2">
+            <div className="flex justify-between mb-1 text-sm">
+              <span>قوة كلمة المرور: {getPasswordStrengthText()}</span>
+              <span>{passwordStrength}%</span>
+            </div>
+            <Progress 
+              value={passwordStrength} 
+              className={`h-1 ${getPasswordStrengthColor()}`} 
+            />
+            <ul className="text-xs text-unlimited-gray mt-2 list-disc list-inside">
+              <li className={passwordStrength > 25 ? "text-unlimited-blue" : ""}>
+                على الأقل 8 أحرف
+              </li>
+              <li className={/[a-z]/.test(formData.password) ? "text-unlimited-blue" : ""}>
+                تحتوي على حرف صغير
+              </li>
+              <li className={/[A-Z]/.test(formData.password) ? "text-unlimited-blue" : ""}>
+                تحتوي على حرف كبير
+              </li>
+              <li className={/[0-9!@#$%^&*(),.?":{}|<>]/.test(formData.password) ? "text-unlimited-blue" : ""}>
+                تحتوي على رقم أو رمز
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
         <div className="relative">
+          <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-unlimited-gray h-4 w-4" />
           <Input
             id="confirmPassword"
             name="confirmPassword"
@@ -173,20 +281,26 @@ const RegisterForm = () => {
             placeholder="أعد إدخال كلمة المرور"
             value={formData.confirmPassword}
             onChange={handleChange}
+            className="pl-10"
             required
           />
-          <button
+          <Button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+            variant="ghost"
+            size="icon"
+            className="absolute right-0 top-0 h-full px-3"
           >
             {showConfirmPassword ? (
-              <EyeOff className="h-5 w-5" />
+              <EyeOff className="h-4 w-4" />
             ) : (
-              <Eye className="h-5 w-5" />
+              <Eye className="h-4 w-4" />
             )}
-          </button>
+          </Button>
         </div>
+        {formData.password && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+          <p className="text-sm text-unlimited-danger">كلمات المرور غير متطابقة</p>
+        )}
       </div>
       
       <div className="flex items-start space-x-2 rtl:space-x-reverse">

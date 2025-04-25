@@ -16,6 +16,7 @@ import UniversityDetails from "./pages/UniversityDetails";
 import Login from "./pages/Login";
 import LoginPage from "./pages/LoginPage";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import StudentApplication from "./pages/StudentApplication";
@@ -32,6 +33,7 @@ import AgentDashboard from "./pages/agent/AgentDashboard";
 import StudentApplications from "./pages/dashboard/StudentApplications";
 import StudentProfile from "./pages/dashboard/StudentProfile";
 import StudentNotifications from "./pages/dashboard/StudentNotifications";
+import LoginActivity from "./pages/dashboard/LoginActivity";
 import UserMessages from "./pages/messaging/UserMessages";
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
@@ -59,6 +61,7 @@ function App() {
         <Route path="/universities/:id" element={<UniversityDetails />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/apply" element={<StudentApplication />} />
@@ -66,6 +69,7 @@ function App() {
         <Route path="/dashboard/applications/:id" element={<StudentApplications />} />
         <Route path="/dashboard/profile" element={<StudentProfile />} />
         <Route path="/dashboard/notifications" element={<StudentNotifications />} />
+        <Route path="/dashboard/login-activity" element={<LoginActivity />} />
         <Route path="/messages" element={<UserMessages />} />
         <Route path="/student/messages" element={<UserMessages />} />
 
