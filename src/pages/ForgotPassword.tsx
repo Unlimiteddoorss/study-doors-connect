@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -108,7 +107,11 @@ const ForgotPassword = () => {
       setIsLoading(false);
     }
   };
-  
+
+  const handleOTPChange = (value: string) => {
+    setValue('verificationCode', value);
+  };
+
   const renderStep = () => {
     switch (step) {
       case 'email':
@@ -166,16 +169,18 @@ const ForgotPassword = () => {
               <div className="space-y-2">
                 <Label htmlFor="verification-code">{t('forgotPassword.verificationCodeLabel')}</Label>
                 <div className="flex justify-center py-2">
-                  <InputOTP maxLength={6} onValueChange={(value) => setValue('verificationCode', value)}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
+                  <InputOTP
+                    maxLength={6}
+                    value=""
+                    onChange={handleOTPChange}
+                    render={({ slots }) => (
+                      <InputOTPGroup>
+                        {slots.map((slot, index) => (
+                          <InputOTPSlot key={index} {...slot} />
+                        ))}
+                      </InputOTPGroup>
+                    )}
+                  />
                 </div>
                 
                 <div className="text-center">

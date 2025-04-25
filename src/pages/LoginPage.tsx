@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -248,6 +247,10 @@ const LoginForm = ({
   setValue
 }: LoginFormProps) => {
   const { t } = useTranslation();
+
+  const handleOTPChange = (value: string) => {
+    setValue('twoFactorCode', value);
+  };
   
   return (
     <Card className="border-2 shadow-md">
@@ -339,16 +342,18 @@ const LoginForm = ({
               
               <div className="space-y-2">
                 <Label htmlFor="2fa-code">{t('login.2faCodeLabel')}</Label>
-                <InputOTP maxLength={6} onValueChange={(value) => setValue('twoFactorCode', value)}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
+                <InputOTP
+                  maxLength={6}
+                  value=""
+                  onChange={handleOTPChange}
+                  render={({ slots }) => (
+                    <InputOTPGroup>
+                      {slots.map((slot, index) => (
+                        <InputOTPSlot key={index} {...slot} />
+                      ))}
+                    </InputOTPGroup>
+                  )}
+                />
               </div>
             </div>
           )}
