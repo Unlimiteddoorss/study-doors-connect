@@ -34,6 +34,7 @@ import StudentApplications from "./pages/dashboard/StudentApplications";
 import StudentProfile from "./pages/dashboard/StudentProfile";
 import StudentNotifications from "./pages/dashboard/StudentNotifications";
 import LoginActivity from "./pages/dashboard/LoginActivity";
+import AccountSettings from "./pages/dashboard/AccountSettings";
 import UserMessages from "./pages/messaging/UserMessages";
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
@@ -70,6 +71,7 @@ function App() {
         <Route path="/dashboard/profile" element={<StudentProfile />} />
         <Route path="/dashboard/notifications" element={<StudentNotifications />} />
         <Route path="/dashboard/login-activity" element={<LoginActivity />} />
+        <Route path="/dashboard/account-settings" element={<AccountSettings />} />
         <Route path="/messages" element={<UserMessages />} />
         <Route path="/student/messages" element={<UserMessages />} />
 
