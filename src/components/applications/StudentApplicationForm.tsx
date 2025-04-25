@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
@@ -47,7 +46,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
-// Define the form schema
+interface StudentApplicationFormProps {
+  preSelectedProgram?: any; // Type this properly based on your program structure
+}
+
 const applicationSchema = z.object({
   // Personal Information
   personalInfo: z.object({
@@ -107,7 +109,7 @@ const applicationSchema = z.object({
 
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
-const StudentApplicationForm = () => {
+const StudentApplicationForm = ({ preSelectedProgram }: StudentApplicationFormProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [studentPhoto, setStudentPhoto] = useState<File | null>(null);
@@ -1084,7 +1086,7 @@ const StudentApplicationForm = () => {
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="اختر المؤهل التعليمي" />
+                                <SelectValue placeholder="اختر المؤهل التعلي��ي" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -1312,7 +1314,7 @@ const StudentApplicationForm = () => {
                               <SelectItem value="istanbul">جامعة اسطنبول</SelectItem>
                               <SelectItem value="ankara">جامعة أنقرة</SelectItem>
                               <SelectItem value="marmara">جامعة مرمرة</SelectItem>
-                              <SelectItem value="bogazici">جامعة بوغازيتشي</SelectItem>
+                              <SelectItem value="bogazici">جامعة بوغaziتشي</SelectItem>
                               <SelectItem value="other">أخرى</SelectItem>
                             </SelectContent>
                           </Select>

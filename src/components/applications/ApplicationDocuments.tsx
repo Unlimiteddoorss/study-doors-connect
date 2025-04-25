@@ -1,15 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import DocumentUpload, { DocumentType } from './DocumentUpload';
+import DocumentUpload from './DocumentUpload';
 import { applicationDocumentTypes } from '@/data/documentTypes';
 import { useToast } from '@/hooks/use-toast';
+import { DocumentType } from '@/types/documents';
 
-// For demo purposes only - in a real app this would come from an API
 const generateDemoFiles = (applicationId: number) => {
-  // If application ID is odd, return some demo files
   if (applicationId % 2 === 1) {
     return applicationDocumentTypes.map(doc => ({
       ...doc,
@@ -19,7 +17,7 @@ const generateDemoFiles = (applicationId: number) => {
           name: `${doc.name} Document`,
           nameAr: `مستند ${doc.nameAr}`,
           type: doc.id === 'passport' ? 'application/pdf' : 'image/jpeg',
-          size: 1024 * 1024, // 1MB
+          size: 1024 * 1024,
           url: '/placeholder.svg',
           status: doc.id === 'passport' ? 'verified' : 'uploaded',
           lastModified: new Date().toISOString()
@@ -52,10 +50,9 @@ const ApplicationDocuments = ({
   useEffect(() => {
     const loadDocuments = async () => {
       try {
-        // In a real app, this would be an API call
         setIsLoading(true);
         setTimeout(() => {
-          const demoDocuments = generateDemoFiles(applicationId);
+          const demoDocuments = generateDemoFiles(applicationId) as DocumentType[];
           setDocuments(demoDocuments);
           setIsLoading(false);
         }, 1000);
@@ -75,7 +72,6 @@ const ApplicationDocuments = ({
 
   const handleDocumentUpload = async (documentTypeId: string, file: File) => {
     try {
-      // Create a new file entry
       const fileId = `${Date.now()}-${file.name}`;
       const newFile = {
         id: fileId,
@@ -88,7 +84,6 @@ const ApplicationDocuments = ({
         lastModified: new Date().toISOString()
       };
 
-      // Add the file to the correct document type
       setDocuments(prevDocuments => prevDocuments.map(doc => {
         if (doc.id === documentTypeId) {
           return {
@@ -99,7 +94,6 @@ const ApplicationDocuments = ({
         return doc;
       }));
 
-      // Simulate upload progress
       let progress = 0;
       const interval = setInterval(() => {
         progress += Math.floor(Math.random() * 20) + 5;
@@ -107,7 +101,6 @@ const ApplicationDocuments = ({
           progress = 100;
           clearInterval(interval);
 
-          // Update file status to uploaded when complete
           setTimeout(() => {
             setDocuments(prevDocuments => prevDocuments.map(doc => {
               if (doc.id === documentTypeId) {
@@ -122,7 +115,6 @@ const ApplicationDocuments = ({
             }));
           }, 500);
         } else {
-          // Update progress
           setDocuments(prevDocuments => prevDocuments.map(doc => {
             if (doc.id === documentTypeId) {
               return {

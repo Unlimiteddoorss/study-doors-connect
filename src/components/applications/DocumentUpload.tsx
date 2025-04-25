@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, Upload, X, CheckCircle, AlertCircle, FileQuestion, Download } from 'lucide-react';
@@ -90,7 +89,6 @@ export const DocumentUpload = ({
   };
 
   const uploadFile = async (documentId: string, file: File) => {
-    // Find the document type
     const documentType = documents.find(doc => doc.id === documentId);
     if (!documentType) {
       toast({
@@ -101,7 +99,6 @@ export const DocumentUpload = ({
       return;
     }
 
-    // Check file size
     if (file.size > documentType.maxSize) {
       toast({
         title: t("documents.error"),
@@ -111,7 +108,6 @@ export const DocumentUpload = ({
       return;
     }
 
-    // Check file format
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
     const acceptedExtensions = documentType.acceptedFormats.map(format => 
       format.startsWith('.') ? format.substring(1).toLowerCase() : format.toLowerCase());
@@ -153,7 +149,6 @@ export const DocumentUpload = ({
     if (onDocumentDownload) {
       onDocumentDownload(file);
     } else {
-      // Default download behavior using the file URL
       const a = document.createElement('a');
       a.href = file.url;
       a.download = file.name;
@@ -168,7 +163,6 @@ export const DocumentUpload = ({
     if (file.status === 'error') return <AlertCircle className="h-5 w-5 text-red-500" />;
     if (file.status === 'verified') return <CheckCircle className="h-5 w-5 text-green-500" />;
     
-    // Determine icon by file type
     const fileType = file.type.split('/')[0];
     switch (fileType) {
       case 'image':
@@ -188,6 +182,15 @@ export const DocumentUpload = ({
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  };
+
+  const handleClick = (documentId: string) => {
+    if (!readOnly) {
+      const fileInput = document.getElementById(`file-input-${documentId}`);
+      if (fileInput) {
+        fileInput.click();
+      }
+    }
   };
 
   return (
@@ -305,11 +308,7 @@ export const DocumentUpload = ({
                 onDragOver={(e) => handleDragOver(e, document.id)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, document.id)}
-                onClick={() => {
-                  if (!readOnly) {
-                    document.getElementById(`file-input-${document.id}`)?.click();
-                  }
-                }}
+                onClick={() => handleClick(document.id)}
               >
                 {readOnly ? (
                   <div>
