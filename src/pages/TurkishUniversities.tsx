@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -19,7 +20,7 @@ const cityTranslations: Record<string, string> = {
   'Bursa': 'بورصة',
   'Konya': 'قونيا',
   'Adana': 'أضنة',
-  'Gaziantep': 'غazi عنتاب',
+  'Gaziantep': 'غازي عنتاب',
   'Mersin': 'مرسين',
   'Kayseri': 'قيصري',
   'Alanya': 'ألانيا',
@@ -48,8 +49,8 @@ const adaptedUniversities = turkishUniversities.map(uni => ({
   ranking: Math.floor(Math.random() * 1000) + 1, // Generate random ranking
   fees: uni.fees,
   image: uni.image,
-  languages: uni.languages as string[], // Ensure languages is an array of strings
-  accreditations: [uni.accreditation] as string[],
+  languages: ['Turkish', 'English'],
+  accreditations: [uni.accreditation],
   isFeatured: Math.random() > 0.7 // Randomly set some universities as featured
 }));
 
@@ -261,7 +262,7 @@ const TurkishUniversities = () => {
               تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
             </p>
             <p>
-              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مم�� يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
+              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
             </p>
           </div>
 

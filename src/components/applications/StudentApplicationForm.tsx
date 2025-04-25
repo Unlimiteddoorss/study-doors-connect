@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { z } from "zod";
@@ -46,10 +47,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
 
-interface StudentApplicationFormProps {
-  preSelectedProgram?: any; // Type this properly based on your program structure
-}
-
+// Define the form schema
 const applicationSchema = z.object({
   // Personal Information
   personalInfo: z.object({
@@ -109,7 +107,7 @@ const applicationSchema = z.object({
 
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
 
-const StudentApplicationForm = ({ preSelectedProgram }: StudentApplicationFormProps) => {
+const StudentApplicationForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [studentPhoto, setStudentPhoto] = useState<File | null>(null);
@@ -1086,7 +1084,7 @@ const StudentApplicationForm = ({ preSelectedProgram }: StudentApplicationFormPr
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="اختر المؤهل التعلي��ي" />
+                                <SelectValue placeholder="اختر المؤهل التعليمي" />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -1314,7 +1312,7 @@ const StudentApplicationForm = ({ preSelectedProgram }: StudentApplicationFormPr
                               <SelectItem value="istanbul">جامعة اسطنبول</SelectItem>
                               <SelectItem value="ankara">جامعة أنقرة</SelectItem>
                               <SelectItem value="marmara">جامعة مرمرة</SelectItem>
-                              <SelectItem value="bogazici">جامعة بوغaziتشي</SelectItem>
+                              <SelectItem value="bogazici">جامعة بوغازيتشي</SelectItem>
                               <SelectItem value="other">أخرى</SelectItem>
                             </SelectContent>
                           </Select>

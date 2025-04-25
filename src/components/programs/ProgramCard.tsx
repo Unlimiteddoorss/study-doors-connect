@@ -17,8 +17,8 @@ export interface Program {
   discount?: string;
   image: string;
   isFeatured?: boolean;
-  scholarshipAvailable?: boolean;
   badges?: string[];
+  scholarshipAvailable?: boolean;
 }
 
 interface ProgramCardProps {
