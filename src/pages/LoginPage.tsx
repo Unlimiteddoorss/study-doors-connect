@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -349,7 +350,7 @@ const LoginForm = ({
                   render={({ slots }) => (
                     <InputOTPGroup>
                       {slots.map((slot, index) => (
-                        <InputOTPSlot key={index} {...slot} />
+                        <InputOTPSlot key={index} {...slot} index={index} />
                       ))}
                     </InputOTPGroup>
                   )}

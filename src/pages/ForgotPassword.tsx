@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -176,7 +177,7 @@ const ForgotPassword = () => {
                     render={({ slots }) => (
                       <InputOTPGroup>
                         {slots.map((slot, index) => (
-                          <InputOTPSlot key={index} {...slot} />
+                          <InputOTPSlot key={index} {...slot} index={index} />
                         ))}
                       </InputOTPGroup>
                     )}
