@@ -52,6 +52,7 @@ const engineeringPrograms = dummyPrograms
       fee: "$5,200 / سنة",
       image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
+      scholarshipAvailable: true,
       badges: ["معتمد دوليًا", "تدريب عملي"]
     },
     {
@@ -66,7 +67,7 @@ const engineeringPrograms = dummyPrograms
       discount: "$4,200 / سنة",
       image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       badges: ["وظائف مضمونة", "تقنيات حديثة"],
-      isFeatured: false,
+      isFeatured: false, 
       scholarshipAvailable: false
     },
     {

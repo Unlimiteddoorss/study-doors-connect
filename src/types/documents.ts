@@ -23,3 +23,19 @@ export interface DocumentType {
   maxSize: number;
   files: DocumentFile[];
 }
+
+export interface Program {
+  id: number;
+  title: string;
+  university: string;
+  location: string;
+  language: string;
+  duration: string;
+  deadline: string;
+  fee: string;
+  discount?: string;
+  image: string;
+  isFeatured?: boolean;
+  scholarshipAvailable?: boolean;
+  badges?: string[];
+}
