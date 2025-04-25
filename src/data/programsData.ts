@@ -1,3 +1,4 @@
+
 export const programs = [
   {
     id: 1,
@@ -100,3 +101,268 @@ export const programs = [
     levelAr: "بكالوريوس",
   },
 ];
+
+// Export programs as dummyPrograms (for backward compatibility)
+export const dummyPrograms = [
+  {
+    id: 101,
+    title: "بكالوريوس الطب والجراحة (MBBS)",
+    university: "جامعة اسطنبول",
+    location: "Turkey، إسطنبول",
+    language: "إنجليزية",
+    duration: "6 سنوات",
+    deadline: "15/08/2023",
+    fee: "$8,500 / سنة",
+    image: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    isFeatured: true,
+    scholarshipAvailable: true,
+    badges: ["برنامج معتمد", "تدريب عملي"]
+  },
+  {
+    id: 102,
+    title: "بكالوريوس طب الأسنان",
+    university: "جامعة أنقرة",
+    location: "Turkey، أنقرة",
+    language: "تركية",
+    duration: "5 سنوات",
+    deadline: "30/07/2023",
+    fee: "$7,500 / سنة",
+    discount: "$6,800 / سنة",
+    image: "https://images.unsplash.com/photo-1588776814546-daab30f0477e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    badges: ["منهج حديث", "معامل متطورة"]
+  },
+  {
+    id: 103,
+    title: "بكالوريوس الصيدلة",
+    university: "جامعة إزمير",
+    location: "Turkey، إزمير",
+    language: "إنجليزية وتركية",
+    duration: "5 سنوات",
+    deadline: "10/09/2023",
+    fee: "$5,200 / سنة",
+    image: "https://images.unsplash.com/photo-1585435557343-3b348b7a7cef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    badges: ["تدريب مهني", "برنامج تبادل طلابي"]
+  },
+  {
+    id: 104,
+    title: "بكالوريوس العلاج الطبيعي",
+    university: "جامعة بورصة",
+    location: "Turkey، بورصة",
+    language: "إنجليزية",
+    duration: "4 سنوات",
+    deadline: "20/08/2023",
+    fee: "$4,800 / سنة",
+    discount: "$4,300 / سنة",
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    badges: ["تدريب ميداني", "فرص وظيفية"]
+  },
+  {
+    id: 105,
+    title: "ماجستير الجراحة العامة",
+    university: "جامعة اسطنبول",
+    location: "Turkey، إسطنبول",
+    language: "إنجليزية",
+    duration: "3 سنوات",
+    deadline: "05/08/2023",
+    fee: "$10,200 / سنة",
+    image: "https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    isFeatured: true,
+    badges: ["بحث متخصص", "تدريب في المستشفيات"]
+  },
+  {
+    id: 106,
+    title: "بكالوريوس هندسة الحاسب",
+    university: "جامعة باهتشه شهير",
+    location: "Turkey، إسطنبول",
+    language: "إنجليزية",
+    duration: "4 سنوات",
+    deadline: "25/08/2023",
+    fee: "$6,500 / سنة",
+    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    isFeatured: true,
+    badges: ["برامج تدريبية", "معامل حديثة"]
+  },
+];
+
+// List of available countries
+export const availableCountries = [
+  "Turkey",
+  "United Kingdom",
+  "Germany",
+  "United States",
+  "Malaysia",
+  "Ireland",
+  "Spain",
+  "Australia",
+  "Egypt",
+  "Azerbaijan",
+  "Georgia",
+  "United Arab Emirates",
+  "Cyprus",
+  "Northern Cyprus",
+  "Czech Republic",
+  "Poland",
+  "Hungary",
+  "Malta",
+  "Montenegro",
+  "Macedonia",
+  "Kosovo",
+  "Bosnia and Herzegovina",
+  "Serbia",
+  "Scotland"
+];
+
+// Degree types
+export const degreeTypes = [
+  { value: "Bachelor", label: "بكالوريوس" },
+  { value: "Master", label: "ماجستير" },
+  { value: "Doctorate", label: "دكتوراه" },
+  { value: "Diploma", label: "دبلوم" },
+  { value: "Certificate", label: "شهادة" }
+];
+
+// Program specialties
+export const programSpecialties = [
+  { value: "Medicine", label: "الطب البشري" },
+  { value: "Dentistry", label: "طب الأسنان" },
+  { value: "Pharmacy", label: "الصيدلة" },
+  { value: "Engineering", label: "الهندسة" },
+  { value: "Computer Science", label: "علوم الحاسوب" },
+  { value: "Business", label: "إدارة الأعمال" },
+  { value: "Arts", label: "الفنون" },
+  { value: "Education", label: "التربية" },
+  { value: "Law", label: "القانون" },
+  { value: "Science", label: "العلوم" }
+];
+
+// Turkish universities data
+export const turkishUniversities = [
+  {
+    id: 1,
+    name: "Istanbul University",
+    location: "Istanbul",
+    type: "Public",
+    founded: 1453,
+    programs: 120,
+    accreditation: "YÖK Accredited",
+    fees: "$5,000 - $12,000",
+    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.istanbul.edu.tr/"
+  },
+  {
+    id: 2,
+    name: "Bahcesehir University",
+    location: "Istanbul",
+    type: "Private",
+    founded: 1998,
+    programs: 85,
+    accreditation: "YÖK Accredited",
+    fees: "$7,500 - $15,000",
+    image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.bahcesehir.edu.tr/"
+  },
+  {
+    id: 3,
+    name: "Istanbul Technical University",
+    location: "Istanbul",
+    type: "Public",
+    founded: 1773,
+    programs: 130,
+    accreditation: "YÖK Accredited",
+    fees: "$4,500 - $9,000",
+    image: "https://images.unsplash.com/photo-1592280771490-3e2e6afd4192?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.itu.edu.tr/"
+  },
+  {
+    id: 4,
+    name: "Middle East Technical University",
+    location: "Ankara",
+    type: "Public",
+    founded: 1956,
+    programs: 110,
+    accreditation: "YÖK Accredited",
+    fees: "$5,000 - $10,000",
+    image: "https://images.unsplash.com/photo-1544531585-9847b68c8c86?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.metu.edu.tr/"
+  },
+  {
+    id: 5,
+    name: "Bilkent University",
+    location: "Ankara",
+    type: "Private",
+    founded: 1984,
+    programs: 75,
+    accreditation: "YÖK Accredited",
+    fees: "$8,000 - $16,000",
+    image: "https://images.unsplash.com/photo-1592839570551-85a6798abf7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://w3.bilkent.edu.tr/"
+  },
+  {
+    id: 6,
+    name: "Koç University",
+    location: "Istanbul",
+    type: "Private",
+    founded: 1993,
+    programs: 70,
+    accreditation: "YÖK Accredited",
+    fees: "$9,000 - $18,000",
+    image: "https://images.unsplash.com/photo-1543505298-b8be9b52a21a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.ku.edu.tr/"
+  },
+  {
+    id: 7,
+    name: "Sabanci University",
+    location: "Istanbul",
+    type: "Private",
+    founded: 1994,
+    programs: 65,
+    accreditation: "YÖK Accredited",
+    fees: "$9,500 - $19,000",
+    image: "https://images.unsplash.com/photo-1585620385456-4759f9b5c7d9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.sabanciuniv.edu/"
+  },
+  {
+    id: 8,
+    name: "Ankara University",
+    location: "Ankara",
+    type: "Public",
+    founded: 1946,
+    programs: 100,
+    accreditation: "YÖK Accredited",
+    fees: "$4,000 - $8,000",
+    image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.ankara.edu.tr/"
+  },
+  {
+    id: 9,
+    name: "Istanbul Medipol University",
+    location: "Istanbul",
+    type: "Private",
+    founded: 2009,
+    programs: 60,
+    accreditation: "YÖK Accredited",
+    fees: "$7,000 - $15,000",
+    image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.medipol.edu.tr/"
+  },
+  {
+    id: 10,
+    name: "Ege University",
+    location: "Izmir",
+    type: "Public",
+    founded: 1955,
+    programs: 95,
+    accreditation: "YÖK Accredited",
+    fees: "$4,200 - $8,500",
+    image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    website: "https://www.ege.edu.tr/"
+  }
+];
+
+// University programs data retrieval function
+export const getUniversityPrograms = (universityId: number) => {
+  // This would normally fetch from an API, but we'll mock it for now
+  return dummyPrograms.filter(program => 
+    program.university.includes(turkishUniversities.find(u => u.id === universityId)?.name || '')
+  );
+};
