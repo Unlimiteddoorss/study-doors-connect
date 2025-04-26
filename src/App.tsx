@@ -41,17 +41,39 @@ import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 function App() {
   // FIXME: In production, this would come from auth context or user state
-  // For testing purposes, we'll set it to 'agent' to test agent access
-  const userRole = 'agent' as 'student' | 'admin' | 'agent'; // Changed to agent for testing
+  // For testing purposes, we'll allow the user to switch roles
+  const [userRole, setUserRole] = useState<'student' | 'admin' | 'agent'>('admin'); // Default to admin
 
   type UserRole = 'student' | 'admin' | 'agent';
+  
+  // Use location to detect if user is on admin pages
+  const location = useLocation();
+
+  // Store user role in localStorage for persistence
+  useEffect(() => {
+    const storedRole = localStorage.getItem('userRole');
+    if (storedRole && ['student', 'admin', 'agent'].includes(storedRole)) {
+      setUserRole(storedRole as UserRole);
+    } else {
+      localStorage.setItem('userRole', userRole);
+    }
+  }, []);
+
+  // Update localStorage when role changes
+  useEffect(() => {
+    localStorage.setItem('userRole', userRole);
+  }, [userRole]);
 
   const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: UserRole[] }) => {
     const isAuthenticated = true; // For testing purposes
-    const hasPermission = allowedRoles.includes(userRole as UserRole);
+    const hasPermission = allowedRoles.includes(userRole);
+    
+    console.log(`Route check - User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}, Has permission: ${hasPermission}`);
 
     if (!isAuthenticated) {
       return <Navigate to="/login" replace />;
@@ -64,10 +86,34 @@ function App() {
     return <>{children}</>;
   };
 
-  // Handle redirect to admin dashboard for admin users
-  if (userRole === ('admin' as UserRole)) {
-    return <Navigate to="/admin" replace />;
-  }
+  // Create a role switcher component for testing
+  const RoleSwitcher = () => {
+    return (
+      <div className="fixed bottom-4 left-4 bg-white shadow-lg p-2 rounded-md border z-50">
+        <div className="text-xs font-bold mb-1">تغيير دور المستخدم (للاختبار فقط):</div>
+        <div className="flex space-x-2">
+          <button 
+            onClick={() => setUserRole('admin')}
+            className={`px-2 py-1 text-xs rounded ${userRole === 'admin' ? 'bg-unlimited-blue text-white' : 'bg-gray-200'}`}
+          >
+            مدير
+          </button>
+          <button 
+            onClick={() => setUserRole('agent')}
+            className={`px-2 py-1 text-xs rounded ${userRole === 'agent' ? 'bg-unlimited-blue text-white' : 'bg-gray-200'}`}
+          >
+            وكيل
+          </button>
+          <button 
+            onClick={() => setUserRole('student')}
+            className={`px-2 py-1 text-xs rounded ${userRole === 'student' ? 'bg-unlimited-blue text-white' : 'bg-gray-200'}`}
+          >
+            طالب
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -231,6 +277,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
+      <RoleSwitcher />
     </>
   );
 }

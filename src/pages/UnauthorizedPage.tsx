@@ -13,7 +13,7 @@ const UnauthorizedPage = () => {
   const { toast } = useToast();
   const isRtl = i18n.language === 'ar';
   
-  // Get user role (this would come from authentication context in real app)
+  // Get user role from localStorage (this would come from authentication context in real app)
   const userRole = localStorage.getItem('userRole') || 'student';
 
   useEffect(() => {
@@ -23,7 +23,10 @@ const UnauthorizedPage = () => {
       description: t('errors.unauthorized.description'),
       variant: "destructive",
     });
-  }, [toast, t]);
+    
+    // Log for debugging
+    console.log('Unauthorized access detected. User role:', userRole);
+  }, [toast, t, userRole]);
 
   // Get appropriate redirect based on user role
   const getAppropriateRedirect = () => {
@@ -65,7 +68,11 @@ const UnauthorizedPage = () => {
             </Button>
             
             <Button 
-              onClick={() => navigate(getAppropriateRedirect())}
+              onClick={() => {
+                const redirectPath = getAppropriateRedirect();
+                console.log(`Redirecting to: ${redirectPath}`);
+                navigate(redirectPath);
+              }}
               className="flex items-center gap-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
             >
               <User className="h-4 w-4" />
