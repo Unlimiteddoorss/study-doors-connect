@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -38,11 +39,12 @@ import UserMessages from "./pages/messaging/UserMessages";
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
 
 function App() {
   // FIXME: In production, this would come from auth context or user state
   // 'student', 'admin', or 'agent'
-  const userRole = 'admin'; // Changed to 'admin' for testing
+  const userRole = 'student'; // Changed to 'student' for testing student pages
 
   const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
     const isAuthenticated = true; // For testing purposes
@@ -81,6 +83,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
         {/* Redirect admin users from /dashboard to /admin */}
         <Route path="/dashboard" element={
@@ -91,7 +94,7 @@ function App() {
           )
         } />
 
-        {/* Student Application Routes */}
+        {/* Student Application Routes - منفصلة تماما عن صفحات الأدمن */}
         <Route path="/apply" element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentApplication />
