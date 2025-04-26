@@ -106,7 +106,7 @@ const SecuritySettings = () => {
           </div>
           
           {!is2FAEnabled && (
-            <Alert variant="warning" className="bg-yellow-50 text-yellow-800 border-yellow-200 mt-4">
+            <Alert variant="warning" className="mt-4">
               <AlertTriangle className="h-4 w-4" />
               <AlertTitle>{t('auth.securitySettings.securityWarning')}</AlertTitle>
               <AlertDescription>

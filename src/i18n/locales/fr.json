@@ -1,0 +1,64 @@
+
+{
+  "site": {
+    "name": "Unlimited Doors",
+    "tagline": "Unlimited Doors - Depuis 1992"
+  },
+  "nav": {
+    "home": "Accueil",
+    "programs": "Programmes",
+    "universities": "Universités",
+    "about": "À propos",
+    "contact": "Contact",
+    "apply": "Postuler"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "myAccount": "Mon Compte",
+    "logout": "Déconnexion",
+    "accountSettings": {
+      "title": "Paramètres du compte",
+      "securitySettings": "Paramètres de sécurité",
+      "subAccounts": "Sous-comptes",
+      "preferences": "Préférences"
+    },
+    "securitySettings": {
+      "title": "Paramètres de sécurité",
+      "description": "Gérez les paramètres de sécurité et les options d'authentification de votre compte",
+      "twoFactor": "Authentification à deux facteurs",
+      "twoFactorEnabledInfo": "L'authentification à deux facteurs est activée, un code de vérification sera envoyé lors de la connexion",
+      "twoFactorDisabledInfo": "Activez l'authentification à deux facteurs pour renforcer la sécurité de votre compte",
+      "enable": "Activer",
+      "disable": "Désactiver",
+      "twoFactorEnabled": "Authentification à deux facteurs activée",
+      "twoFactorDisabled": "Authentification à deux facteurs désactivée",
+      "twoFactorEnabledDescription": "L'authentification à deux facteurs a été activée avec succès pour votre compte",
+      "twoFactorDisabledDescription": "L'authentification à deux facteurs a été désactivée pour votre compte",
+      "changePassword": "Modifier le mot de passe",
+      "changePasswordDescription": "Modifiez le mot de passe de votre compte",
+      "change": "Modifier",
+      "error": "Erreur",
+      "errorDescription": "Une erreur s'est produite lors du traitement de votre demande, veuillez réessayer",
+      "loginHistory": "Historique de connexion",
+      "loginHistoryDescription": "Consultez les activités de connexion récentes à votre compte",
+      "viewFullHistory": "Voir l'historique complet",
+      "lastLoginTitle": "Dernière connexion",
+      "previousLoginTitle": "Connexion précédente",
+      "securityWarning": "Alerte de sécurité",
+      "securityWarningDesc": "Votre compte est actuellement plus vulnérable sans l'authentification à deux facteurs. Nous vous recommandons de l'activer pour une meilleure protection."
+    },
+    "preferences": {
+      "title": "Préférences",
+      "description": "Personnalisez votre expérience utilisateur",
+      "language": "Langue",
+      "theme": "Thème",
+      "lightTheme": "Thème clair",
+      "darkTheme": "Thème sombre",
+      "systemTheme": "Thème système",
+      "lightThemeDesc": "Utiliser le thème clair",
+      "darkThemeDesc": "Utiliser le thème sombre",
+      "systemThemeDesc": "Suivre les préférences système"
+    }
+  }
+}
