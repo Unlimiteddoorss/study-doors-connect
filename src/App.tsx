@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -92,6 +91,7 @@ function App() {
           )
         } />
 
+        {/* Student Application Routes */}
         <Route path="/apply" element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentApplication />
