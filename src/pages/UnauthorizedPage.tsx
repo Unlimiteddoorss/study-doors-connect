@@ -5,16 +5,27 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, ArrowLeft, User, ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '@/components/ui/use-toast';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { toast } = useToast();
   const isRtl = i18n.language === 'ar';
   
-  // رصد دور المستخدم (هذا مثال فقط، يجب استبداله بالمنطق الحقيقي للتطبيق)
+  // Get user role (this would come from authentication context in real app)
   const userRole = localStorage.getItem('userRole') || 'student';
 
-  // رصد مكان المناسب للتوجيه حسب دور المستخدم
+  useEffect(() => {
+    // Show toast to inform user about the authorization issue
+    toast({
+      title: t('errors.unauthorized.title'),
+      description: t('errors.unauthorized.description'),
+      variant: "destructive",
+    });
+  }, [toast, t]);
+
+  // Get appropriate redirect based on user role
   const getAppropriateRedirect = () => {
     switch (userRole) {
       case 'admin':

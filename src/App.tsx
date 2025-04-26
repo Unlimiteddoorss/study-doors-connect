@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -43,8 +44,8 @@ import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
 
 function App() {
   // FIXME: In production, this would come from auth context or user state
-  // 'student', 'admin', or 'agent'
-  const userRole = 'student' as 'student' | 'admin' | 'agent'; // Properly typed
+  // For testing purposes, we'll set it to 'agent' to test agent access
+  const userRole = 'agent' as 'student' | 'admin' | 'agent'; // Changed to agent for testing
 
   type UserRole = 'student' | 'admin' | 'agent';
 
@@ -190,9 +191,40 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Agent routes with proper protection */}
         <Route path="/agent" element={
           <ProtectedRoute allowedRoles={['agent']}>
             <AgentDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/agent/students" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <AgentDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/agent/applications" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <AgentDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/agent/messages" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <UserMessages />
+          </ProtectedRoute>
+        } />
+        <Route path="/agent/notifications" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <StudentNotifications />
+          </ProtectedRoute>
+        } />
+        <Route path="/agent/profile" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <StudentProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="/agent/settings" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <AccountSettings />
           </ProtectedRoute>
         } />
         
