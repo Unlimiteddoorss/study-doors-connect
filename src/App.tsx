@@ -46,9 +46,11 @@ function App() {
   // 'student', 'admin', or 'agent'
   const userRole = 'student'; // Changed to 'student' for testing student pages
 
-  const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
+  type UserRole = 'student' | 'admin' | 'agent';
+
+  const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: UserRole[] }) => {
     const isAuthenticated = true; // For testing purposes
-    const hasPermission = allowedRoles.includes(userRole);
+    const hasPermission = allowedRoles.includes(userRole as UserRole);
 
     if (!isAuthenticated) {
       return <Navigate to="/login" replace />;
