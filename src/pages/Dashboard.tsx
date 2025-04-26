@@ -1,8 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
+import { UniversityAnnouncements } from '@/components/dashboard/UniversityAnnouncements';
+import { ProgramQuotas } from '@/components/dashboard/ProgramQuotas';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -90,111 +91,76 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Stats */}
         <DashboardStats />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Recent Applications */}
-          <Card className="lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-xl">طلباتي الحالية</CardTitle>
-                <CardDescription>آخر الطلبات المقدمة</CardDescription>
-              </div>
-              <Link to="/dashboard/applications">
-                <Button variant="outline" size="sm" className="text-sm">
-                  عرض الكل
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <div className="flex justify-center items-center h-40">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentApplications.length > 0 ? (
-                    recentApplications.map((app) => (
-                      <Link 
-                        key={app.id}
-                        to={`/dashboard/applications`}
-                        className="block"
-                      >
-                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <div className="flex items-start gap-3">
-                            <div className="bg-unlimited-blue/10 p-2 rounded-full">
-                              <FileText className="h-5 w-5 text-unlimited-blue" />
-                            </div>
-                            <div>
-                              <h4 className="font-medium">{app.program}</h4>
-                              <p className="text-sm text-unlimited-gray">{app.university}</p>
-                            </div>
-                          </div>
-                          <div className="flex flex-col items-end">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(app.status)}`}>
-                              {getStatusLabel(app.status)}
-                            </span>
-                            <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
-                      <Link to="/programs">
-                        <Button>
-                          استكشف البرامج
-                          <ArrowRight className="mr-2 h-4 w-4" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Notifications */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-xl">الإشعارات</CardTitle>
-                <CardDescription>آخر التحديثات</CardDescription>
-              </div>
-              <Link to="/dashboard/notifications">
-                <Button variant="outline" size="sm" className="text-sm">
-                  عرض الكل
-                </Button>
-              </Link>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {notifications.map((notification) => (
-                  <Link
-                    key={notification.id}
-                    to="/dashboard/notifications"
-                    className="block"
-                  >
-                    <div className="flex gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
-                        <Bell className="h-4 w-4 text-unlimited-blue" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium">{notification.title}</h4>
-                        <p className="text-sm text-unlimited-gray">{notification.message}</p>
-                        <span className="text-xs text-unlimited-gray mt-1">{notification.time}</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <UniversityAnnouncements />
+          <ProgramQuotas />
         </div>
 
-        {/* Student Profile & Messages */}
+        {/* Recent Applications Section */}
+        <Card className="col-span-full">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div>
+              <CardTitle className="text-xl">طلباتي الحالية</CardTitle>
+              <CardDescription>آخر الطلبات المقدمة</CardDescription>
+            </div>
+            <Link to="/dashboard/applications">
+              <Button variant="outline" size="sm" className="text-sm">
+                عرض الكل
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex justify-center items-center h-40">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentApplications.length > 0 ? (
+                  recentApplications.map((app) => (
+                    <Link 
+                      key={app.id}
+                      to={`/dashboard/applications`}
+                      className="block"
+                    >
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div className="flex items-start gap-3">
+                          <div className="bg-unlimited-blue/10 p-2 rounded-full">
+                            <FileText className="h-5 w-5 text-unlimited-blue" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">{app.program}</h4>
+                            <p className="text-sm text-unlimited-gray">{app.university}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(app.status)}`}>
+                            {getStatusLabel(app.status)}
+                          </span>
+                          <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
+                    <Link to="/programs">
+                      <Button>
+                        استكشف البرامج
+                        <ArrowRight className="mr-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Profile & Messages Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="pb-2">
