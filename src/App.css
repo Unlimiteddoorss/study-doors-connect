@@ -61,3 +61,22 @@
   }
 }
 
+/* Fix RTL/LTR sidebar positioning */
+.rtl .lg\:pr-[250px] {
+  padding-right: 250px;
+  padding-left: 0;
+}
+
+.ltr .lg\:pl-[250px] {
+  padding-left: 250px;
+  padding-right: 0;
+}
+
+/* Fix responsive layout issues */
+@media (max-width: 1023px) {
+  .rtl .lg\:pr-[250px],
+  .ltr .lg\:pl-[250px] {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
