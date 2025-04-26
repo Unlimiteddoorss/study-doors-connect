@@ -19,14 +19,15 @@ import { useTranslation } from 'react-i18next';
 
 const AdminSidebar = () => {
   const { pathname } = useLocation();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
   
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(`${path}/`);
   };
   
   return (
-    <div className="fixed inset-y-0 right-0 w-[250px] border-l border-gray-200 bg-white z-30 flex flex-col">
+    <div className={`fixed inset-y-0 ${isRtl ? 'right-0 border-r' : 'left-0 border-l'} w-[250px] border-gray-200 bg-white z-30 flex flex-col`}>
       <div className="p-4 bg-unlimited-dark-blue text-white">
         <Logo />
       </div>
@@ -41,7 +42,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <Home className="h-5 w-5 ml-2" />
+            <Home className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.dashboard')}</span>
           </Link>
           
@@ -53,7 +54,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <Users className="h-5 w-5 ml-2" />
+            <Users className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.studentsManagement')}</span>
           </Link>
           
@@ -65,7 +66,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <UserCog className="h-5 w-5 ml-2" />
+            <UserCog className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.agentsManagement')}</span>
           </Link>
           
@@ -77,7 +78,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <Building className="h-5 w-5 ml-2" />
+            <Building className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.universitiesManagement')}</span>
           </Link>
           
@@ -89,7 +90,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <BookOpen className="h-5 w-5 ml-2" />
+            <BookOpen className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.programsManagement')}</span>
           </Link>
           
@@ -101,7 +102,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <FileText className="h-5 w-5 ml-2" />
+            <FileText className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.applicationsManagement')}</span>
           </Link>
 
@@ -120,7 +121,7 @@ const AdminSidebar = () => {
             }`}
           >
             <div className="flex items-center">
-              <MessageSquare className="h-5 w-5 ml-2" />
+              <MessageSquare className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
               <span>{t('admin.sidebar.messagingSystem')}</span>
             </div>
             <Badge className="bg-unlimited-warning text-white">12</Badge>
@@ -135,7 +136,7 @@ const AdminSidebar = () => {
             }`}
           >
             <div className="flex items-center">
-              <Bell className="h-5 w-5 ml-2" />
+              <Bell className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
               <span>{t('admin.sidebar.notifications')}</span>
             </div>
             <Badge className="bg-unlimited-danger text-white">5</Badge>
@@ -155,7 +156,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <BarChart3 className="h-5 w-5 ml-2" />
+            <BarChart3 className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.reportsStatistics')}</span>
           </Link>
           
@@ -167,7 +168,7 @@ const AdminSidebar = () => {
                 : 'text-unlimited-gray hover:bg-unlimited-blue/10'
             }`}
           >
-            <Settings className="h-5 w-5 ml-2" />
+            <Settings className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
             <span>{t('admin.sidebar.settings')}</span>
           </Link>
         </nav>
@@ -178,7 +179,7 @@ const AdminSidebar = () => {
           <div className="flex-shrink-0 h-8 w-8 rounded-full bg-unlimited-blue/20 flex items-center justify-center">
             <GraduationCap className="h-5 w-5 text-unlimited-blue" />
           </div>
-          <div className="mr-3">
+          <div className={`${isRtl ? 'mr-3' : 'ml-3'}`}>
             <p className="text-sm font-medium text-unlimited-dark-blue">{t('admin.sidebar.adminPanel')}</p>
             <p className="text-xs text-unlimited-gray">{t('site.name')}</p>
           </div>

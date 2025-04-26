@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +7,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import StudentApplicationForm from '@/components/applications/StudentApplicationForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from '@/components/ui/button';
-import { Search, FilterIcon, GraduationCap, Building, Globe, Check, Clock, Plus, FileText, AlertCircle } from 'lucide-react';
+import { Search, AlertCircle, FilterIcon, GraduationCap, Building, Globe, Check, Clock, Plus, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -21,11 +22,12 @@ import {
 import ApplicationDocuments from '@/components/applications/ApplicationDocuments';
 import ApplicationMessages from '@/components/applications/ApplicationMessages';
 
+// Program data for demo purposes
 const programs = [
   {
     id: 1,
     title: "Medicine (English)",
-    titleAr: "الط�� البشري (بالإنجليزية)",
+    titleAr: "الطب البشري (بالإنجليزية)",
     university: "Istanbul University",
     universityAr: "جامعة اسطنبول",
     country: "Turkey",
@@ -124,6 +126,7 @@ const programs = [
   },
 ];
 
+// Sample applications data
 const myApplications = [
   {
     id: 101,
@@ -304,14 +307,14 @@ const StudentApplication = () => {
             <TabsContent value="application-detail" className="space-y-4">
               {currentApplication && currentProgram && (
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col md:flex-row justify-between items-start gap-4">
                     <div>
                       <h2 className="text-2xl font-bold text-unlimited-blue">
                         {getLocalizedValue(currentProgram.title, currentProgram.titleAr)}
                       </h2>
                       <p className="text-unlimited-gray">
                         {getLocalizedValue(currentProgram.university, currentProgram.universityAr)} | 
-                        {getLocalizedValue("Application", "رقم الطلب")}: #{selectedApplication}
+                        {getLocalizedValue(" Application", " رقم الطلب")}: #{selectedApplication}
                       </p>
                     </div>
                     
@@ -323,7 +326,7 @@ const StudentApplication = () => {
                         size="sm"
                         onClick={() => setActiveTab('my-applications')}
                       >
-                        Back to Applications
+                        {isRtl ? "العودة إلى الطلبات" : "Back to Applications"}
                       </Button>
                     </div>
                   </div>
@@ -332,15 +335,15 @@ const StudentApplication = () => {
                     <Tabs value={applicationDetailTab} onValueChange={setApplicationDetailTab}>
                       <TabsList className="grid w-full md:w-[600px] grid-cols-3">
                         <TabsTrigger value="form">
-                          <FileText className="h-4 w-4 mr-2" />
-                          Application Form
+                          <FileText className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
+                          {isRtl ? "نموذج الطلب" : "Application Form"}
                         </TabsTrigger>
                         <TabsTrigger value="documents">
-                          <FileText className="h-4 w-4 mr-2" />
+                          <FileText className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
                           {t("application.documents.title")}
                         </TabsTrigger>
                         <TabsTrigger value="messages">
-                          <FileText className="h-4 w-4 mr-2" />
+                          <FileText className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
                           {t("application.messages.title")}
                         </TabsTrigger>
                       </TabsList>
@@ -352,9 +355,10 @@ const StudentApplication = () => {
                           ) : (
                             <Card>
                               <CardHeader>
-                                <CardTitle>Application Details</CardTitle>
+                                <CardTitle>{isRtl ? "تفاصيل الطلب" : "Application Details"}</CardTitle>
                                 <CardDescription>
-                                  Submitted on {currentApplication.submissionDate}
+                                  {isRtl ? `تم التقديم في ${currentApplication.submissionDate}` : 
+                                          `Submitted on ${currentApplication.submissionDate}`}
                                 </CardDescription>
                               </CardHeader>
                               <CardContent className="space-y-6">
@@ -383,7 +387,7 @@ const StudentApplication = () => {
                                     </div>
                                     <div>
                                       <p className="text-sm text-unlimited-gray">{t("application.personal.nationality")}</p>
-                                      <p>Kuwait</p>
+                                      <p>{isRtl ? "الكويت" : "Kuwait"}</p>
                                     </div>
                                   </div>
                                 </div>
@@ -393,7 +397,7 @@ const StudentApplication = () => {
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                       <p className="text-sm text-unlimited-gray">{t("application.academic.highSchoolName")}</p>
-                                      <p>Kuwait International School</p>
+                                      <p>{isRtl ? "المدرسة الكويتية الدولية" : "Kuwait International School"}</p>
                                     </div>
                                     <div>
                                       <p className="text-sm text-unlimited-gray">{t("application.academic.yearOfGraduation")}</p>
@@ -436,6 +440,11 @@ const StudentApplication = () => {
                                   </div>
                                 </div>
                               </CardContent>
+                              <CardFooter>
+                                <Button variant="outline" className="w-full">
+                                  {isRtl ? "تحميل نسخة PDF" : "Download PDF Copy"}
+                                </Button>
+                              </CardFooter>
                             </Card>
                           )}
                         </div>
@@ -585,7 +594,7 @@ const StudentApplication = () => {
                             <span className="text-unlimited-blue font-bold">
                               {getLocalizedValue(program.discountedFee, program.discountedFeeAr)}
                             </span>
-                            <span className="text-unlimited-gray text-sm line-through mr-2">
+                            <span className="text-unlimited-gray text-sm line-through ml-2">
                               {getLocalizedValue(program.tuitionFee, program.tuitionFeeAr)}
                             </span>
                           </div>

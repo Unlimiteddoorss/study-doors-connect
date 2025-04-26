@@ -11,7 +11,8 @@ import { useTranslation } from 'react-i18next';
 
 const AdminDashboard = () => {
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
 
   const applicationData = {
     daily: [
@@ -75,9 +76,9 @@ const AdminDashboard = () => {
         <Tabs defaultValue="overview" className="space-y-4">
           <div className="overflow-x-auto">
             <TabsList>
-              <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-              <TabsTrigger value="analytics">التحليلات</TabsTrigger>
-              <TabsTrigger value="tasks">المهام</TabsTrigger>
+              <TabsTrigger value="overview">{isRtl ? "نظرة عامة" : "Overview"}</TabsTrigger>
+              <TabsTrigger value="analytics">{isRtl ? "التحليلات" : "Analytics"}</TabsTrigger>
+              <TabsTrigger value="tasks">{isRtl ? "المهام" : "Tasks"}</TabsTrigger>
             </TabsList>
           </div>
 
@@ -85,25 +86,25 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">الطلبات الجديدة</CardTitle>
-                  <div className="flex space-x-2 rtl:space-x-reverse">
+                  <CardTitle className="text-sm font-medium">{isRtl ? "الطلبات الجديدة" : "New Applications"}</CardTitle>
+                  <div className={`flex space-x-2 ${isRtl ? 'space-x-reverse' : ''}`}>
                     <button
                       onClick={() => setPeriod('daily')}
                       className={`px-2 py-1 text-xs rounded ${period === 'daily' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
                     >
-                      يومي
+                      {isRtl ? "يومي" : "Daily"}
                     </button>
                     <button
                       onClick={() => setPeriod('weekly')}
                       className={`px-2 py-1 text-xs rounded ${period === 'weekly' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
                     >
-                      أسبوعي
+                      {isRtl ? "أسبوعي" : "Weekly"}
                     </button>
                     <button
                       onClick={() => setPeriod('monthly')}
                       className={`px-2 py-1 text-xs rounded ${period === 'monthly' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
                     >
-                      شهري
+                      {isRtl ? "شهري" : "Monthly"}
                     </button>
                   </div>
                 </CardHeader>
@@ -113,7 +114,7 @@ const AdminDashboard = () => {
                     index="name"
                     categories={["total"]}
                     colors={["blue"]}
-                    valueFormatter={(value: number) => `${value} طلب`}
+                    valueFormatter={(value: number) => isRtl ? `${value} طلب` : `${value} applications`}
                     className="aspect-[4/3]"
                   />
                 </CardContent>
@@ -121,7 +122,9 @@ const AdminDashboard = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm font-medium">توزيع الطلبات حسب التخصص</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    {isRtl ? "توزيع الطلبات حسب التخصص" : "Applications by Specialization"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PieChart
@@ -137,7 +140,9 @@ const AdminDashboard = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">الطلبات حسب البلد</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {isRtl ? "الطلبات حسب البلد" : "Applications by Country"}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <BarChart
@@ -145,7 +150,7 @@ const AdminDashboard = () => {
                   index="name"
                   categories={["total"]}
                   colors={["blue"]}
-                  valueFormatter={(value: number) => `${value} طلب`}
+                  valueFormatter={(value: number) => isRtl ? `${value} طلب` : `${value} applications`}
                   className="aspect-[4/3]"
                 />
               </CardContent>
@@ -155,22 +160,24 @@ const AdminDashboard = () => {
           <TabsContent value="analytics" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm font-medium">تحليل أداء الوكلاء</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {isRtl ? "تحليل أداء الوكلاء" : "Agent Performance Analysis"}
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <LineChart
                   data={[
-                    { name: "يناير", "وكيل 1": 12, "وكيل 2": 18, "وكيل 3": 10 },
-                    { name: "فبراير", "وكيل 1": 15, "وكيل 2": 20, "وكيل 3": 12 },
-                    { name: "مارس", "وكيل 1": 18, "وكيل 2": 22, "وكيل 3": 14 },
-                    { name: "أبريل", "وكيل 1": 20, "وكيل 2": 25, "وكيل 3": 18 },
-                    { name: "مايو", "وكيل 1": 22, "وكيل 2": 28, "وكيل 3": 20 },
-                    { name: "يونيو", "وكيل 1": 25, "وكيل 2": 30, "وكيل 3": 22 },
+                    { name: isRtl ? "يناير" : "January", "وكيل 1": 12, "وكيل 2": 18, "وكيل 3": 10 },
+                    { name: isRtl ? "فبراير" : "February", "وكيل 1": 15, "وكيل 2": 20, "وكيل 3": 12 },
+                    { name: isRtl ? "مارس" : "March", "وكيل 1": 18, "وكيل 2": 22, "وكيل 3": 14 },
+                    { name: isRtl ? "أبريل" : "April", "وكيل 1": 20, "وكيل 2": 25, "وكيل 3": 18 },
+                    { name: isRtl ? "مايو" : "May", "وكيل 1": 22, "وكيل 2": 28, "وكيل 3": 20 },
+                    { name: isRtl ? "يونيو" : "June", "وكيل 1": 25, "وكيل 2": 30, "وكيل 3": 22 },
                   ]}
                   index="name"
                   categories={["وكيل 1", "وكيل 2", "وكيل 3"]}
                   colors={["blue", "green", "orange"]}
-                  valueFormatter={(value: number) => `${value} طلب`}
+                  valueFormatter={(value: number) => isRtl ? `${value} طلب` : `${value} applications`}
                   className="aspect-[4/3]"
                 />
               </CardContent>
@@ -181,7 +188,9 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="col-span-1">
                 <CardHeader>
-                  <CardTitle className="text-base font-medium">المهام المعلقة</CardTitle>
+                  <CardTitle className="text-base font-medium">
+                    {isRtl ? "المهام المعلقة" : "Pending Tasks"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <PendingTasks />
@@ -190,7 +199,9 @@ const AdminDashboard = () => {
               
               <Card className="col-span-1">
                 <CardHeader>
-                  <CardTitle className="text-base font-medium">الطلبات الحديثة</CardTitle>
+                  <CardTitle className="text-base font-medium">
+                    {isRtl ? "الطلبات الحديثة" : "Recent Applications"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RecentApplications />

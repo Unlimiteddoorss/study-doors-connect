@@ -81,6 +81,14 @@ const StudentApplicationFormSubmit = ({
     
     // Call the onSubmit handler
     onSubmit();
+    
+    // Show success toast for better UX
+    if (isLastStep) {
+      toast({
+        title: t("application.submission.success"),
+        description: t("application.submission.successMessage"),
+      });
+    }
   };
 
   return (
@@ -109,7 +117,7 @@ const StudentApplicationFormSubmit = ({
           variant="outline"
           onClick={onBack}
           disabled={isSubmitting}
-          className="order-2 sm:order-1 flex items-center gap-1"
+          className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
         >
           {isRtl ? (
             <>
@@ -132,11 +140,13 @@ const StudentApplicationFormSubmit = ({
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {t('application.buttons.submitting')}
+                <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> 
+                {t('application.buttons.submitting')}
               </>
             ) : (
               <>
-                <Check className="mr-2 h-4 w-4" /> {t('application.buttons.submit')}
+                <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> 
+                {t('application.buttons.submit')}
               </>
             )}
           </Button>
@@ -145,7 +155,7 @@ const StudentApplicationFormSubmit = ({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1"
+            className={`w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
           >
             {isRtl ? (
               <>

@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -132,6 +133,7 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Admin routes with proper protection */}
         <Route path="/admin" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminDashboard />
