@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
@@ -63,7 +64,14 @@ const StudentApplications = () => {
         university: 'جامعة البسفور',
         date: '2025-01-30',
         status: 'rejected',
-      }
+      },
+      {
+        id: 'APP-005',
+        program: 'ماجستير تقنية المعلومات',
+        university: 'جامعة أنقرة',
+        date: '2025-04-15',
+        status: 'conditional',
+      },
     ];
 
     // حفظ البيانات في التخزين المحلي
@@ -153,6 +161,11 @@ const StudentApplications = () => {
   // تصدير البيانات إلى ملف Excel
   const handleExport = () => {
     alert('سيتم تصدير البيانات إلى ملف Excel');
+  };
+
+  // الانتقال إلى صفحة تفاصيل الطلب
+  const viewApplicationDetails = (applicationId: string) => {
+    navigate(`/dashboard/applications/${applicationId}`);
   };
 
   return (
@@ -267,6 +280,7 @@ const StudentApplications = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 className="flex items-center gap-1"
+                                onClick={() => viewApplicationDetails(app.id)}
                               >
                                 <Eye className="h-4 w-4" />
                                 <span className="hidden sm:inline">{t('view', 'عرض')}</span>
@@ -326,6 +340,7 @@ const StudentApplications = () => {
                                     variant="ghost" 
                                     size="sm" 
                                     className="flex items-center gap-1"
+                                    onClick={() => viewApplicationDetails(app.id)}
                                   >
                                     <Eye className="h-4 w-4" />
                                     <span className="hidden sm:inline">{t('view', 'عرض')}</span>

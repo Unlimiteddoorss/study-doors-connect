@@ -40,6 +40,7 @@ import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
+import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
 
 function App() {
   // FIXME: In production, this would come from auth context or user state
@@ -109,7 +110,7 @@ function App() {
         } />
         <Route path="/dashboard/applications/:id" element={
           <ProtectedRoute allowedRoles={['student']}>
-            <StudentApplications />
+            <ApplicationDetails />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/profile" element={
