@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -40,7 +41,9 @@ import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 
 function App() {
-  const userRole = 'student';
+  // FIXME: In production, this would come from auth context or user state
+  // 'student', 'admin', or 'agent'
+  const userRole = 'admin'; // Changed from 'student' to 'admin' for testing purposes
 
   const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
     const isAuthenticated = true;
@@ -80,11 +83,15 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
+        {/* Redirect admin users from /dashboard to /admin */}
         <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <Dashboard />
-          </ProtectedRoute>
+          userRole === 'admin' ? <Navigate to="/admin" replace /> : (
+            <ProtectedRoute allowedRoles={['student']}>
+              <Dashboard />
+            </ProtectedRoute>
+          )
         } />
+
         <Route path="/apply" element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentApplication />
