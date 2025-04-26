@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -43,10 +42,10 @@ import "./App.css";
 function App() {
   // FIXME: In production, this would come from auth context or user state
   // 'student', 'admin', or 'agent'
-  const userRole = 'admin'; // Changed from 'student' to 'admin' for testing purposes
+  const userRole = 'admin'; // Changed to 'admin' for testing
 
   const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: string[] }) => {
-    const isAuthenticated = true;
+    const isAuthenticated = true; // For testing purposes
     const hasPermission = allowedRoles.includes(userRole);
 
     if (!isAuthenticated) {

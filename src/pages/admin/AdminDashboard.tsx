@@ -73,11 +73,13 @@ const AdminDashboard = () => {
         <DashboardStats userRole="admin" />
 
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid grid-cols-3 md:w-[400px]">
-            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="analytics">التحليلات</TabsTrigger>
-            <TabsTrigger value="tasks">المهام</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList>
+              <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+              <TabsTrigger value="analytics">التحليلات</TabsTrigger>
+              <TabsTrigger value="tasks">المهام</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="overview" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -85,27 +87,24 @@ const AdminDashboard = () => {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">الطلبات الجديدة</CardTitle>
                   <div className="flex space-x-2 rtl:space-x-reverse">
-                    <TabsTrigger
-                      value="daily"
+                    <button
                       onClick={() => setPeriod('daily')}
-                      className={period === 'daily' ? 'bg-unlimited-blue text-white' : ''}
+                      className={`px-2 py-1 text-xs rounded ${period === 'daily' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
                     >
                       يومي
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="weekly"
+                    </button>
+                    <button
                       onClick={() => setPeriod('weekly')}
-                      className={period === 'weekly' ? 'bg-unlimited-blue text-white' : ''}
+                      className={`px-2 py-1 text-xs rounded ${period === 'weekly' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
                     >
                       أسبوعي
-                    </TabsTrigger>
-                    <TabsTrigger
-                      value="monthly"
+                    </button>
+                    <button
                       onClick={() => setPeriod('monthly')}
-                      className={period === 'monthly' ? 'bg-unlimited-blue text-white' : ''}
+                      className={`px-2 py-1 text-xs rounded ${period === 'monthly' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
                     >
                       شهري
-                    </TabsTrigger>
+                    </button>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-6">

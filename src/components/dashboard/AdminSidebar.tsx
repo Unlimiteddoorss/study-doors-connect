@@ -178,7 +178,7 @@ const AdminSidebar = () => {
           <div className="flex-shrink-0 h-8 w-8 rounded-full bg-unlimited-blue/20 flex items-center justify-center">
             <GraduationCap className="h-5 w-5 text-unlimited-blue" />
           </div>
-          <div className="ml-3">
+          <div className="mr-3">
             <p className="text-sm font-medium text-unlimited-dark-blue">{t('admin.sidebar.adminPanel')}</p>
             <p className="text-xs text-unlimited-gray">{t('site.name')}</p>
           </div>

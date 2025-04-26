@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Archive, CheckCircle, Clock, Download, FileText, MoreHorizontal, Search, Trash, Upload, X, Eye } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -37,7 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 
@@ -223,8 +222,6 @@ const ManageApplications = () => {
       return;
     }
 
-    // В реальном приложении здесь был бы код для обработки файла Excel
-    // Имитируем успешный импорт
     setTimeout(() => {
       toast({
         title: t("application.import.success"),
@@ -236,15 +233,12 @@ const ManageApplications = () => {
   };
 
   const handleExportApplications = () => {
-    // В реальном приложении здесь был бы код для экспорта в Excel
-    // Имитируем успешный экспорт
     setTimeout(() => {
       toast({
         title: t("application.export.success"),
         description: t("application.export.successDesc"),
       });
       
-      // Создаем фиктивный элемент для "скачивания" файла
       const element = document.createElement('a');
       element.setAttribute('href', 'data:text/plain;charset=utf-8,');
       element.setAttribute('download', `applications_export_${new Date().toISOString().slice(0,10)}.xlsx`);
@@ -441,110 +435,99 @@ const ManageApplications = () => {
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
           </div>
         ) : (
-          <Tabs defaultValue="all" onValueChange={(value) => setStatusFilter(value as ApplicationStatus | 'all')}>
-            <div className="overflow-x-auto">
-              <TabsList className="mb-4 inline-flex">
-                <TabsTrigger value="all" className="min-w-[80px]">
+          <div>
+            <div className="mb-4 border-b border-gray-200">
+              <nav className="-mb-px flex space-x-8 rtl:space-x-reverse" aria-label="Tabs">
+                <button
+                  onClick={() => setStatusFilter('all')}
+                  className={`${
+                    statusFilter === 'all'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.tabs.all')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.all}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="min-w-[80px]">
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.all}</Badge>
+                </button>
+                <button
+                  onClick={() => setStatusFilter('pending')}
+                  className={`${
+                    statusFilter === 'pending'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.status.pending')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.pending}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="processing" className="min-w-[80px]">
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.pending}</Badge>
+                </button>
+                <button
+                  onClick={() => setStatusFilter('processing')}
+                  className={`${
+                    statusFilter === 'processing'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.status.processing')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.processing}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="approved" className="min-w-[80px]">
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.processing}</Badge>
+                </button>
+                <button
+                  onClick={() => setStatusFilter('approved')}
+                  className={`${
+                    statusFilter === 'approved'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.status.approved')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.approved}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="rejected" className="min-w-[80px]">
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.approved}</Badge>
+                </button>
+                <button
+                  onClick={() => setStatusFilter('rejected')}
+                  className={`${
+                    statusFilter === 'rejected'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.status.rejected')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.rejected}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="completed" className="min-w-[80px]">
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.rejected}</Badge>
+                </button>
+                <button
+                  onClick={() => setStatusFilter('completed')}
+                  className={`${
+                    statusFilter === 'completed'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.status.completed')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.completed}</Badge>
-                </TabsTrigger>
-                <TabsTrigger value="archived" className="min-w-[80px]">
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.completed}</Badge>
+                </button>
+                <button
+                  onClick={() => setStatusFilter('archived')}
+                  className={`${
+                    statusFilter === 'archived'
+                      ? 'border-unlimited-blue text-unlimited-blue'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center`}
+                >
                   {t('application.status.archived')}
-                  <Badge variant="outline" className="mr-2">{applicationsByStatus.archived}</Badge>
-                </TabsTrigger>
-              </TabsList>
+                  <Badge variant="outline" className="ml-2">{applicationsByStatus.archived}</Badge>
+                </button>
+              </nav>
             </div>
-
-            <TabsContent value="all">
-              <ApplicationsTable 
-                applications={filteredApplications} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
             
-            <TabsContent value="pending">
-              <ApplicationsTable 
-                applications={filteredApplications.filter(a => a.status === 'pending')} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
-            
-            <TabsContent value="processing">
-              <ApplicationsTable 
-                applications={filteredApplications.filter(a => a.status === 'processing')} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
-            
-            <TabsContent value="approved">
-              <ApplicationsTable 
-                applications={filteredApplications.filter(a => a.status === 'approved')} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
-            
-            <TabsContent value="rejected">
-              <ApplicationsTable 
-                applications={filteredApplications.filter(a => a.status === 'rejected')} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
-            
-            <TabsContent value="completed">
-              <ApplicationsTable 
-                applications={filteredApplications.filter(a => a.status === 'completed')} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
-            
-            <TabsContent value="archived">
-              <ApplicationsTable 
-                applications={filteredApplications.filter(a => a.status === 'archived')} 
-                handleViewApplication={handleViewApplication}
-                handleDeleteApplication={handleDeleteApplication}
-                handleUpdateStatus={handleUpdateStatus}
-                t={t}
-              />
-            </TabsContent>
-          </Tabs>
+            <ApplicationsTable 
+              applications={filteredApplications.filter(app => 
+                statusFilter === 'all' ? true : app.status === statusFilter
+              )} 
+              handleViewApplication={handleViewApplication}
+              handleDeleteApplication={handleDeleteApplication}
+              handleUpdateStatus={handleUpdateStatus}
+              t={t}
+            />
+          </div>
         )}
         
         {selectedApplication && (
