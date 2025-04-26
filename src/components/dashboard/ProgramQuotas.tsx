@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Chart } from "@/components/ui/chart";
+import { Progress } from "@/components/ui/progress";
 
 const quotaData = [
   {
@@ -31,25 +31,27 @@ const quotaData = [
 
 export function ProgramQuotas() {
   return (
-    <Card className="col-span-full lg:col-span-2">
+    <Card className="col-span-full lg:col-span-2 w-full">
       <CardHeader>
         <CardTitle className="text-xl">الحصص المتبقية في البرامج</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {quotaData.map((program) => (
             <div key={program.program} className="space-y-2">
-              <div className="flex justify-between items-center">
-                <span className="font-medium">{program.program}</span>
-                <span className="text-sm text-unlimited-gray">
+              <div className="flex flex-wrap justify-between items-center gap-2">
+                <span className="font-medium text-sm sm:text-base">{program.program}</span>
+                <span className="text-xs sm:text-sm text-unlimited-gray whitespace-nowrap">
                   {program.remaining} مقعد متبقي
                 </span>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full">
-                <div
-                  className="h-full bg-unlimited-blue rounded-full transition-all"
-                  style={{ width: `${(program.filled / program.total) * 100}%` }}
-                />
+              <Progress 
+                value={(program.filled / program.total) * 100} 
+                className="h-2 w-full bg-gray-100"
+              />
+              <div className="flex justify-between items-center text-xs text-unlimited-gray">
+                <span>{program.filled} مقعد مشغول</span>
+                <span>{program.total} إجمالي المقاعد</span>
               </div>
             </div>
           ))}
