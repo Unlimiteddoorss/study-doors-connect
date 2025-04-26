@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -45,7 +44,7 @@ import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
 function App() {
   // FIXME: In production, this would come from auth context or user state
   // 'student', 'admin', or 'agent'
-  const userRole = 'student'; // Changed to 'student' for testing student pages
+  const userRole = 'student' as 'student' | 'admin' | 'agent'; // Properly typed
 
   type UserRole = 'student' | 'admin' | 'agent';
 
@@ -63,6 +62,11 @@ function App() {
 
     return <>{children}</>;
   };
+
+  // Handle redirect to admin dashboard for admin users
+  if (userRole === ('admin' as UserRole)) {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <>
