@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from 'react-i18next';
+import { changeLanguage } from '@/i18n/config';
 
 interface DashboardHeaderProps {
   userRole?: 'student' | 'admin' | 'agent';
@@ -37,10 +38,8 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
     // Implement actual theme toggling here
   };
 
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = lang;
+  const handleLanguageChange = (lang: string) => {
+    changeLanguage(lang);
   };
 
   return (
@@ -69,10 +68,10 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => changeLanguage('ar')}>
+              <DropdownMenuItem onClick={() => handleLanguageChange('ar')}>
                 العربية
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => changeLanguage('en')}>
+              <DropdownMenuItem onClick={() => handleLanguageChange('en')}>
                 English
               </DropdownMenuItem>
             </DropdownMenuContent>

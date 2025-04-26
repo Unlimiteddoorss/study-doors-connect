@@ -20,7 +20,36 @@
     "subAccounts": "الحسابات الفرعية",
     "permissions": "الصلاحيات",
     "accountSettings": "إعدادات الحساب",
-    "securitySettings": "إعدادات الأمان"
+    "securitySettings": "إعدادات الأمان",
+    "profile": "الملف الشخصي",
+    "viewProfile": "عرض الملف الشخصي",
+    "settings": "الإعدادات",
+    "accountSettings": {
+      "title": "إعدادات الحساب",
+      "securitySettings": "إعدادات الأمان",
+      "subAccounts": "الحسابات الفرعية"
+    },
+    "securitySettings": {
+      "title": "إعدادات الأمان",
+      "description": "إدارة إعدادات الأمان وخيارات المصادقة لحسابك",
+      "twoFactor": "المصادقة الثنائية",
+      "twoFactorEnabledInfo": "المصادقة الثنائية مفعلة، سيتم إرسال رمز تحقق عند تسجيل الدخول",
+      "twoFactorDisabledInfo": "قم بتفعيل المصادقة الثنائية لتعزيز أمان حسابك",
+      "enable": "تفعيل",
+      "disable": "تعطيل",
+      "twoFactorEnabled": "تم تفعيل المصادقة الثنائية",
+      "twoFactorDisabled": "تم تعطيل المصادقة الثنائية",
+      "twoFactorEnabledDescription": "تم تفعيل المصادقة الثنائية بنجاح لحسابك",
+      "twoFactorDisabledDescription": "تم تعطيل المصادقة الثنائية لحسابك",
+      "changePassword": "تغيير كلمة المرور",
+      "changePasswordDescription": "قم بتغيير كلمة المرور الخاصة بحسابك",
+      "change": "تغيير",
+      "error": "خطأ",
+      "errorDescription": "حدث خطأ أثناء معالجة طلبك، يرجى المحاولة مرة أخرى",
+      "loginHistory": "سجل تسجيل الدخول",
+      "loginHistoryDescription": "اطّلع على آخر نشاطات تسجيل الدخول إلى حسابك",
+      "viewFullHistory": "عرض سجل تسجيل الدخول الكامل"
+    }
   },
   "login": {
     "studentTab": "طالب",
@@ -111,6 +140,75 @@
     "inactiveStatus": "غير نشط",
     "delete": "حذف",
     "noSubAccounts": "لا يوجد حسابات فرعية حالياً"
+  },
+  "dashboard": {
+    "home": "الرئيسية",
+    "student": {
+      "title": "لوحة تحكم الطالب"
+    },
+    "agent": {
+      "title": "لوحة تحكم الوكيل"
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "title": "لوحة تحكم المدير"
+    },
+    "breadcrumbs": {
+      "home": "الرئيسية",
+      "adminDashboard": "لوحة التحكم",
+      "students": "الطلاب",
+      "applications": "الطلبات",
+      "programs": "البرامج",
+      "agents": "الوكلاء",
+      "universities": "الجامعات"
+    },
+    "students": "إدارة الطلاب",
+    "agents": "إدارة الوكلاء",
+    "applications": "إدارة الطلبات",
+    "programs": "إدارة البرامج",
+    "universities": "إدارة الجامعات",
+    "reports": {
+      "title": "التقارير والإحصائيات"
+    },
+    "communication": "التواصل",
+    "additional": "إضافي",
+    "sidebar": {
+      "dashboard": "لوحة التحكم",
+      "studentsManagement": "إدارة الطلاب",
+      "agentsManagement": "إدارة الوكلاء",
+      "universitiesManagement": "إدارة الجامعات",
+      "programsManagement": "إدارة البرامج",
+      "applicationsManagement": "إدارة الطلبات",
+      "messagingSystem": "نظام المراسلات",
+      "notifications": "الإشعارات",
+      "reportsStatistics": "التقارير والإحصائيات",
+      "settings": "الإعدادات",
+      "adminPanel": "لوحة المدير"
+    }
+  },
+  "application": {
+    "myApplications": {
+      "title": "طلباتي",
+      "subtitle": "قائمة طلبات التقديم الخاصة بك",
+      "newApplication": "طلب جديد"
+    }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "item": "إشعار {{number}}",
+    "time": "منذ {{number}} ساعات",
+    "viewAll": "عرض كل الإشعارات"
+  },
+  "student": {
+    "dashboard": {
+      "title": "لوحة تحكم الطالب"
+    }
+  },
+  "agent": {
+    "dashboard": {
+      "title": "لوحة تحكم الوكيل"
+    }
   },
   "footer": {
     "companyDescription": "أبواب غير محدودة هي شركة استشارات تعليمية موثوقة تساعد الطلاب في استكشاف فرص التعليم الدولية منذ عام 1992. نقدم دعماً شاملاً لبرامج الدراسة في الخارج في جميع أنحاء العالم.",

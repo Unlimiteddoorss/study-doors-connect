@@ -11,6 +11,7 @@ const defaultLanguage = ['ar', 'en'].includes(savedLanguage) ? savedLanguage : '
 // Set document direction based on language
 document.documentElement.dir = defaultLanguage === 'ar' ? 'rtl' : 'ltr';
 document.documentElement.lang = defaultLanguage;
+document.documentElement.classList.add(defaultLanguage === 'ar' ? 'rtl' : 'ltr');
 
 i18n
   .use(initReactI18next)
@@ -34,8 +35,23 @@ i18n
 export const changeLanguage = (lng: string) => {
   i18n.changeLanguage(lng).then(() => {
     localStorage.setItem('language', lng);
-    document.documentElement.dir = lng === 'ar' ? 'rtl' : 'ltr';
+    
+    // Update document direction
+    const isRtl = lng === 'ar';
+    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
     document.documentElement.lang = lng;
+    
+    // Update CSS classes for RTL support
+    if (isRtl) {
+      document.documentElement.classList.add('rtl');
+      document.documentElement.classList.remove('ltr');
+    } else {
+      document.documentElement.classList.add('ltr');
+      document.documentElement.classList.remove('rtl');
+    }
+    
+    // Force re-render of RTL/LTR sensitive components
+    window.dispatchEvent(new Event('languagechange'));
   });
 };
 
