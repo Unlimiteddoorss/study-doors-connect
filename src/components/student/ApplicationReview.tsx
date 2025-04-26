@@ -95,8 +95,7 @@ const ApplicationReview = ({ formData }: ApplicationReviewProps) => {
                       <span className="text-xs">{doc.name}</span>
                       <Badge 
                         className="ml-2"
-                        variant={doc.status === 'required' ? 'destructive' : 'default'} 
-                        size="sm"
+                        variant={doc.status === 'required' ? 'destructive' : 'default'}
                       >
                         {doc.status === 'uploaded' ? t('application.documents.uploaded') : t('application.documents.missing')}
                       </Badge>

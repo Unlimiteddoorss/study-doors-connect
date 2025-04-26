@@ -24,6 +24,11 @@
     "profile": "الملف الشخصي",
     "viewProfile": "عرض الملف الشخصي",
     "settings": "الإعدادات",
+    "userNames": {
+      "student": "طالب",
+      "admin": "مدير النظام",
+      "agent": "وكيل"
+    },
     "accountSettings": {
       "title": "إعدادات الحساب",
       "securitySettings": "إعدادات الأمان",
@@ -188,11 +193,169 @@
     }
   },
   "application": {
+    "submit": {
+      "title": "تقديم طلب",
+      "subtitle": "أكمل المعلومات المطلوبة وقدم طلبك"
+    },
     "myApplications": {
       "title": "طلباتي",
       "subtitle": "قائمة طلبات التقديم الخاصة بك",
       "newApplication": "طلب جديد"
+    },
+    "steps": {
+      "personal": "المعلومات الشخصية",
+      "documents": "المستندات",
+      "academic": "المعلومات الأكاديمية",
+      "program": "اختيار البرنامج",
+      "review": "المراجعة والتقديم"
+    },
+    "personal": {
+      "firstName": "الاسم الأول",
+      "firstNamePlaceholder": "أدخل اسمك الأول",
+      "lastName": "اسم العائلة",
+      "lastNamePlaceholder": "أدخل اسم عائلتك",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "gender": "الجنس",
+      "male": "ذكر",
+      "female": "أنثى",
+      "birthDate": "تاريخ الميلاد",
+      "selectDate": "اختر تاريخ",
+      "nationality": "الجنسية",
+      "selectNationality": "اختر الجنسية"
+    },
+    "documents": {
+      "title": "تحميل المستندات",
+      "description": "قم بتحميل المستندات المطلوبة أدناه. يجب أن تكون جميع الملفات بتنسيق PDF أو صور واضحة.",
+      "uploadFile": "تحميل ملف",
+      "dragDrop": "اسحب وأفلت أو انقر للتحميل",
+      "required": "مطلوب",
+      "approved": "معتمد",
+      "uploaded": "تم التحميل",
+      "missing": "مفقود",
+      "imageFormat": "صورة (JPG، PNG)",
+      "uploadedDescription": "تم تحميل المستند بنجاح",
+      "removed": "تم إزالة المستند",
+      "removedDescription": "تمت إزالة المستند بنجاح"
+    },
+    "academic": {
+      "title": "المعلومات الأكاديمية",
+      "description": "أدخل معلوماتك الأكاديمية ومؤهلاتك التعليمية.",
+      "lastEducation": "آخر مؤهل دراسي",
+      "selectEducation": "اختر المؤهل",
+      "highSchool": "ثانوية عامة",
+      "bachelor": "بكالوريوس",
+      "master": "ماجستير",
+      "phd": "دكتوراه",
+      "other": "أخرى",
+      "graduationYear": "سنة التخرج",
+      "selectYear": "اختر السنة",
+      "gpa": "المعدل التراكمي",
+      "gpaPlaceholder": "مثال: 3.5 من 4.0",
+      "englishLevel": "مستوى اللغة الإنجليزية",
+      "selectEnglishLevel": "اختر المستوى",
+      "beginner": "مبتدئ",
+      "intermediate": "متوسط",
+      "advanced": "متقدم",
+      "fluent": "طليق",
+      "native": "لغة أم",
+      "previousStudy": "دراسات سابقة",
+      "previousStudyPlaceholder": "أدخل معلومات عن دراساتك السابقة (اختياري)",
+      "achievements": "الإنجازات والشهادات",
+      "achievementsPlaceholder": "أدخل الإنجازات والشهادات التي حصلت عليها (اختياري)",
+      "applyScholarship": "هل تريد التقديم على منحة دراسية؟",
+      "yes": "نعم",
+      "no": "لا"
+    },
+    "program": {
+      "name": "اسم البرنامج",
+      "university": "الجامعة",
+      "annualFees": "الرسوم السنوية",
+      "duration": "مدة البرنامج"
+    },
+    "review": {
+      "title": "مراجعة الطلب",
+      "description": "راجع معلوماتك قبل إرسال الطلب.",
+      "personalInfo": "المعلومات الشخصية",
+      "documents": "المستندات",
+      "academicInfo": "المعلومات الأكاديمية",
+      "programSelection": "اختيار البرنامج",
+      "complete": "مكتمل",
+      "incomplete": "غير مكتمل",
+      "uploadedDocuments": "المستندات المحملة",
+      "personalInfoMissing": "يجب إكمال معلوماتك الشخصية",
+      "documentsMissing": "يجب تحميل المستندات المطلوبة",
+      "academicInfoMissing": "يجب إكمال المعلومات الأكاديمية",
+      "programMissing": "يجب اختيار البرنامج",
+      "beforeSubmitting": "قبل تقديم الطلب",
+      "checkAllInformation": "يرجى التأكد من صحة جميع المعلومات وتحميل جميع المستندات المطلوبة.",
+      "bulletComplete": "تأكد من إكمال جميع الأقسام الإلزامية.",
+      "bulletDocuments": "تأكد من تحميل جميع المستندات المطلوبة بتنسيق مناسب.",
+      "bulletApplication": "سيتم مراجعة طلبك من قبل فريقنا وإبلاغك بالنتيجة.",
+      "readyToSubmit": "جاهز للتقديم؟",
+      "willBeProcessed": "سيتم معالجة طلبك ومراجعته في أقرب وقت ممكن."
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "review": "قيد المراجعة",
+      "approved": "مقبول",
+      "rejected": "مرفوض",
+      "documents": "بانتظار المستندات",
+      "conditional": "قبول مشروط",
+      "paid": "مدفوع",
+      "registered": "مسجل",
+      "completed": "مكتمل"
+    },
+    "buttons": {
+      "submit": "تقديم الطلب",
+      "submitting": "جاري التقديم...",
+      "submitNote": "بالضغط على زر التقديم، أنت توافق على شروط وأحكام الخدمة.",
+      "saveProgress": "حفظ التقدم"
+    },
+    "navigation": {
+      "next": "التالي",
+      "previous": "السابق"
+    },
+    "validation": {
+      "error": "خطأ في البيانات",
+      "completeAllFields": "يرجى إكمال جميع الحقول المطلوبة",
+      "personalInfoIncomplete": "المعلومات الشخصية غير مكتملة",
+      "academicInfoIncomplete": "المعلومات الأكاديمية غير مكتملة",
+      "programSelectionIncomplete": "لم يتم اختيار البرنامج أو الجامعة",
+      "pleaseCorrect": "يرجى تصحيح الأخطاء التالية",
+      "errors": {
+        "missingDocuments": "بعض المستندات المطلوبة غير محملة",
+        "incompleteProfile": "الملف الشخصي غير مكتمل"
+      },
+      "educationRequired": "المؤهل الدراسي مطلوب"
+    },
+    "export": {
+      "toExcel": "تصدير إلى Excel"
+    },
+    "tabs": {
+      "all": "جميع الطلبات"
+    },
+    "search": {
+      "applications": "بحث في الطلبات"
+    },
+    "form": {
+      "saved": "تم الحفظ",
+      "academicInfoSaved": "تم حفظ المعلومات الأكاديمية"
+    },
+    "noApplications": {
+      "message": "لا توجد طلبات مقدمة بعد"
+    },
+    "submission": {
+      "success": "تم التقديم بنجاح",
+      "successMessage": "تم تقديم طلبك بنجاح وسيتم مراجعته قريباً"
     }
+  },
+  "documents": {
+    "passport": "جواز السفر",
+    "diploma": "الشهادة الدراسية",
+    "photo": "صورة شخصية",
+    "transcript": "كشف الدرجات",
+    "motivation": "رسالة التحفيز"
   },
   "notifications": {
     "title": "الإشعارات",
@@ -203,11 +366,39 @@
   "student": {
     "dashboard": {
       "title": "لوحة تحكم الطالب"
+    },
+    "stats": {
+      "applications": "إجمالي عدد الطلبات",
+      "pending": "طلبات قيد المعالجة",
+      "accepted": "طلبات مقبولة",
+      "messages": "رسائل غير مقروءة"
+    },
+    "announcements": {
+      "title": "آخر الإعلانات الجامعية",
+      "deadline": "موعد نهائي",
+      "update": "تحديث",
+      "info": "معلومات"
+    },
+    "quotas": {
+      "title": "الحصص المتبقية في البرامج",
+      "remaining": "مقعد متبقي",
+      "occupied": "مقعد مشغول",
+      "total": "إجمالي المقاعد"
     }
   },
   "agent": {
     "dashboard": {
       "title": "لوحة تحكم الوكيل"
+    }
+  },
+  "errors": {
+    "unauthorized": {
+      "title": "غير مصرح",
+      "description": "ليس لديك صلاحية للوصول إلى هذه الصفحة",
+      "backHome": "العودة للرئيسية",
+      "dashboard": "الذهاب للوحة التحكم",
+      "needHelp": "هل تحتاج للمساعدة؟",
+      "contactSupport": "يرجى التواصل مع الدعم الفني إذا كنت تعتقد أنه يجب أن يكون لديك صلاحية الوصول."
     }
   },
   "footer": {

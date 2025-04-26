@@ -15,8 +15,8 @@ const StudentApplicationHeader = ({ showNewButton }: StudentApplicationHeaderPro
   return (
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
       <div>
-        <h1 className="text-2xl font-bold text-unlimited-dark-blue mb-2">{t("application.submit.title")}</h1>
-        <p className="text-unlimited-gray">{t("application.submit.subtitle")}</p>
+        <h1 className="text-2xl font-bold text-unlimited-dark-blue mb-2">{t("application.submit.title", "تقديم طلب")}</h1>
+        <p className="text-unlimited-gray">{t("application.submit.subtitle", "أكمل المعلومات المطلوبة وقدم طلبك")}</p>
       </div>
 
       {showNewButton && (
@@ -25,7 +25,7 @@ const StudentApplicationHeader = ({ showNewButton }: StudentApplicationHeaderPro
           className="sm:self-start flex items-center gap-2"
         >
           <PlusCircle className="h-4 w-4" />
-          {t("application.myApplications.newApplication")}
+          {t("application.myApplications.newApplication", "طلب جديد")}
         </Button>
       )}
     </div>

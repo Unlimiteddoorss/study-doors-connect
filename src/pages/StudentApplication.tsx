@@ -7,15 +7,11 @@ import PersonalInfoForm from '@/components/student/PersonalInfoForm';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StudentApplicationFormSubmit from '@/components/applications/StudentApplicationFormSubmit';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
-import { ArrowRight, Check, ArrowLeft, Loader2, X } from 'lucide-react';
 import DocumentsUploadForm from '@/components/student/DocumentsUploadForm';
 import AcademicInfoForm from '@/components/student/AcademicInfoForm';
 import ProgramSelectionForm from '@/components/student/ProgramSelectionForm';
 import ApplicationReview from '@/components/student/ApplicationReview';
-import { Badge } from '@/components/ui/badge';
 import ApplicationSubmissionHandler from '@/components/applications/ApplicationSubmissionHandler';
 
 // تعريف واجهة بيانات الطلب
@@ -180,22 +176,14 @@ const StudentApplication = () => {
             />
           ) : (
             <div className="mt-8">
-              <div className="mb-4 p-4 border border-yellow-200 bg-yellow-50 rounded-md">
-                <div className="flex items-start gap-2">
-                  <div className="bg-yellow-100 p-1 rounded-full">
-                    <ArrowRight className="h-5 w-5 text-yellow-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-yellow-800">{t("application.review.title")}</h4>
-                    <p className="text-sm text-yellow-700">{t("application.review.description")}</p>
-                  </div>
-                </div>
-              </div>
-              
               <ApplicationSubmissionHandler 
                 formData={formData} 
                 onSubmit={() => {
                   // تم إرسال الطلب بنجاح
+                  toast({
+                    title: t("application.submission.success"),
+                    description: t("application.submission.successMessage")
+                  });
                 }}
               />
             </div>

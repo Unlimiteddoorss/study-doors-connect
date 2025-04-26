@@ -46,8 +46,8 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
     // التحقق من البيانات المطلوبة
     if (!formData.education) {
       toast({
-        title: t('application.validation.error'),
-        description: t('application.validation.educationRequired'),
+        title: t('application.validation.error', 'خطأ في البيانات'),
+        description: t('application.validation.educationRequired', 'المؤهل الدراسي مطلوب'),
         variant: 'destructive',
       });
       return;
@@ -58,46 +58,46 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
     
     // عرض رسالة نجاح
     toast({
-      title: t('application.form.saved'),
-      description: t('application.form.academicInfoSaved'),
+      title: t('application.form.saved', 'تم الحفظ'),
+      description: t('application.form.academicInfoSaved', 'تم حفظ المعلومات الأكاديمية'),
     });
   };
 
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h3 className="text-lg font-medium">{t('application.academic.title')}</h3>
-        <p className="text-unlimited-gray">{t('application.academic.description')}</p>
+        <h3 className="text-lg font-medium">{t('application.academic.title', 'المعلومات الأكاديمية')}</h3>
+        <p className="text-unlimited-gray">{t('application.academic.description', 'أدخل معلوماتك الأكاديمية ومؤهلاتك التعليمية.')}</p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="education">{t('application.academic.lastEducation')}</Label>
+          <Label htmlFor="education">{t('application.academic.lastEducation', 'آخر مؤهل دراسي')}</Label>
           <Select 
             value={formData.education} 
             onValueChange={(value) => handleInputChange('education', value)}
           >
             <SelectTrigger id="education">
-              <SelectValue placeholder={t('application.academic.selectEducation')} />
+              <SelectValue placeholder={t('application.academic.selectEducation', 'اختر المؤهل')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="high_school">{t('application.academic.highSchool')}</SelectItem>
-              <SelectItem value="bachelor">{t('application.academic.bachelor')}</SelectItem>
-              <SelectItem value="master">{t('application.academic.master')}</SelectItem>
-              <SelectItem value="phd">{t('application.academic.phd')}</SelectItem>
-              <SelectItem value="other">{t('application.academic.other')}</SelectItem>
+              <SelectItem value="high_school">{t('application.academic.highSchool', 'ثانوية عامة')}</SelectItem>
+              <SelectItem value="bachelor">{t('application.academic.bachelor', 'بكالوريوس')}</SelectItem>
+              <SelectItem value="master">{t('application.academic.master', 'ماجستير')}</SelectItem>
+              <SelectItem value="phd">{t('application.academic.phd', 'دكتوراه')}</SelectItem>
+              <SelectItem value="other">{t('application.academic.other', 'أخرى')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="graduationYear">{t('application.academic.graduationYear')}</Label>
+          <Label htmlFor="graduationYear">{t('application.academic.graduationYear', 'سنة التخرج')}</Label>
           <Select 
             value={formData.graduationYear} 
             onValueChange={(value) => handleInputChange('graduationYear', value)}
           >
             <SelectTrigger id="graduationYear">
-              <SelectValue placeholder={t('application.academic.selectYear')} />
+              <SelectValue placeholder={t('application.academic.selectYear', 'اختر السنة')} />
             </SelectTrigger>
             <SelectContent>
               {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(year => (
@@ -110,40 +110,40 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="gpa">{t('application.academic.gpa')}</Label>
+          <Label htmlFor="gpa">{t('application.academic.gpa', 'المعدل التراكمي')}</Label>
           <Input
             id="gpa"
-            placeholder={t('application.academic.gpaPlaceholder')}
+            placeholder={t('application.academic.gpaPlaceholder', 'مثال: 3.5 من 4.0')}
             value={formData.gpa}
             onChange={(e) => handleInputChange('gpa', e.target.value)}
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="englishProficiency">{t('application.academic.englishLevel')}</Label>
+          <Label htmlFor="englishProficiency">{t('application.academic.englishLevel', 'مستوى اللغة الإنجليزية')}</Label>
           <Select 
             value={formData.englishProficiency} 
             onValueChange={(value) => handleInputChange('englishProficiency', value)}
           >
             <SelectTrigger id="englishProficiency">
-              <SelectValue placeholder={t('application.academic.selectEnglishLevel')} />
+              <SelectValue placeholder={t('application.academic.selectEnglishLevel', 'اختر المستوى')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="beginner">{t('application.academic.beginner')}</SelectItem>
-              <SelectItem value="intermediate">{t('application.academic.intermediate')}</SelectItem>
-              <SelectItem value="advanced">{t('application.academic.advanced')}</SelectItem>
-              <SelectItem value="fluent">{t('application.academic.fluent')}</SelectItem>
-              <SelectItem value="native">{t('application.academic.native')}</SelectItem>
+              <SelectItem value="beginner">{t('application.academic.beginner', 'مبتدئ')}</SelectItem>
+              <SelectItem value="intermediate">{t('application.academic.intermediate', 'متوسط')}</SelectItem>
+              <SelectItem value="advanced">{t('application.academic.advanced', 'متقدم')}</SelectItem>
+              <SelectItem value="fluent">{t('application.academic.fluent', 'طليق')}</SelectItem>
+              <SelectItem value="native">{t('application.academic.native', 'لغة أم')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="previousStudy">{t('application.academic.previousStudy')}</Label>
+        <Label htmlFor="previousStudy">{t('application.academic.previousStudy', 'دراسات سابقة')}</Label>
         <Textarea
           id="previousStudy"
-          placeholder={t('application.academic.previousStudyPlaceholder')}
+          placeholder={t('application.academic.previousStudyPlaceholder', 'أدخل معلومات عن دراساتك السابقة (اختياري)')}
           className="h-24"
           value={formData.previousStudy}
           onChange={(e) => handleInputChange('previousStudy', e.target.value)}
@@ -151,10 +151,10 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
       </div>
       
       <div className="space-y-2">
-        <Label htmlFor="achievements">{t('application.academic.achievements')}</Label>
+        <Label htmlFor="achievements">{t('application.academic.achievements', 'الإنجازات والشهادات')}</Label>
         <Textarea
           id="achievements"
-          placeholder={t('application.academic.achievementsPlaceholder')}
+          placeholder={t('application.academic.achievementsPlaceholder', 'أدخل الإنجازات والشهادات التي حصلت عليها (اختياري)')}
           className="h-24"
           value={formData.achievements}
           onChange={(e) => handleInputChange('achievements', e.target.value)}
@@ -162,7 +162,7 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
       </div>
       
       <div className="space-y-2">
-        <Label>{t('application.academic.applyScholarship')}</Label>
+        <Label>{t('application.academic.applyScholarship', 'هل تريد التقديم على منحة دراسية؟')}</Label>
         <RadioGroup 
           value={formData.hasScholarship} 
           onValueChange={(value) => handleInputChange('hasScholarship', value)}
@@ -170,11 +170,11 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
         >
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <RadioGroupItem value="yes" id="scholarship-yes" />
-            <Label htmlFor="scholarship-yes">{t('application.academic.yes')}</Label>
+            <Label htmlFor="scholarship-yes">{t('application.academic.yes', 'نعم')}</Label>
           </div>
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <RadioGroupItem value="no" id="scholarship-no" />
-            <Label htmlFor="scholarship-no">{t('application.academic.no')}</Label>
+            <Label htmlFor="scholarship-no">{t('application.academic.no', 'لا')}</Label>
           </div>
         </RadioGroup>
       </div>
@@ -185,7 +185,7 @@ const AcademicInfoForm = ({ initialData = {}, onSave }: AcademicInfoFormProps) =
           onClick={handleSaveClick}
           className="bg-unlimited-blue hover:bg-unlimited-dark-blue"
         >
-          {t('application.buttons.saveProgress')}
+          {t('application.buttons.saveProgress', 'حفظ التقدم')}
         </Button>
       </div>
     </div>

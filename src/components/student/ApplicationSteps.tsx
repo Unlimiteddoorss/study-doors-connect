@@ -6,14 +6,15 @@ interface StepProps {
 }
 
 const ApplicationSteps = ({ currentStep }: StepProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
   
   const steps = [
-    { id: 1, title: t("application.steps.personal") },
-    { id: 2, title: t("application.steps.documents") },
-    { id: 3, title: t("application.steps.academic") },
-    { id: 4, title: t("application.steps.program") },
-    { id: 5, title: t("application.steps.review") },
+    { id: 1, title: t("application.steps.personal", "المعلومات الشخصية") },
+    { id: 2, title: t("application.steps.documents", "المستندات") },
+    { id: 3, title: t("application.steps.academic", "المعلومات الأكاديمية") },
+    { id: 4, title: t("application.steps.program", "اختيار البرنامج") },
+    { id: 5, title: t("application.steps.review", "المراجعة والتقديم") },
   ];
 
   return (
@@ -32,7 +33,7 @@ const ApplicationSteps = ({ currentStep }: StepProps) => {
             >
               {step.id}
             </div>
-            <span className="mx-3 text-sm text-unlimited-gray">{step.title}</span>
+            <span className="mx-3 text-sm text-unlimited-gray whitespace-nowrap">{step.title}</span>
           </div>
           {step.id !== steps.length && (
             <div 

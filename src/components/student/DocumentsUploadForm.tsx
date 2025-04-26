@@ -37,7 +37,7 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
 
   const handleFileChange = (id: string, file: File) => {
     setDocuments(docs => docs.map(doc => 
-      doc.id === id ? { ...doc, file, status: 'uploaded' } : doc
+      doc.id === id ? { ...doc, file, status: 'uploaded' as const } : doc
     ));
     
     // إظهار رسالة نجاح
@@ -48,14 +48,14 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
     
     // حفظ التغييرات
     const updatedDocs = documents.map(doc => 
-      doc.id === id ? { ...doc, file, status: 'uploaded' } : doc
+      doc.id === id ? { ...doc, file, status: 'uploaded' as const } : doc
     );
     onSave(updatedDocs);
   };
 
   const removeFile = (id: string) => {
     setDocuments(docs => docs.map(doc => 
-      doc.id === id ? { ...doc, file: undefined, status: 'required' } : doc
+      doc.id === id ? { ...doc, file: undefined, status: 'required' as const } : doc
     ));
     
     // إظهار رسالة
@@ -66,7 +66,7 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
     
     // حفظ التغييرات
     const updatedDocs = documents.map(doc => 
-      doc.id === id ? { ...doc, file: undefined, status: 'required' } : doc
+      doc.id === id ? { ...doc, file: undefined, status: 'required' as const } : doc
     );
     onSave(updatedDocs);
   };

@@ -88,13 +88,13 @@ function App() {
         {/* Redirect admin users from /dashboard to /admin */}
         <Route path="/dashboard" element={
           userRole === 'admin' ? <Navigate to="/admin" replace /> : (
-            <ProtectedRoute allowedRoles={['student']}>
+            <ProtectedRoute allowedRoles={['student', 'agent']}>
               <Dashboard />
             </ProtectedRoute>
           )
         } />
 
-        {/* Student Application Routes - منفصلة تماما عن صفحات الأدمن */}
+        {/* Student Application Routes - completely separate from admin pages */}
         <Route path="/apply" element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentApplication />

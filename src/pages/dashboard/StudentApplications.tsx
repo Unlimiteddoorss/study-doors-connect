@@ -1,755 +1,352 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableCell,
-  TableCaption,
-} from '@/components/ui/table';
-import {
-  FileText,
-  Download,
-  ExternalLink,
-  MessageSquare,
-  Check,
-  Clock,
-  AlertCircle,
-  PlusCircle,
-  Upload,
-  Search,
-  X,
-  Edit,
-  Calendar,
-  FileUp,
-  Mail
-} from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { FileText, Search, Calendar, Download, Eye, X } from 'lucide-react';
 
-type ApplicationStatus = 'pending' | 'review' | 'approved' | 'rejected' | 'documents' | 'conditional' | 'paid' | 'registered';
-
+// مكون قائمة التطبيقات
 interface Application {
-  id: number | string;
+  id: string;
   program: string;
-  programId?: number;
   university: string;
-  status: ApplicationStatus;
   date: string;
-  statusColor: string;
-  messages: number;
-  academicYear?: string;
-  semester?: string;
-  pinCode?: string;
-  scholarshipStatus?: string;
-  assignedTo?: string;
-  documents: {
-    name: string;
-    status: 'uploaded' | 'required' | 'approved';
-  }[];
+  status: string;
 }
 
 const StudentApplications = () => {
-  const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedDocument, setSelectedDocument] = useState<{applicationId: string | number, docName: string} | null>(null);
-  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortField, setSortField] = useState<keyof Application>('date');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const exportRef = useRef<HTMLAnchorElement>(null);
-  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const isRtl = i18n.language === 'ar';
   
-  const statusConfig = {
-    pending: { label: t('application.status.pending'), color: 'bg-yellow-100 text-yellow-800', icon: <Clock className="h-4 w-4" /> },
-    review: { label: t('application.status.review'), color: 'bg-blue-100 text-blue-800', icon: <Clock className="h-4 w-4" /> },
-    documents: { label: t('application.status.documents'), color: 'bg-purple-100 text-purple-800', icon: <FileText className="h-4 w-4" /> },
-    approved: { label: t('application.status.approved'), color: 'bg-green-100 text-green-800', icon: <Check className="h-4 w-4" /> },
-    rejected: { label: t('application.status.rejected'), color: 'bg-red-100 text-red-800', icon: <X className="h-4 w-4" /> },
-    conditional: { label: t('application.status.conditional'), color: 'bg-indigo-100 text-indigo-800', icon: <AlertCircle className="h-4 w-4" /> },
-    paid: { label: t('application.status.paid'), color: 'bg-emerald-100 text-emerald-800', icon: <Check className="h-4 w-4" /> },
-    registered: { label: t('application.status.registered'), color: 'bg-teal-100 text-teal-800', icon: <Check className="h-4 w-4" /> },
-  };
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedYear, setSelectedYear] = useState('2025-2026');
+  const [selectedStatus, setSelectedStatus] = useState('all');
   
+  // محاكاة جلب البيانات من الخادم
   useEffect(() => {
-    const fetchApplications = async () => {
-      setIsLoading(true);
-      try {
-        const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
-        
-        if (apiEndpoint) {
-          try {
-            const userId = localStorage.getItem('userId');
-            const response = await fetch(`${apiEndpoint}/student/applications?userId=${userId}`);
-            if (response.ok) {
-              const data = await response.json();
-              setApplications(data);
-              localStorage.setItem('studentApplications', JSON.stringify(data));
-              return;
-            }
-          } catch (apiError) {
-            console.error("API fetch failed, falling back to local storage:", apiError);
-          }
-        }
-        
-        const storedApps = localStorage.getItem('studentApplications');
-        if (storedApps) {
-          const parsedApps = JSON.parse(storedApps);
-          const processedApps = parsedApps.map((app: any) => ({
-            ...app,
-            statusColor: app.statusColor || getStatusColorFromStatus(app.status),
-            academicYear: app.academicYear || "2025-2026",
-            semester: app.semester || (app.date && new Date(app.date).getMonth() > 6 ? "Fall" : "Spring"),
-            pinCode: app.pinCode || generateRandomPinCode(),
-            messages: app.messages || 0
-          }));
-          setApplications(processedApps);
-        }
-      } catch (error) {
-        console.error("Error loading applications:", error);
-        toast({
-          title: t("application.error.loadFailed"),
-          description: t("application.error.loadFailedDesc"),
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
+    // في التطبيق الحقيقي، هذه البيانات ستأتي من الخادم
+    const mockApplications: Application[] = [
+      {
+        id: 'APP-001',
+        program: 'بكالوريوس هندسة البرمجيات',
+        university: 'جامعة إسطنبول التقنية',
+        date: '2025-04-10',
+        status: 'review',
+      },
+      {
+        id: 'APP-002',
+        program: 'ماجستير إدارة الأعمال',
+        university: 'جامعة أنقرة',
+        date: '2025-03-22',
+        status: 'documents',
+      },
+      {
+        id: 'APP-003',
+        program: 'بكالوريوس العلوم الطبية',
+        university: 'جامعة إسطنبول',
+        date: '2025-02-15',
+        status: 'approved',
+      },
+      {
+        id: 'APP-004',
+        program: 'بكالوريوس الهندسة المعمارية',
+        university: 'جامعة البسفور',
+        date: '2025-01-30',
+        status: 'rejected',
       }
-    };
-    
-    fetchApplications();
-  }, [toast, t]);
+    ];
 
-  const getStatusColorFromStatus = (status: ApplicationStatus) => {
-    return statusConfig[status]?.color || 'bg-gray-100 text-gray-800';
-  };
-  
-  const generateRandomPinCode = () => {
-    return Math.floor(10000000 + Math.random() * 90000000).toString();
-  };
+    // حفظ البيانات في التخزين المحلي
+    localStorage.setItem('studentApplications', JSON.stringify(mockApplications));
+    
+    setTimeout(() => {
+      setApplications(mockApplications);
+      setFilteredApplications(mockApplications);
+      setIsLoading(false);
+    }, 500);
+  }, []);
 
-  const getFilteredApplications = () => {
-    let filtered = applications;
+  // تطبيق الفلاتر على القائمة
+  useEffect(() => {
+    let result = [...applications];
     
-    if (activeTab !== 'all') {
-      filtered = filtered.filter(app => app.status === activeTab);
-    }
-    
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(app => 
-        app.program.toLowerCase().includes(query) ||
-        app.university.toLowerCase().includes(query) ||
-        app.id.toString().includes(query)
+    // فلتر بحث
+    if (searchTerm) {
+      result = result.filter(app => 
+        app.program.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        app.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.id.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
-    filtered = [...filtered].sort((a, b) => {
-      let compareA = a[sortField];
-      let compareB = b[sortField];
-      
-      if (typeof compareA === 'string' && typeof compareB === 'string') {
-        if (sortDirection === 'asc') {
-          return compareA.localeCompare(compareB);
-        } else {
-          return compareB.localeCompare(compareA);
-        }
-      } else {
-        if (sortDirection === 'asc') {
-          return compareA > compareB ? 1 : -1;
-        } else {
-          return compareB > compareA ? 1 : -1;
-        }
-      }
-    });
+    // فلتر الحالة
+    if (selectedStatus !== 'all') {
+      result = result.filter(app => app.status === selectedStatus);
+    }
     
-    return filtered;
-  };
+    // يمكن إضافة فلتر السنة الدراسية إذا كان لدينا بيانات متعلقة بالسنة
+    
+    setFilteredApplications(result);
+  }, [searchTerm, selectedStatus, applications]);
 
-  const handleSort = (field: keyof Application) => {
-    if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortDirection('asc');
+  // الحصول على لون خلفية وحالة الطلب
+  const getStatusDetails = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return { 
+          color: 'bg-yellow-100 text-yellow-800', 
+          label: t('application.status.pending', 'قيد الانتظار') 
+        };
+      case 'review':
+        return { 
+          color: 'bg-blue-100 text-blue-800', 
+          label: t('application.status.review', 'قيد المراجعة') 
+        };
+      case 'documents':
+        return { 
+          color: 'bg-purple-100 text-purple-800', 
+          label: t('application.status.documents', 'بانتظار المستندات') 
+        };
+      case 'approved':
+        return { 
+          color: 'bg-green-100 text-green-800', 
+          label: t('application.status.approved', 'مقبول') 
+        };
+      case 'rejected':
+        return { 
+          color: 'bg-red-100 text-red-800', 
+          label: t('application.status.rejected', 'مرفوض') 
+        };
+      case 'conditional':
+        return { 
+          color: 'bg-indigo-100 text-indigo-800', 
+          label: t('application.status.conditional', 'قبول مشروط') 
+        };
+      case 'paid':
+        return { 
+          color: 'bg-green-100 text-green-800', 
+          label: t('application.status.paid', 'مدفوع') 
+        };
+      case 'registered':
+        return { 
+          color: 'bg-teal-100 text-teal-800', 
+          label: t('application.status.registered', 'مسجل') 
+        };
+      default:
+        return { 
+          color: 'bg-gray-100 text-gray-800', 
+          label: status 
+        };
     }
   };
 
-  const handleMessageClick = (applicationId: number | string) => {
-    toast({
-      title: t("application.notifications.messageOpen"),
-      description: t("application.notifications.messageOpenDesc", { id: applicationId }),
-    });
-    navigate(`/messages?applicationId=${applicationId}`);
-  };
-
-  const handleDownloadDocument = (applicationId: number | string, document: string) => {
-    toast({
-      title: t("application.notifications.downloading"),
-      description: t("application.notifications.downloadingDesc", { document }),
-    });
-    
-    const samplePDF = new Blob(['This is a sample document'], { type: 'application/pdf' });
-    const url = URL.createObjectURL(samplePDF);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = `${document}_${applicationId}.pdf`;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleUploadDocument = (applicationId: number | string, docName: string) => {
-    setSelectedDocument({ applicationId, docName });
-    setIsUploadDialogOpen(true);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-  
-  const handleFileUpload = (files: FileList | null) => {
-    if (!files || !files.length || !selectedDocument) return;
-    
-    const file = files[0];
-    console.log(`Uploading ${file.name} for application ${selectedDocument.applicationId}`);
-    
-    const updatedApplications = applications.map(app => {
-      if (app.id === selectedDocument.applicationId) {
-        const updatedDocuments = app.documents.map(doc => {
-          if (doc.name === selectedDocument.docName) {
-            return { ...doc, status: 'uploaded' as const };
-          }
-          return doc;
-        });
-        return { ...app, documents: updatedDocuments };
-      }
-      return app;
-    });
-    
-    setApplications(updatedApplications);
-    localStorage.setItem('studentApplications', JSON.stringify(updatedApplications));
-    
-    const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
-    if (apiEndpoint) {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('applicationId', selectedDocument.applicationId.toString());
-      formData.append('documentName', selectedDocument.docName);
-      
-      fetch(`${apiEndpoint}/documents/upload`, {
-        method: 'POST',
-        body: formData,
-      }).catch(error => {
-        console.error('Error uploading document to API:', error);
-      });
-    }
-    
-    toast({
-      title: t("application.notifications.uploadSuccess"),
-      description: t("application.notifications.uploadSuccessDesc", { document: selectedDocument.docName }),
-    });
-    
-    setIsUploadDialogOpen(false);
-  };
-
-  const handleNewApplication = () => {
-    navigate('/apply');
-  };
-  
-  const handleViewDetails = (application: Application) => {
-    setSelectedApplication(application);
-    setIsDetailsDialogOpen(true);
-  };
-  
-  const exportToExcel = () => {
-    const headers = ['ID', 'Program', 'University', 'Status', 'Date', 'Academic Year', 'Semester', 'PIN Code'];
-    const filteredApps = getFilteredApplications();
-    
-    let csvContent = headers.join(',') + '\n';
-    
-    filteredApps.forEach(app => {
-      const row = [
-        app.id,
-        `"${app.program.replace(/"/g, '""')}"`,
-        `"${app.university.replace(/"/g, '""')}"`,
-        statusConfig[app.status].label,
-        app.date,
-        app.academicYear || '',
-        app.semester || '',
-        app.pinCode || ''
-      ];
-      csvContent += row.join(',') + '\n';
-    });
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    
-    if (exportRef.current) {
-      exportRef.current.href = url;
-      exportRef.current.download = 'my_applications.csv';
-      exportRef.current.click();
-    }
-    
-    setTimeout(() => URL.revokeObjectURL(url), 100);
-    
-    toast({
-      title: t("application.export.success"),
-      description: t("application.export.successDesc"),
-    });
+  // تصدير البيانات إلى ملف Excel
+  const handleExport = () => {
+    alert('سيتم تصدير البيانات إلى ملف Excel');
   };
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="max-w-7xl mx-auto">
+        <StudentApplicationHeader showNewButton />
+        
         <Card>
-          <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
-              <CardTitle className="text-xl">{t("application.myApplications.title")}</CardTitle>
-              <CardDescription>{t("application.myApplications.subtitle")}</CardDescription>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-              <Button onClick={handleNewApplication} className="gap-2">
-                <PlusCircle className="h-4 w-4" />
-                {t("application.myApplications.newApplication")}
-              </Button>
-              <Button variant="outline" onClick={exportToExcel} className="gap-2">
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <div>
+                <CardTitle>{t("application.myApplications.title", "طلباتي")}</CardTitle>
+                <CardDescription>{t("application.myApplications.subtitle", "قائمة طلبات التقديم الخاصة بك")}</CardDescription>
+              </div>
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExport}
+                className="flex items-center gap-2 self-end"
+              >
                 <Download className="h-4 w-4" />
-                {t("application.export.toExcel")}
+                {t('application.export.toExcel', 'تصدير إلى Excel')}
               </Button>
-              <a ref={exportRef} className="hidden"></a>
             </div>
           </CardHeader>
           
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <div className="px-6">
-              <TabsList className="grid grid-cols-9">
-                <TabsTrigger value="all">{t("application.tabs.all")}</TabsTrigger>
-                <TabsTrigger value="pending">{t("application.status.pending")}</TabsTrigger>
-                <TabsTrigger value="review">{t("application.status.review")}</TabsTrigger>
-                <TabsTrigger value="documents">{t("application.status.documents")}</TabsTrigger>
-                <TabsTrigger value="conditional">{t("application.status.conditional")}</TabsTrigger>
-                <TabsTrigger value="approved">{t("application.status.approved")}</TabsTrigger>
-                <TabsTrigger value="paid">{t("application.status.paid")}</TabsTrigger>
-                <TabsTrigger value="registered">{t("application.status.registered")}</TabsTrigger>
-                <TabsTrigger value="rejected">{t("application.status.rejected")}</TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <TabsContent value={activeTab} className="p-0 pt-4">
-              <CardContent>
-                <div className="mb-6 flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray" />
-                    <Input 
-                      placeholder={t("application.search.applications")}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                  <Select defaultValue="current">
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                      <SelectValue placeholder={t("application.filter.academicYear")} />
+          <CardContent>
+            <Tabs defaultValue="all" className="mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <TabsList className="mb-0">
+                  <TabsTrigger value="all">{t('application.tabs.all', 'جميع الطلبات')}</TabsTrigger>
+                  <TabsTrigger value="pending">{t('application.status.pending', 'قيد الانتظار')}</TabsTrigger>
+                  <TabsTrigger value="documents">{t('application.status.documents', 'المستندات')}</TabsTrigger>
+                  <TabsTrigger value="conditional">{t('application.status.conditional', 'مشروط')}</TabsTrigger>
+                  <TabsTrigger value="approved">{t('application.status.approved', 'مقبول')}</TabsTrigger>
+                  <TabsTrigger value="paid">{t('application.status.paid', 'مدفوع')}</TabsTrigger>
+                  <TabsTrigger value="registered">{t('application.status.registered', 'مسجل')}</TabsTrigger>
+                  <TabsTrigger value="rejected">{t('application.status.rejected', 'مرفوض')}</TabsTrigger>
+                </TabsList>
+                
+                <div className="flex items-center gap-2">
+                  <Select
+                    value={selectedYear}
+                    onValueChange={setSelectedYear}
+                  >
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="2025-2026" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="current">2025-2026</SelectItem>
-                      <SelectItem value="previous">2024-2025</SelectItem>
-                      <SelectItem value="next">2026-2027</SelectItem>
+                      <SelectItem value="2025-2026">2025-2026</SelectItem>
+                      <SelectItem value="2024-2025">2024-2025</SelectItem>
+                      <SelectItem value="2023-2024">2023-2024</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-              
-                {!isLoading && applications.length === 0 && (
-                  <div className="text-center py-8">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-2 text-unlimited-gray" />
-                    <p className="text-unlimited-gray mb-4">{t("application.noApplications.message")}</p>
-                    <Button onClick={handleNewApplication} className="gap-2">
-                      <PlusCircle className="h-4 w-4" />
-                      {t("application.noApplications.apply")}
-                    </Button>
-                  </div>
-                )}
-                
-                {!isLoading && getFilteredApplications().length > 0 && (
-                  <div className="border rounded-md overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead 
-                            className={`cursor-pointer ${sortField === 'id' ? 'bg-gray-50' : ''}`}
-                            onClick={() => handleSort('id')}
-                          >
-                            {t("application.table.id")} 
-                            {sortField === 'id' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                          </TableHead>
-                          <TableHead 
-                            className={`cursor-pointer ${sortField === 'program' ? 'bg-gray-50' : ''}`}
-                            onClick={() => handleSort('program')}
-                          >
-                            {t("application.table.program")}
-                            {sortField === 'program' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                          </TableHead>
-                          <TableHead 
-                            className={`cursor-pointer ${sortField === 'university' ? 'bg-gray-50' : ''}`}
-                            onClick={() => handleSort('university')}
-                          >
-                            {t("application.table.university")}
-                            {sortField === 'university' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                          </TableHead>
-                          <TableHead 
-                            className={`cursor-pointer ${sortField === 'status' ? 'bg-gray-50' : ''}`}
-                            onClick={() => handleSort('status')}
-                          >
-                            {t("application.table.status")}
-                            {sortField === 'status' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                          </TableHead>
-                          <TableHead 
-                            className={`cursor-pointer ${sortField === 'date' ? 'bg-gray-50' : ''}`}
-                            onClick={() => handleSort('date')}
-                          >
-                            {t("application.table.date")}
-                            {sortField === 'date' && (sortDirection === 'asc' ? ' ↑' : ' ↓')}
-                          </TableHead>
-                          <TableHead>{t("application.table.documents")}</TableHead>
-                          <TableHead>{t("application.table.actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {getFilteredApplications().map((app) => (
-                          <TableRow key={app.id} className="hover:bg-gray-50">
-                            <TableCell className="font-medium">{app.id}</TableCell>
-                            <TableCell>{app.program}</TableCell>
-                            <TableCell>{app.university}</TableCell>
-                            <TableCell>
-                              <Badge className={statusConfig[app.status].color + " flex w-fit items-center gap-1"}>
-                                {statusConfig[app.status].icon}
-                                {statusConfig[app.status].label}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{app.date}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                {app.documents.filter(d => d.status === 'required').length > 0 ? (
-                                  <Badge variant="destructive" className="rounded-full px-2 py-0 text-xs">
-                                    {app.documents.filter(d => d.status === 'required').length}
-                                  </Badge>
-                                ) : null}
-                                {app.documents.filter(d => d.status === 'uploaded').length > 0 ? (
-                                  <Badge variant="outline" className="rounded-full px-2 py-0 text-xs">
-                                    {app.documents.filter(d => d.status === 'uploaded').length}
-                                  </Badge>
-                                ) : null}
-                                {app.documents.filter(d => d.status === 'approved').length > 0 ? (
-                                  <Badge variant="default" className="rounded-full px-2 py-0 text-xs">
-                                    {app.documents.filter(d => d.status === 'approved').length}
-                                  </Badge>
-                                ) : null}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Button size="icon" variant="ghost" onClick={() => handleViewDetails(app)}>
-                                  <ExternalLink className="h-4 w-4" />
-                                  <span className="sr-only">View Details</span>
-                                </Button>
-                                <Button size="icon" variant="ghost" onClick={() => handleMessageClick(app.id)}>
-                                  <MessageSquare className="h-4 w-4" />
-                                  <span className="sr-only">Messages</span>
-                                  {app.messages > 0 && (
-                                    <Badge className="absolute -top-1 -right-1 w-4 h-4 p-0 flex items-center justify-center" variant="destructive">
-                                      {app.messages}
-                                    </Badge>
-                                  )}
-                                </Button>
-                                <Button size="icon" variant="ghost" onClick={() => navigate(`/dashboard/applications/${app.id}`)}>
-                                  <FileText className="h-4 w-4" />
-                                  <span className="sr-only">View Application</span>
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-                
-                {!isLoading && getFilteredApplications().length > 0 && (
-                  <div className="mt-4 text-sm text-unlimited-gray text-center">
-                    {t("application.table.showing", { 
-                      count: getFilteredApplications().length, 
-                      total: applications.length 
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </TabsContent>
-          </Tabs>
-        </Card>
-      </div>
-      
-      <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{t("application.upload.title")}</DialogTitle>
-            <DialogDescription>
-              {t("application.upload.description")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="document">{t("application.upload.documentLabel", { name: selectedDocument?.docName })}</Label>
-              <Input
-                id="document"
-                type="file"
-                ref={fileInputRef}
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={(e) => handleFileUpload(e.target.files)}
-              />
-              <p className="text-sm text-unlimited-gray">{t("application.upload.requirements")}</p>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsUploadDialogOpen(false)}>
-              {t("application.buttons.cancel")}
-            </Button>
-            <Button type="submit" onClick={() => {
-              if (fileInputRef.current) {
-                handleFileUpload(fileInputRef.current.files);
-              }
-            }}>
-              <Upload className="mr-2 h-4 w-4" />
-              {t("application.buttons.upload")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-          {selectedApplication && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{t("application.details.title", { id: selectedApplication.id })}</DialogTitle>
-                <DialogDescription>
-                  {t("application.details.subtitle", { program: selectedApplication.program, university: selectedApplication.university })}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-6 py-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">{t("application.details.applicationInfo")}</h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-unlimited-gray">{t("application.table.id")}:</div>
-                      <div>{selectedApplication.id}</div>
-                      <div className="text-unlimited-gray">{t("application.table.date")}:</div>
-                      <div>{selectedApplication.date}</div>
-                      <div className="text-unlimited-gray">{t("application.table.status")}:</div>
-                      <div>
-                        <Badge className={statusConfig[selectedApplication.status].color}>
-                          {statusConfig[selectedApplication.status].label}
-                        </Badge>
-                      </div>
-                      <div className="text-unlimited-gray">{t("application.details.pinCode")}:</div>
-                      <div>{selectedApplication.pinCode || '-'}</div>
-                      <div className="text-unlimited-gray">{t("application.details.academicYear")}:</div>
-                      <div>{selectedApplication.academicYear || '2025-2026'}</div>
-                      <div className="text-unlimited-gray">{t("application.details.semester")}:</div>
-                      <div>{selectedApplication.semester || 'Fall'}</div>
-                    </div>
-                  </div>
                   
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">{t("application.details.programInfo")}</h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-unlimited-gray">{t("application.table.program")}:</div>
-                      <div>{selectedApplication.program}</div>
-                      <div className="text-unlimited-gray">{t("application.table.university")}:</div>
-                      <div>{selectedApplication.university}</div>
-                      <div className="text-unlimited-gray">{t("application.details.scholarship")}:</div>
-                      <div>{selectedApplication.scholarshipStatus || t("application.details.notApplied")}</div>
-                      <div className="text-unlimited-gray">{t("application.details.assignedTo")}:</div>
-                      <div>{selectedApplication.assignedTo || t("application.details.unassigned")}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">{t("application.details.requiredDocuments")}</h4>
-                  <div className="border rounded-md overflow-hidden">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>{t("application.details.documentName")}</TableHead>
-                          <TableHead>{t("application.details.status")}</TableHead>
-                          <TableHead>{t("application.table.actions")}</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {selectedApplication.documents.map((doc, idx) => (
-                          <TableRow key={idx}>
-                            <TableCell>{doc.name}</TableCell>
-                            <TableCell>
-                              <Badge variant={
-                                doc.status === 'required' ? 'destructive' : 
-                                doc.status === 'uploaded' ? 'outline' : 
-                                'default'
-                              }>
-                                {doc.status === 'required' 
-                                  ? t("application.documents.required") 
-                                  : doc.status === 'uploaded' 
-                                    ? t("application.documents.uploaded") 
-                                    : t("application.documents.approved")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              {doc.status === 'required' ? (
-                                <Button size="sm" variant="outline" onClick={() => {
-                                  setIsDetailsDialogOpen(false);
-                                  setTimeout(() => {
-                                    handleUploadDocument(selectedApplication.id, doc.name);
-                                  }, 300);
-                                }}>
-                                  <Upload className="h-4 w-4 mr-1" />
-                                  {t("application.buttons.upload")}
-                                </Button>
-                              ) : (
-                                <Button size="sm" variant="outline" onClick={() => handleDownloadDocument(selectedApplication.id, doc.name)}>
-                                  <Download className="h-4 w-4 mr-1" />
-                                  {t("application.buttons.download")}
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">{t("application.details.applicationTimeline")}</h4>
-                  <div className="border rounded-md p-4 space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="bg-blue-100 p-2 rounded-full">
-                        <FileUp className="h-4 w-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <div className="font-medium text-sm">{t("application.timeline.submitted")}</div>
-                        <div className="text-sm text-unlimited-gray">{selectedApplication.date}</div>
-                      </div>
-                    </div>
-                    
-                    {selectedApplication.status !== 'pending' && (
-                      <div className="flex items-start gap-3">
-                        <div className="bg-purple-100 p-2 rounded-full">
-                          <Clock className="h-4 w-4 text-purple-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-sm">{t("application.timeline.review")}</div>
-                          <div className="text-sm text-unlimited-gray">{t("application.timeline.reviewDesc")}</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {['conditional', 'approved', 'paid', 'registered'].includes(selectedApplication.status) && (
-                      <div className="flex items-start gap-3">
-                        <div className="bg-green-100 p-2 rounded-full">
-                          <Check className="h-4 w-4 text-green-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-sm">{t("application.timeline.approved")}</div>
-                          <div className="text-sm text-unlimited-gray">{t("application.timeline.approvedDesc")}</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {['paid', 'registered'].includes(selectedApplication.status) && (
-                      <div className="flex items-start gap-3">
-                        <div className="bg-emerald-100 p-2 rounded-full">
-                          <Check className="h-4 w-4 text-emerald-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-sm">{t("application.timeline.paid")}</div>
-                          <div className="text-sm text-unlimited-gray">{t("application.timeline.paidDesc")}</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {selectedApplication.status === 'registered' && (
-                      <div className="flex items-start gap-3">
-                        <div className="bg-teal-100 p-2 rounded-full">
-                          <Check className="h-4 w-4 text-teal-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-sm">{t("application.timeline.registered")}</div>
-                          <div className="text-sm text-unlimited-gray">{t("application.timeline.registeredDesc")}</div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {selectedApplication.status === 'rejected' && (
-                      <div className="flex items-start gap-3">
-                        <div className="bg-red-100 p-2 rounded-full">
-                          <X className="h-4 w-4 text-red-600" />
-                        </div>
-                        <div>
-                          <div className="font-medium text-sm">{t("application.timeline.rejected")}</div>
-                          <div className="text-sm text-unlimited-gray">{t("application.timeline.rejectedDesc")}</div>
-                        </div>
-                      </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder={t('application.search.applications', 'بحث في الطلبات')}
+                      className="pl-9 w-full md:w-[300px]"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    {searchTerm && (
+                      <button 
+                        className="absolute right-3 top-2.5"
+                        onClick={() => setSearchTerm('')}
+                      >
+                        <X className="h-4 w-4 text-muted-foreground" />
+                      </button>
                     )}
                   </div>
                 </div>
               </div>
-              <DialogFooter>
-                <div className="flex flex-wrap justify-end gap-2 w-full">
-                  <Button variant="outline" onClick={() => handleMessageClick(selectedApplication.id)}>
-                    <Mail className="mr-2 h-4 w-4" />
-                    {t("application.buttons.contactAdvisor")}
-                  </Button>
-                  <Button onClick={() => navigate(`/dashboard/applications/${selectedApplication.id}`)}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    {t("application.buttons.fullView")}
-                  </Button>
-                </div>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+
+              <TabsContent value="all" className="mt-0">
+                {isLoading ? (
+                  <div className="py-20 flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
+                  </div>
+                ) : filteredApplications.length > 0 ? (
+                  <div className="space-y-3 mt-4">
+                    {filteredApplications.map((app) => {
+                      const status = getStatusDetails(app.status);
+                      return (
+                        <div key={app.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between">
+                            <div className="flex items-start gap-3">
+                              <div className="bg-unlimited-blue/10 p-2 rounded-full hidden sm:flex">
+                                <FileText className="h-5 w-5 text-unlimited-blue" />
+                              </div>
+                              <div>
+                                <h3 className="font-medium text-unlimited-dark-blue">{app.program}</h3>
+                                <p className="text-sm text-unlimited-gray">{app.university}</p>
+                                <div className="flex items-center gap-2 mt-2">
+                                  <Badge variant="outline" className="text-xs">{app.id}</Badge>
+                                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <Calendar className="h-3 w-3" />
+                                    <span>{app.date}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 mt-3 md:mt-0">
+                              <Badge className={status.color}>
+                                {status.label}
+                              </Badge>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="flex items-center gap-1"
+                              >
+                                <Eye className="h-4 w-4" />
+                                <span className="hidden sm:inline">{t('view', 'عرض')}</span>
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-20 text-center">
+                    <p className="text-unlimited-gray">{t('application.noApplications.message', 'لا توجد طلبات مقدمة بعد')}</p>
+                  </div>
+                )}
+              </TabsContent>
+              
+              {/* تكرار نفس المحتوى للتبويبات الأخرى */}
+              {['pending', 'documents', 'conditional', 'approved', 'paid', 'registered', 'rejected'].map((tab) => (
+                <TabsContent key={tab} value={tab} className="mt-0">
+                  {isLoading ? (
+                    <div className="py-20 flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
+                    </div>
+                  ) : filteredApplications.filter(app => app.status === tab).length > 0 ? (
+                    <div className="space-y-3 mt-4">
+                      {filteredApplications
+                        .filter(app => app.status === tab)
+                        .map((app) => {
+                          const status = getStatusDetails(app.status);
+                          return (
+                            <div key={app.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                              <div className="flex flex-col md:flex-row md:items-center justify-between">
+                                <div className="flex items-start gap-3">
+                                  <div className="bg-unlimited-blue/10 p-2 rounded-full hidden sm:flex">
+                                    <FileText className="h-5 w-5 text-unlimited-blue" />
+                                  </div>
+                                  <div>
+                                    <h3 className="font-medium text-unlimited-dark-blue">{app.program}</h3>
+                                    <p className="text-sm text-unlimited-gray">{app.university}</p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                      <Badge variant="outline" className="text-xs">{app.id}</Badge>
+                                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                                        <Calendar className="h-3 w-3" />
+                                        <span>{app.date}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex items-center gap-3 mt-3 md:mt-0">
+                                  <Badge className={status.color}>
+                                    {status.label}
+                                  </Badge>
+                                  
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Eye className="h-4 w-4" />
+                                    <span className="hidden sm:inline">{t('view', 'عرض')}</span>
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  ) : (
+                    <div className="py-20 text-center">
+                      <p className="text-unlimited-gray">{t('application.noApplications.message', 'لا توجد طلبات مقدمة بعد')}</p>
+                    </div>
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 };

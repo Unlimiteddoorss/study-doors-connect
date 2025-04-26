@@ -39,16 +39,16 @@ const StudentApplicationFormSubmit = ({
     if (!canSubmit) {
       // Show validation errors and prevent submission
       toast({
-        title: t("application.validation.error"),
-        description: t("application.validation.completeAllFields"),
+        title: t("application.validation.error", "خطأ في البيانات"),
+        description: t("application.validation.completeAllFields", "يرجى إكمال جميع الحقول المطلوبة"),
         variant: "destructive"
       });
       
       // For demo purposes, show some sample validation errors
       if (isLastStep) {
         setValidationErrors([
-          t("application.validation.errors.missingDocuments"),
-          t("application.validation.errors.incompleteProfile")
+          t("application.validation.errors.missingDocuments", "بعض المستندات المطلوبة غير محملة"),
+          t("application.validation.errors.incompleteProfile", "الملف الشخصي غير مكتمل")
         ]);
       }
       
@@ -85,8 +85,8 @@ const StudentApplicationFormSubmit = ({
     // Show success toast for better UX
     if (isLastStep) {
       toast({
-        title: t("application.submission.success"),
-        description: t("application.submission.successMessage"),
+        title: t("application.submission.success", "تم التقديم بنجاح"),
+        description: t("application.submission.successMessage", "تم تقديم طلبك بنجاح وسيتم مراجعته قريباً"),
       });
     }
   };
@@ -99,7 +99,7 @@ const StudentApplicationFormSubmit = ({
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect")}</p>
+              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect", "يرجى تصحيح الأخطاء التالية")}</p>
               <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
                 {validationErrors.map((error, index) => (
                   <li key={index}>{error}</li>
@@ -121,13 +121,13 @@ const StudentApplicationFormSubmit = ({
         >
           {isRtl ? (
             <>
-              {t('application.navigation.previous')}
+              {t('application.navigation.previous', "السابق")}
               <ArrowRight className="h-4 w-4" />
             </>
           ) : (
             <>
               <ArrowLeft className="h-4 w-4" />
-              {t('application.navigation.previous')}
+              {t('application.navigation.previous', "السابق")}
             </>
           )}
         </Button>
@@ -141,12 +141,12 @@ const StudentApplicationFormSubmit = ({
             {isSubmitting ? (
               <>
                 <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> 
-                {t('application.buttons.submitting')}
+                {t('application.buttons.submitting', "جاري التقديم...")}
               </>
             ) : (
               <>
                 <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> 
-                {t('application.buttons.submit')}
+                {t('application.buttons.submit', "تقديم الطلب")}
               </>
             )}
           </Button>
@@ -160,11 +160,11 @@ const StudentApplicationFormSubmit = ({
             {isRtl ? (
               <>
                 <ArrowLeft className="h-4 w-4" />
-                {t('application.navigation.next')}
+                {t('application.navigation.next', "التالي")}
               </>
             ) : (
               <>
-                {t('application.navigation.next')}
+                {t('application.navigation.next', "التالي")}
                 <ArrowRight className="h-4 w-4" />
               </>
             )}
@@ -174,7 +174,7 @@ const StudentApplicationFormSubmit = ({
       
       {isLastStep && (
         <p className="text-sm text-unlimited-gray mt-4 text-center">
-          {t('application.buttons.submitNote')}
+          {t('application.buttons.submitNote', "بالضغط على زر التقديم، أنت توافق على شروط وأحكام الخدمة.")}
         </p>
       )}
     </div>
