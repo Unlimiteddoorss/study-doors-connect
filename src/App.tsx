@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useRole } from "./hooks/useRole";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -8,6 +9,53 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+
+// Import missing components
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import LoginPage from "./pages/LoginPage";
+import MedicalPrograms from "./pages/MedicalPrograms";
+import Programs from "./pages/Programs";
+import ProgramDetails from "./pages/ProgramDetails";
+
+// Create temporary placeholder components for development
+// These components will be replaced with actual implementations later
+const About = () => <div className="p-8">About Page (Coming Soon)</div>;
+const Contact = () => <div className="p-8">Contact Page (Coming Soon)</div>;
+const Services = () => <div className="p-8">Services Page (Coming Soon)</div>;
+const Countries = () => <div className="p-8">Countries Page (Coming Soon)</div>;
+const CountryDetails = () => <div className="p-8">Country Details Page (Coming Soon)</div>;
+const EngineeringPrograms = () => <div className="p-8">Engineering Programs Page (Coming Soon)</div>;
+const Scholarships = () => <div className="p-8">Scholarships Page (Coming Soon)</div>;
+const Universities = () => <div className="p-8">Universities Page (Coming Soon)</div>;
+const TurkishUniversities = () => <div className="p-8">Turkish Universities Page (Coming Soon)</div>;
+const UniversityDetails = () => <div className="p-8">University Details Page (Coming Soon)</div>;
+const Register = () => <div className="p-8">Register Page (Coming Soon)</div>;
+
+// Dashboard components
+const Dashboard = () => <div className="p-8">Dashboard (Coming Soon)</div>;
+const StudentApplication = () => <div className="p-8">Student Application Form (Coming Soon)</div>;
+const StudentApplications = () => <div className="p-8">Student Applications List (Coming Soon)</div>;
+const StudentProfile = () => <div className="p-8">Student Profile (Coming Soon)</div>;
+const StudentNotifications = () => <div className="p-8">Student Notifications (Coming Soon)</div>;
+const LoginActivity = () => <div className="p-8">Login Activity (Coming Soon)</div>;
+const AccountSettings = () => <div className="p-8">Account Settings (Coming Soon)</div>;
+
+// Admin components
+const AdminDashboard = () => <div className="p-8">Admin Dashboard (Coming Soon)</div>;
+const ManageStudents = () => <div className="p-8">Manage Students (Coming Soon)</div>;
+const ManageAgents = () => <div className="p-8">Manage Agents (Coming Soon)</div>;
+const ManagePrograms = () => <div className="p-8">Manage Programs (Coming Soon)</div>;
+const ManageApplications = () => <div className="p-8">Manage Applications (Coming Soon)</div>;
+const ManageUniversities = () => <div className="p-8">Manage Universities (Coming Soon)</div>;
+const AdminNotifications = () => <div className="p-8">Admin Notifications (Coming Soon)</div>;
+const AdminMessages = () => <div className="p-8">Admin Messages (Coming Soon)</div>;
+const Reports = () => <div className="p-8">Reports (Coming Soon)</div>;
+
+// Agent components
+const AgentDashboard = () => <div className="p-8">Agent Dashboard (Coming Soon)</div>;
+const UserMessages = () => <div className="p-8">User Messages (Coming Soon)</div>;
 
 function App() {
   const { userRole, updateRole } = useRole();
