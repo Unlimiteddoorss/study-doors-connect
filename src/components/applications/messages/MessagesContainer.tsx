@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import MessageBubble from './MessageBubble';
 import MessageInput from './MessageInput';
@@ -31,7 +30,6 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
-  // محاكاة جلب الرسائل من الخادم
   useEffect(() => {
     const mockMessages: Message[] = [
       {
@@ -61,12 +59,10 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
       setMessages(mockMessages);
       setIsLoading(false);
       
-      // تعليم الرسائل غير المقروءة كمقروءة بعد عرضها
       const hasUnread = mockMessages.some(msg => !msg.read);
       if (hasUnread && onMessageRead) {
         onMessageRead();
         
-        // تحديث حالة القراءة في المصفوفة المحلية
         setMessages(prev => 
           prev.map(msg => ({ ...msg, read: true }))
         );
@@ -74,27 +70,23 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
     }, 1000);
   }, [programName, universityName, applicationId, onMessageRead]);
   
-  // التمرير إلى آخر رسالة عند تحميل الرسائل أو إضافة رسالة جديدة
   useEffect(() => {
     if (!isLoading && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isLoading]);
   
-  // إرسال رسالة جديدة
   const sendMessage = (messageText: string) => {
     if (!messageText.trim() && uploadedFiles.length === 0) return;
     
     setIsSending(true);
     
-    // إنشاء كائنات المرفقات
     const attachments = uploadedFiles.map(file => ({
       name: file.name,
       url: URL.createObjectURL(file),
       type: file.type
     }));
     
-    // محاكاة إرسال الرسالة
     setTimeout(() => {
       const newMessage: Message = {
         id: `user-${Date.now()}`,
@@ -109,19 +101,16 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
       setIsSending(false);
       setUploadedFiles([]);
       
-      // محاكاة رد تلقائي من المسؤول بعد فترة
       if (messageText.trim()) {
         simulateAdminReply(messageText);
       }
     }, 500);
   };
   
-  // محاكاة رد تلقائي من المسؤول
   const simulateAdminReply = (userMessage: string) => {
     setTimeout(() => {
       let replyMessage = '';
       
-      // محاكاة رد بسيط مبني على محتوى رسالة المستخدم
       if (userMessage.includes('متى') || userMessage.includes('موعد') || userMessage.includes('وقت')) {
         replyMessage = 'عادةً ما تستغرق مراجعة الطلب من 3-5 أيام عمل. سنعلمك فور وجود أي تطورات.';
       } else if (userMessage.includes('مستند') || userMessage.includes('وثيقة') || userMessage.includes('شهادة')) {
@@ -144,20 +133,16 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
       
       setMessages(prev => [...prev, adminReply]);
       
-      // تحديث الرسائل غير المقروءة
       if (onMessageRead) {
         onMessageRead();
       }
-      
-    }, 3000 + Math.random() * 2000); // توقيت عشوائي بين 3-5 ثواني
+    }, 3000 + Math.random() * 2000);
   };
   
-  // معالجة رفع الملفات
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       const newFiles = Array.from(event.target.files);
       
-      // التحقق من حجم الملفات (الحد الأقصى 5 ميجابايت)
       const oversizedFiles = newFiles.filter(file => file.size > 5 * 1024 * 1024);
       if (oversizedFiles.length > 0) {
         toast({
@@ -166,13 +151,11 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
           variant: "destructive"
         });
         
-        // إزالة الملفات الكبيرة
         const validFiles = newFiles.filter(file => file.size <= 5 * 1024 * 1024);
         setUploadedFiles(prev => [...prev, ...validFiles]);
         return;
       }
       
-      // التحقق من عدد الملفات (الحد الأقصى 5 ملفات في المرة الواحدة)
       if (uploadedFiles.length + newFiles.length > 5) {
         toast({
           title: "عدد الملفات كبير",
@@ -180,13 +163,11 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
           variant: "destructive"
         });
         
-        // أخذ أول 5 ملفات فقط
         const filesSlice = newFiles.slice(0, 5 - uploadedFiles.length);
         setUploadedFiles(prev => [...prev, ...filesSlice]);
         return;
       }
       
-      // إضافة الملفات الجديدة
       setUploadedFiles(prev => [...prev, ...newFiles]);
       toast({
         title: "تم رفع الملفات",
@@ -195,14 +176,12 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
     }
   };
   
-  // حذف ملف من قائمة الملفات المرفوعة
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="flex flex-col h-[500px]">
-      {/* منطقة عرض الرسائل */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {isLoading ? (
           <div className="space-y-4">
@@ -239,7 +218,6 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
         <div ref={messagesEndRef} />
       </div>
       
-      {/* عرض الملفات المرفوعة */}
       {uploadedFiles.length > 0 && (
         <div className="px-4 py-2 border-t">
           <p className="text-xs text-unlimited-gray mb-2">الملفات المرفقة:</p>
@@ -263,7 +241,6 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
         </div>
       )}
       
-      {/* منطقة إدخال الرسائل */}
       <div className="border-t p-4">
         <div className="flex gap-2">
           <Button
@@ -286,7 +263,6 @@ const MessagesContainer = ({ programName, universityName, applicationId, onMessa
             onSendMessage={sendMessage}
             isSending={isSending}
             placeholder="اكتب رسالة..."
-            hasFiles={uploadedFiles.length > 0}
           />
         </div>
         <p className="text-xs text-unlimited-gray mt-2 text-center">
