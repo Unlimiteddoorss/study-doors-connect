@@ -5,30 +5,16 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, ArrowLeft, User, ShieldAlert } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useToast } from '@/components/ui/use-toast';
 
 const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const { toast } = useToast();
   const isRtl = i18n.language === 'ar';
   
-  // Get user role from localStorage (this would come from authentication context in real app)
+  // رصد دور المستخدم (هذا مثال فقط، يجب استبداله بالمنطق الحقيقي للتطبيق)
   const userRole = localStorage.getItem('userRole') || 'student';
 
-  useEffect(() => {
-    // Show toast to inform user about the authorization issue
-    toast({
-      title: t('errors.unauthorized.title'),
-      description: t('errors.unauthorized.description'),
-      variant: "destructive",
-    });
-    
-    // Log for debugging
-    console.log('Unauthorized access detected. User role:', userRole);
-  }, [toast, t, userRole]);
-
-  // Get appropriate redirect based on user role
+  // رصد مكان المناسب للتوجيه حسب دور المستخدم
   const getAppropriateRedirect = () => {
     switch (userRole) {
       case 'admin':
@@ -68,11 +54,7 @@ const UnauthorizedPage = () => {
             </Button>
             
             <Button 
-              onClick={() => {
-                const redirectPath = getAppropriateRedirect();
-                console.log(`Redirecting to: ${redirectPath}`);
-                navigate(redirectPath);
-              }}
+              onClick={() => navigate(getAppropriateRedirect())}
               className="flex items-center gap-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
             >
               <User className="h-4 w-4" />

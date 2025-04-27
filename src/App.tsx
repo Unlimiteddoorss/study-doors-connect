@@ -1,64 +1,72 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useRole } from "./hooks/useRole";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import RoleSwitcher from "./components/auth/RoleSwitcher";
+import Index from "./pages/Index";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Countries from "./pages/Countries";
+import CountryDetails from "./pages/CountryDetails";
+import Programs from "./pages/Programs";
+import ProgramDetails from "./pages/ProgramDetails";
+import Scholarships from "./pages/Scholarships";
+import Universities from "./pages/Universities";
+import TurkishUniversities from "./pages/TurkishUniversities";
+import MedicalPrograms from "./pages/MedicalPrograms";
+import EngineeringPrograms from "./pages/EngineeringPrograms";
+import UniversityDetails from "./pages/UniversityDetails";
+import Login from "./pages/Login";
+import LoginPage from "./pages/LoginPage";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+import StudentApplication from "./pages/StudentApplication";
+import Services from "./pages/Services";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageStudents from "./pages/admin/ManageStudents";
+import ManageAgents from "./pages/admin/ManageAgents";
+import ManagePrograms from "./pages/admin/ManagePrograms";
+import ManageApplications from "./pages/admin/ManageApplications";
+import ManageUniversities from "./pages/admin/ManageUniversities";
+import AdminNotifications from "./pages/admin/AdminNotifications";
+import AdminMessages from "./pages/admin/AdminMessages";
+import AgentDashboard from "./pages/agent/AgentDashboard";
+import StudentApplications from "./pages/dashboard/StudentApplications";
+import StudentProfile from "./pages/dashboard/StudentProfile";
+import StudentNotifications from "./pages/dashboard/StudentNotifications";
+import LoginActivity from "./pages/dashboard/LoginActivity";
+import AccountSettings from "./pages/dashboard/AccountSettings";
+import UserMessages from "./pages/messaging/UserMessages";
+import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-
-// Import missing components
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import ForgotPassword from "./pages/ForgotPassword";
-import LoginPage from "./pages/LoginPage";
-import MedicalPrograms from "./pages/MedicalPrograms";
-import Programs from "./pages/Programs";
-import ProgramDetails from "./pages/ProgramDetails";
-
-// Create temporary placeholder components for development
-// These components will be replaced with actual implementations later
-const About = () => <div className="p-8">About Page (Coming Soon)</div>;
-const Contact = () => <div className="p-8">Contact Page (Coming Soon)</div>;
-const Services = () => <div className="p-8">Services Page (Coming Soon)</div>;
-const Countries = () => <div className="p-8">Countries Page (Coming Soon)</div>;
-const CountryDetails = () => <div className="p-8">Country Details Page (Coming Soon)</div>;
-const EngineeringPrograms = () => <div className="p-8">Engineering Programs Page (Coming Soon)</div>;
-const Scholarships = () => <div className="p-8">Scholarships Page (Coming Soon)</div>;
-const Universities = () => <div className="p-8">Universities Page (Coming Soon)</div>;
-const TurkishUniversities = () => <div className="p-8">Turkish Universities Page (Coming Soon)</div>;
-const UniversityDetails = () => <div className="p-8">University Details Page (Coming Soon)</div>;
-const Register = () => <div className="p-8">Register Page (Coming Soon)</div>;
-
-// Dashboard components
-const Dashboard = () => <div className="p-8">Dashboard (Coming Soon)</div>;
-const StudentApplication = () => <div className="p-8">Student Application Form (Coming Soon)</div>;
-const StudentApplications = () => <div className="p-8">Student Applications List (Coming Soon)</div>;
-const StudentProfile = () => <div className="p-8">Student Profile (Coming Soon)</div>;
-const StudentNotifications = () => <div className="p-8">Student Notifications (Coming Soon)</div>;
-const LoginActivity = () => <div className="p-8">Login Activity (Coming Soon)</div>;
-const AccountSettings = () => <div className="p-8">Account Settings (Coming Soon)</div>;
-
-// Admin components
-const AdminDashboard = () => <div className="p-8">Admin Dashboard (Coming Soon)</div>;
-const ManageStudents = () => <div className="p-8">Manage Students (Coming Soon)</div>;
-const ManageAgents = () => <div className="p-8">Manage Agents (Coming Soon)</div>;
-const ManagePrograms = () => <div className="p-8">Manage Programs (Coming Soon)</div>;
-const ManageApplications = () => <div className="p-8">Manage Applications (Coming Soon)</div>;
-const ManageUniversities = () => <div className="p-8">Manage Universities (Coming Soon)</div>;
-const AdminNotifications = () => <div className="p-8">Admin Notifications (Coming Soon)</div>;
-const AdminMessages = () => <div className="p-8">Admin Messages (Coming Soon)</div>;
-const Reports = () => <div className="p-8">Reports (Coming Soon)</div>;
-
-// Agent components
-const AgentDashboard = () => <div className="p-8">Agent Dashboard (Coming Soon)</div>;
-const UserMessages = () => <div className="p-8">User Messages (Coming Soon)</div>;
 
 function App() {
-  const { userRole, updateRole } = useRole();
+  // FIXME: In production, this would come from auth context or user state
+  // 'student', 'admin', or 'agent'
+  const userRole = 'student' as 'student' | 'admin' | 'agent'; // Properly typed
+
+  type UserRole = 'student' | 'admin' | 'agent';
+
+  const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: UserRole[] }) => {
+    const isAuthenticated = true; // For testing purposes
+    const hasPermission = allowedRoles.includes(userRole as UserRole);
+
+    if (!isAuthenticated) {
+      return <Navigate to="/login" replace />;
+    }
+
+    if (!hasPermission) {
+      return <Navigate to="/unauthorized" replace />;
+    }
+
+    return <>{children}</>;
+  };
+
+  // Handle redirect to admin dashboard for admin users
+  if (userRole === ('admin' as UserRole)) {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <>
@@ -84,99 +92,113 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
+        {/* Redirect admin users from /dashboard to /admin */}
         <Route path="/dashboard" element={
           userRole === 'admin' ? <Navigate to="/admin" replace /> : (
-            <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
+            <ProtectedRoute allowedRoles={['student', 'agent']}>
               <Dashboard />
             </ProtectedRoute>
           )
         } />
 
+        {/* Student Application Routes - completely separate from admin pages */}
         <Route path="/apply" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <StudentApplication />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/applications" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <StudentApplications />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/applications/:id" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <ApplicationDetails />
           </ProtectedRoute>
         } />
-
         <Route path="/dashboard/profile" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <StudentProfile />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/notifications" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <StudentNotifications />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/login-activity" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <LoginActivity />
           </ProtectedRoute>
         } />
         <Route path="/dashboard/account-settings" element={
-          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student']}>
             <AccountSettings />
           </ProtectedRoute>
         } />
-
-        <Route path="/admin" element={
-          <ProtectedRoute allowedRoles={['admin']} userRole={userRole}>
-            <AdminDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/admin/*" element={
-          <ProtectedRoute allowedRoles={['admin']} userRole={userRole}>
-            <Routes>
-              <Route path="students" element={<ManageStudents />} />
-              <Route path="agents" element={<ManageAgents />} />
-              <Route path="programs" element={<ManagePrograms />} />
-              <Route path="applications" element={<ManageApplications />} />
-              <Route path="universities" element={<ManageUniversities />} />
-              <Route path="notifications" element={<AdminNotifications />} />
-              <Route path="messages" element={<AdminMessages />} />
-              <Route path="reports" element={<Reports />} />
-            </Routes>
-          </ProtectedRoute>
-        } />
-
-        <Route path="/agent" element={
-          <ProtectedRoute allowedRoles={['agent']} userRole={userRole}>
-            <AgentDashboard />
-          </ProtectedRoute>
-        } />
-        <Route path="/agent/*" element={
-          <ProtectedRoute allowedRoles={['agent']} userRole={userRole}>
-            <Routes>
-              <Route path="students" element={<AgentDashboard />} />
-              <Route path="applications" element={<AgentDashboard />} />
-              <Route path="messages" element={<UserMessages />} />
-              <Route path="notifications" element={<StudentNotifications />} />
-              <Route path="profile" element={<StudentProfile />} />
-              <Route path="settings" element={<AccountSettings />} />
-            </Routes>
-          </ProtectedRoute>
-        } />
-
         <Route path="/messages" element={
-          <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
+          <ProtectedRoute allowedRoles={['student', 'agent']}>
             <UserMessages />
           </ProtectedRoute>
         } />
 
+        {/* Admin routes with proper protection */}
+        <Route path="/admin" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/students" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ManageStudents />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/agents" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ManageAgents />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/programs" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ManagePrograms />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/applications" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ManageApplications />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/universities" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ManageUniversities />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/notifications" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminNotifications />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/messages" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminMessages />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/reports" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Reports />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/agent" element={
+          <ProtectedRoute allowedRoles={['agent']}>
+            <AgentDashboard />
+          </ProtectedRoute>
+        } />
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
-      <RoleSwitcher currentRole={userRole} onRoleChange={updateRole} />
     </>
   );
 }
