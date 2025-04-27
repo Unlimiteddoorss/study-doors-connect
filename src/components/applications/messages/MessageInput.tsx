@@ -1,26 +1,38 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Send, Loader2, Paperclip } from 'lucide-react';
 import { useMessageAttachments } from '@/hooks/useMessageAttachments';
-import MessageAttachments from './MessageAttachments';
+import MessageAttachments from '@/components/messages/MessageAttachments';
+import { validateFileType } from '@/utils/messageUtils';
+import { useToast } from '@/hooks/use-toast';
 
 interface MessageInputProps {
   onSendMessage: (message: string, attachments: File[]) => void;
   isSending?: boolean;
   placeholder?: string;
+  maxLength?: number;
 }
 
-const MessageInput = ({ onSendMessage, isSending = false, placeholder = 'اكتب رسالة...' }: MessageInputProps) => {
+const MessageInput = ({ 
+  onSendMessage, 
+  isSending = false, 
+  placeholder = 'اكتب رسالة...', 
+  maxLength = 1000 
+}: MessageInputProps) => {
   const [message, setMessage] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+  
   const { 
     attachments, 
     addAttachments, 
     removeAttachment, 
     clearAttachments,
-    hasAttachments 
+    hasAttachments,
+    isFull 
   } = useMessageAttachments();
   
   useEffect(() => {
@@ -55,6 +67,14 @@ const MessageInput = ({ onSendMessage, isSending = false, placeholder = 'اكت�
   };
 
   const handleFileClick = () => {
+    if (isFull) {
+      toast({
+        title: "تنبيه",
+        description: "لقد وصلت إلى الحد الأقصى من المرفقات المسموح بها",
+        variant: "warning"
+      });
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -72,9 +92,9 @@ const MessageInput = ({ onSendMessage, isSending = false, placeholder = 'اكت�
           type="button"
           variant="outline"
           size="icon"
-          className="flex-shrink-0"
+          className={`flex-shrink-0 ${isFull ? 'opacity-50' : ''}`}
           onClick={handleFileClick}
-          disabled={isSending}
+          disabled={isSending || isFull}
         >
           <Paperclip className="h-4 w-4" />
           <input
@@ -95,7 +115,7 @@ const MessageInput = ({ onSendMessage, isSending = false, placeholder = 'اكت�
           placeholder={placeholder}
           className="min-h-10 flex-1 resize-none overflow-hidden rounded-md py-2"
           rows={1}
-          maxLength={1000}
+          maxLength={maxLength}
           disabled={isSending}
         />
         

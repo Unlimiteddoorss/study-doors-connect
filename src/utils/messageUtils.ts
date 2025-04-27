@@ -14,6 +14,7 @@ export const formatMessageDate = (dateString: string) => {
       return format(date, 'dd MMM yyyy HH:mm', { locale: ar });
     }
   } catch (error) {
+    console.error('Error formatting date:', error);
     return dateString;
   }
 };
@@ -43,3 +44,16 @@ export const formatFileSize = (bytes: number) => {
   return `${Math.round(bytes / Math.pow(1024, i))} ${sizes[i]}`;
 };
 
+export const validateFileType = (file: File): boolean => {
+  const allowedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  ];
+  return allowedTypes.includes(file.type);
+};
