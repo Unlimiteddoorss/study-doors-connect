@@ -19,8 +19,6 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import EngineeringPrograms from "@/pages/EngineeringPrograms";
 import MedicalPrograms from "@/pages/MedicalPrograms";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
-import StudentApplication from "@/pages/StudentApplication";
-import UserMessages from "@/pages/messaging/UserMessages";
 
 export const PublicRoutes = () => {
   return (
@@ -45,8 +43,6 @@ export const PublicRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      <Route path="/apply" element={<StudentApplication />} />
-      <Route path="/messages" element={<UserMessages />} />
     </Routes>
   );
 };

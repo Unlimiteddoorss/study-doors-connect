@@ -8,6 +8,8 @@ import { StudentRoutes } from "@/routes/StudentRoutes";
 import { AdminRoutes } from "@/routes/AdminRoutes";
 import { AgentRoutes } from "@/routes/AgentRoutes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import StudentApplication from "@/pages/StudentApplication";
+import UserMessages from "@/pages/messaging/UserMessages";
 import NotFound from "@/pages/NotFound";
 import "./App.css";
 
@@ -64,13 +66,14 @@ function App() {
         <Route path="/*" element={<PublicRoutes />} />
         
         {/* Dashboard redirect based on role */}
-        <Route path="/dashboard" element={
-          userRole === 'admin' ? 
-            <Navigate to="/admin" replace /> : 
-            <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
-              <Navigate to="/dashboard" replace />
-            </ProtectedRoute>
-        } />
+        <Route 
+          path="/dashboard" 
+          element={
+            userRole === 'admin' ? 
+              <Navigate to="/admin" replace /> : 
+              <Navigate to="/dashboard/applications" replace />
+          } 
+        />
         
         {/* Student Routes */}
         <Route path="/dashboard/*" element={
@@ -79,15 +82,17 @@ function App() {
           </ProtectedRoute>
         } />
         
+        {/* Direct access to student application */}
         <Route path="/apply" element={
           <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
-            <Navigate to="/apply" replace />
+            <StudentApplication />
           </ProtectedRoute>
         } />
 
+        {/* Messages access for all roles */}
         <Route path="/messages" element={
           <ProtectedRoute allowedRoles={['student', 'admin', 'agent']} userRole={userRole}>
-            <Navigate to="/messages" replace />
+            <UserMessages />
           </ProtectedRoute>
         } />
         

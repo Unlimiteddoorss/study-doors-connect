@@ -1,7 +1,6 @@
 
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "@/pages/Dashboard";
-import StudentApplication from "@/pages/StudentApplication";
 import StudentApplications from "@/pages/dashboard/StudentApplications";
 import ApplicationDetails from "@/pages/dashboard/ApplicationDetails";
 import StudentProfile from "@/pages/dashboard/StudentProfile";
@@ -9,6 +8,7 @@ import StudentNotifications from "@/pages/dashboard/StudentNotifications";
 import LoginActivity from "@/pages/dashboard/LoginActivity";
 import AccountSettings from "@/pages/dashboard/AccountSettings";
 import UserMessages from "@/pages/messaging/UserMessages";
+import StudentApplication from "@/pages/StudentApplication";
 
 export const StudentRoutes = () => {
   return (
@@ -21,6 +21,7 @@ export const StudentRoutes = () => {
       <Route path="login-activity" element={<LoginActivity />} />
       <Route path="account-settings" element={<AccountSettings />} />
       <Route path="messages" element={<UserMessages />} />
+      <Route path="new-application" element={<StudentApplication />} />
     </Routes>
   );
 };
