@@ -1,5 +1,5 @@
 
-import { Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Index from "@/pages/Index";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
@@ -19,10 +19,12 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import EngineeringPrograms from "@/pages/EngineeringPrograms";
 import MedicalPrograms from "@/pages/MedicalPrograms";
 import UnauthorizedPage from "@/pages/UnauthorizedPage";
+import StudentApplication from "@/pages/StudentApplication";
+import UserMessages from "@/pages/messaging/UserMessages";
 
 export const PublicRoutes = () => {
   return (
-    <>
+    <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
@@ -43,6 +45,8 @@ export const PublicRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
-    </>
+      <Route path="/apply" element={<StudentApplication />} />
+      <Route path="/messages" element={<UserMessages />} />
+    </Routes>
   );
 };

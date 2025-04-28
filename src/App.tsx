@@ -60,32 +60,56 @@ function App() {
   return (
     <>
       <Routes>
-        <PublicRoutes />
+        {/* Public Routes */}
+        <Route>
+          <PublicRoutes />
+        </Route>
         
-        {/* Redirect admin users from /dashboard to /admin */}
-        <Route path="/dashboard" element={
-          userRole === 'admin' ? <Navigate to="/admin" replace /> : (
-            <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
+        {/* Student Routes */}
+        <Route>
+          <Route path="/dashboard" element={
+            userRole === 'admin' ? 
+              <Navigate to="/admin" replace /> : 
+              <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
+                <Navigate to="/dashboard" />
+              </ProtectedRoute>
+          } />
+          
+          {/* Protect all student routes */}
+          <Route path="/dashboard/*" element={
+            <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
               <StudentRoutes />
             </ProtectedRoute>
-          )
+          } />
+          
+          <Route path="/apply" element={
+            <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+              <Navigate to="/apply" />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/messages" element={
+            <ProtectedRoute allowedRoles={['student', 'admin', 'agent']} userRole={userRole}>
+              <Navigate to="/messages" />
+            </ProtectedRoute>
+          } />
+        </Route>
+
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={
+          <ProtectedRoute allowedRoles={['admin']} userRole={userRole}>
+            <AdminRoutes />
+          </ProtectedRoute>
         } />
 
-        {/* Protected Student Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['student']} userRole={userRole}>
-          <StudentRoutes />
-        </ProtectedRoute>} />
-
-        {/* Protected Admin Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['admin']} userRole={userRole}>
-          <AdminRoutes />
-        </ProtectedRoute>} />
-
-        {/* Protected Agent Routes */}
-        <Route element={<ProtectedRoute allowedRoles={['agent']} userRole={userRole}>
-          <AgentRoutes />
-        </ProtectedRoute>} />
+        {/* Agent Routes */}
+        <Route path="/agent/*" element={
+          <ProtectedRoute allowedRoles={['agent']} userRole={userRole}>
+            <AgentRoutes />
+          </ProtectedRoute>
+        } />
         
+        {/* 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

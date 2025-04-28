@@ -1,17 +1,18 @@
 
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { ReactNode } from "react";
 
 type UserRole = 'student' | 'admin' | 'agent';
 
 interface ProtectedRouteProps {
-  children: ReactNode;
+  children?: ReactNode;
   allowedRoles: UserRole[];
   userRole: UserRole;
 }
 
 export const ProtectedRoute = ({ children, allowedRoles, userRole }: ProtectedRouteProps) => {
-  const isAuthenticated = true; // For testing purposes
+  // Use localStorage to check if user is authenticated
+  const isAuthenticated = localStorage.getItem('userRole') !== null;
   const hasPermission = allowedRoles.includes(userRole);
 
   if (!isAuthenticated) {
@@ -22,5 +23,6 @@ export const ProtectedRoute = ({ children, allowedRoles, userRole }: ProtectedRo
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <>{children}</>;
+  // If Outlet is used (for nested routes), render that, otherwise render children
+  return children ? <>{children}</> : <Outlet />;
 };

@@ -1,5 +1,5 @@
 
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import ManageStudents from "@/pages/admin/ManageStudents";
 import ManageAgents from "@/pages/admin/ManageAgents";
@@ -12,16 +12,16 @@ import Reports from "@/pages/admin/Reports";
 
 export const AdminRoutes = () => {
   return (
-    <>
-      <Route path="/admin" element={<AdminDashboard />} />
-      <Route path="/admin/students" element={<ManageStudents />} />
-      <Route path="/admin/agents" element={<ManageAgents />} />
-      <Route path="/admin/programs" element={<ManagePrograms />} />
-      <Route path="/admin/applications" element={<ManageApplications />} />
-      <Route path="/admin/universities" element={<ManageUniversities />} />
-      <Route path="/admin/notifications" element={<AdminNotifications />} />
-      <Route path="/admin/messages" element={<AdminMessages />} />
-      <Route path="/admin/reports" element={<Reports />} />
-    </>
+    <Routes>
+      <Route index element={<AdminDashboard />} />
+      <Route path="students" element={<ManageStudents />} />
+      <Route path="agents" element={<ManageAgents />} />
+      <Route path="programs" element={<ManagePrograms />} />
+      <Route path="applications" element={<ManageApplications />} />
+      <Route path="universities" element={<ManageUniversities />} />
+      <Route path="notifications" element={<AdminNotifications />} />
+      <Route path="messages" element={<AdminMessages />} />
+      <Route path="reports" element={<Reports />} />
+    </Routes>
   );
 };

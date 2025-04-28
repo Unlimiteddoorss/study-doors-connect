@@ -1,5 +1,5 @@
 
-import { Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Dashboard from "@/pages/Dashboard";
 import StudentApplication from "@/pages/StudentApplication";
 import StudentApplications from "@/pages/dashboard/StudentApplications";
@@ -12,16 +12,15 @@ import UserMessages from "@/pages/messaging/UserMessages";
 
 export const StudentRoutes = () => {
   return (
-    <>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/apply" element={<StudentApplication />} />
-      <Route path="/dashboard/applications" element={<StudentApplications />} />
-      <Route path="/dashboard/applications/:id" element={<ApplicationDetails />} />
-      <Route path="/dashboard/profile" element={<StudentProfile />} />
-      <Route path="/dashboard/notifications" element={<StudentNotifications />} />
-      <Route path="/dashboard/login-activity" element={<LoginActivity />} />
-      <Route path="/dashboard/account-settings" element={<AccountSettings />} />
-      <Route path="/messages" element={<UserMessages />} />
-    </>
+    <Routes>
+      <Route index element={<Dashboard />} />
+      <Route path="applications" element={<StudentApplications />} />
+      <Route path="applications/:id" element={<ApplicationDetails />} />
+      <Route path="profile" element={<StudentProfile />} />
+      <Route path="notifications" element={<StudentNotifications />} />
+      <Route path="login-activity" element={<LoginActivity />} />
+      <Route path="account-settings" element={<AccountSettings />} />
+      <Route path="messages" element={<UserMessages />} />
+    </Routes>
   );
 };
