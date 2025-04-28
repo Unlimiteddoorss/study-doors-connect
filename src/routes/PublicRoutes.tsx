@@ -25,7 +25,7 @@ import UserMessages from "@/pages/messaging/UserMessages";
 export const PublicRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Index />} />
+      <Route index element={<Index />} />
       <Route path="/about" element={<About />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/services" element={<Services />} />

@@ -61,40 +61,36 @@ function App() {
     <>
       <Routes>
         {/* Public Routes */}
-        <Route>
-          <PublicRoutes />
-        </Route>
+        <Route path="/*" element={<PublicRoutes />} />
+        
+        {/* Dashboard redirect based on role */}
+        <Route path="/dashboard" element={
+          userRole === 'admin' ? 
+            <Navigate to="/admin" replace /> : 
+            <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
+              <Navigate to="/dashboard" replace />
+            </ProtectedRoute>
+        } />
         
         {/* Student Routes */}
-        <Route>
-          <Route path="/dashboard" element={
-            userRole === 'admin' ? 
-              <Navigate to="/admin" replace /> : 
-              <ProtectedRoute allowedRoles={['student', 'agent']} userRole={userRole}>
-                <Navigate to="/dashboard" />
-              </ProtectedRoute>
-          } />
-          
-          {/* Protect all student routes */}
-          <Route path="/dashboard/*" element={
-            <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
-              <StudentRoutes />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/apply" element={
-            <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
-              <Navigate to="/apply" />
-            </ProtectedRoute>
-          } />
+        <Route path="/dashboard/*" element={
+          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+            <StudentRoutes />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/apply" element={
+          <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
+            <Navigate to="/apply" replace />
+          </ProtectedRoute>
+        } />
 
-          <Route path="/messages" element={
-            <ProtectedRoute allowedRoles={['student', 'admin', 'agent']} userRole={userRole}>
-              <Navigate to="/messages" />
-            </ProtectedRoute>
-          } />
-        </Route>
-
+        <Route path="/messages" element={
+          <ProtectedRoute allowedRoles={['student', 'admin', 'agent']} userRole={userRole}>
+            <Navigate to="/messages" replace />
+          </ProtectedRoute>
+        } />
+        
         {/* Admin Routes */}
         <Route path="/admin/*" element={
           <ProtectedRoute allowedRoles={['admin']} userRole={userRole}>
