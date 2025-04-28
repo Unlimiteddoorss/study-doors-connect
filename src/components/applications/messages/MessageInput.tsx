@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -71,11 +70,28 @@ const MessageInput = ({
       toast({
         title: "تنبيه",
         description: "لقد وصلت إلى الحد الأقصى من المرفقات المسموح بها",
-        variant: "warning"
+        variant: "destructive"
       });
       return;
     }
     fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const selectedFile = files[0];
+    if (!validateFileType(selectedFile)) {
+      toast({
+        title: "تنبيه",
+        description: "نوع الملف غير مدعوم",
+        variant: "destructive" // Changed from "warning" to "destructive"
+      });
+      return;
+    }
+
+    // Handle file attachment
   };
 
   return (
