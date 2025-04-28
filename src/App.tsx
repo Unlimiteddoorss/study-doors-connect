@@ -41,11 +41,57 @@ import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 function App() {
-  // FIXME: In production, this would come from auth context or user state
-  // 'student', 'admin', or 'agent'
-  const userRole = 'student' as 'student' | 'admin' | 'agent'; // Properly typed
+  // Get userRole from localStorage and allow for updates during runtime
+  const [userRole, setUserRole] = useState<'student' | 'admin' | 'agent'>('student');
+  const { toast } = useToast();
+  
+  // Check for role changes in localStorage
+  useEffect(() => {
+    // Initial role check
+    const storedRole = localStorage.getItem('userRole');
+    if (storedRole && (storedRole === 'admin' || storedRole === 'agent' || storedRole === 'student')) {
+      setUserRole(storedRole as 'student' | 'admin' | 'agent');
+    }
+    
+    // Listen for changes to localStorage
+    const handleStorageChange = () => {
+      const updatedRole = localStorage.getItem('userRole');
+      if (updatedRole && (updatedRole === 'admin' || updatedRole === 'agent' || updatedRole === 'student')) {
+        if (updatedRole !== userRole) {
+          setUserRole(updatedRole as 'student' | 'admin' | 'agent');
+          
+          // Show notification about role change
+          toast({
+            title: "تم تغيير الصلاحيات",
+            description: `تم تغيير صلاحياتك إلى ${
+              updatedRole === 'admin' ? 'مدير النظام' : 
+              updatedRole === 'agent' ? 'وكيل' : 'طالب'
+            }`,
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-tab updates
+    const checkLocalStorageChange = setInterval(() => {
+      const currentRole = localStorage.getItem('userRole');
+      if (currentRole && currentRole !== userRole && 
+         (currentRole === 'admin' || currentRole === 'agent' || currentRole === 'student')) {
+        setUserRole(currentRole as 'student' | 'admin' | 'agent');
+      }
+    }, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(checkLocalStorageChange);
+    };
+  }, [userRole, toast]);
 
   type UserRole = 'student' | 'admin' | 'agent';
 
@@ -63,11 +109,6 @@ function App() {
 
     return <>{children}</>;
   };
-
-  // Handle redirect to admin dashboard for admin users
-  if (userRole === ('admin' as UserRole)) {
-    return <Navigate to="/admin" replace />;
-  }
 
   return (
     <>
