@@ -171,6 +171,7 @@ const StudentApplication = () => {
               isLastStep={false}
               isSubmitting={isSubmitting}
               canSubmit={canSubmit}
+              formData={formData}
               onBack={handleBack}
               onSubmit={handleNext}
             />
@@ -179,7 +180,7 @@ const StudentApplication = () => {
               <ApplicationSubmissionHandler 
                 formData={formData} 
                 onSubmit={() => {
-                  // تم إرسال الطلب بنجاح
+                  // Show success message and redirect to dashboard
                   toast({
                     title: t("application.submission.success"),
                     description: t("application.submission.successMessage")

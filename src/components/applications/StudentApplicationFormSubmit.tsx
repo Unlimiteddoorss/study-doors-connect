@@ -1,21 +1,16 @@
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
-
-// Define window interface to support gtag
-declare global {
-  interface Window {
-    gtag?: (command: string, action: string, params: any) => void;
-  }
-}
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
   isSubmitting: boolean;
   canSubmit: boolean;
+  formData: any;
   onBack: () => void;
   onSubmit: () => void;
 }
@@ -24,82 +19,94 @@ const StudentApplicationFormSubmit = ({
   isLastStep,
   isSubmitting,
   canSubmit,
+  formData,
   onBack,
   onSubmit
 }: StudentApplicationFormSubmitProps) => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const isRtl = i18n.language === 'ar';
 
+  const generateApplicationId = () => {
+    const prefix = 'APP';
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const timestamp = new Date().getTime().toString().slice(-4);
+    return `${prefix}-${randomNum}-${timestamp}`;
+  };
+
   const handleSubmit = () => {
-    // Reset validation errors
     setValidationErrors([]);
     
     if (!canSubmit) {
-      // Show validation errors and prevent submission
       toast({
-        title: t("application.validation.error", "خطأ في البيانات"),
-        description: t("application.validation.completeAllFields", "يرجى إكمال جميع الحقول المطلوبة"),
+        title: t("application.validation.error"),
+        description: t("application.validation.completeAllFields"),
         variant: "destructive"
       });
-      
-      // For demo purposes, show some sample validation errors
-      if (isLastStep) {
-        setValidationErrors([
-          t("application.validation.errors.missingDocuments", "بعض المستندات المطلوبة غير محملة"),
-          t("application.validation.errors.incompleteProfile", "الملف الشخصي غير مكتمل")
-        ]);
-      }
-      
       return;
     }
-    
-    // Track submission in analytics
-    try {
-      console.log("Tracking form submission event");
-      
-      // Handle Google Analytics tracking properly
-      if (typeof window !== 'undefined' && window.gtag) {
-        window.gtag('event', 'form_submission', {
-          'event_category': 'application',
-          'event_label': 'student_application',
-          'value': isLastStep ? 'final_submit' : 'next_step'
-        });
-      } else {
-        // Fallback tracking for when gtag is not available
-        console.log("Google Analytics not available, tracking locally");
-        // You could implement a custom event tracking solution here
-      }
-      
-      // Additional tracking services could be added here
-      
-    } catch (error) {
-      console.error("Analytics error:", error);
-      // Don't stop the form submission if analytics fails
-    }
-    
-    // Call the onSubmit handler
-    onSubmit();
-    
-    // Show success toast for better UX
+
     if (isLastStep) {
+      const applicationId = generateApplicationId();
+      const newApplication = {
+        id: applicationId,
+        program: formData.program?.name || 'برنامج غير معروف',
+        university: formData.university || 'جامعة غير معروفة',
+        date: new Date().toISOString().split('T')[0],
+        status: 'pending',
+        timeline: [
+          {
+            status: 'pending',
+            date: new Date().toISOString(),
+            note: 'تم استلام الطلب وهو قيد المراجعة'
+          }
+        ],
+        documents: [
+          { name: 'جواز السفر', status: 'required' },
+          { name: 'الشهادة الثانوية', status: 'required' },
+          { name: 'كشف الدرجات', status: 'required' }
+        ],
+        messages: 0,
+        formData: formData
+      };
+
+      // Get existing applications from localStorage
+      const existingApps = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+      
+      // Add new application
+      existingApps.push(newApplication);
+      
+      // Store updated applications
+      localStorage.setItem('studentApplications', JSON.stringify(existingApps));
+
+      // Call the original onSubmit
+      onSubmit();
+
+      // Show success message
       toast({
-        title: t("application.submission.success", "تم التقديم بنجاح"),
-        description: t("application.submission.successMessage", "تم تقديم طلبك بنجاح وسيتم مراجعته قريباً"),
+        title: t("application.submission.success"),
+        description: t("application.submission.successMessage")
       });
+
+      // Navigate to the applications dashboard
+      setTimeout(() => {
+        navigate(`/dashboard/applications/${applicationId}`);
+      }, 1500);
+    } else {
+      onSubmit();
     }
   };
 
   return (
     <div className="mt-6">
-      {/* Validation errors display */}
       {validationErrors.length > 0 && (
         <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect", "يرجى تصحيح الأخطاء التالية")}</p>
+              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect")}</p>
               <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
                 {validationErrors.map((error, index) => (
                   <li key={index}>{error}</li>
@@ -110,7 +117,6 @@ const StudentApplicationFormSubmit = ({
         </div>
       )}
       
-      {/* Buttons */}
       <div className="flex flex-wrap gap-3">
         <Button
           type="button"
@@ -121,62 +127,36 @@ const StudentApplicationFormSubmit = ({
         >
           {isRtl ? (
             <>
-              {t('application.navigation.previous', "السابق")}
+              {t('application.navigation.previous')}
               <ArrowRight className="h-4 w-4" />
             </>
           ) : (
             <>
               <ArrowLeft className="h-4 w-4" />
-              {t('application.navigation.previous', "السابق")}
+              {t('application.navigation.previous')}
             </>
           )}
         </Button>
-        {isLastStep ? (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> 
-                {t('application.buttons.submitting', "جاري التقديم...")}
-              </>
-            ) : (
-              <>
-                <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> 
-                {t('application.buttons.submit', "تقديم الطلب")}
-              </>
-            )}
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={`w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
-          >
-            {isRtl ? (
-              <>
-                <ArrowLeft className="h-4 w-4" />
-                {t('application.navigation.next', "التالي")}
-              </>
-            ) : (
-              <>
-                {t('application.navigation.next', "التالي")}
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
-        )}
+        
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
+              {t('application.buttons.submitting')}
+            </>
+          ) : (
+            <>
+              <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+              {t(isLastStep ? 'application.buttons.submit' : 'application.buttons.next')}
+            </>
+          )}
+        </Button>
       </div>
-      
-      {isLastStep && (
-        <p className="text-sm text-unlimited-gray mt-4 text-center">
-          {t('application.buttons.submitNote', "بالضغط على زر التقديم، أنت توافق على شروط وأحكام الخدمة.")}
-        </p>
-      )}
     </div>
   );
 };
