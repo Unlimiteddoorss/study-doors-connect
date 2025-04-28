@@ -8,6 +8,7 @@ import { StudentRoutes } from "@/routes/StudentRoutes";
 import { AdminRoutes } from "@/routes/AdminRoutes";
 import { AgentRoutes } from "@/routes/AgentRoutes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { AuthProvider } from "@/hooks/useAuth";
 import NotFound from "@/pages/NotFound";
 import "./App.css";
 
@@ -58,7 +59,7 @@ function App() {
   }, [userRole, toast]);
 
   return (
-    <>
+    <AuthProvider>
       <Routes>
         {/* Public Routes */}
         <Route path="/*" element={<PublicRoutes />} />
@@ -112,7 +113,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
-    </>
+    </AuthProvider>
   );
 }
 

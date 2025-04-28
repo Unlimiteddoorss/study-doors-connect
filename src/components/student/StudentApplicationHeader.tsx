@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { PlusCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { SupabaseStatus } from "@/components/shared/SupabaseStatus";
 
 interface StudentApplicationHeaderProps {
   showNewButton?: boolean;
@@ -26,6 +27,9 @@ const StudentApplicationHeader = ({ showNewButton = true }: StudentApplicationHe
           <p className="text-unlimited-gray">
             {t("application.subtitle", "قدم طلبك للإلتحاق بإحدى الجامعات والبرامج المتاحة")}
           </p>
+          <div className="mt-2">
+            <SupabaseStatus />
+          </div>
         </div>
 
         {showNewButton && (
