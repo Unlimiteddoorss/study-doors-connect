@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -86,12 +87,13 @@ const MessageInput = ({
       toast({
         title: "تنبيه",
         description: "نوع الملف غير مدعوم",
-        variant: "destructive" // Changed from "warning" to "destructive"
+        variant: "destructive"
       });
       return;
     }
 
     // Handle file attachment
+    addAttachments(files);
   };
 
   return (
@@ -118,7 +120,7 @@ const MessageInput = ({
             type="file"
             multiple
             className="hidden"
-            onChange={(e) => addAttachments(e.target.files)}
+            onChange={handleFileChange}
             accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
           />
         </Button>
