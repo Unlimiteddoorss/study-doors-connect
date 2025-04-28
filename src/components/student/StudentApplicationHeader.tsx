@@ -13,7 +13,7 @@ const StudentApplicationHeader = ({ showNewButton = true }: StudentApplicationHe
   const navigate = useNavigate();
 
   const handleNewApplication = () => {
-    navigate("/apply");
+    navigate("/dashboard/new-application");
   };
 
   return (

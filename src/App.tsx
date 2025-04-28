@@ -8,8 +8,6 @@ import { StudentRoutes } from "@/routes/StudentRoutes";
 import { AdminRoutes } from "@/routes/AdminRoutes";
 import { AgentRoutes } from "@/routes/AgentRoutes";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import StudentApplication from "@/pages/StudentApplication";
-import UserMessages from "@/pages/messaging/UserMessages";
 import NotFound from "@/pages/NotFound";
 import "./App.css";
 
@@ -82,17 +80,17 @@ function App() {
           </ProtectedRoute>
         } />
         
-        {/* Direct access to student application */}
+        {/* Direct access to student application - Redirect to dashboard/new-application */}
         <Route path="/apply" element={
           <ProtectedRoute allowedRoles={['student']} userRole={userRole}>
-            <StudentApplication />
+            <Navigate to="/dashboard/new-application" replace />
           </ProtectedRoute>
         } />
 
         {/* Messages access for all roles */}
         <Route path="/messages" element={
           <ProtectedRoute allowedRoles={['student', 'admin', 'agent']} userRole={userRole}>
-            <UserMessages />
+            <Navigate to="/dashboard/messages" replace />
           </ProtectedRoute>
         } />
         

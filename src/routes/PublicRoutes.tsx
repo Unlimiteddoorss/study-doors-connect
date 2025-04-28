@@ -43,6 +43,7 @@ export const PublicRoutes = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      <Route path="/dashboard-login" element={<Login />} />
     </Routes>
   );
 };
