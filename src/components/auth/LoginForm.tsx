@@ -4,8 +4,9 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  const navigate = useNavigate();
+  const { signIn } = useAuth();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,16 +31,15 @@ const LoginForm = () => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await signIn(email, password);
+      // Navigation is handled in the useAuth hook
+    } catch (error) {
+      console.error('Login failed:', error);
+      // Error handling is already in the useAuth hook
+    } finally {
       setIsLoading(false);
-      // For demo purposes, any login will succeed
-      toast({
-        title: 'تم تسجيل الدخول بنجاح',
-        description: 'مرحباً بك في منصة أبواب غير محدودة',
-      });
-      navigate('/dashboard');
-    }, 1500);
+    }
   };
 
   const toggleShowPassword = () => {

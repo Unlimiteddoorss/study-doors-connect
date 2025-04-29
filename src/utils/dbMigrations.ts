@@ -11,9 +11,25 @@ interface Migration {
 // Check if migrations table exists, if not create it
 const checkMigrationsTable = async () => {
   try {
-    const { error } = await supabase.from('migrations').select('name').limit(1);
+    // We can't use the standard supabase.from() here because the migrations table isn't in the types
+    // Instead, we'll use a custom RPC call to check if the table exists
+    const { data, error } = await supabase.rpc('execute_sql', { 
+      sql_string: `
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public'
+          AND table_name = 'migrations'
+        );
+      `
+    });
     
-    if (error && error.code === '42P01') { // Table does not exist
+    if (error) {
+      console.error('Error checking migrations table:', error);
+      return false;
+    }
+    
+    // If table doesn't exist, create it
+    if (!data || !data[0] || !data[0].exists) {
       const { error: createError } = await supabase.rpc('execute_sql', { 
         sql_string: `
           CREATE TABLE IF NOT EXISTS migrations (
@@ -28,9 +44,6 @@ const checkMigrationsTable = async () => {
         console.error('Error creating migrations table:', createError);
         return false;
       }
-    } else if (error) {
-      console.error('Error checking migrations table:', error);
-      return false;
     }
     
     return true;
@@ -56,14 +69,22 @@ export const applyMigration = async (migration: Migration) => {
       return false;
     }
     
-    // Check if migration has already been applied
-    const { data, error } = await supabase
-      .from('migrations')
-      .select('name')
-      .eq('name', migration.name)
-      .single();
+    // Check if migration has already been applied using RPC
+    const { data, error } = await supabase.rpc('execute_sql', { 
+      sql_string: `
+        SELECT EXISTS (
+          SELECT 1 FROM migrations 
+          WHERE name = '${migration.name}'
+        );
+      `
+    });
       
-    if (data) {
+    if (error) {
+      console.error('Error checking migration:', error);
+      return false;
+    }
+    
+    if (data && data[0] && data[0].exists) {
       console.log(`Migration ${migration.name} already applied`);
       return true;
     }
@@ -83,17 +104,20 @@ export const applyMigration = async (migration: Migration) => {
       return false;
     }
     
-    // Record migration
-    const { error: recordError } = await supabase
-      .from('migrations')
-      .insert([{ name: migration.name }]);
+    // Record migration using RPC
+    const { error: recordError } = await supabase.rpc('execute_sql', { 
+      sql_string: `
+        INSERT INTO migrations (name)
+        VALUES ('${migration.name}');
+      `
+    });
       
     if (recordError) {
       console.error('Error recording migration:', recordError);
       toast({
         title: "تحذير",
         description: "تم تطبيق الترحيل ولكن فشل في تسجيله",
-        variant: "warning"
+        variant: "default"
       });
     }
     

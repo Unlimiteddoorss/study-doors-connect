@@ -1,18 +1,66 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { v4 as uuidv4 } from 'uuid';
+import { createMessagesTable } from '@/sql/messagesMigration';
 
-// We need to create a messages table in Supabase first
-// This service will only work properly after the messages table is created
-// For now, we'll use temporary placeholder functions that don't cause build errors
+interface MessageAttachment {
+  url: string;
+  path: string;
+  fileName: string;
+  fileType: string;
+  fileSize?: number;
+}
+
+interface Message {
+  id?: string;
+  application_id: string;
+  sender_id: string;
+  sender_role: 'student' | 'admin' | 'agent';
+  content: string;
+  attachments?: MessageAttachment[];
+  is_read?: boolean;
+  created_at?: string;
+}
+
+// Function to create the messages table if it doesn't exist
+export const initializeMessageSystem = async () => {
+  try {
+    // Check if messages table exists
+    const { count, error } = await supabase
+      .from('messages')
+      .select('*', { count: 'exact', head: true });
+    
+    if (error && error.code === '42P01') {
+      // Table doesn't exist, create it
+      await createMessagesTable();
+      return { success: true, message: 'Messages table created successfully' };
+    } else if (error) {
+      console.error('Error checking messages table:', error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true, message: 'Messages table already exists' };
+  } catch (error: any) {
+    console.error('Error initializing message system:', error.message);
+    return { success: false, error: error.message };
+  }
+};
 
 // Get messages for an application
 export const getApplicationMessages = async (applicationId: string) => {
   try {
-    // This is a placeholder - will be implemented when messages table exists
-    console.log(`Getting messages for application ${applicationId}`);
+    // Try to create the table if it doesn't exist
+    await initializeMessageSystem();
     
-    return { data: [], error: null };
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('application_id', applicationId)
+      .order('created_at', { ascending: true });
+    
+    if (error) throw error;
+    
+    return { data, error: null };
   } catch (error: any) {
     console.error(`Error fetching messages for application ${applicationId}:`, error.message);
     return { data: [], error: error.message };
@@ -20,12 +68,20 @@ export const getApplicationMessages = async (applicationId: string) => {
 };
 
 // Send a message
-export const sendMessage = async (message: any) => {
+export const sendMessage = async (message: Message) => {
   try {
-    // This is a placeholder - will be implemented when messages table exists
-    console.log('Sending message:', message);
+    // Try to create the table if it doesn't exist
+    await initializeMessageSystem();
     
-    return { data: message, error: null };
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([message])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return { data, error: null };
   } catch (error: any) {
     console.error('Error sending message:', error.message);
     return { data: null, error: error.message };
@@ -52,7 +108,7 @@ export const uploadMessageAttachment = async (messageId: string, file: File) => 
       console.error('Error checking/creating bucket:', err);
     }
 
-    // Upload file logic (will work without messages table)
+    // Upload file logic
     const fileExt = file.name.split('.').pop();
     const fileName = `${messageId}-${Date.now()}.${fileExt}`;
     const filePath = `${messageId}/${fileName}`;
@@ -64,7 +120,7 @@ export const uploadMessageAttachment = async (messageId: string, file: File) => 
 
     if (uploadError) throw uploadError;
 
-    // Get public URL (this will work)
+    // Get public URL
     const { data: publicUrlData } = supabase
       .storage
       .from(bucketName)
@@ -74,7 +130,9 @@ export const uploadMessageAttachment = async (messageId: string, file: File) => 
       data: { 
         url: publicUrlData.publicUrl,
         path: filePath,
-        fileName: file.name
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size
       }, 
       error: null 
     };
@@ -88,12 +146,21 @@ export const uploadMessageAttachment = async (messageId: string, file: File) => 
 // Mark messages as read
 export const markMessagesAsRead = async (applicationId: string, userId: string) => {
   try {
-    // This is a placeholder - will be implemented when messages table exists
-    console.log(`Marking messages as read for application ${applicationId} by user ${userId}`);
+    // Try to create the table if it doesn't exist
+    await initializeMessageSystem();
     
-    return { data: [], error: null };
+    // Use the database function to mark messages as read
+    const { error } = await supabase
+      .rpc('mark_messages_read', { 
+        p_application_id: applicationId, 
+        p_user_id: userId 
+      });
+    
+    if (error) throw error;
+    
+    return { success: true, error: null };
   } catch (error: any) {
     console.error('Error marking messages as read:', error.message);
-    return { data: null, error: error.message };
+    return { success: false, error: error.message };
   }
 };

@@ -10,7 +10,8 @@ export const getUniversities = async (
   try {
     let query = supabase
       .from('universities')
-      .select('*', { count: 'exact' });
+      .select('*')
+      .order('name', { ascending: true });
     
     // Apply filters
     if (filters.country) {
@@ -25,17 +26,22 @@ export const getUniversities = async (
       query = query.eq('is_featured', true);
     }
 
+    // Get total count for pagination
+    const { count: totalCount, error: countError } = await supabase
+      .from('universities')
+      .select('*', { count: 'exact', head: true });
+    
+    if (countError) throw countError;
+    
     // Apply pagination
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
     
-    const { data, count, error } = await query
-      .range(from, to)
-      .order('name', { ascending: true });
+    const { data, error } = await query.range(from, to);
 
     if (error) throw error;
 
-    return { data, count, error: null };
+    return { data, count: totalCount || 0, error: null };
   } catch (error: any) {
     console.error('Error fetching universities:', error.message);
     return { data: [], count: 0, error: error.message };

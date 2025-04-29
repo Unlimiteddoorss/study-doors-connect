@@ -141,11 +141,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error: any) {
+      console.error('Sign in error:', error);
       toast({
         title: "خطأ في تسجيل الدخول",
         description: error.message || "الرجاء التحقق من بريدك الإلكتروني وكلمة المرور",
         variant: "destructive"
       });
+      throw error; // Re-throw to allow the login component to handle it
     }
   };
 

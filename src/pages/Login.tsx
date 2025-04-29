@@ -7,7 +7,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import { Loader2, ShieldAlert, Eye, EyeOff } from 'lucide-react';
 import { hasValidSupabaseCredentials } from '@/lib/supabase';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [supabaseConfigured, setSupabaseConfigured] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -50,6 +51,8 @@ const Login = () => {
     setIsLoading(true);
     try {
       await signIn(email, password);
+    } catch (error) {
+      console.error('Login error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -107,15 +110,26 @@ const Login = () => {
                     {t("login.forgotPassword", "نسيت كلمة المرور؟")}
                   </Link>
                 </div>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  placeholder="••••••••" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={!supabaseConfigured}
-                />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={!supabaseConfigured}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full px-3"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               
               <Button 
