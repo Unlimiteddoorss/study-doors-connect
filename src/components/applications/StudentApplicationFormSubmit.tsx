@@ -7,6 +7,7 @@ import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-rea
 import { useTranslation } from 'react-i18next';
 import { createApplication } from '@/services/applicationService';
 import { useAuth } from '@/hooks/useAuth';
+import { Application } from '@/types/supabase';
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
@@ -50,11 +51,11 @@ const StudentApplicationFormSubmit = ({
       
       try {
         // Create the application in Supabase
-        const applicationData = {
+        const applicationData: Partial<Application> = {
           student_id: user?.id || '',
           university_id: formData.university?.id || 0,
           program_id: formData.program?.id || 0,
-          status: 'pending',
+          status: 'pending' as Application['status'], // Fixed type issue by explicitly typing as Application['status']
           personal_info: formData.personalInfo || {},
           academic_info: formData.academicInfo || {},
         };
