@@ -26,7 +26,7 @@ interface Message {
 export const initializeMessageSystem = async () => {
   try {
     // Use raw query for checking if table exists
-    const { data, error } = await supabase.rpc('execute_sql', {
+    const { data, error } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
@@ -65,7 +65,7 @@ export const getApplicationMessages = async (applicationId: string) => {
     await initializeMessageSystem();
     
     // Use raw SQL query to avoid type errors
-    const { data, error } = await supabase.rpc('execute_sql', {
+    const { data, error } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         SELECT * FROM messages
         WHERE application_id = '${applicationId}'
@@ -89,7 +89,7 @@ export const sendMessage = async (message: Message) => {
     await initializeMessageSystem();
     
     // Use raw SQL query to avoid type errors
-    const { data, error } = await supabase.rpc('execute_sql', {
+    const { data, error } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         INSERT INTO messages (
           id,

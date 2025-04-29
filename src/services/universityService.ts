@@ -29,7 +29,7 @@ export const getUniversities = async (
     }
     
     // Get total count for pagination
-    const { data: countResult, error: countError } = await supabase.rpc('execute_sql', {
+    const { data: countResult, error: countError } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         SELECT COUNT(*) as total FROM universities ${whereClause};
       `
@@ -43,7 +43,7 @@ export const getUniversities = async (
     const offset = (page - 1) * pageSize;
     
     // Get paginated data
-    const { data, error } = await supabase.rpc('execute_sql', {
+    const { data, error } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         SELECT * FROM universities
         ${whereClause}
@@ -64,7 +64,7 @@ export const getUniversities = async (
 // Get university by ID
 export const getUniversityById = async (id: number) => {
   try {
-    const { data, error } = await supabase.rpc('execute_sql', {
+    const { data, error } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         SELECT * FROM universities
         WHERE id = ${id}
@@ -84,7 +84,7 @@ export const getUniversityById = async (id: number) => {
 // Get university programs
 export const getUniversityPrograms = async (universityId: number) => {
   try {
-    const { data, error } = await supabase.rpc('execute_sql', {
+    const { data, error } = await (supabase.rpc as any)('execute_sql', {
       sql_string: `
         SELECT * FROM programs
         WHERE university_id = ${universityId};

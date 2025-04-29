@@ -12,7 +12,7 @@ interface Migration {
 const checkMigrationsTable = async () => {
   try {
     // Use raw query instead of typechecked supabase.from()
-    const { data: result, error: checkError } = await supabase.rpc('execute_sql', { 
+    const { data: result, error: checkError } = await (supabase.rpc as any)('execute_sql', { 
       sql_string: `
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
@@ -29,7 +29,7 @@ const checkMigrationsTable = async () => {
     
     // If table doesn't exist, create it
     if (!result || !result[0] || !result[0].exists) {
-      const { error: createError } = await supabase.rpc('execute_sql', { 
+      const { error: createError } = await (supabase.rpc as any)('execute_sql', { 
         sql_string: `
           CREATE TABLE IF NOT EXISTS migrations (
             id SERIAL PRIMARY KEY,
@@ -69,7 +69,7 @@ export const applyMigration = async (migration: Migration) => {
     }
     
     // Check if migration has already been applied using RPC
-    const { data: result, error } = await supabase.rpc('execute_sql', { 
+    const { data: result, error } = await (supabase.rpc as any)('execute_sql', { 
       sql_string: `
         SELECT EXISTS (
           SELECT 1 FROM migrations 
@@ -89,7 +89,7 @@ export const applyMigration = async (migration: Migration) => {
     }
     
     // Apply migration
-    const { error: sqlError } = await supabase.rpc('execute_sql', { 
+    const { error: sqlError } = await (supabase.rpc as any)('execute_sql', { 
       sql_string: migration.sql
     }) as { data: any | null, error: any };
     
@@ -104,7 +104,7 @@ export const applyMigration = async (migration: Migration) => {
     }
     
     // Record migration using RPC
-    const { error: recordError } = await supabase.rpc('execute_sql', { 
+    const { error: recordError } = await (supabase.rpc as any)('execute_sql', { 
       sql_string: `
         INSERT INTO migrations (name)
         VALUES ('${migration.name}');
