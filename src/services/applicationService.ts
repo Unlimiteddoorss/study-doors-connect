@@ -7,7 +7,7 @@ export const getStudentApplications = async (studentId: string) => {
   try {
     const { data, error } = await supabase
       .from('applications')
-      .select('*, universities(name, name_ar), programs(name, name_ar)')
+      .select('*, universities(name, name_ar, country, city, image_url), programs(name, name_ar, degree_type, duration)')
       .eq('student_id', studentId)
       .order('created_at', { ascending: false });
 
@@ -65,9 +65,13 @@ export const getApplicationById = async (id: string) => {
 // Create new application
 export const createApplication = async (application: Partial<Application>) => {
   try {
+    // Generate a UUID for the application
+    const applicationId = crypto.randomUUID();
+    const newApplication = { ...application, id: applicationId };
+    
     const { data, error } = await supabase
       .from('applications')
-      .insert([application])
+      .insert([newApplication])
       .select()
       .single();
 
@@ -107,6 +111,12 @@ export const uploadDocument = async (
       .upload(filePath, file);
 
     if (uploadError) throw uploadError;
+    
+    // Get public URL for the uploaded file
+    const { data: publicUrlData } = supabase
+      .storage
+      .from('application-documents')
+      .getPublicUrl(filePath);
 
     // Create document record
     const { data, error } = await supabase
@@ -116,14 +126,15 @@ export const uploadDocument = async (
         name: documentName,
         file_path: filePath,
         file_type: file.type,
-        status: 'pending'
+        status: 'pending',
+        uploaded_at: new Date().toISOString()
       }])
       .select()
       .single();
 
     if (error) throw error;
 
-    return { data, error: null };
+    return { data: { ...data, publicUrl: publicUrlData.publicUrl }, error: null };
   } catch (error: any) {
     console.error('Error uploading document:', error.message);
     return { data: null, error: error.message };
@@ -140,7 +151,7 @@ export const updateApplicationStatus = async (
     // Update application status
     const { data, error } = await supabase
       .from('applications')
-      .update({ status })
+      .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
@@ -148,17 +159,45 @@ export const updateApplicationStatus = async (
     if (error) throw error;
 
     // Add timeline entry
+    const timelineNote = note || `تم تحديث حالة الطلب إلى ${status}`;
     await supabase
       .from('timeline')
       .insert([{
         application_id: id,
         status,
-        note: note || `تم تحديث حالة الطلب إلى ${status}`
+        note: timelineNote,
+        created_at: new Date().toISOString()
       }]);
 
     return { data, error: null };
   } catch (error: any) {
     console.error(`Error updating application ${id} status:`, error.message);
+    return { data: null, error: error.message };
+  }
+};
+
+// Update application form data
+export const updateApplicationForm = async (
+  id: string,
+  formData: any
+) => {
+  try {
+    const { data, error } = await supabase
+      .from('applications')
+      .update({
+        personal_info: formData.personalInfo || null,
+        academic_info: formData.academicInfo || null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+      
+    if (error) throw error;
+    
+    return { data, error: null };
+  } catch (error: any) {
+    console.error(`Error updating application ${id} form data:`, error.message);
     return { data: null, error: error.message };
   }
 };

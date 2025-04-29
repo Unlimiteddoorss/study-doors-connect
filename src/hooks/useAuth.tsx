@@ -30,32 +30,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Check active sessions and set user
     const getSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-      if (error) {
-        console.error('Error getting session:', error.message);
+        if (error) {
+          console.error('Error getting session:', error.message);
+          setLoading(false);
+          return;
+        }
+
+        if (session?.user) {
+          const { data: userRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
+
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
+          });
+
+          // Store the role in localStorage to maintain compatibility with existing code
+          localStorage.setItem('userRole', userRole?.role || 'student');
+        } else {
+          setUser(null);
+          localStorage.removeItem('userRole');
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error('Error in session check:', error);
+        setLoading(false);
       }
-
-      if (session?.user) {
-        const { data: userRole } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
-
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
-        });
-
-        // Store the role in localStorage to maintain compatibility with existing code
-        localStorage.setItem('userRole', userRole?.role || 'student');
-      } else {
-        setUser(null);
-        localStorage.removeItem('userRole');
-      }
-      setLoading(false);
     };
 
     getSession();
@@ -63,19 +70,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for authentication changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        const { data: userRole } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single();
+        try {
+          const { data: userRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
 
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
-        });
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
+          });
 
-        localStorage.setItem('userRole', userRole?.role || 'student');
+          localStorage.setItem('userRole', userRole?.role || 'student');
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+        }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
         localStorage.removeItem('userRole');
@@ -94,26 +105,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
 
       if (data?.user) {
-        const { data: userRole } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .single();
+        try {
+          const { data: userRole } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', data.user.id)
+            .single();
 
-        const role = userRole?.role || 'student';
-        localStorage.setItem('userRole', role);
+          const role = userRole?.role || 'student';
+          localStorage.setItem('userRole', role);
 
-        toast({
-          title: "تم تسجيل الدخول بنجاح",
-          description: "مرحبًا بك في نظام طلبات الإلتحاق"
-        });
+          toast({
+            title: "تم تسجيل الدخول بنجاح",
+            description: "مرحبًا بك في نظام طلبات الإلتحاق"
+          });
 
-        // Navigate based on role
-        if (role === 'admin') {
-          navigate('/admin');
-        } else if (role === 'agent') {
-          navigate('/agent');
-        } else {
+          // Navigate based on role
+          if (role === 'admin') {
+            navigate('/admin');
+          } else if (role === 'agent') {
+            navigate('/agent');
+          } else {
+            navigate('/dashboard/applications');
+          }
+        } catch (error) {
+          console.error('Error fetching user role:', error);
+          localStorage.setItem('userRole', 'student');
           navigate('/dashboard/applications');
         }
       }

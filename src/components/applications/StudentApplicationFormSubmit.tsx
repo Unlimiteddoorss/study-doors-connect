@@ -5,6 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { createApplication } from '@/services/applicationService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
@@ -17,7 +19,7 @@ interface StudentApplicationFormSubmitProps {
 
 const StudentApplicationFormSubmit = ({
   isLastStep,
-  isSubmitting,
+  isSubmitting: propIsSubmitting,
   canSubmit,
   formData,
   onBack,
@@ -26,17 +28,12 @@ const StudentApplicationFormSubmit = ({
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(propIsSubmitting);
   const isRtl = i18n.language === 'ar';
 
-  const generateApplicationId = () => {
-    const prefix = 'APP';
-    const randomNum = Math.floor(10000 + Math.random() * 90000);
-    const timestamp = new Date().getTime().toString().slice(-4);
-    return `${prefix}-${randomNum}-${timestamp}`;
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setValidationErrors([]);
     
     if (!canSubmit) {
@@ -49,51 +46,58 @@ const StudentApplicationFormSubmit = ({
     }
 
     if (isLastStep) {
-      const applicationId = generateApplicationId();
-      const newApplication = {
-        id: applicationId,
-        program: formData.program?.name || 'برنامج غير معروف',
-        university: formData.university || 'جامعة غير معروفة',
-        date: new Date().toISOString().split('T')[0],
-        status: 'pending',
-        timeline: [
-          {
-            status: 'pending',
-            date: new Date().toISOString(),
-            note: 'تم استلام الطلب وهو قيد المراجعة'
-          }
-        ],
-        documents: [
-          { name: 'جواز السفر', status: 'required' },
-          { name: 'الشهادة الثانوية', status: 'required' },
-          { name: 'كشف الدرجات', status: 'required' }
-        ],
-        messages: 0,
-        formData: formData
-      };
-
-      // Get existing applications from localStorage
-      const existingApps = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+      setIsSubmitting(true);
       
-      // Add new application
-      existingApps.push(newApplication);
-      
-      // Store updated applications
-      localStorage.setItem('studentApplications', JSON.stringify(existingApps));
+      try {
+        // Create the application in Supabase
+        const applicationData = {
+          student_id: user?.id || '',
+          university_id: formData.university?.id || 0,
+          program_id: formData.program?.id || 0,
+          status: 'pending',
+          personal_info: formData.personalInfo || {},
+          academic_info: formData.academicInfo || {},
+        };
+        
+        const { data, error } = await createApplication(applicationData);
+        
+        if (error) {
+          toast({
+            title: t("application.submission.error"),
+            description: error,
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+        
+        // Call the original onSubmit
+        onSubmit();
 
-      // Call the original onSubmit
-      onSubmit();
+        // Show success message
+        toast({
+          title: t("application.submission.success"),
+          description: t("application.submission.successMessage")
+        });
 
-      // Show success message
-      toast({
-        title: t("application.submission.success"),
-        description: t("application.submission.successMessage")
-      });
-
-      // Navigate to the applications dashboard
-      setTimeout(() => {
-        navigate(`/dashboard/applications/${applicationId}`);
-      }, 1500);
+        // Navigate to the application details page
+        if (data) {
+          setTimeout(() => {
+            navigate(`/dashboard/applications/${data.id}`);
+          }, 1500);
+        } else {
+          navigate('/dashboard/applications');
+        }
+      } catch (error: any) {
+        console.error('Error submitting application:', error);
+        toast({
+          title: t("application.submission.error"),
+          description: error.message || t("application.submission.errorMessage"),
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
     } else {
       onSubmit();
     }

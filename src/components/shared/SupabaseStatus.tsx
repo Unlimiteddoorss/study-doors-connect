@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { checkSupabaseConnection } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { DatabaseZap, AlertCircle } from 'lucide-react';
@@ -13,22 +13,17 @@ export const SupabaseStatus = () => {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        const { data, error } = await supabase.from('universities').select('count').limit(1);
+        const connected = await checkSupabaseConnection();
+        setIsConnected(connected);
+        setMessage(connected ? 'تم الاتصال بنجاح' : 'فشل الاتصال بقاعدة البيانات');
         
-        if (error) {
-          console.error('Supabase connection error:', error);
-          setIsConnected(false);
-          setMessage('فشل الاتصال بقاعدة البيانات');
+        if (!connected) {
           toast({
             title: "خطأ في الاتصال بقاعدة البيانات",
-            description: "تأكد من إعدادات Supabase الخاصة بك",
+            description: "تأكد من إعدادات Supabase الخاصة بك وقم بتحديث مفاتيح الوصول",
             variant: "destructive"
           });
-          return;
         }
-        
-        setIsConnected(true);
-        setMessage('تم الاتصال بنجاح');
       } catch (err) {
         console.error('Error checking Supabase connection:', err);
         setIsConnected(false);
@@ -37,6 +32,11 @@ export const SupabaseStatus = () => {
     };
 
     checkConnection();
+    
+    // Check connection every 5 minutes
+    const interval = setInterval(checkConnection, 5 * 60 * 1000);
+    
+    return () => clearInterval(interval);
   }, [toast]);
 
   return (
