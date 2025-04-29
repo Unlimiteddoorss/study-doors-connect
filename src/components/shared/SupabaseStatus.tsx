@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { checkSupabaseConnection, hasValidSupabaseCredentials } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';

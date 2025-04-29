@@ -7,8 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const hasValidSupabaseCredentials = (): boolean => {
   try {
-    const url = supabase?.supabaseUrl;
-    const key = supabase?.supabaseKey;
+    // Use the supabaseUrl and supabaseKey from environment or config
+    const url = process.env.SUPABASE_URL || supabase?.supabaseUrl as string;
+    const key = process.env.SUPABASE_KEY || supabase?.supabaseKey as string;
     
     // Basic validation
     if (!url || !key || url.includes('YOUR_SUPABASE_URL') || key.includes('YOUR_SUPABASE_ANON_KEY')) {
@@ -18,6 +19,27 @@ export const hasValidSupabaseCredentials = (): boolean => {
     return true;
   } catch (error) {
     console.error('Error checking Supabase credentials:', error);
+    return false;
+  }
+};
+
+/**
+ * Check if Supabase connection is working
+ * @returns Promise<boolean>
+ */
+export const checkSupabaseConnection = async (): Promise<boolean> => {
+  if (!hasValidSupabaseCredentials()) {
+    return false;
+  }
+  
+  try {
+    // Attempt a simple query to check connection
+    const { error } = await supabase.from('user_roles').select('id').limit(1);
+    
+    // If there's no error, the connection is working
+    return !error;
+  } catch (error) {
+    console.error('Error checking Supabase connection:', error);
     return false;
   }
 };
