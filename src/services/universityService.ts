@@ -8,40 +8,53 @@ export const getUniversities = async (
   filters: Record<string, any> = {}
 ) => {
   try {
-    let query = supabase
-      .from('universities')
-      .select('*')
-      .order('name', { ascending: true });
+    // Build the SQL query string with filters
+    let whereClause = '';
+    const conditions = [];
     
-    // Apply filters
     if (filters.country) {
-      query = query.eq('country', filters.country);
+      conditions.push(`country = '${filters.country}'`);
     }
 
     if (filters.type) {
-      query = query.eq('type', filters.type);
+      conditions.push(`type = '${filters.type}'`);
     }
     
     if (filters.isFeatured) {
-      query = query.eq('is_featured', true);
+      conditions.push(`is_featured = true`);
     }
-
+    
+    if (conditions.length > 0) {
+      whereClause = 'WHERE ' + conditions.join(' AND ');
+    }
+    
     // Get total count for pagination
-    const { count: totalCount, error: countError } = await supabase
-      .from('universities')
-      .select('*', { count: 'exact', head: true });
+    const { data: countResult, error: countError } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        SELECT COUNT(*) as total FROM universities ${whereClause};
+      `
+    });
     
     if (countError) throw countError;
     
-    // Apply pagination
-    const from = (page - 1) * pageSize;
-    const to = from + pageSize - 1;
+    const totalCount = countResult?.[0]?.total || 0;
     
-    const { data, error } = await query.range(from, to);
+    // Calculate pagination limits
+    const offset = (page - 1) * pageSize;
+    
+    // Get paginated data
+    const { data, error } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        SELECT * FROM universities
+        ${whereClause}
+        ORDER BY name ASC
+        LIMIT ${pageSize} OFFSET ${offset};
+      `
+    });
 
     if (error) throw error;
 
-    return { data, count: totalCount || 0, error: null };
+    return { data, count: Number(totalCount), error: null };
   } catch (error: any) {
     console.error('Error fetching universities:', error.message);
     return { data: [], count: 0, error: error.message };
@@ -51,15 +64,17 @@ export const getUniversities = async (
 // Get university by ID
 export const getUniversityById = async (id: number) => {
   try {
-    const { data, error } = await supabase
-      .from('universities')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        SELECT * FROM universities
+        WHERE id = ${id}
+        LIMIT 1;
+      `
+    });
 
     if (error) throw error;
 
-    return { data, error: null };
+    return { data: data && data.length > 0 ? data[0] : null, error: null };
   } catch (error: any) {
     console.error(`Error fetching university with ID ${id}:`, error.message);
     return { data: null, error: error.message };
@@ -69,10 +84,12 @@ export const getUniversityById = async (id: number) => {
 // Get university programs
 export const getUniversityPrograms = async (universityId: number) => {
   try {
-    const { data, error } = await supabase
-      .from('programs')
-      .select('*')
-      .eq('university_id', universityId);
+    const { data, error } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        SELECT * FROM programs
+        WHERE university_id = ${universityId};
+      `
+    });
 
     if (error) throw error;
 

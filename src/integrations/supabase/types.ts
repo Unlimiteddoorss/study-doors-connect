@@ -104,6 +104,50 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          application_id: string
+          attachments: Json | null
+          content: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          sender_id: string
+          sender_role: string
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          attachments?: Json | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id: string
+          sender_role: string
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          attachments?: Json | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          sender_id?: string
+          sender_role?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       programs: {
         Row: {
           created_at: string | null
@@ -314,7 +358,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      mark_messages_read: {
+        Args: { p_application_id: string; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

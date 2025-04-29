@@ -16,15 +16,16 @@ const LoginForm = () => {
   
   const { signIn } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email || !password) {
       toast({
-        title: 'خطأ',
-        description: 'الرجاء إدخال البريد الإلكتروني وكلمة المرور',
-        variant: 'destructive',
+        title: "خطأ",
+        description: "الرجاء إدخال البريد الإلكتروني وكلمة المرور",
+        variant: "destructive",
       });
       return;
     }
@@ -32,8 +33,21 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
-      // Navigation is handled in the useAuth hook
+      const result = await signIn(email, password);
+      console.log("Login successful:", result);
+      
+      // Role-based redirection is handled in useAuth hook
+      // But we can add additional handling here if needed
+      const userRole = localStorage.getItem('userRole');
+      console.log("User role after login:", userRole);
+      
+      if (userRole === 'admin') {
+        navigate('/admin');
+      } else if (userRole === 'agent') {
+        navigate('/agent');
+      } else {
+        navigate('/dashboard/applications');
+      }
     } catch (error) {
       console.error('Login failed:', error);
       // Error handling is already in the useAuth hook

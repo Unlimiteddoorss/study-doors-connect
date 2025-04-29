@@ -11,9 +11,8 @@ interface Migration {
 // Check if migrations table exists, if not create it
 const checkMigrationsTable = async () => {
   try {
-    // We can't use the standard supabase.from() here because the migrations table isn't in the types
-    // Instead, we'll use a custom RPC call to check if the table exists
-    const { data, error } = await supabase.rpc('execute_sql', { 
+    // Use raw query instead of typechecked supabase.from()
+    const { data: result, error: checkError } = await supabase.rpc('execute_sql', { 
       sql_string: `
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
@@ -23,13 +22,13 @@ const checkMigrationsTable = async () => {
       `
     });
     
-    if (error) {
-      console.error('Error checking migrations table:', error);
+    if (checkError) {
+      console.error('Error checking migrations table:', checkError);
       return false;
     }
     
     // If table doesn't exist, create it
-    if (!data || !data[0] || !data[0].exists) {
+    if (!result || !result[0] || !result[0].exists) {
       const { error: createError } = await supabase.rpc('execute_sql', { 
         sql_string: `
           CREATE TABLE IF NOT EXISTS migrations (
@@ -70,7 +69,7 @@ export const applyMigration = async (migration: Migration) => {
     }
     
     // Check if migration has already been applied using RPC
-    const { data, error } = await supabase.rpc('execute_sql', { 
+    const { data: result, error } = await supabase.rpc('execute_sql', { 
       sql_string: `
         SELECT EXISTS (
           SELECT 1 FROM migrations 
@@ -84,7 +83,7 @@ export const applyMigration = async (migration: Migration) => {
       return false;
     }
     
-    if (data && data[0] && data[0].exists) {
+    if (result && result[0] && result[0].exists) {
       console.log(`Migration ${migration.name} already applied`);
       return true;
     }

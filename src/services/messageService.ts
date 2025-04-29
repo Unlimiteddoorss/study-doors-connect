@@ -25,18 +25,30 @@ interface Message {
 // Function to create the messages table if it doesn't exist
 export const initializeMessageSystem = async () => {
   try {
-    // Check if messages table exists
-    const { count, error } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true });
+    // Use raw query for checking if table exists
+    const { data, error } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public'
+          AND table_name = 'messages'
+        );
+      `
+    });
     
-    if (error && error.code === '42P01') {
+    if (error) {
+      console.error('Error checking if messages table exists:', error);
+      // Try to create the table
+      await createMessagesTable();
+      return { success: true, message: 'Messages table created successfully' };
+    }
+    
+    const tableExists = data && data[0] && data[0].exists;
+    
+    if (!tableExists) {
       // Table doesn't exist, create it
       await createMessagesTable();
       return { success: true, message: 'Messages table created successfully' };
-    } else if (error) {
-      console.error('Error checking messages table:', error);
-      return { success: false, error: error.message };
     }
     
     return { success: true, message: 'Messages table already exists' };
@@ -52,11 +64,14 @@ export const getApplicationMessages = async (applicationId: string) => {
     // Try to create the table if it doesn't exist
     await initializeMessageSystem();
     
-    const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .eq('application_id', applicationId)
-      .order('created_at', { ascending: true });
+    // Use raw SQL query to avoid type errors
+    const { data, error } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        SELECT * FROM messages
+        WHERE application_id = '${applicationId}'
+        ORDER BY created_at ASC;
+      `
+    });
     
     if (error) throw error;
     
@@ -73,15 +88,34 @@ export const sendMessage = async (message: Message) => {
     // Try to create the table if it doesn't exist
     await initializeMessageSystem();
     
-    const { data, error } = await supabase
-      .from('messages')
-      .insert([message])
-      .select()
-      .single();
+    // Use raw SQL query to avoid type errors
+    const { data, error } = await supabase.rpc('execute_sql', {
+      sql_string: `
+        INSERT INTO messages (
+          id,
+          application_id,
+          sender_id,
+          sender_role,
+          content,
+          attachments,
+          is_read
+        )
+        VALUES (
+          '${message.id || uuidv4()}',
+          '${message.application_id}',
+          '${message.sender_id}',
+          '${message.sender_role}',
+          '${message.content.replace(/'/g, "''")}',
+          '${JSON.stringify(message.attachments || []).replace(/'/g, "''")}'::jsonb,
+          ${message.is_read === undefined ? 'false' : message.is_read}
+        )
+        RETURNING *;
+      `
+    });
     
     if (error) throw error;
     
-    return { data, error: null };
+    return { data: data && data.length > 0 ? data[0] : null, error: null };
   } catch (error: any) {
     console.error('Error sending message:', error.message);
     return { data: null, error: error.message };
@@ -91,14 +125,13 @@ export const sendMessage = async (message: Message) => {
 // Upload message attachment
 export const uploadMessageAttachment = async (messageId: string, file: File) => {
   try {
-    // Create storage bucket if it doesn't exist (this will work)
+    // Create storage bucket if it doesn't exist
     const bucketName = 'message-attachments';
     
     try {
       // Check if bucket exists
-      const { data: bucketExists } = await supabase
-        .storage
-        .getBucket(bucketName);
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(b => b.name === bucketName);
       
       if (!bucketExists) {
         // Create bucket
@@ -150,11 +183,10 @@ export const markMessagesAsRead = async (applicationId: string, userId: string) 
     await initializeMessageSystem();
     
     // Use the database function to mark messages as read
-    const { error } = await supabase
-      .rpc('mark_messages_read', { 
-        p_application_id: applicationId, 
-        p_user_id: userId 
-      });
+    const { error } = await supabase.rpc('mark_messages_read', { 
+      p_application_id: applicationId, 
+      p_user_id: userId 
+    });
     
     if (error) throw error;
     
