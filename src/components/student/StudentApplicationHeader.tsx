@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { PlusCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SupabaseStatus } from "@/components/shared/SupabaseStatus";
+import { SupabaseSetupGuide } from "@/components/shared/SupabaseSetupGuide";
+import { hasValidSupabaseCredentials } from "@/lib/supabase";
+import { useState, useEffect } from "react";
 
 interface StudentApplicationHeaderProps {
   showNewButton?: boolean;
@@ -12,6 +15,11 @@ interface StudentApplicationHeaderProps {
 const StudentApplicationHeader = ({ showNewButton = true }: StudentApplicationHeaderProps) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [supabaseConfigured, setSupabaseConfigured] = useState(true);
+
+  useEffect(() => {
+    setSupabaseConfigured(hasValidSupabaseCredentials());
+  }, []);
 
   const handleNewApplication = () => {
     navigate("/dashboard/new-application");
@@ -19,6 +27,8 @@ const StudentApplicationHeader = ({ showNewButton = true }: StudentApplicationHe
 
   return (
     <div className="mb-6">
+      {!supabaseConfigured && <SupabaseSetupGuide />}
+      
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-unlimited-dark-blue">
@@ -36,6 +46,7 @@ const StudentApplicationHeader = ({ showNewButton = true }: StudentApplicationHe
           <Button 
             onClick={handleNewApplication}
             className="sm:self-start gap-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+            disabled={!supabaseConfigured}
           >
             <PlusCircle className="h-4 w-4" />
             {t("application.buttons.newApplication", "طلب إلتحاق جديد")}

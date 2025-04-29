@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye } from 'lucide-react';
+import { SupabaseSetupGuide } from '@/components/shared/SupabaseSetupGuide';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
 
 interface Application {
   id: string | number;
@@ -21,8 +23,14 @@ interface Application {
 const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
 
-  // Load applications from localStorage
+  // التحقق من وجود بيانات اعتماد Supabase
+  useEffect(() => {
+    setShowSetupGuide(!hasValidSupabaseCredentials());
+  }, []);
+
+  // تحميل الطلبات من localStorage
   useEffect(() => {
     setIsLoading(true);
     try {
@@ -39,7 +47,7 @@ const Dashboard = () => {
     }
   }, []);
 
-  // Sample notifications - in real app these would come from backend
+  // الإشعارات النموذجية - في التطبيق الحقيقي ستأتي من الخلفية
   const notifications = [
     {
       id: 1,
@@ -61,7 +69,7 @@ const Dashboard = () => {
     },
   ];
 
-  // Get the status display classes
+  // الحصول على فئات حالة العرض
   const getStatusClass = (status: string) => {
     switch(status) {
       case 'approved': return 'text-green-600 bg-green-100';
@@ -73,7 +81,7 @@ const Dashboard = () => {
     }
   };
   
-  // Get status label in Arabic
+  // الحصول على تسمية الحالة باللغة العربية
   const getStatusLabel = (status: string) => {
     const statusMap: Record<string, string> = {
       'pending': 'قيد الانتظار',
@@ -91,6 +99,8 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {showSetupGuide && <SupabaseSetupGuide />}
+        
         <DashboardStats />
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -98,7 +108,7 @@ const Dashboard = () => {
           <ProgramQuotas />
         </div>
 
-        {/* Recent Applications Section */}
+        {/* قسم الطلبات الأخيرة */}
         <Card className="col-span-full">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
@@ -160,7 +170,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Profile & Messages Section */}
+        {/* قسم الملف الشخصي والرسائل */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="pb-2">
@@ -244,7 +254,7 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Recommended Programs */}
+        {/* البرامج الموصى بها */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>

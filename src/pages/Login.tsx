@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -7,23 +7,41 @@ import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldAlert } from 'lucide-react';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslation } from 'react-i18next';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [supabaseConfigured, setSupabaseConfigured] = useState(true);
   const { signIn, user } = useAuth();
   const { toast } = useToast();
+  const { t } = useTranslation();
+  
+  useEffect(() => {
+    // التحقق من تكوين Supabase
+    setSupabaseConfigured(hasValidSupabaseCredentials());
+  }, []);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!supabaseConfigured) {
+      toast({
+        title: t("supabase.setup.required", "إعداد Supabase مطلوب"),
+        description: t("supabase.setup.configureFirst", "يجب تكوين Supabase قبل تسجيل الدخول"),
+        variant: "destructive"
+      });
+      return;
+    }
+    
     if (!email || !password) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال البريد الإلكتروني وكلمة المرور",
+        title: t("login.error", "خطأ"),
+        description: t("login.emptyFields", "الرجاء إدخال البريد الإلكتروني وكلمة المرور"),
         variant: "destructive"
       });
       return;
@@ -37,7 +55,7 @@ const Login = () => {
     }
   };
   
-  // If user is already logged in, redirect to dashboard
+  // إذا كان المستخدم مسجلاً بالفعل، فانتقل إلى لوحة المعلومات
   if (user) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -48,17 +66,29 @@ const Login = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-unlimited-dark-blue">
-              تسجيل الدخول
+              {t("login.title", "تسجيل الدخول")}
             </h2>
             <p className="mt-2 text-unlimited-gray">
-              قم بتسجيل الدخول للوصول إلى لوحة التحكم الخاصة بك
+              {t("login.subtitle", "قم بتسجيل الدخول للوصول إلى لوحة التحكم الخاصة بك")}
             </p>
           </div>
+          
+          {!supabaseConfigured && (
+            <Alert className="mb-6 border-red-300 bg-red-50" variant="destructive">
+              <ShieldAlert className="h-4 w-4 text-red-800" />
+              <AlertTitle className="text-red-800">
+                {t("supabase.setup.missing", "Supabase غير مُكوّن")}
+              </AlertTitle>
+              <AlertDescription className="text-red-700">
+                {t("supabase.setup.loginDisabled", "تسجيل الدخول معطل حاليًا حتى يتم تكوين Supabase. الرجاء الرجوع إلى دليل التثبيت في الصفحة الرئيسية.")}
+              </AlertDescription>
+            </Alert>
+          )}
           
           <div className="bg-white p-8 shadow-md rounded-lg">
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">البريد الإلكتروني</Label>
+                <Label htmlFor="email">{t("login.email", "البريد الإلكتروني")}</Label>
                 <Input 
                   id="email" 
                   type="email" 
@@ -66,14 +96,15 @@ const Login = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  disabled={!supabaseConfigured}
                 />
               </div>
               
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">كلمة المرور</Label>
-                  <Link to="/forgot-password" className="text-sm text-unlimited-blue hover:underline">
-                    نسيت كلمة المرور؟
+                  <Label htmlFor="password">{t("login.password", "كلمة المرور")}</Label>
+                  <Link to="/forgot-password" className={`text-sm text-unlimited-blue hover:underline ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}>
+                    {t("login.forgotPassword", "نسيت كلمة المرور؟")}
                   </Link>
                 </div>
                 <Input 
@@ -83,33 +114,49 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  disabled={!supabaseConfigured}
                 />
               </div>
               
               <Button 
                 type="submit" 
                 className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
-                disabled={isLoading}
+                disabled={isLoading || !supabaseConfigured}
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    جاري تسجيل الدخول...
+                    {t("login.loggingIn", "جاري تسجيل الدخول...")}
                   </>
                 ) : (
-                  "تسجيل الدخول"
+                  t("login.loginButton", "تسجيل الدخول")
                 )}
               </Button>
             </form>
             
             <div className="mt-6 text-center">
               <p className="text-unlimited-gray">
-                ليس لديك حساب؟{" "}
-                <Link to="/register" className="text-unlimited-blue hover:underline">
-                  إنشاء حساب جديد
+                {t("login.noAccount", "ليس لديك حساب؟")}{" "}
+                <Link to="/register" className={`text-unlimited-blue hover:underline ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}>
+                  {t("login.createAccount", "إنشاء حساب جديد")}
                 </Link>
               </p>
             </div>
+            
+            {!supabaseConfigured && (
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-center text-sm text-gray-600">
+                  {t("supabase.setup.adminInstruction", "للمسؤولين: قم بإعداد Supabase باتباع التعليمات في الصفحة الرئيسية")}
+                </p>
+                <div className="mt-3 flex justify-center">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/">
+                      {t("supabase.setup.goToDashboard", "الانتقال إلى الصفحة الرئيسية")}
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

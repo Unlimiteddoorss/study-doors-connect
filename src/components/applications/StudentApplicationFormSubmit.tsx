@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { createApplication } from '@/services/applicationService';
 import { useAuth } from '@/hooks/useAuth';
 import { Application } from '@/types/supabase';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
@@ -32,30 +34,71 @@ const StudentApplicationFormSubmit = ({
   const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(propIsSubmitting);
+  const [supabaseConfigured, setSupabaseConfigured] = useState(hasValidSupabaseCredentials());
   const isRtl = i18n.language === 'ar';
 
+  const validateApplicationData = () => {
+    const errors: string[] = [];
+    
+    if (!user?.id) {
+      errors.push(t("application.validation.notLoggedIn", "يجب تسجيل الدخول لتقديم الطلب"));
+    }
+    
+    if (!formData.university?.id) {
+      errors.push(t("application.validation.noUniversity", "يرجى اختيار الجامعة"));
+    }
+    
+    if (!formData.program?.id) {
+      errors.push(t("application.validation.noProgram", "يرجى اختيار البرنامج"));
+    }
+    
+    if (!formData.personalInfo?.firstName || !formData.personalInfo?.lastName) {
+      errors.push(t("application.validation.incompletePersonalInfo", "المعلومات الشخصية غير مكتملة"));
+    }
+    
+    return errors;
+  };
+
   const handleSubmit = async () => {
+    // التحقق من تكوين Supabase
+    if (!supabaseConfigured) {
+      toast({
+        title: t("supabase.setup.required", "إعداد Supabase مطلوب"),
+        description: t("supabase.setup.configureFirst", "يجب تكوين Supabase قبل تقديم الطلب"),
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // مسح الأخطاء السابقة
     setValidationErrors([]);
     
     if (!canSubmit) {
       toast({
-        title: t("application.validation.error"),
-        description: t("application.validation.completeAllFields"),
+        title: t("application.validation.error", "خطأ في التحقق"),
+        description: t("application.validation.completeAllFields", "يرجى إكمال جميع الحقول المطلوبة"),
         variant: "destructive"
       });
       return;
     }
 
     if (isLastStep) {
+      // التحقق من صحة البيانات
+      const errors = validateApplicationData();
+      if (errors.length > 0) {
+        setValidationErrors(errors);
+        return;
+      }
+      
       setIsSubmitting(true);
       
       try {
-        // Create the application in Supabase
+        // إنشاء الطلب في Supabase
         const applicationData: Partial<Application> = {
           student_id: user?.id || '',
           university_id: formData.university?.id || 0,
           program_id: formData.program?.id || 0,
-          status: 'pending' as Application['status'], // Fixed type issue by explicitly typing as Application['status']
+          status: 'pending' as Application['status'], // تم تعديل نوع البيانات بشكل صريح كـ Application['status']
           personal_info: formData.personalInfo || {},
           academic_info: formData.academicInfo || {},
         };
@@ -64,7 +107,7 @@ const StudentApplicationFormSubmit = ({
         
         if (error) {
           toast({
-            title: t("application.submission.error"),
+            title: t("application.submission.error", "خطأ في تقديم الطلب"),
             description: error,
             variant: "destructive"
           });
@@ -72,16 +115,16 @@ const StudentApplicationFormSubmit = ({
           return;
         }
         
-        // Call the original onSubmit
+        // استدعاء وظيفة onSubmit الأصلية
         onSubmit();
 
-        // Show success message
+        // عرض رسالة النجاح
         toast({
-          title: t("application.submission.success"),
-          description: t("application.submission.successMessage")
+          title: t("application.submission.success", "تم تقديم الطلب بنجاح"),
+          description: t("application.submission.successMessage", "سيتم مراجعة طلبك في أقرب وقت ممكن")
         });
 
-        // Navigate to the application details page
+        // الانتقال إلى صفحة تفاصيل الطلب
         if (data) {
           setTimeout(() => {
             navigate(`/dashboard/applications/${data.id}`);
@@ -92,8 +135,8 @@ const StudentApplicationFormSubmit = ({
       } catch (error: any) {
         console.error('Error submitting application:', error);
         toast({
-          title: t("application.submission.error"),
-          description: error.message || t("application.submission.errorMessage"),
+          title: t("application.submission.error", "خطأ في تقديم الطلب"),
+          description: error.message || t("application.submission.errorMessage", "حدث خطأ أثناء إرسال طلبك"),
           variant: "destructive"
         });
       } finally {
@@ -106,12 +149,21 @@ const StudentApplicationFormSubmit = ({
 
   return (
     <div className="mt-6">
+      {!supabaseConfigured && (
+        <Alert className="mb-4 border-yellow-300 bg-yellow-50">
+          <AlertTriangle className="h-5 w-5 text-yellow-600" />
+          <AlertDescription className="text-yellow-800">
+            {t("supabase.setup.requiredForSubmission", "تكوين Supabase مطلوب لتقديم الطلبات. يرجى الرجوع إلى دليل الإعداد في الصفحة الرئيسية.")}
+          </AlertDescription>
+        </Alert>
+      )}
+      
       {validationErrors.length > 0 && (
         <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect")}</p>
+              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect", "يرجى تصحيح الأخطاء التالية")}</p>
               <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
                 {validationErrors.map((error, index) => (
                   <li key={index}>{error}</li>
@@ -132,13 +184,13 @@ const StudentApplicationFormSubmit = ({
         >
           {isRtl ? (
             <>
-              {t('application.navigation.previous')}
+              {t('application.navigation.previous', 'السابق')}
               <ArrowRight className="h-4 w-4" />
             </>
           ) : (
             <>
               <ArrowLeft className="h-4 w-4" />
-              {t('application.navigation.previous')}
+              {t('application.navigation.previous', 'السابق')}
             </>
           )}
         </Button>
@@ -146,18 +198,18 @@ const StudentApplicationFormSubmit = ({
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || (!isLastStep && !canSubmit) || (isLastStep && !supabaseConfigured)}
           className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
         >
           {isSubmitting ? (
             <>
               <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-              {t('application.buttons.submitting')}
+              {t('application.buttons.submitting', 'جاري الإرسال...')}
             </>
           ) : (
             <>
               <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-              {t(isLastStep ? 'application.buttons.submit' : 'application.buttons.next')}
+              {t(isLastStep ? 'application.buttons.submit' : 'application.buttons.next', isLastStep ? 'تقديم الطلب' : 'التالي')}
             </>
           )}
         </Button>
