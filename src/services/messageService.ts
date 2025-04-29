@@ -1,6 +1,23 @@
 
-import { supabase } from '@/lib/supabase';
-import { Message } from '@/types/supabase';
+import { supabase } from '@/integrations/supabase/client';
+
+// Create a messages table in the database if it doesn't exist
+const checkMessagesTable = async () => {
+  try {
+    // Check if the table exists by querying it
+    const { error } = await supabase.from('messages').select('id').limit(1);
+    
+    // If there's an error, the table might not exist
+    if (error && error.code === 'PGRST116') {
+      console.log('Messages table does not exist. Please create it via SQL migrations.');
+    }
+  } catch (error) {
+    console.error('Error checking messages table:', error);
+  }
+};
+
+// Call this function when the app initializes
+checkMessagesTable();
 
 // Get messages for an application
 export const getApplicationMessages = async (applicationId: string) => {
@@ -21,7 +38,7 @@ export const getApplicationMessages = async (applicationId: string) => {
 };
 
 // Send a message
-export const sendMessage = async (message: Partial<Message>) => {
+export const sendMessage = async (message: any) => {
   try {
     const { data, error } = await supabase
       .from('messages')
@@ -47,6 +64,15 @@ export const uploadMessageAttachment = async (
     const fileExt = file.name.split('.').pop();
     const fileName = `${messageId}-${Date.now()}.${fileExt}`;
     const filePath = `message-attachments/${fileName}`;
+
+    // Create message-attachments bucket if it doesn't exist
+    const { data: bucketExists } = await supabase
+      .storage
+      .getBucket('message-attachments');
+    
+    if (!bucketExists) {
+      await supabase.storage.createBucket('message-attachments', { public: false });
+    }
 
     // Upload file to storage
     const { error: uploadError } = await supabase

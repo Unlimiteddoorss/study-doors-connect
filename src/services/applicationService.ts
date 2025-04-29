@@ -1,6 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
-import { Application, Document, Timeline } from '@/types/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Get all applications for a student
 export const getStudentApplications = async (studentId: string) => {
@@ -63,15 +62,12 @@ export const getApplicationById = async (id: string) => {
 };
 
 // Create new application
-export const createApplication = async (application: Partial<Application>) => {
+export const createApplication = async (application: any) => {
   try {
     // Generate a UUID for the application
-    const applicationId = crypto.randomUUID();
-    const newApplication = { ...application, id: applicationId };
-    
     const { data, error } = await supabase
       .from('applications')
-      .insert([newApplication])
+      .insert([application])
       .select()
       .single();
 

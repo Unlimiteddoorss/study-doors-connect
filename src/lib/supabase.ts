@@ -1,14 +1,6 @@
 
-import { createClient } from '@supabase/supabase-js';
-import { Database } from '@/types/supabase-types';
-
-// هذه المتغيرات البيئية يجب تعيينها في البيئة المنشورة
-// للتطوير المحلي، يمكنك استبدالها بعنوان URL الفعلي لـ Supabase ومفتاح التعريف
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://example.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
-
-// إنشاء عميل Supabase مع أنواع Database المحددة
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
 
 // التحقق من صحة الاتصال بقاعدة البيانات
 export const checkSupabaseConnection = async () => {
@@ -34,9 +26,5 @@ export const checkSupabaseConnection = async () => {
 
 // وظيفة للتحقق من وجود المتغيرات البيئية المطلوبة
 export const hasValidSupabaseCredentials = (): boolean => {
-  const url = import.meta.env.VITE_SUPABASE_URL;
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
-  
-  return Boolean(url && url !== 'https://example.supabase.co' && 
-                 key && key !== 'your-anon-key');
+  return true; // We now have hardcoded credentials in the client file
 };

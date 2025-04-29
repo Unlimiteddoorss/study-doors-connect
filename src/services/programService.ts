@@ -1,6 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
-import { Program } from '@/types/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Get all programs with optional pagination and filters
 export const getPrograms = async (
@@ -22,16 +21,8 @@ export const getPrograms = async (
       query = query.eq('degree_type', filters.degree_type);
     }
 
-    if (filters.field_of_study) {
-      query = query.eq('field_of_study', filters.field_of_study);
-    }
-    
     if (filters.language) {
       query = query.eq('language', filters.language);
-    }
-
-    if (filters.is_featured) {
-      query = query.eq('is_featured', true);
     }
 
     // Apply pagination
@@ -40,7 +31,6 @@ export const getPrograms = async (
     
     const { data, count, error } = await query
       .range(from, to)
-      .order('is_featured', { ascending: false })
       .order('name', { ascending: true });
 
     if (error) throw error;
@@ -76,7 +66,6 @@ export const getFeaturedPrograms = async (limit: number = 6) => {
     const { data, error } = await supabase
       .from('programs')
       .select('*, universities(name, name_ar, country, city)')
-      .eq('is_featured', true)
       .limit(limit);
 
     if (error) throw error;

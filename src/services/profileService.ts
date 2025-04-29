@@ -1,12 +1,11 @@
 
-import { supabase } from '@/lib/supabase';
-import { StudentProfile } from '@/types/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
-// Get student profile
-export const getStudentProfile = async (userId: string) => {
+// Get user profile
+export const getUserProfile = async (userId: string) => {
   try {
     const { data, error } = await supabase
-      .from('student_profiles')
+      .from('user_profiles')
       .select('*')
       .eq('user_id', userId)
       .single();
@@ -20,11 +19,11 @@ export const getStudentProfile = async (userId: string) => {
   }
 };
 
-// Create or update student profile
-export const upsertStudentProfile = async (profile: Partial<StudentProfile>) => {
+// Create or update user profile
+export const upsertUserProfile = async (profile: any) => {
   try {
     const { data, error } = await supabase
-      .from('student_profiles')
+      .from('user_profiles')
       .upsert([profile])
       .select()
       .single();
@@ -33,7 +32,7 @@ export const upsertStudentProfile = async (profile: Partial<StudentProfile>) => 
 
     return { data, error: null };
   } catch (error: any) {
-    console.error('Error updating student profile:', error.message);
+    console.error('Error updating user profile:', error.message);
     return { data: null, error: error.message };
   }
 };
@@ -45,10 +44,19 @@ export const uploadProfileImage = async (userId: string, file: File) => {
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
     const filePath = `avatars/${fileName}`;
 
+    // Create avatars bucket if it doesn't exist
+    const { data: bucketExists } = await supabase
+      .storage
+      .getBucket('avatars');
+    
+    if (!bucketExists) {
+      await supabase.storage.createBucket('avatars', { public: true });
+    }
+
     // Upload file to storage
     const { error: uploadError } = await supabase
       .storage
-      .from('profiles')
+      .from('avatars')
       .upload(filePath, file);
 
     if (uploadError) throw uploadError;
@@ -56,12 +64,12 @@ export const uploadProfileImage = async (userId: string, file: File) => {
     // Get public URL
     const { data: publicUrlData } = supabase
       .storage
-      .from('profiles')
+      .from('avatars')
       .getPublicUrl(filePath);
 
     // Update profile with avatar URL
     const { data, error } = await supabase
-      .from('student_profiles')
+      .from('user_profiles')
       .update({ avatar_url: publicUrlData.publicUrl })
       .eq('user_id', userId)
       .select()

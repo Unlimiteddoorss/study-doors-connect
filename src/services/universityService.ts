@@ -1,6 +1,5 @@
 
-import { supabase } from '@/lib/supabase';
-import { University } from '@/types/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // Get all universities with optional pagination
 export const getUniversities = async (
@@ -32,7 +31,6 @@ export const getUniversities = async (
     
     const { data, count, error } = await query
       .range(from, to)
-      .order('is_featured', { ascending: false })
       .order('name', { ascending: true });
 
     if (error) throw error;

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -28,48 +28,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check active sessions and set user
-    const getSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('Error getting session:', error.message);
-          setLoading(false);
-          return;
-        }
-
-        if (session?.user) {
-          const { data: userRole } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', session.user.id)
-            .single();
-
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
-          });
-
-          // Store the role in localStorage to maintain compatibility with existing code
-          localStorage.setItem('userRole', userRole?.role || 'student');
-        } else {
-          setUser(null);
-          localStorage.removeItem('userRole');
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error in session check:', error);
-        setLoading(false);
-      }
-    };
-
-    getSession();
-
-    // Listen for authentication changes
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if (session?.user) {
         try {
           const { data: userRole } = await supabase
             .from('user_roles')
@@ -86,10 +47,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.setItem('userRole', userRole?.role || 'student');
         } catch (error) {
           console.error('Error fetching user role:', error);
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+            role: 'student'
+          });
+          localStorage.setItem('userRole', 'student');
         }
-      } else if (event === 'SIGNED_OUT') {
+      } else {
         setUser(null);
         localStorage.removeItem('userRole');
+      }
+    });
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', session.user.id)
+          .single()
+          .then(({ data: userRole }) => {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
+            });
+            localStorage.setItem('userRole', userRole?.role || 'student');
+            setLoading(false);
+          })
+          .catch(error => {
+            console.error('Error fetching user role:', error);
+            setUser({
+              id: session.user.id,
+              email: session.user.email || '',
+              role: 'student'
+            });
+            localStorage.setItem('userRole', 'student');
+            setLoading(false);
+          });
+      } else {
+        setLoading(false);
       }
     });
 

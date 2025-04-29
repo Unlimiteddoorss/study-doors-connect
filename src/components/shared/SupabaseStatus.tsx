@@ -28,7 +28,7 @@ export const SupabaseStatus = () => {
           if (!connected) {
             toast({
               title: t("supabase.connection.error", "خطأ في الاتصال بقاعدة البيانات"),
-              description: t("supabase.connection.errorDescription", "تأكد من إعدادات Supabase الخاصة بك وقم بتحديث مفاتيح الوصول"),
+              description: t("supabase.connection.errorDescription", "تأكد من إعدادات Supabase الخاصة بك"),
               variant: "destructive"
             });
           }
@@ -62,7 +62,7 @@ export const SupabaseStatus = () => {
           </TooltipTrigger>
           <TooltipContent>
             <p className="max-w-xs text-sm">
-              {t("supabase.credentials.instruction", "قم بتهيئة متغيرات البيئة VITE_SUPABASE_URL و VITE_SUPABASE_ANON_KEY")}
+              {t("supabase.credentials.instruction", "قم بتهيئة بيانات اعتماد Supabase")}
             </p>
           </TooltipContent>
         </Tooltip>
