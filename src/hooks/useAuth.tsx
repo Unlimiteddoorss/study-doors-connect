@@ -61,23 +61,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .single()
-          .then(({ data: userRole }) => {
+    const checkSession = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          try {
+            const { data: userRole } = await supabase
+              .from('user_roles')
+              .select('role')
+              .eq('user_id', session.user.id)
+              .single();
+
             setUser({
               id: session.user.id,
               email: session.user.email || '',
               role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
             });
             localStorage.setItem('userRole', userRole?.role || 'student');
-            setLoading(false);
-          })
-          .catch(error => {
+          } catch (error) {
             console.error('Error fetching user role:', error);
             setUser({
               id: session.user.id,
@@ -85,12 +87,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               role: 'student'
             });
             localStorage.setItem('userRole', 'student');
-            setLoading(false);
-          });
-      } else {
+          }
+        }
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error checking session:', error);
         setLoading(false);
       }
-    });
+    };
+    
+    checkSession();
 
     return () => {
       subscription.unsubscribe();
