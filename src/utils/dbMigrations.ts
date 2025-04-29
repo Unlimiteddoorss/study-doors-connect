@@ -20,7 +20,7 @@ const checkMigrationsTable = async () => {
           AND table_name = 'migrations'
         );
       `
-    });
+    }) as { data: Array<{exists: boolean}> | null, error: any };
     
     if (checkError) {
       console.error('Error checking migrations table:', checkError);
@@ -37,7 +37,7 @@ const checkMigrationsTable = async () => {
             applied_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
           );
         `
-      });
+      }) as { data: any | null, error: any };
       
       if (createError) {
         console.error('Error creating migrations table:', createError);
@@ -76,7 +76,7 @@ export const applyMigration = async (migration: Migration) => {
           WHERE name = '${migration.name}'
         );
       `
-    });
+    }) as { data: Array<{exists: boolean}> | null, error: any };
       
     if (error) {
       console.error('Error checking migration:', error);
@@ -91,7 +91,7 @@ export const applyMigration = async (migration: Migration) => {
     // Apply migration
     const { error: sqlError } = await supabase.rpc('execute_sql', { 
       sql_string: migration.sql
-    });
+    }) as { data: any | null, error: any };
     
     if (sqlError) {
       console.error('Error applying migration:', sqlError);
@@ -109,7 +109,7 @@ export const applyMigration = async (migration: Migration) => {
         INSERT INTO migrations (name)
         VALUES ('${migration.name}');
       `
-    });
+    }) as { data: any | null, error: any };
       
     if (recordError) {
       console.error('Error recording migration:', recordError);

@@ -34,7 +34,7 @@ export const initializeMessageSystem = async () => {
           AND table_name = 'messages'
         );
       `
-    });
+    }) as { data: Array<{exists: boolean}> | null, error: any };
     
     if (error) {
       console.error('Error checking if messages table exists:', error);
@@ -71,7 +71,7 @@ export const getApplicationMessages = async (applicationId: string) => {
         WHERE application_id = '${applicationId}'
         ORDER BY created_at ASC;
       `
-    });
+    }) as { data: any[] | null, error: any };
     
     if (error) throw error;
     
@@ -111,7 +111,7 @@ export const sendMessage = async (message: Message) => {
         )
         RETURNING *;
       `
-    });
+    }) as { data: any[] | null, error: any };
     
     if (error) throw error;
     

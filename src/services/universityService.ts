@@ -33,7 +33,7 @@ export const getUniversities = async (
       sql_string: `
         SELECT COUNT(*) as total FROM universities ${whereClause};
       `
-    });
+    }) as { data: Array<{total: number}> | null, error: any };
     
     if (countError) throw countError;
     
@@ -50,7 +50,7 @@ export const getUniversities = async (
         ORDER BY name ASC
         LIMIT ${pageSize} OFFSET ${offset};
       `
-    });
+    }) as { data: any[] | null, error: any };
 
     if (error) throw error;
 
@@ -70,7 +70,7 @@ export const getUniversityById = async (id: number) => {
         WHERE id = ${id}
         LIMIT 1;
       `
-    });
+    }) as { data: any[] | null, error: any };
 
     if (error) throw error;
 
@@ -89,7 +89,7 @@ export const getUniversityPrograms = async (universityId: number) => {
         SELECT * FROM programs
         WHERE university_id = ${universityId};
       `
-    });
+    }) as { data: any[] | null, error: any };
 
     if (error) throw error;
 

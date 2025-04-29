@@ -33,11 +33,10 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const result = await signIn(email, password);
-      console.log("Login successful:", result);
+      await signIn(email, password);
       
-      // Role-based redirection is handled in useAuth hook
-      // But we can add additional handling here if needed
+      // Role-based redirection handled in useAuth hook
+      // Check local storage for role to ensure proper redirection
       const userRole = localStorage.getItem('userRole');
       console.log("User role after login:", userRole);
       
@@ -48,9 +47,13 @@ const LoginForm = () => {
       } else {
         navigate('/dashboard/applications');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
-      // Error handling is already in the useAuth hook
+      toast({
+        title: "خطأ في تسجيل الدخول",
+        description: error.message || "فشل تسجيل الدخول. يرجى التحقق من بياناتك والمحاولة مرة أخرى.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
