@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, User, Mail, Phone, ShieldCheck } from 'lucide-react';
 import {
   Select,
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
+import { supabase } from '@/integrations/supabase/client';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -117,32 +118,86 @@ const RegisterForm = () => {
     
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo purposes, any registration will succeed
-      toast({
-        title: 'تم إنشاء الحساب بنجاح',
-        description: 'مرحباً بك في منصة أبواب غير محدودة',
-      });
-      
-      // Store in localStorage for demo purposes
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      users.push({
-        ...formData,
-        id: Date.now(),
-        password: '*****', // don't store actual password in local storage
-        createdAt: new Date().toISOString(),
-      });
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      // Redirect based on user type
-      if (formData.userType === 'student') {
-        navigate('/dashboard');
-      } else if (formData.userType === 'agent') {
-        navigate('/agent');
+    try {
+      // Register with Supabase if configured
+      if (supabase) {
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.fullName,
+              phone: formData.phone,
+              user_type: formData.userType,
+            },
+          }
+        });
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Store role in user_roles table
+        if (data.user) {
+          const { error: roleError } = await (supabase.rpc as any)('execute_sql', {
+            sql_string: `
+              INSERT INTO user_roles (user_id, role)
+              VALUES ('${data.user.id}', '${formData.userType}');
+            `
+          });
+          
+          if (roleError) console.error('Error setting user role:', roleError);
+          
+          // Store in localStorage for immediate use
+          localStorage.setItem('userRole', formData.userType);
+        }
+        
+        toast({
+          title: 'تم إنشاء الحساب بنجاح',
+          description: 'مرحباً بك في منصة أبواب غير محدودة',
+        });
+        
+        // Redirect based on user type
+        if (formData.userType === 'student') {
+          navigate('/dashboard');
+        } else if (formData.userType === 'agent') {
+          navigate('/agent');
+        }
+      } else {
+        // Fallback for demo purposes when Supabase is not configured
+        // Store in localStorage for demo purposes
+        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        users.push({
+          ...formData,
+          id: Date.now(),
+          password: '*****', // don't store actual password in local storage
+          createdAt: new Date().toISOString(),
+        });
+        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('userRole', formData.userType);
+        
+        toast({
+          title: 'تم إنشاء الحساب بنجاح (وضع العرض)',
+          description: 'مرحباً بك في منصة أبواب غير محدودة',
+        });
+        
+        // Redirect based on user type
+        if (formData.userType === 'student') {
+          navigate('/dashboard');
+        } else if (formData.userType === 'agent') {
+          navigate('/agent');
+        }
       }
-    }, 1500);
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast({
+        title: 'فشل في إنشاء الحساب',
+        description: error.message || 'حدث خطأ أثناء إنشاء الحساب، يرجى المحاولة مرة أخرى',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

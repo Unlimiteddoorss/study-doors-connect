@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
@@ -13,8 +12,13 @@ import AcademicInfoForm from '@/components/student/AcademicInfoForm';
 import ProgramSelectionForm from '@/components/student/ProgramSelectionForm';
 import ApplicationReview from '@/components/student/ApplicationReview';
 import ApplicationSubmissionHandler from '@/components/applications/ApplicationSubmissionHandler';
+import { useNavigate } from 'react-router-dom';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle } from 'lucide-react';
 
-// تعريف واجهة بيانات الطلب
+// Define application data interface
 interface ApplicationData {
   personalInfo?: any;
   documents?: any[];
@@ -30,9 +34,28 @@ const StudentApplication = () => {
   const [formData, setFormData] = useState<ApplicationData>({});
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const isRtl = i18n.language === 'ar';
+  const hasSupabase = hasValidSupabaseCredentials();
 
-  // التحقق من اكتمال البيانات حسب الخطوة الحالية
+  // Check if user is logged in
+  if (!user) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-5xl mx-auto py-8 px-4">
+          <Alert className="mb-4 border-yellow-300 bg-yellow-50">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              {t("auth.requiredLogin", "يجب تسجيل الدخول لتقديم طلب جديد.")}
+            </AlertDescription>
+          </Alert>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Validate current step data
   const validateCurrentStep = () => {
     if (currentStep === 1) {
       // التحقق من بيانات الطالب الشخصية
@@ -72,12 +95,12 @@ const StudentApplication = () => {
     return true;
   };
 
-  // العودة للخطوة السابقة
+  // Go to previous step
   const handleBack = () => {
     setCurrentStep((prev) => Math.max(1, prev - 1));
   };
 
-  // الانتقال للخطوة التالية أو إرسال الطلب
+  // Go to next step or submit
   const handleNext = () => {
     if (!validateCurrentStep()) return;
 
@@ -86,7 +109,7 @@ const StudentApplication = () => {
     }
   };
 
-  // تحديث بيانات النموذج
+  // Update form data
   const updateFormData = (step: number, data: any) => {
     setFormData(prevData => {
       switch(step) {
@@ -104,6 +127,7 @@ const StudentApplication = () => {
     });
   };
 
+  // Check if form is complete
   const isFormComplete = () => {
     // التحقق من اكتمال جميع البيانات المطلوبة للطلب
     return (
@@ -115,6 +139,7 @@ const StudentApplication = () => {
     );
   };
 
+  // Render current step content
   const renderStepContent = () => {
     switch(currentStep) {
       case 1:
@@ -159,6 +184,15 @@ const StudentApplication = () => {
       <div className="max-w-5xl mx-auto py-8 px-4">
         <StudentApplicationHeader />
         
+        {!hasSupabase && (
+          <Alert className="mb-4 border-yellow-300 bg-yellow-50">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <AlertDescription className="text-yellow-800">
+              {t("supabase.setup.requiredForSubmission", "تكوين Supabase مطلوب لتقديم الطلبات. يرجى الرجوع إلى دليل الإعداد في الصفحة الرئيسية.")}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Card className="p-6">
           <ApplicationSteps currentStep={currentStep} />
           
@@ -185,6 +219,7 @@ const StudentApplication = () => {
                     title: t("application.submission.success"),
                     description: t("application.submission.successMessage")
                   });
+                  navigate('/dashboard/applications');
                 }}
               />
             </div>

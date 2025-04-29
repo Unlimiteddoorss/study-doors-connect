@@ -1,30 +1,41 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
 
-// التحقق من صحة الاتصال بقاعدة البيانات
-export const checkSupabaseConnection = async () => {
+/**
+ * Check if Supabase is configured with valid credentials
+ * @returns boolean
+ */
+export const hasValidSupabaseCredentials = (): boolean => {
   try {
-    // محاولة استرداد بيانات من جدول موجود
-    const { count, error } = await supabase
-      .from('universities')
-      .select('*', { count: 'exact', head: true });
+    const url = supabase?.supabaseUrl;
+    const key = supabase?.supabaseKey;
     
-    if (error) {
-      console.error('خطأ في الاتصال بـ Supabase:', error.message);
-      throw error;
+    // Basic validation
+    if (!url || !key || url.includes('YOUR_SUPABASE_URL') || key.includes('YOUR_SUPABASE_ANON_KEY')) {
+      return false;
     }
     
-    // إذا وصلنا إلى هنا، فالاتصال ناجح
-    console.log('تم الاتصال بـ Supabase بنجاح');
     return true;
   } catch (error) {
-    console.error('خطأ في الاتصال بـ Supabase:', error);
+    console.error('Error checking Supabase credentials:', error);
     return false;
   }
 };
 
-// وظيفة للتحقق من وجود المتغيرات البيئية المطلوبة
-export const hasValidSupabaseCredentials = (): boolean => {
-  return true; // We now have hardcoded credentials in the client file
+/**
+ * Helper function to safely access Supabase when ready
+ * @param callback The function to call when Supabase is ready
+ */
+export const withSupabase = async <T>(callback: (client: typeof supabase) => Promise<T>): Promise<T | null> => {
+  if (!hasValidSupabaseCredentials()) {
+    console.error('Supabase not configured correctly');
+    return null;
+  }
+  
+  try {
+    return await callback(supabase);
+  } catch (error) {
+    console.error('Error in Supabase operation:', error);
+    return null;
+  }
 };
