@@ -2,7 +2,19 @@
 import { useRef, useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Paperclip } from 'lucide-react';
-import { type Message } from '@/pages/messaging/UserMessages';
+
+interface Attachment {
+  name: string;
+  url: string;
+}
+
+export interface Message {
+  id: string;
+  content: string;
+  sender: string;
+  timestamp: Date;
+  attachments?: Attachment[];
+}
 
 interface MessagesListProps {
   messages: Message[];

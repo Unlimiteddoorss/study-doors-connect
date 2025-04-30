@@ -1,129 +1,165 @@
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Eye, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { TableSkeleton } from './TableSkeleton';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface Column {
+export interface Column {
   header: string;
   accessor: string;
   hideOnMobile?: boolean;
-  render?: (value: any) => React.ReactNode;
+  render?: (value: any, row?: any) => React.ReactNode;
 }
 
-interface FilterableTableProps {
+export interface Action {
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+}
+
+export interface FilterableTableProps {
   data: any[];
   columns: Column[];
-  isLoading: boolean;
-  onViewDetails: (item: any) => void;
-  onEdit: (item: any) => void;
-  onDelete: (item: any) => void;
+  isLoading?: boolean;
+  actions?: (row: any) => Action[];
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  };
+  className?: string;
 }
 
-export function FilterableTable({
+const FilterableTable = ({
   data,
   columns,
-  isLoading,
-  onViewDetails,
-  onEdit,
-  onDelete
-}: FilterableTableProps) {
+  isLoading = false,
+  actions,
+  pagination,
+  className,
+}: FilterableTableProps) => {
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+
   return (
-    <div className="rounded-md border shadow-sm">
+    <div className={cn("rounded-md border", className)}>
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map((column) => (
+            {columns.map((column, i) => (
               <TableHead
-                key={column.accessor}
-                className={column.hideOnMobile ? 'hidden md:table-cell' : undefined}
+                key={i}
+                className={cn(column.hideOnMobile && 'hidden md:table-cell')}
               >
                 {column.header}
               </TableHead>
             ))}
-            <TableHead className="text-left">الإجراءات</TableHead>
+            {actions && <TableHead className="w-[80px]"></TableHead>}
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
-            <TableSkeleton columns={columns.length + 1} rows={10} />
+            <TableRow>
+              <TableCell colSpan={columns.length + (actions ? 1 : 0)} className="h-24 text-center">
+                <Loader2 className="animate-spin h-6 w-6 mx-auto" />
+              </TableCell>
+            </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length + 1} className="text-center h-40 text-unlimited-gray">
-                لا توجد بيانات متطابقة مع البحث
+              <TableCell colSpan={columns.length + (actions ? 1 : 0)} className="h-24 text-center">
+                لا توجد بيانات للعرض
               </TableCell>
             </TableRow>
           ) : (
-            data.map((item) => (
-              <TableRow key={item.id}>
-                {columns.map((column) => (
+            data.map((row, rowIndex) => (
+              <TableRow
+                key={rowIndex}
+                onMouseEnter={() => setHoveredRow(rowIndex)}
+                onMouseLeave={() => setHoveredRow(null)}
+              >
+                {columns.map((column, colIndex) => (
                   <TableCell
-                    key={column.accessor}
-                    className={column.hideOnMobile ? 'hidden md:table-cell' : undefined}
+                    key={colIndex}
+                    className={cn(column.hideOnMobile && 'hidden md:table-cell')}
                   >
-                    {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
+                    {column.render
+                      ? column.render(row[column.accessor], row)
+                      : row[column.accessor]}
                   </TableCell>
                 ))}
-                <TableCell>
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => onViewDetails(item)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8"
-                      onClick={() => onEdit(item)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                
+                {actions && (
+                  <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">فتح القائمة</span>
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>{item.name}</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => onViewDetails(item)}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          عرض التفاصيل
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(item)}>
-                          <Edit className="h-4 w-4 mr-2" />
-                          تعديل
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-unlimited-danger focus:text-unlimited-danger"
-                          onClick={() => onDelete(item)}
-                        >
-                          <Trash className="h-4 w-4 mr-2" />
-                          حذف
-                        </DropdownMenuItem>
+                        {actions(row).map((action, actionIndex) => (
+                          <DropdownMenuItem
+                            key={actionIndex}
+                            onClick={() => action.onClick()}
+                            className={cn(
+                              action.destructive && 'text-red-600',
+                              'gap-2'
+                            )}
+                          >
+                            {action.icon}
+                            {action.label}
+                          </DropdownMenuItem>
+                        ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                </TableCell>
+                  </TableCell>
+                )}
               </TableRow>
             ))
           )}
         </TableBody>
       </Table>
+
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-end space-x-2 py-4 px-4 rtl:space-x-reverse">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
+          >
+            السابق
+          </Button>
+          <div className="text-sm text-unlimited-gray">
+            الصفحة {pagination.currentPage} من {pagination.totalPages}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            التالي
+          </Button>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default FilterableTable;

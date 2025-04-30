@@ -5,15 +5,27 @@ import { Badge } from '@/components/ui/badge';
 import { User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { type Contact } from '@/pages/messaging/UserMessages';
+
+export interface Contact {
+  id: string | number;
+  name: string;
+  role: string;
+  avatar?: string | null;
+  lastMessage: string;
+  timestamp: string;
+  lastMessageTime: Date;
+  unread: number;
+  unreadCount?: number;
+}
 
 interface ContactsListProps {
   contacts: Contact[];
+  selectedContactId?: string | number | null;
   activeContactId?: string;
-  onSelectContact: (contactId: string) => void;
+  onSelectContact: (contactId: any) => void;
 }
 
-const ContactsList = ({ contacts, activeContactId, onSelectContact }: ContactsListProps) => {
+const ContactsList = ({ contacts, selectedContactId, activeContactId, onSelectContact }: ContactsListProps) => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
@@ -31,7 +43,7 @@ const ContactsList = ({ contacts, activeContactId, onSelectContact }: ContactsLi
         <div
           key={contact.id}
           className={`p-3 cursor-pointer hover:bg-gray-100 border-b ${
-            activeContactId === contact.id ? 'bg-gray-100' : ''
+            (selectedContactId === contact.id || activeContactId === contact.id) ? 'bg-gray-100' : ''
           }`}
           onClick={() => onSelectContact(contact.id)}
         >
@@ -49,10 +61,12 @@ const ContactsList = ({ contacts, activeContactId, onSelectContact }: ContactsLi
             </div>
             <div className="flex flex-col items-end">
               <div className="text-xs text-unlimited-gray">
-                {formatDistanceToNow(contact.lastMessageTime, { addSuffix: true, locale: ar })}
+                {contact.lastMessageTime ? 
+                  formatDistanceToNow(contact.lastMessageTime, { addSuffix: true, locale: ar }) : 
+                  contact.timestamp}
               </div>
-              {contact.unreadCount > 0 && (
-                <Badge className="bg-unlimited-blue">{contact.unreadCount}</Badge>
+              {(contact.unread > 0 || contact.unreadCount && contact.unreadCount > 0) && (
+                <Badge className="bg-unlimited-blue">{contact.unreadCount || contact.unread}</Badge>
               )}
             </div>
           </div>

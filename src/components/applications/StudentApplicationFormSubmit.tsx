@@ -5,61 +5,46 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { createApplication } from '@/services/applicationService';
-import { useAuth } from '@/hooks/useAuth';
-import { Application } from '@/types/supabase';
-import { hasValidSupabaseCredentials } from '@/lib/supabase';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
 
 interface StudentApplicationFormSubmitProps {
-  isLastStep: boolean;
-  isSubmitting: boolean;
-  canSubmit: boolean;
-  formData: any;
-  onBack: () => void;
+  isSubmitting?: boolean;
+  university?: any;
+  program?: any;
+  isValid: boolean;
   onSubmit: () => void;
 }
 
 const StudentApplicationFormSubmit = ({
-  isLastStep,
-  isSubmitting: propIsSubmitting,
-  canSubmit,
-  formData,
-  onBack,
+  isSubmitting = false,
+  university,
+  program,
+  isValid,
   onSubmit
 }: StudentApplicationFormSubmitProps) => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(propIsSubmitting);
-  const [supabaseConfigured, setSupabaseConfigured] = useState(hasValidSupabaseCredentials());
+  const [supabaseConfigured] = useState(hasValidSupabaseCredentials());
   const isRtl = i18n.language === 'ar';
 
   const validateApplicationData = () => {
     const errors: string[] = [];
     
-    if (!user?.id) {
-      errors.push(t("application.validation.notLoggedIn", "يجب تسجيل الدخول لتقديم الطلب"));
-    }
-    
-    if (!formData.university?.id) {
+    if (!university?.id) {
       errors.push(t("application.validation.noUniversity", "يرجى اختيار الجامعة"));
     }
     
-    if (!formData.program?.id) {
+    if (!program?.id) {
       errors.push(t("application.validation.noProgram", "يرجى اختيار البرنامج"));
-    }
-    
-    if (!formData.personalInfo?.firstName || !formData.personalInfo?.lastName) {
-      errors.push(t("application.validation.incompletePersonalInfo", "المعلومات الشخصية غير مكتملة"));
     }
     
     return errors;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     // التحقق من تكوين Supabase
     if (!supabaseConfigured) {
       toast({
@@ -73,7 +58,7 @@ const StudentApplicationFormSubmit = ({
     // مسح الأخطاء السابقة
     setValidationErrors([]);
     
-    if (!canSubmit) {
+    if (!isValid) {
       toast({
         title: t("application.validation.error", "خطأ في التحقق"),
         description: t("application.validation.completeAllFields", "يرجى إكمال جميع الحقول المطلوبة"),
@@ -82,69 +67,15 @@ const StudentApplicationFormSubmit = ({
       return;
     }
 
-    if (isLastStep) {
-      // التحقق من صحة البيانات
-      const errors = validateApplicationData();
-      if (errors.length > 0) {
-        setValidationErrors(errors);
-        return;
-      }
-      
-      setIsSubmitting(true);
-      
-      try {
-        // إنشاء الطلب في Supabase
-        const applicationData: Partial<Application> = {
-          student_id: user?.id || '',
-          university_id: formData.university?.id || 0,
-          program_id: formData.program?.id || 0,
-          status: 'pending' as Application['status'], // تم تعديل نوع البيانات بشكل صريح كـ Application['status']
-          personal_info: formData.personalInfo || {},
-          academic_info: formData.academicInfo || {},
-        };
-        
-        const { data, error } = await createApplication(applicationData);
-        
-        if (error) {
-          toast({
-            title: t("application.submission.error", "خطأ في تقديم الطلب"),
-            description: error,
-            variant: "destructive"
-          });
-          setIsSubmitting(false);
-          return;
-        }
-        
-        // استدعاء وظيفة onSubmit الأصلية
-        onSubmit();
-
-        // عرض رسالة النجاح
-        toast({
-          title: t("application.submission.success", "تم تقديم الطلب بنجاح"),
-          description: t("application.submission.successMessage", "سيتم مراجعة طلبك في أقرب وقت ممكن")
-        });
-
-        // الانتقال إلى صفحة تفاصيل الطلب
-        if (data) {
-          setTimeout(() => {
-            navigate(`/dashboard/applications/${data.id}`);
-          }, 1500);
-        } else {
-          navigate('/dashboard/applications');
-        }
-      } catch (error: any) {
-        console.error('Error submitting application:', error);
-        toast({
-          title: t("application.submission.error", "خطأ في تقديم الطلب"),
-          description: error.message || t("application.submission.errorMessage", "حدث خطأ أثناء إرسال طلبك"),
-          variant: "destructive"
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
-      onSubmit();
+    // التحقق من صحة البيانات
+    const errors = validateApplicationData();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
     }
+
+    // استدعاء وظيفة onSubmit
+    onSubmit();
   };
 
   return (
@@ -174,46 +105,24 @@ const StudentApplicationFormSubmit = ({
         </div>
       )}
       
-      <div className="flex flex-wrap gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={isSubmitting}
-          className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
-        >
-          {isRtl ? (
-            <>
-              {t('application.navigation.previous', 'السابق')}
-              <ArrowRight className="h-4 w-4" />
-            </>
-          ) : (
-            <>
-              <ArrowLeft className="h-4 w-4" />
-              {t('application.navigation.previous', 'السابق')}
-            </>
-          )}
-        </Button>
-        
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting || (!isLastStep && !canSubmit) || (isLastStep && !supabaseConfigured)}
-          className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-              {t('application.buttons.submitting', 'جاري الإرسال...')}
-            </>
-          ) : (
-            <>
-              <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-              {t(isLastStep ? 'application.buttons.submit' : 'application.buttons.next', isLastStep ? 'تقديم الطلب' : 'التالي')}
-            </>
-          )}
-        </Button>
-      </div>
+      <Button
+        type="button"
+        onClick={handleSubmit}
+        disabled={isSubmitting || !isValid || !supabaseConfigured}
+        className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
+      >
+        {isSubmitting ? (
+          <>
+            <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
+            {t('application.buttons.submitting', 'جاري الإرسال...')}
+          </>
+        ) : (
+          <>
+            <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+            {t('application.buttons.submit', 'تقديم الطلب')}
+          </>
+        )}
+      </Button>
     </div>
   );
 };

@@ -2,11 +2,11 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
-import { MessagesList } from '@/components/messaging/MessagesList';
-import { ContactsList } from '@/components/messaging/ContactsList';
+import MessagesList from '@/components/messaging/MessagesList';
+import ContactsList from '@/components/messaging/ContactsList';
 
 const AgentMessages = () => {
-  const [selectedContact, setSelectedContact] = useState(null);
+  const [selectedContact, setSelectedContact] = useState<any>(null);
 
   // Mock data for contacts
   const contacts = [
@@ -17,6 +17,7 @@ const AgentMessages = () => {
       avatar: null,
       lastMessage: 'هل يمكنك مساعدتي في الطلب؟',
       timestamp: '10:30',
+      lastMessageTime: new Date(),
       unread: 2,
     },
     {
@@ -26,6 +27,7 @@ const AgentMessages = () => {
       avatar: null,
       lastMessage: 'الرجاء مراجعة الطلب المعلق',
       timestamp: 'أمس',
+      lastMessageTime: new Date(Date.now() - 86400000),
       unread: 1,
     },
     {
@@ -35,6 +37,7 @@ const AgentMessages = () => {
       avatar: null,
       lastMessage: 'شكراً لمساعدتك',
       timestamp: 'أمس',
+      lastMessageTime: new Date(Date.now() - 86400000),
       unread: 0,
     },
     {
@@ -44,11 +47,38 @@ const AgentMessages = () => {
       avatar: null,
       lastMessage: 'متى سيتم الرد على طلبي؟',
       timestamp: '22/04',
+      lastMessageTime: new Date(Date.now() - 172800000),
       unread: 0,
     },
   ];
 
-  const handleContactSelect = (contact) => {
+  // Mock messages for selected contact
+  const [messages] = useState([
+    {
+      id: '1',
+      content: 'مرحباً، هل يمكنك مساعدتي في طلب التحاق؟',
+      sender: 'student1',
+      timestamp: new Date(Date.now() - 3600000),
+      attachments: [],
+    },
+    {
+      id: '2',
+      content: 'بالطبع، كيف يمكنني مساعدتك؟',
+      sender: 'agent',
+      timestamp: new Date(Date.now() - 3500000),
+      attachments: [],
+    },
+    {
+      id: '3',
+      content: 'أريد معرفة المستندات المطلوبة للتقديم في جامعة إسطنبول التقنية',
+      sender: 'student1',
+      timestamp: new Date(Date.now() - 3400000),
+      attachments: [],
+    }
+  ]);
+
+  const handleContactSelect = (contactId: number) => {
+    const contact = contacts.find(c => c.id === contactId);
     setSelectedContact(contact);
   };
 
@@ -66,7 +96,13 @@ const AgentMessages = () => {
                 />
               </div>
               <div className="col-span-12 md:col-span-8 xl:col-span-9">
-                <MessagesList selectedContact={selectedContact} />
+                {selectedContact ? (
+                  <MessagesList messages={messages} currentUserId="agent" />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-unlimited-gray">اختر جهة اتصال للبدء في المحادثة</p>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

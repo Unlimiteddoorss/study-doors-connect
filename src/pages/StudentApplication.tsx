@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { useToast } from '@/hooks/use-toast';
-import { StudentApplicationForm } from '@/components/applications/StudentApplicationForm';
-import { StudentApplicationFormSubmit } from '@/components/applications/StudentApplicationFormSubmit';
-import { ApplicationSubmissionHandler } from '@/components/applications/ApplicationSubmissionHandler';
-import { supabase } from '@/integrations/supabase/client';
+import StudentApplicationForm from '@/components/applications/StudentApplicationForm';
+import StudentApplicationFormSubmit from '@/components/applications/StudentApplicationFormSubmit';
+import ApplicationSubmissionHandler from '@/components/applications/ApplicationSubmissionHandler';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import {
   Card,
