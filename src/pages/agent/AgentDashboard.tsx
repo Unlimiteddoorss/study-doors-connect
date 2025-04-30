@@ -1,192 +1,172 @@
 
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, PieChart } from '@/components/charts';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Search, Filter, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import AgentApplicationsList from '@/components/agent/AgentApplicationsList';
+import DashboardStats from '@/components/dashboard/DashboardStats';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AreaChart, LineChart } from "@/components/ui/chart";
+import { AgentStudentsList } from '@/components/agent/AgentStudentsList';
+import { AgentApplicationsList } from '@/components/agent/AgentApplicationsList';
 
 const AgentDashboard = () => {
-  const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [universityFilter, setUniversityFilter] = useState('all');
+  const [period, setPeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
+  
+  const applicationData = {
+    weekly: [
+      { name: "الأحد", applications: 4, students: 2 },
+      { name: "الاثنين", applications: 7, students: 3 },
+      { name: "الثلاثاء", applications: 5, students: 1 },
+      { name: "الأربعاء", applications: 8, students: 4 },
+      { name: "الخميس", applications: 6, students: 2 },
+      { name: "الجمعة", applications: 3, students: 1 },
+      { name: "السبت", applications: 5, students: 3 },
+    ],
+    monthly: [
+      { name: "يناير", applications: 25, students: 12 },
+      { name: "فبراير", applications: 30, students: 15 },
+      { name: "مارس", applications: 22, students: 10 },
+      { name: "أبريل", applications: 35, students: 18 },
+      { name: "مايو", applications: 28, students: 14 },
+      { name: "يونيو", applications: 32, students: 16 },
+      { name: "يوليو", applications: 27, students: 13 },
+      { name: "أغسطس", applications: 31, students: 15 },
+      { name: "سبتمبر", applications: 38, students: 20 },
+      { name: "أكتوبر", applications: 40, students: 22 },
+      { name: "نوفمبر", applications: 45, students: 25 },
+      { name: "ديسمبر", applications: 42, students: 21 },
+    ],
+    yearly: [
+      { name: "2020", applications: 120, students: 60 },
+      { name: "2021", applications: 220, students: 110 },
+      { name: "2022", applications: 280, students: 140 },
+      { name: "2023", applications: 350, students: 180 },
+      { name: "2024", applications: 150, students: 70 },
+    ],
+  };
 
-  // Sample data for statistics
-  const applicationStatsData = [
-    { month: 'يناير', applications: 15 },
-    { month: 'فبراير', applications: 22 },
-    { month: 'مارس', applications: 18 },
-    { month: 'أبريل', applications: 25 },
-    { month: 'مايو', applications: 30 },
-    { month: 'يونيو', applications: 28 },
-  ];
-
-  const applicationsByStatus = [
-    { name: 'مقبول', value: 32 },
-    { name: 'قيد المراجعة', value: 18 },
-    { name: 'قيد الانتظار', value: 12 },
-    { name: 'مرفوض', value: 8 },
-  ];
-
-  // Universities list for filter
-  const universities = [
-    'جامعة الملك سعود',
-    'جامعة القاهرة',
-    'الجامعة الأمريكية',
-  ];
+  const commissionData = {
+    weekly: [
+      { name: "الأسبوع 1", commission: 12000 },
+      { name: "الأسبوع 2", commission: 18000 },
+      { name: "الأسبوع 3", commission: 15000 },
+      { name: "الأسبوع 4", commission: 21000 },
+    ],
+    monthly: [
+      { name: "يناير", commission: 45000 },
+      { name: "فبراير", commission: 52000 },
+      { name: "مارس", commission: 48000 },
+      { name: "أبريل", commission: 60000 },
+      { name: "مايو", commission: 55000 },
+      { name: "يونيو", commission: 65000 },
+      { name: "يوليو", commission: 58000 },
+      { name: "أغسطس", commission: 63000 },
+      { name: "سبتمبر", commission: 70000 },
+      { name: "أكتوبر", commission: 75000 },
+      { name: "نوفمبر", commission: 80000 },
+      { name: "ديسمبر", commission: 0 },
+    ],
+    yearly: [
+      { name: "2020", commission: 250000 },
+      { name: "2021", commission: 420000 },
+      { name: "2022", commission: 580000 },
+      { name: "2023", commission: 680000 },
+      { name: "2024", commission: 320000 },
+    ],
+  };
 
   return (
     <DashboardLayout userRole="agent">
-      <div className="container py-6">
-        <h1 className="text-2xl font-bold mb-6 text-unlimited-dark-blue">
-          لوحة التحكم
-        </h1>
-        
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">إجمالي الطلاب</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-unlimited-dark-blue">24</div>
-              <p className="text-sm text-unlimited-gray">زيادة بنسبة 8% عن الشهر الماضي</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">طلبات الالتحاق</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-unlimited-dark-blue">70</div>
-              <p className="text-sm text-unlimited-gray">زيادة بنسبة 12% عن الشهر الماضي</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">طلبات مقبولة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-unlimited-dark-blue">32</div>
-              <p className="text-sm text-unlimited-gray">معدل قبول 45.7%</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">العمولات المستحقة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-unlimited-dark-blue">18,500 ر.س</div>
-              <p className="text-sm text-unlimited-gray">زيادة بنسبة 15% عن الشهر الماضي</p>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">طلبات الالتحاق حسب الشهر</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="h-80">
-                <BarChart 
-                  data={applicationStatsData} 
-                  index="month" 
-                  categories={["applications"]} 
-                  valueFormatter={(value) => `${value} طلب`}
-                  className="h-full"
-                />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">الطلبات حسب الحالة</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="h-80">
-                <PieChart 
-                  data={applicationsByStatus}
-                  valueFormatter={(value) => `${value} طلب`}
-                  className="h-full"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        {/* Recent Applications */}
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-unlimited-dark-blue">
-            أحدث طلبات الالتحاق
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-unlimited-gray" />
-              <Input
-                placeholder="بحث برقم الطلب أو اسم الطالب"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+      <div className="space-y-6">
+        <DashboardStats userRole="agent" />
+
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList className="grid grid-cols-3 md:w-[400px]">
+            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
+            <TabsTrigger value="students">طلابي</TabsTrigger>
+            <TabsTrigger value="applications">طلبات التسجيل</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">إحصائيات الطلاب والطلبات</CardTitle>
+                  <div className="flex space-x-2 rtl:space-x-reverse">
+                    <TabsTrigger
+                      value="weekly"
+                      onClick={() => setPeriod('weekly')}
+                      className={period === 'weekly' ? 'bg-unlimited-blue text-white' : ''}
+                    >
+                      أسبوعي
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="monthly"
+                      onClick={() => setPeriod('monthly')}
+                      className={period === 'monthly' ? 'bg-unlimited-blue text-white' : ''}
+                    >
+                      شهري
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="yearly"
+                      onClick={() => setPeriod('yearly')}
+                      className={period === 'yearly' ? 'bg-unlimited-blue text-white' : ''}
+                    >
+                      سنوي
+                    </TabsTrigger>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <AreaChart
+                    data={applicationData[period]}
+                    index="name"
+                    categories={["applications", "students"]}
+                    colors={["blue", "green"]}
+                    valueFormatter={(value: number) => `${value}`}
+                    className="aspect-[4/3]"
+                  />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium">العمولات</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <LineChart
+                    data={commissionData[period]}
+                    index="name"
+                    categories={["commission"]}
+                    colors={["purple"]}
+                    valueFormatter={(value: number) => `${value} ريال`}
+                    className="aspect-[4/3]"
+                  />
+                </CardContent>
+              </Card>
             </div>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue placeholder="فلترة حسب الحالة" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="pending">قيد الانتظار</SelectItem>
-                <SelectItem value="review">قيد المراجعة</SelectItem>
-                <SelectItem value="approved">مقبول</SelectItem>
-                <SelectItem value="rejected">مرفوض</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={universityFilter} onValueChange={setUniversityFilter}>
-              <SelectTrigger>
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <SelectValue placeholder="فلترة حسب الجامعة" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الجامعات</SelectItem>
-                {universities.map((university) => (
-                  <SelectItem key={university} value={university}>{university}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <AgentApplicationsList
-            searchQuery={searchQuery}
-            statusFilter={statusFilter}
-            universityFilter={universityFilter}
-          />
-        </div>
+          </TabsContent>
+
+          <TabsContent value="students">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium">قائمة طلابي</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AgentStudentsList />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="applications">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base font-medium">طلبات التسجيل</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AgentApplicationsList />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

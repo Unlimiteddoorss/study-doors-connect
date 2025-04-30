@@ -4,62 +4,42 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { hasValidSupabaseCredentials } from '@/lib/supabase';
-import { useTranslation } from 'react-i18next';
+import { useToast } from '@/components/ui/use-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [supabaseConfigured] = useState(hasValidSupabaseCredentials());
   
-  const { signIn } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!supabaseConfigured) {
-      toast({
-        title: "خطأ",
-        description: "يجب تكوين Supabase قبل تسجيل الدخول",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     if (!email || !password) {
       toast({
-        title: "خطأ",
-        description: "الرجاء إدخال البريد الإلكتروني وكلمة المرور",
-        variant: "destructive",
+        title: 'خطأ',
+        description: 'الرجاء إدخال البريد الإلكتروني وكلمة المرور',
+        variant: 'destructive',
       });
       return;
     }
     
     setIsLoading(true);
     
-    try {
-      await signIn(email, password);
-      
-      // Note: Navigation is now handled in the useAuth hook's signIn function
-      // based on the user's role, so we don't need explicit navigation here
-    } catch (error: any) {
-      console.error('Login failed:', error);
-      toast({
-        title: "خطأ في تسجيل الدخول",
-        description: error.message || "فشل تسجيل الدخول. يرجى التحقق من بياناتك والمحاولة مرة أخرى.",
-        variant: "destructive",
-      });
-    } finally {
+    // Simulate API call
+    setTimeout(() => {
       setIsLoading(false);
-    }
+      // For demo purposes, any login will succeed
+      toast({
+        title: 'تم تسجيل الدخول بنجاح',
+        description: 'مرحباً بك في منصة أبواب غير محدودة',
+      });
+      navigate('/dashboard');
+    }, 1500);
   };
 
   const toggleShowPassword = () => {
@@ -77,7 +57,6 @@ const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          disabled={!supabaseConfigured || isLoading}
         />
       </div>
       
@@ -86,7 +65,7 @@ const LoginForm = () => {
           <Label htmlFor="password">كلمة المرور</Label>
           <Link 
             to="/forgot-password" 
-            className={`text-sm text-unlimited-blue hover:underline ${(!supabaseConfigured || isLoading) ? 'pointer-events-none opacity-50' : ''}`}
+            className="text-sm text-unlimited-blue hover:underline"
           >
             نسيت كلمة المرور؟
           </Link>
@@ -99,12 +78,10 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            disabled={!supabaseConfigured || isLoading}
           />
           <button
             type="button"
             onClick={toggleShowPassword}
-            disabled={!supabaseConfigured || isLoading}
             className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
           >
             {showPassword ? (
@@ -119,23 +96,16 @@ const LoginForm = () => {
       <Button 
         type="submit" 
         className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90" 
-        disabled={isLoading || !supabaseConfigured}
+        disabled={isLoading}
       >
-        {isLoading ? (
-          <div className="flex items-center justify-center">
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            <span>جاري تسجيل الدخول...</span>
-          </div>
-        ) : (
-          'تسجيل الدخول'
-        )}
+        {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
       </Button>
       
       <p className="text-center text-unlimited-gray text-sm">
         ليس لديك حساب؟{' '}
         <Link 
           to="/register" 
-          className={`text-unlimited-blue hover:underline font-medium ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}
+          className="text-unlimited-blue hover:underline font-medium"
         >
           إنشاء حساب جديد
         </Link>

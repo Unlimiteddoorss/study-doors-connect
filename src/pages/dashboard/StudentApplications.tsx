@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
@@ -9,11 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Search, Calendar, Download, Eye, X, Plus } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { getStudentApplications } from '@/services/applicationService';
-import { useToast } from '@/hooks/use-toast';
+import { FileText, Search, Calendar, Download, Eye, X } from 'lucide-react';
 
 // مكون قائمة التطبيقات
 interface Application {

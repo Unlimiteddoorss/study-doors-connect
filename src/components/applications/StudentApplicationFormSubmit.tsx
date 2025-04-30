@@ -1,113 +1,164 @@
 
-import React from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, CheckCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface StudentApplicationFormSubmitProps {
+  isLastStep: boolean;
   isSubmitting: boolean;
-  isSuccess: boolean;
-  error?: string | null;
-  onReset: () => void;
-  applicationId?: string;
+  canSubmit: boolean;
+  formData: any;
+  onBack: () => void;
+  onSubmit: () => void;
 }
 
 const StudentApplicationFormSubmit = ({
+  isLastStep,
   isSubmitting,
-  isSuccess,
-  error,
-  onReset,
-  applicationId
+  canSubmit,
+  formData,
+  onBack,
+  onSubmit
 }: StudentApplicationFormSubmitProps) => {
-  if (isSubmitting) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>جاري إرسال الطلب</CardTitle>
-          <CardDescription>يرجى الانتظار حتى يتم معالجة طلبك</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col items-center justify-center py-6">
-          <div className="h-16 w-16 relative">
-            <div className="absolute inset-0 rounded-full border-4 border-unlimited-blue border-opacity-25"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-t-unlimited-blue animate-spin"></div>
+  const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const isRtl = i18n.language === 'ar';
+
+  const generateApplicationId = () => {
+    const prefix = 'APP';
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
+    const timestamp = new Date().getTime().toString().slice(-4);
+    return `${prefix}-${randomNum}-${timestamp}`;
+  };
+
+  const handleSubmit = () => {
+    setValidationErrors([]);
+    
+    if (!canSubmit) {
+      toast({
+        title: t("application.validation.error"),
+        description: t("application.validation.completeAllFields"),
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isLastStep) {
+      const applicationId = generateApplicationId();
+      const newApplication = {
+        id: applicationId,
+        program: formData.program?.name || 'برنامج غير معروف',
+        university: formData.university || 'جامعة غير معروفة',
+        date: new Date().toISOString().split('T')[0],
+        status: 'pending',
+        timeline: [
+          {
+            status: 'pending',
+            date: new Date().toISOString(),
+            note: 'تم استلام الطلب وهو قيد المراجعة'
+          }
+        ],
+        documents: [
+          { name: 'جواز السفر', status: 'required' },
+          { name: 'الشهادة الثانوية', status: 'required' },
+          { name: 'كشف الدرجات', status: 'required' }
+        ],
+        messages: 0,
+        formData: formData
+      };
+
+      // Get existing applications from localStorage
+      const existingApps = JSON.parse(localStorage.getItem('studentApplications') || '[]');
+      
+      // Add new application
+      existingApps.push(newApplication);
+      
+      // Store updated applications
+      localStorage.setItem('studentApplications', JSON.stringify(existingApps));
+
+      // Call the original onSubmit
+      onSubmit();
+
+      // Show success message
+      toast({
+        title: t("application.submission.success"),
+        description: t("application.submission.successMessage")
+      });
+
+      // Navigate to the applications dashboard
+      setTimeout(() => {
+        navigate(`/dashboard/applications/${applicationId}`);
+      }, 1500);
+    } else {
+      onSubmit();
+    }
+  };
+
+  return (
+    <div className="mt-6">
+      {validationErrors.length > 0 && (
+        <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect")}</p>
+              <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
+                {validationErrors.map((error, index) => (
+                  <li key={index}>{error}</li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <p className="mt-4 text-center">
-            جاري معالجة طلبك، يرجى عدم إغلاق الصفحة أو تحديثها...
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isSuccess) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="text-green-600 flex items-center">
-            <CheckCircle className="mr-2 h-6 w-6" />
-            تم إرسال الطلب بنجاح
-          </CardTitle>
-          <CardDescription>
-            لقد تم استلام طلبك وسيتم مراجعته قريبًا
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-unlimited-gray">
-            رقم الطلب: <span className="font-bold">{applicationId || 'APP-' + Math.random().toString(36).substring(2, 8).toUpperCase()}</span>
-          </p>
-          <p className="mt-2">
-            يمكنك متابعة حالة طلبك من خلال لوحة التحكم الخاصة بك. سيتم إعلامك بأي تحديثات عبر البريد الإلكتروني.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <div className="flex gap-4 w-full">
-            <Button variant="outline" className="w-full" onClick={() => window.location.href = '/dashboard'}>
-              الذهاب إلى لوحة التحكم
-            </Button>
-            <Button className="w-full" onClick={onReset}>
-              تقديم طلب آخر
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="text-red-600 flex items-center">
-            <AlertCircle className="mr-2 h-6 w-6" />
-            حدث خطأ
-          </CardTitle>
-          <CardDescription>
-            نعتذر، لم نتمكن من إرسال طلبك
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>خطأ</AlertTitle>
-            <AlertDescription>
-              {error}
-            </AlertDescription>
-          </Alert>
-          <p className="mt-4">
-            يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني إذا استمرت المشكلة.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button variant="outline" className="w-full" onClick={onReset}>
-            العودة وإعادة المحاولة
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
-
-  return null;
+        </div>
+      )}
+      
+      <div className="flex flex-wrap gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onBack}
+          disabled={isSubmitting}
+          className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+        >
+          {isRtl ? (
+            <>
+              {t('application.navigation.previous')}
+              <ArrowRight className="h-4 w-4" />
+            </>
+          ) : (
+            <>
+              <ArrowLeft className="h-4 w-4" />
+              {t('application.navigation.previous')}
+            </>
+          )}
+        </Button>
+        
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
+              {t('application.buttons.submitting')}
+            </>
+          ) : (
+            <>
+              <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
+              {t(isLastStep ? 'application.buttons.submit' : 'application.buttons.next')}
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 export default StudentApplicationFormSubmit;
