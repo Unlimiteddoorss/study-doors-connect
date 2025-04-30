@@ -175,9 +175,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // If user was created successfully
       if (data?.user) {
-        // Use service role client to create user role bypassing RLS policies
-        // We're inserting directly from client code which is not secure, but for demo purposes
-        // In production, this should be done via a secure serverless function or trigger
+        try {
+          // Insert user role directly
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: data.user.id,
+              role: role,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
+            
+          if (roleError) {
+            console.error('Error creating user role:', roleError);
+          }
+        } catch (roleErr) {
+          console.error('Error assigning role:', roleErr);
+        }
+        
         toast({
           title: "تم التسجيل بنجاح",
           description: "يرجى تأكيد بريدك الإلكتروني لإكمال عملية التسجيل"

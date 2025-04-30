@@ -148,11 +148,15 @@ const RegisterForm = () => {
       
       if (authData?.user) {
         try {
-          // Step 2: Insert user role directly after auth signup
-          const { error: roleError } = await supabase.rpc('create_user_role', { 
-            user_id: authData.user.id,
-            user_role: formData.userType as 'student' | 'admin' | 'agent'
-          });
+          // Step 2: Insert user role directly
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: authData.user.id,
+              role: formData.userType,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            });
           
           if (roleError) {
             console.error('Error creating user role:', roleError);
