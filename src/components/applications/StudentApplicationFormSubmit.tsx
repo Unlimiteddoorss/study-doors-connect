@@ -1,130 +1,113 @@
 
-import { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { AlertCircle, CheckCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface StudentApplicationFormSubmitProps {
-  isSubmitting?: boolean;
-  university?: any;
-  program?: any;
-  isValid: boolean;
-  onSubmit: () => void;
+  isSubmitting: boolean;
+  isSuccess: boolean;
+  error?: string | null;
+  onReset: () => void;
+  applicationId?: string;
 }
 
 const StudentApplicationFormSubmit = ({
-  isSubmitting = false,
-  university,
-  program,
-  isValid,
-  onSubmit
+  isSubmitting,
+  isSuccess,
+  error,
+  onReset,
+  applicationId
 }: StudentApplicationFormSubmitProps) => {
-  const { toast } = useToast();
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [supabaseConfigured] = useState(hasValidSupabaseCredentials());
-  const isRtl = i18n.language === 'ar';
-
-  const validateApplicationData = () => {
-    const errors: string[] = [];
-    
-    if (!university?.id) {
-      errors.push(t("application.validation.noUniversity", "يرجى اختيار الجامعة"));
-    }
-    
-    if (!program?.id) {
-      errors.push(t("application.validation.noProgram", "يرجى اختيار البرنامج"));
-    }
-    
-    return errors;
-  };
-
-  const handleSubmit = () => {
-    // التحقق من تكوين Supabase
-    if (!supabaseConfigured) {
-      toast({
-        title: t("supabase.setup.required", "إعداد Supabase مطلوب"),
-        description: t("supabase.setup.configureFirst", "يجب تكوين Supabase قبل تقديم الطلب"),
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // مسح الأخطاء السابقة
-    setValidationErrors([]);
-    
-    if (!isValid) {
-      toast({
-        title: t("application.validation.error", "خطأ في التحقق"),
-        description: t("application.validation.completeAllFields", "يرجى إكمال جميع الحقول المطلوبة"),
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // التحقق من صحة البيانات
-    const errors = validateApplicationData();
-    if (errors.length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    // استدعاء وظيفة onSubmit
-    onSubmit();
-  };
-
-  return (
-    <div className="mt-6">
-      {!supabaseConfigured && (
-        <Alert className="mb-4 border-yellow-300 bg-yellow-50">
-          <AlertTriangle className="h-5 w-5 text-yellow-600" />
-          <AlertDescription className="text-yellow-800">
-            {t("supabase.setup.requiredForSubmission", "تكوين Supabase مطلوب لتقديم الطلبات. يرجى الرجوع إلى دليل الإعداد في الصفحة الرئيسية.")}
-          </AlertDescription>
-        </Alert>
-      )}
-      
-      {validationErrors.length > 0 && (
-        <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect", "يرجى تصحيح الأخطاء التالية")}</p>
-              <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
-                {validationErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-            </div>
+  if (isSubmitting) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>جاري إرسال الطلب</CardTitle>
+          <CardDescription>يرجى الانتظار حتى يتم معالجة طلبك</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center justify-center py-6">
+          <div className="h-16 w-16 relative">
+            <div className="absolute inset-0 rounded-full border-4 border-unlimited-blue border-opacity-25"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-t-unlimited-blue animate-spin"></div>
           </div>
-        </div>
-      )}
-      
-      <Button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isSubmitting || !isValid || !supabaseConfigured}
-        className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
-      >
-        {isSubmitting ? (
-          <>
-            <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-            {t('application.buttons.submitting', 'جاري الإرسال...')}
-          </>
-        ) : (
-          <>
-            <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-            {t('application.buttons.submit', 'تقديم الطلب')}
-          </>
-        )}
-      </Button>
-    </div>
-  );
+          <p className="mt-4 text-center">
+            جاري معالجة طلبك، يرجى عدم إغلاق الصفحة أو تحديثها...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isSuccess) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-green-600 flex items-center">
+            <CheckCircle className="mr-2 h-6 w-6" />
+            تم إرسال الطلب بنجاح
+          </CardTitle>
+          <CardDescription>
+            لقد تم استلام طلبك وسيتم مراجعته قريبًا
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-unlimited-gray">
+            رقم الطلب: <span className="font-bold">{applicationId || 'APP-' + Math.random().toString(36).substring(2, 8).toUpperCase()}</span>
+          </p>
+          <p className="mt-2">
+            يمكنك متابعة حالة طلبك من خلال لوحة التحكم الخاصة بك. سيتم إعلامك بأي تحديثات عبر البريد الإلكتروني.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <div className="flex gap-4 w-full">
+            <Button variant="outline" className="w-full" onClick={() => window.location.href = '/dashboard'}>
+              الذهاب إلى لوحة التحكم
+            </Button>
+            <Button className="w-full" onClick={onReset}>
+              تقديم طلب آخر
+            </Button>
+          </div>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle className="text-red-600 flex items-center">
+            <AlertCircle className="mr-2 h-6 w-6" />
+            حدث خطأ
+          </CardTitle>
+          <CardDescription>
+            نعتذر، لم نتمكن من إرسال طلبك
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>خطأ</AlertTitle>
+            <AlertDescription>
+              {error}
+            </AlertDescription>
+          </Alert>
+          <p className="mt-4">
+            يرجى المحاولة مرة أخرى أو التواصل مع الدعم الفني إذا استمرت المشكلة.
+          </p>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" className="w-full" onClick={onReset}>
+            العودة وإعادة المحاولة
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  return null;
 };
 
 export default StudentApplicationFormSubmit;

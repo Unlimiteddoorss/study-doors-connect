@@ -1,8 +1,9 @@
+
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
 import { useTableFilters } from '@/hooks/admin/useTableFilters';
-import { FilterableTable } from '@/components/admin/FilterableTable';
+import FilterableTable from '@/components/admin/FilterableTable';
 import { StudentFilters } from '@/components/admin/students/StudentFilters';
 import { StudentActions } from '@/components/admin/students/StudentActions';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -323,9 +324,6 @@ const ManageStudents = () => {
         <FilterableTable
           data={filteredStudents}
           isLoading={isLoading}
-          onViewDetails={handleViewStudent}
-          onEdit={handleOpenEditDialog}
-          onDelete={handleOpenDeleteDialog}
           columns={[
             { header: t('admin.studentsPage.tableHeaders.id'), accessor: 'id' },
             { header: t('admin.studentsPage.tableHeaders.name'), accessor: 'name' },
@@ -343,6 +341,24 @@ const ManageStudents = () => {
                 </Badge>
               )
             }
+          ]}
+          actions={(row) => [
+            {
+              icon: <Eye className="h-4 w-4" />,
+              label: t('admin.actions.view'),
+              onClick: () => handleViewStudent(row),
+            },
+            {
+              icon: <Edit className="h-4 w-4" />,
+              label: t('admin.actions.edit'),
+              onClick: () => handleOpenEditDialog(row),
+            },
+            {
+              icon: <Trash className="h-4 w-4" />,
+              label: t('admin.actions.delete'),
+              onClick: () => handleOpenDeleteDialog(row),
+              destructive: true,
+            },
           ]}
         />
       </div>

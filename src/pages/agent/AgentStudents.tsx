@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -24,7 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Filter, PlusCircle, Eye, Edit, File, Trash } from 'lucide-react';
-import { FilterableTable } from '@/components/admin/FilterableTable';
+import FilterableTable from '@/components/admin/FilterableTable';
 
 const AgentStudents = () => {
   const { t } = useTranslation();
@@ -117,7 +116,7 @@ const AgentStudents = () => {
       name: "طالب جديد",
       email: "new.student@example.com",
       phone: "+966500000000",
-      nationality: "سعودي",
+      nationality: "سع��دي",
       applicationsCount: 0,
       status: "pending",
     };

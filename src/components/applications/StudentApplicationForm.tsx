@@ -1,191 +1,315 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
-interface StudentApplicationFormProps {
-  type: 'personal' | 'academic';
-  value: any;
-  onChange: (value: any) => void;
-}
+const applicationSchema = z.object({
+  firstName: z.string().min(2, { message: 'الاسم الأول مطلوب' }),
+  lastName: z.string().min(2, { message: 'اسم العائلة مطلوب' }),
+  email: z.string().email({ message: 'البريد الإلكتروني غير صالح' }),
+  phone: z.string().min(10, { message: 'رقم الهاتف غير صالح' }),
+  nationality: z.string().min(1, { message: 'الجنسية مطلوبة' }),
+  university: z.string().min(1, { message: 'الجامعة مطلوبة' }),
+  program: z.string().min(1, { message: 'البرنامج الدراسي مطلوب' }),
+  academicLevel: z.string().min(1, { message: 'المستوى الأكاديمي مطلوب' }),
+  personalStatement: z.string().optional(),
+});
 
-const StudentApplicationForm = ({ type, value, onChange }: StudentApplicationFormProps) => {
-  const handleChange = (field: string, fieldValue: any) => {
-    onChange({ ...value, [field]: fieldValue });
+type ApplicationFormValues = z.infer<typeof applicationSchema>;
+
+// Mock data
+const universities = [
+  { id: '1', name: 'جامعة الملك سعود' },
+  { id: '2', name: 'جامعة إسطنبول التقنية' },
+  { id: '3', name: 'جامعة القاهرة' },
+];
+
+const programs = [
+  { id: '1', name: 'هندسة البرمجيات', universityId: '1' },
+  { id: '2', name: 'الطب البشري', universityId: '2' },
+  { id: '3', name: 'إدارة الأعمال', universityId: '3' },
+];
+
+const nationalities = [
+  'سعودي',
+  'إماراتي',
+  'كويتي',
+  'قطري',
+  'بحريني',
+  'عماني',
+  'مصري',
+  'أردني',
+];
+
+const academicLevels = [
+  'بكالوريوس',
+  'ماجستير',
+  'دكتوراه',
+];
+
+const StudentApplicationForm = ({ onSubmit }) => {
+  const { toast } = useToast();
+  const [selectedUniversity, setSelectedUniversity] = useState('');
+  
+  const form = useForm<ApplicationFormValues>({
+    resolver: zodResolver(applicationSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      nationality: '',
+      university: '',
+      program: '',
+      academicLevel: '',
+      personalStatement: '',
+    },
+  });
+
+  const handleSubmit = (values: ApplicationFormValues) => {
+    onSubmit(values);
   };
 
-  if (type === 'personal') {
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="firstName">الاسم الأول</Label>
-            <Input 
-              id="firstName"
-              value={value?.firstName || ''}
-              onChange={(e) => handleChange('firstName', e.target.value)}
-              placeholder="أدخل الاسم الأول"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lastName">اسم العائلة</Label>
-            <Input 
-              id="lastName"
-              value={value?.lastName || ''}
-              onChange={(e) => handleChange('lastName', e.target.value)}
-              placeholder="أدخل اسم العائلة"
-            />
-          </div>
-        </div>
+  const filteredPrograms = programs.filter(
+    program => selectedUniversity === '' || program.universityId === selectedUniversity
+  );
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">البريد الإلكتروني</Label>
-            <Input 
-              id="email"
-              type="email"
-              value={value?.email || ''}
-              onChange={(e) => handleChange('email', e.target.value)}
-              placeholder="أدخل البريد الإلكتروني"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">رقم الهاتف</Label>
-            <Input 
-              id="phone"
-              value={value?.phone || ''}
-              onChange={(e) => handleChange('phone', e.target.value)}
-              placeholder="أدخل رقم الهاتف"
-            />
-          </div>
-        </div>
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <div className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>المعلومات الشخصية</CardTitle>
+              <CardDescription>الرجاء إدخال معلوماتك الشخصية</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>الاسم الأول</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>اسم العائلة</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="nationality">الجنسية</Label>
-            <Select 
-              value={value?.nationality || ''} 
-              onValueChange={(val) => handleChange('nationality', val)}
-            >
-              <SelectTrigger id="nationality">
-                <SelectValue placeholder="اختر الجنسية" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="saudi">سعودي</SelectItem>
-                <SelectItem value="emirati">إماراتي</SelectItem>
-                <SelectItem value="qatari">قطري</SelectItem>
-                <SelectItem value="kuwaiti">كويتي</SelectItem>
-                <SelectItem value="bahraini">بحريني</SelectItem>
-                <SelectItem value="omani">عماني</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="gender">الجنس</Label>
-            <Select 
-              value={value?.gender || ''} 
-              onValueChange={(val) => handleChange('gender', val)}
-            >
-              <SelectTrigger id="gender">
-                <SelectValue placeholder="اختر الجنس" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">ذكر</SelectItem>
-                <SelectItem value="female">أنثى</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>البريد الإلكتروني</FormLabel>
+                      <FormControl>
+                        <Input {...field} type="email" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>رقم الهاتف</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="address">العنوان</Label>
-          <Textarea 
-            id="address"
-            value={value?.address || ''}
-            onChange={(e) => handleChange('address', e.target.value)}
-            placeholder="أدخل العنوان"
-          />
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="education">المستوى التعليمي</Label>
-            <Select 
-              value={value?.education || ''} 
-              onValueChange={(val) => handleChange('education', val)}
-            >
-              <SelectTrigger id="education">
-                <SelectValue placeholder="اختر المستوى التعليمي" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="high_school">ثانوية عامة</SelectItem>
-                <SelectItem value="bachelor">بكالوريوس</SelectItem>
-                <SelectItem value="master">ماجستير</SelectItem>
-                <SelectItem value="phd">دكتوراه</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="major">التخصص</Label>
-            <Input 
-              id="major"
-              value={value?.major || ''}
-              onChange={(e) => handleChange('major', e.target.value)}
-              placeholder="أدخل التخصص"
-            />
-          </div>
-        </div>
+              <FormField
+                control={form.control}
+                name="nationality"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الجنسية</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الجنسية" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {nationalities.map((nationality) => (
+                          <SelectItem key={nationality} value={nationality}>
+                            {nationality}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="institution">المؤسسة التعليمية</Label>
-            <Input 
-              id="institution"
-              value={value?.institution || ''}
-              onChange={(e) => handleChange('institution', e.target.value)}
-              placeholder="أدخل اسم المؤسسة التعليمية"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="graduationYear">سنة التخرج</Label>
-            <Input 
-              id="graduationYear"
-              type="number"
-              value={value?.graduationYear || ''}
-              onChange={(e) => handleChange('graduationYear', e.target.value)}
-              placeholder="أدخل سنة التخرج"
-            />
-          </div>
-        </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>المعلومات الأكاديمية</CardTitle>
+              <CardDescription>اختر الجامعة والبرنامج الدراسي</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="university"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الجامعة</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setSelectedUniversity(value);
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر الجامعة" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {universities.map((university) => (
+                          <SelectItem key={university.id} value={university.id}>
+                            {university.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="space-y-2">
-          <Label htmlFor="gpa">المعدل التراكمي</Label>
-          <Input 
-            id="gpa"
-            value={value?.gpa || ''}
-            onChange={(e) => handleChange('gpa', e.target.value)}
-            placeholder="أدخل المعدل التراكمي"
-          />
-        </div>
+              <FormField
+                control={form.control}
+                name="program"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>البرنامج الدراسي</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر البرنامج الدراسي" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {filteredPrograms.map((program) => (
+                          <SelectItem key={program.id} value={program.id}>
+                            {program.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <div className="space-y-2">
-          <Label htmlFor="academicAchievements">الإنجازات الأكاديمية</Label>
-          <Textarea 
-            id="academicAchievements"
-            value={value?.academicAchievements || ''}
-            onChange={(e) => handleChange('academicAchievements', e.target.value)}
-            placeholder="أدخل الإنجازات الأكاديمية"
-          />
+              <FormField
+                control={form.control}
+                name="academicLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>المستوى الأكاديمي</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="اختر المستوى الأكاديمي" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {academicLevels.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="personalStatement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>البيان الشخصي (اختياري)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="أخبرنا عن نفسك وأهدافك الأكاديمية"
+                        className="resize-none"
+                        rows={4}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      هذا سيساعدنا على فهم أهدافك بشكل أفضل
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button type="submit">إرسال الطلب</Button>
+          </div>
         </div>
-      </div>
-    );
-  }
+      </form>
+    </Form>
+  );
 };
 
 export default StudentApplicationForm;

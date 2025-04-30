@@ -1,78 +1,133 @@
-
-import { useEffect } from 'react';
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { User } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { Search } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export interface Contact {
-  id: string | number;
+  id: string;
   name: string;
-  role: string;
-  avatar?: string | null;
-  lastMessage: string;
-  timestamp: string;
-  lastMessageTime: Date;
-  unread: number;
+  lastMessage?: string;
+  avatar?: string;
   unreadCount?: number;
+  timestamp?: string;
+  isOnline?: boolean;
 }
 
 interface ContactsListProps {
   contacts: Contact[];
-  selectedContactId?: string | number | null;
-  activeContactId?: string;
-  onSelectContact: (contactId: any) => void;
+  selectedContactId?: string;
+  onSelectContact: (contactId: string) => void;
+  className?: string;
 }
 
-const ContactsList = ({ contacts, selectedContactId, activeContactId, onSelectContact }: ContactsListProps) => {
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-unlimited-dark-blue';
-      case 'agent':
-        return 'bg-unlimited-blue';
-      default:
-        return 'bg-unlimited-gray';
+const ContactsList = ({
+  contacts,
+  selectedContactId,
+  onSelectContact,
+  className,
+}: ContactsListProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const formatTime = (timestamp?: string) => {
+    if (!timestamp) return '';
+    
+    const messageDate = new Date(timestamp);
+    const today = new Date();
+    
+    // Check if the message is from today
+    if (messageDate.toDateString() === today.toDateString()) {
+      return messageDate.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
     }
+    
+    // Check if the message is from this week
+    const diff = today.getTime() - messageDate.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days < 7) {
+      return messageDate.toLocaleDateString('ar-SA', { weekday: 'short' });
+    }
+    
+    // Otherwise show the date
+    return messageDate.toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   return (
-    <ScrollArea className="h-[calc(100vh-270px)]">
-      {contacts.map((contact) => (
-        <div
-          key={contact.id}
-          className={`p-3 cursor-pointer hover:bg-gray-100 border-b ${
-            (selectedContactId === contact.id || activeContactId === contact.id) ? 'bg-gray-100' : ''
-          }`}
-          onClick={() => onSelectContact(contact.id)}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <div className={`h-10 w-10 rounded-full ${getRoleColor(contact.role)} flex items-center justify-center text-white`}>
-                <User className="h-6 w-6" />
-              </div>
-              <div className="mr-3">
-                <div className="font-medium">{contact.name}</div>
-                <div className="text-sm text-unlimited-gray truncate max-w-[180px]">
-                  {contact.lastMessage}
-                </div>
-              </div>
-            </div>
-            <div className="flex flex-col items-end">
-              <div className="text-xs text-unlimited-gray">
-                {contact.lastMessageTime ? 
-                  formatDistanceToNow(contact.lastMessageTime, { addSuffix: true, locale: ar }) : 
-                  contact.timestamp}
-              </div>
-              {(contact.unread > 0 || contact.unreadCount && contact.unreadCount > 0) && (
-                <Badge className="bg-unlimited-blue">{contact.unreadCount || contact.unread}</Badge>
-              )}
-            </div>
-          </div>
+    <Card className={cn("h-full flex flex-col overflow-hidden", className)}>
+      <CardHeader className="p-4 pb-2">
+        <CardTitle className="text-lg">المحادثات</CardTitle>
+        <div className="relative mt-2">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-unlimited-gray" />
+          <Input
+            placeholder="بحث..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
         </div>
-      ))}
-    </ScrollArea>
+      </CardHeader>
+      <CardContent className="p-0 flex-1 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="divide-y">
+            {filteredContacts.length === 0 ? (
+              <div className="p-4 text-center text-unlimited-gray">
+                لا توجد محادثات لعرضها
+              </div>
+            ) : (
+              filteredContacts.map((contact) => (
+                <div
+                  key={contact.id}
+                  className={cn(
+                    "p-4 cursor-pointer hover:bg-gray-50 transition-colors",
+                    contact.id === selectedContactId && "bg-gray-100"
+                  )}
+                  onClick={() => onSelectContact(contact.id)}
+                >
+                  <div className="flex gap-3">
+                    <div className="relative">
+                      <Avatar>
+                        <AvatarImage src={contact.avatar} alt={contact.name} />
+                        <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      {contact.isOnline && (
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-medium truncate">{contact.name}</h3>
+                        {contact.timestamp && (
+                          <span className="text-xs text-unlimited-gray">
+                            {formatTime(contact.timestamp)}
+                          </span>
+                        )}
+                      </div>
+                      {contact.lastMessage && (
+                        <p className="text-sm text-unlimited-gray truncate">
+                          {contact.lastMessage}
+                        </p>
+                      )}
+                    </div>
+                    {contact.unreadCount && contact.unreadCount > 0 && (
+                      <Badge className="bg-unlimited-blue ml-2">
+                        {contact.unreadCount}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 };
 

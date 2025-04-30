@@ -1,243 +1,218 @@
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BarChart, PieChart } from '@/components/charts';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 
 const AgentReports = () => {
-  const [period, setPeriod] = useState('monthly');
-  const currentYear = new Date().getFullYear();
+  const { t } = useTranslation();
+  const [timeRange, setTimeRange] = useState('month');
   
-  // Mock data for applications by university
-  const universityApplicationsData = [
-    { name: 'جامعة الملك سعود', value: 42 },
-    { name: 'جامعة إسطنبول التقنية', value: 28 },
-    { name: 'جامعة القاهرة', value: 15 },
-    { name: 'الجامعة الأمريكية', value: 10 },
-    { name: 'جامعة أنقرة', value: 5 },
-  ];
-  
-  // Mock data for applications by status
-  const statusData = [
-    { name: 'قيد الانتظار', value: 25 },
-    { name: 'قيد المراجعة', value: 15 },
-    { name: 'مقبول', value: 40 },
-    { name: 'قبول مشروط', value: 10 },
-    { name: 'مرفوض', value: 10 },
-  ];
-  
-  // Mock data for applications by program
-  const programData = [
-    { name: 'هندسة البرمجيات', value: 30 },
-    { name: 'الطب البشري', value: 25 },
-    { name: 'إدارة الأعمال', value: 20 },
-    { name: 'الهندسة المدنية', value: 15 },
-    { name: 'علوم الحاسب', value: 10 },
+  // Sample data for reports
+  const applicationsByUniversity = [
+    { name: 'جامعة الملك سعود', value: 32 },
+    { name: 'جامعة القاهرة', value: 27 },
+    { name: 'جامعة إسطنبول التقنية', value: 18 },
+    { name: 'الجامعة الأمريكية', value: 14 },
+    { name: 'جامعة الإمارات', value: 9 },
   ];
 
-  // Generate monthly application data
-  const generateMonthlyData = () => {
-    const months = [
-      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-    ];
-    
-    return months.map(month => ({
-      name: month,
-      pending: Math.floor(Math.random() * 10) + 1,
-      approved: Math.floor(Math.random() * 15) + 5,
-      rejected: Math.floor(Math.random() * 5)
-    }));
-  };
-  
-  // Generate quarterly application data
-  const generateQuarterlyData = () => {
-    return [
-      { name: 'الربع الأول', pending: 15, approved: 25, rejected: 5 },
-      { name: 'الربع الثاني', pending: 10, approved: 30, rejected: 8 },
-      { name: 'الربع الثالث', pending: 12, approved: 28, rejected: 6 },
-      { name: 'الربع الرابع', pending: 18, approved: 22, rejected: 4 },
-    ];
-  };
-  
-  // Generate yearly application data
-  const generateYearlyData = () => {
-    return [
-      { name: (currentYear - 2).toString(), pending: 45, approved: 80, rejected: 15 },
-      { name: (currentYear - 1).toString(), pending: 55, approved: 95, rejected: 18 },
-      { name: currentYear.toString(), pending: 60, approved: 100, rejected: 20 },
-    ];
-  };
-  
-  // Get data based on selected period
-  const getApplicationsOverTimeData = () => {
-    switch(period) {
-      case 'monthly':
-        return generateMonthlyData();
-      case 'quarterly':
-        return generateQuarterlyData();
-      case 'yearly':
-        return generateYearlyData();
-      default:
-        return generateMonthlyData();
-    }
-  };
-  
-  const applicationsOverTimeData = getApplicationsOverTimeData();
-  
-  // Status colors for consistency
-  const statusColors = {
-    pending: '#f59e0b',
-    approved: '#10b981',
-    rejected: '#ef4444'
-  };
-  
-  // Mock data for country distribution
-  const countryData = [
-    { name: 'المملكة العربية السعودية', value: 55 },
-    { name: 'الإمارات العربية المتحدة', value: 20 },
-    { name: 'قطر', value: 15 },
-    { name: 'الكويت', value: 10 },
-    { name: 'البحرين', value: 5 },
-    { name: 'عمان', value: 5 },
+  const applicationsByStatus = [
+    { name: 'مقبول', value: 42 },
+    { name: 'قيد المراجعة', value: 28 },
+    { name: 'قيد الانتظار', value: 18 },
+    { name: 'مرفوض', value: 12 },
   ];
+
+  const applicationsByMonth = [
+    { month: 'يناير', pending: 5, approved: 8, rejected: 2 },
+    { month: 'فبراير', pending: 7, approved: 10, rejected: 3 },
+    { month: 'مارس', pending: 8, approved: 12, rejected: 4 },
+    { month: 'أبريل', pending: 12, approved: 15, rejected: 5 },
+    { month: 'مايو', pending: 10, approved: 18, rejected: 6 },
+    { month: 'يونيو', pending: 8, approved: 16, rejected: 4 },
+  ];
+
+  const commissionsByMonth = [
+    { month: 'يناير', amount: 12500 },
+    { month: 'فبراير', amount: 15000 },
+    { month: 'مارس', amount: 18000 },
+    { month: 'أبريل', amount: 22000 },
+    { month: 'مايو', amount: 25000 },
+    { month: 'يونيو', amount: 20000 },
+  ];
+
+  const handleExportReport = (reportType: string) => {
+    // Logic to export report
+    console.log(`Exporting ${reportType} report...`);
+    // Placeholder for actual export functionality
+  };
+
+  const formatCurrency = (value: number) => `${value.toLocaleString()} ر.س`;
 
   return (
     <DashboardLayout userRole="agent">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="container py-6">
+        <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-unlimited-dark-blue">التقارير والإحصائيات</h1>
-          <div className="flex items-center gap-2">
-            <Label htmlFor="period" className="text-unlimited-gray">الفترة:</Label>
-            <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger id="period" className="w-[180px]">
-                <SelectValue placeholder="اختر الفترة" />
+          
+          <div className="flex gap-4">
+            <Select value={timeRange} onValueChange={setTimeRange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="اختر النطاق الزمني" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="monthly">شهري</SelectItem>
-                <SelectItem value="quarterly">ربع سنوي</SelectItem>
-                <SelectItem value="yearly">سنوي</SelectItem>
+                <SelectItem value="week">آخر أسبوع</SelectItem>
+                <SelectItem value="month">آخر شهر</SelectItem>
+                <SelectItem value="quarter">آخر ربع سنة</SelectItem>
+                <SelectItem value="year">آخر سنة</SelectItem>
               </SelectContent>
             </Select>
+            
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              تصدير التقارير
+            </Button>
           </div>
         </div>
         
-        <Tabs defaultValue="applications" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="applications">طلبات الالتحاق</TabsTrigger>
-            <TabsTrigger value="demographics">بيانات الطلاب</TabsTrigger>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">إجمالي الطلاب</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">48</div>
+              <p className="text-sm text-unlimited-gray">زيادة بنسبة 12% عن الشهر الماضي</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">طلبات الالتحاق</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">126</div>
+              <p className="text-sm text-unlimited-gray">زيادة بنسبة 8% عن الشهر الماضي</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">إجمالي العمولات</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">112,500 ر.س</div>
+              <p className="text-sm text-unlimited-gray">زيادة بنسبة 15% عن الشهر الماضي</p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Tabs defaultValue="applications" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="applications">تقارير الطلبات</TabsTrigger>
+            <TabsTrigger value="commissions">تقارير العمولات</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="applications" className="space-y-6">
+          <TabsContent value="applications" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg">طلبات الالتحاق حسب الجامعة</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1" onClick={() => handleExportReport('universities')}>
+                      <Download className="h-3 w-3" />
+                      <span className="text-xs">تصدير</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="h-80">
+                    <PieChart 
+                      data={applicationsByUniversity}
+                      valueFormatter={(value) => `${value} طلب`}
+                      className="h-full"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg">طلبات الالتحاق حسب الحالة</CardTitle>
+                    <Button variant="ghost" size="sm" className="h-8 gap-1" onClick={() => handleExportReport('status')}>
+                      <Download className="h-3 w-3" />
+                      <span className="text-xs">تصدير</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="h-80">
+                    <PieChart 
+                      data={applicationsByStatus}
+                      valueFormatter={(value) => `${value} طلب`}
+                      className="h-full"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
             <Card>
-              <CardHeader>
-                <CardTitle>طلبات الالتحاق عبر الوقت</CardTitle>
-                <CardDescription>
-                  عرض تطور طلبات الالتحاق حسب الحالة
-                </CardDescription>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">تطور طلبات الالتحاق</CardTitle>
+                  <Button variant="ghost" size="sm" className="h-8 gap-1" onClick={() => handleExportReport('applications-trend')}>
+                    <Download className="h-3 w-3" />
+                    <span className="text-xs">تصدير</span>
+                  </Button>
+                </div>
               </CardHeader>
-              <CardContent>
-                <BarChart
-                  data={applicationsOverTimeData}
-                  index="name"
-                  categories={['pending', 'approved', 'rejected']}
-                  colors={[statusColors.pending, statusColors.approved, statusColors.rejected]}
-                  valueFormatter={(value) => `${value} طلب`}
-                  className="mt-6 aspect-[4/3]"
-                />
-                <div className="flex justify-center gap-4 mt-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#f59e0b]"></div>
-                    <span className="text-sm text-unlimited-gray">قيد الانتظار</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#10b981]"></div>
-                    <span className="text-sm text-unlimited-gray">مقبول</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#ef4444]"></div>
-                    <span className="text-sm text-unlimited-gray">مرفوض</span>
-                  </div>
+              <CardContent className="pt-0">
+                <div className="h-80">
+                  <BarChart
+                    data={applicationsByMonth}
+                    index="month"
+                    categories={["pending", "approved", "rejected"]}
+                    colors={["#f59e0b", "#10b981", "#ef4444"]}
+                    valueFormatter={(value) => `${value} طلب`}
+                    className="h-full"
+                  />
                 </div>
               </CardContent>
             </Card>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>طلبات الالتحاق حسب الجامعة</CardTitle>
-                  <CardDescription>
-                    توزيع طلبات الالتحاق على الجامعات المختلفة
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PieChart 
-                    data={universityApplicationsData} 
-                    valueFormatter={(value) => `${value} طلب`} 
-                    className="max-w-xs mx-auto aspect-square" 
-                  />
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>طلبات الالتحاق حسب الحالة</CardTitle>
-                  <CardDescription>
-                    توزيع طلبات الالتحاق حسب حالة الطلب
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PieChart 
-                    data={statusData} 
-                    valueFormatter={(value) => `${value} طلب`}
-                    colors={["#f59e0b", "#3b82f6", "#10b981", "#8b5cf6", "#ef4444"]}
-                    className="max-w-xs mx-auto aspect-square"
-                  />
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
           
-          <TabsContent value="demographics" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>طلبات الالتحاق حسب البرنامج</CardTitle>
-                  <CardDescription>
-                    توزيع طلبات الالتحاق على البرامج الدراسية المختلفة
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+          <TabsContent value="commissions" className="space-y-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">العمولات الشهرية</CardTitle>
+                  <Button variant="ghost" size="sm" className="h-8 gap-1" onClick={() => handleExportReport('commissions')}>
+                    <Download className="h-3 w-3" />
+                    <span className="text-xs">تصدير</span>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="h-80">
                   <BarChart
-                    data={programData}
-                    index="name"
-                    categories={['value']}
-                    colors={['#3b82f6']}
-                    valueFormatter={(value) => `${value} طلب`}
-                    className="mt-6 aspect-[3/2]"
+                    data={commissionsByMonth}
+                    index="month"
+                    categories={["amount"]}
+                    colors={["#3b82f6"]}
+                    valueFormatter={formatCurrency}
+                    className="h-full"
                   />
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>توزيع الطلاب حسب الدولة</CardTitle>
-                  <CardDescription>
-                    توزيع طلبات الالتحاق حسب دولة الطالب
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <PieChart 
-                    data={countryData} 
-                    valueFormatter={(value) => `${value} طالب`}
-                    className="max-w-xs mx-auto aspect-square"
-                  />
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>

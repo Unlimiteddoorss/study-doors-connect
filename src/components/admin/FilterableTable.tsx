@@ -152,7 +152,7 @@ const FilterableTable = ({
             variant="outline"
             size="sm"
             onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-            disabled={pagination.currentPage === pagination.totalPages}
+            disabled={pagination.currentPage === pagination.totalPage}
           >
             التالي
           </Button>
@@ -162,4 +162,6 @@ const FilterableTable = ({
   );
 };
 
+// Export both as default and named export to support both import styles
+export { FilterableTable };
 export default FilterableTable;

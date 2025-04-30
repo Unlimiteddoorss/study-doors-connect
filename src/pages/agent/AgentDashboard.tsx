@@ -1,183 +1,192 @@
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, PieChart } from '@/components/charts';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, PieChart, LineChart } from '@/components/ui/chart';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Search, Filter, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { AgentApplicationsList } from '@/components/agent/AgentApplicationsList';
-import { AgentStudentsList } from '@/components/agent/AgentStudentsList';
-import { FileText, Users, School, PlusCircle } from 'lucide-react';
+import AgentApplicationsList from '@/components/agent/AgentApplicationsList';
 
 const AgentDashboard = () => {
-  const [period, setPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [universityFilter, setUniversityFilter] = useState('all');
 
-  const stats = [
-    { 
-      title: 'طلبات التحاق نشطة', 
-      value: '24', 
-      change: '+3', 
-      trend: 'up',
-      icon: <FileText className="h-6 w-6" />
-    },
-    { 
-      title: 'الطلاب المسجلين', 
-      value: '85', 
-      change: '+12', 
-      trend: 'up',
-      icon: <Users className="h-6 w-6" />
-    },
-    { 
-      title: 'الجامعات المتعاقدة', 
-      value: '15', 
-      change: '+2', 
-      trend: 'up',
-      icon: <School className="h-6 w-6" />
-    },
+  // Sample data for statistics
+  const applicationStatsData = [
+    { month: 'يناير', applications: 15 },
+    { month: 'فبراير', applications: 22 },
+    { month: 'مارس', applications: 18 },
+    { month: 'أبريل', applications: 25 },
+    { month: 'مايو', applications: 30 },
+    { month: 'يونيو', applications: 28 },
   ];
 
-  const applicationData = {
-    daily: [
-      { name: "الأحد", total: 2 },
-      { name: "الاثنين", total: 3 },
-      { name: "الثلاثاء", total: 2 },
-      { name: "الأربعاء", total: 4 },
-      { name: "الخميس", total: 2 },
-      { name: "الجمعة", total: 1 },
-      { name: "السبت", total: 0 },
-    ],
-    weekly: [
-      { name: "الأسبوع 1", total: 8 },
-      { name: "الأسبوع 2", total: 12 },
-      { name: "الأسبوع 3", total: 9 },
-      { name: "الأسبوع 4", total: 14 },
-    ],
-    monthly: [
-      { name: "يناير", total: 30 },
-      { name: "فبراير", total: 26 },
-      { name: "مارس", total: 34 },
-      { name: "أبريل", total: 28 },
-      { name: "مايو", total: 32 },
-      { name: "يونيو", total: 38 },
-    ],
-  };
+  const applicationsByStatus = [
+    { name: 'مقبول', value: 32 },
+    { name: 'قيد المراجعة', value: 18 },
+    { name: 'قيد الانتظار', value: 12 },
+    { name: 'مرفوض', value: 8 },
+  ];
 
-  const applicationsDistribution = [
-    { name: "قيد الانتظار", value: 35 },
-    { name: "قيد المراجعة", value: 22 },
-    { name: "مقبول", value: 18 },
-    { name: "مرفوض", value: 12 },
-    { name: "قبول مشروط", value: 8 },
+  // Universities list for filter
+  const universities = [
+    'جامعة الملك سعود',
+    'جامعة القاهرة',
+    'الجامعة الأمريكية',
   ];
 
   return (
     <DashboardLayout userRole="agent">
-      <div className="space-y-6">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {stats.map((stat, index) => (
-            <Card key={index}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <div className="rounded-full p-2 bg-blue-50">{stat.icon}</div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className={`text-xs ${stat.trend === 'up' ? 'text-green-500' : 'text-red-500'} flex items-center`}>
-                  {stat.change} من الشهر الماضي
-                </p>
-              </CardContent>
-            </Card>
-          ))}
+      <div className="container py-6">
+        <h1 className="text-2xl font-bold mb-6 text-unlimited-dark-blue">
+          لوحة التحكم
+        </h1>
+        
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">إجمالي الطلاب</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">24</div>
+              <p className="text-sm text-unlimited-gray">زيادة بنسبة 8% عن الشهر الماضي</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">طلبات الالتحاق</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">70</div>
+              <p className="text-sm text-unlimited-gray">زيادة بنسبة 12% عن الشهر الماضي</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">طلبات مقبولة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">32</div>
+              <p className="text-sm text-unlimited-gray">معدل قبول 45.7%</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">العمولات المستحقة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-unlimited-dark-blue">18,500 ر.س</div>
+              <p className="text-sm text-unlimited-gray">زيادة بنسبة 15% عن الشهر الماضي</p>
+            </CardContent>
+          </Card>
         </div>
-
+        
         {/* Charts */}
-        <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="applications">الطلبات</TabsTrigger>
-            <TabsTrigger value="students">الطلاب</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">الطلبات الجديدة</CardTitle>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => setPeriod('daily')}
-                      className={`px-2 py-1 text-xs rounded ${period === 'daily' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
-                    >
-                      يومي
-                    </button>
-                    <button
-                      onClick={() => setPeriod('weekly')}
-                      className={`px-2 py-1 text-xs rounded ${period === 'weekly' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
-                    >
-                      أسبوعي
-                    </button>
-                    <button
-                      onClick={() => setPeriod('monthly')}
-                      className={`px-2 py-1 text-xs rounded ${period === 'monthly' ? 'bg-unlimited-blue text-white' : 'bg-gray-100'}`}
-                    >
-                      شهري
-                    </button>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <LineChart
-                    data={applicationData[period]}
-                    index="name"
-                    categories={["total"]}
-                    colors={["blue"]}
-                    valueFormatter={(value: number) => `${value} طلب`}
-                    className="aspect-[4/3]"
-                  />
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium">
-                    توزيع الطلبات حسب الحالة
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PieChart
-                    data={applicationsDistribution}
-                    index="name"
-                    category="value"
-                    valueFormatter={(value: number) => `${value}%`}
-                    className="aspect-[4/3]"
-                  />
-                </CardContent>
-              </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">طلبات الالتحاق حسب الشهر</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="h-80">
+                <BarChart 
+                  data={applicationStatsData} 
+                  index="month" 
+                  categories={["applications"]} 
+                  valueFormatter={(value) => `${value} طلب`}
+                  className="h-full"
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">الطلبات حسب الحالة</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="h-80">
+                <PieChart 
+                  data={applicationsByStatus}
+                  valueFormatter={(value) => `${value} طلب`}
+                  className="h-full"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Recent Applications */}
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-unlimited-dark-blue">
+            أحدث طلبات الالتحاق
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-unlimited-gray" />
+              <Input
+                placeholder="بحث برقم الطلب أو اسم الطالب"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          </TabsContent>
-
-          <TabsContent value="applications" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">الطلبات النشطة</h2>
-              <Button className="gap-2">
-                <PlusCircle className="h-4 w-4" />
-                طلب جديد
-              </Button>
-            </div>
-            <AgentApplicationsList />
-          </TabsContent>
-
-          <TabsContent value="students" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">الطلاب المسجلين</h2>
-              <Button className="gap-2">
-                <PlusCircle className="h-4 w-4" />
-                إضافة طالب
-              </Button>
-            </div>
-            <AgentStudentsList />
-          </TabsContent>
-        </Tabs>
+            
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="فلترة حسب الحالة" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="pending">قيد الانتظار</SelectItem>
+                <SelectItem value="review">قيد المراجعة</SelectItem>
+                <SelectItem value="approved">مقبول</SelectItem>
+                <SelectItem value="rejected">مرفوض</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={universityFilter} onValueChange={setUniversityFilter}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="فلترة حسب الجامعة" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الجامعات</SelectItem>
+                {universities.map((university) => (
+                  <SelectItem key={university} value={university}>{university}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <AgentApplicationsList
+            searchQuery={searchQuery}
+            statusFilter={statusFilter}
+            universityFilter={universityFilter}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );
