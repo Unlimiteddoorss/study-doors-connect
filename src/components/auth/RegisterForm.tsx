@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -15,9 +14,9 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { supabase } from '@/integrations/supabase/client';
 import { hasValidSupabaseCredentials } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -132,16 +131,47 @@ const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      // Use the signUp method from useAuth instead of directly using Supabase
-      await signUp(formData.email, formData.password, formData.userType as 'student' | 'admin' | 'agent');
-      
-      toast({
-        title: 'تم إنشاء الحساب بنجاح',
-        description: 'مرحباً بك في منصة أبواب غير محدودة',
+      // Step 1: Register the user with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.fullName,
+            role: formData.userType,
+            phone: formData.phone
+          }
+        }
       });
       
-      // Navigate to login after successful registration
-      navigate('/login');
+      if (authError) throw authError;
+      
+      if (authData?.user) {
+        try {
+          // Step 2: Insert user role directly after auth signup
+          const { error: roleError } = await supabase.rpc('create_user_role', { 
+            user_id: authData.user.id,
+            user_role: formData.userType as 'student' | 'admin' | 'agent'
+          });
+          
+          if (roleError) {
+            console.error('Error creating user role:', roleError);
+            // Continue because the auth part succeeded
+          }
+          
+          toast({
+            title: 'تم إنشاء الحساب بنجاح',
+            description: 'مرحباً بك في منصة أبواب غير محدودة',
+          });
+          
+          // Navigate to login after successful registration
+          navigate('/login');
+        } catch (roleErr: any) {
+          console.error('Role assignment error:', roleErr);
+          // Still navigate to login since the user was created
+          navigate('/login');
+        }
+      }
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({

@@ -61,3 +61,31 @@ export const withSupabase = async <T>(callback: (client: typeof supabase) => Pro
     return null;
   }
 };
+
+/**
+ * Create a user role safely (using RPC)
+ * @param userId The user ID to create a role for
+ * @param role The role to assign to the user
+ * @returns Promise<boolean> Whether the operation was successful
+ */
+export const createUserRole = async (
+  userId: string, 
+  role: 'student' | 'admin' | 'agent'
+): Promise<boolean> => {
+  try {
+    const { error } = await supabase.rpc('create_user_role', { 
+      user_id: userId,
+      user_role: role
+    });
+    
+    if (error) {
+      console.error('Error creating user role:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error creating user role:', error);
+    return false;
+  }
+};
