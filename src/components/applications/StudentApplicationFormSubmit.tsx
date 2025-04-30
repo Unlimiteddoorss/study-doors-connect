@@ -1,163 +1,147 @@
 
-import { useState } from 'react';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Check, HelpCircle, Info } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface StudentApplicationFormSubmitProps {
-  isLastStep: boolean;
-  isSubmitting: boolean;
-  canSubmit: boolean;
-  formData: any;
-  onBack: () => void;
   onSubmit: () => void;
+  onCancel: () => void;
+  applicationData: {
+    personalInfo: {
+      fullName: string;
+      nationality: string;
+      residence?: string;
+    };
+    educationInfo: {
+      level: string;
+      university?: string;
+    };
+    programInfo: {
+      university: string;
+      program: string;
+      degreeLevel: string;
+      academicYear: string;
+    };
+  };
 }
 
 const StudentApplicationFormSubmit = ({
-  isLastStep,
-  isSubmitting,
-  canSubmit,
-  formData,
-  onBack,
-  onSubmit
+  onSubmit,
+  onCancel,
+  applicationData,
 }: StudentApplicationFormSubmitProps) => {
-  const { toast } = useToast();
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const isRtl = i18n.language === 'ar';
-
-  const generateApplicationId = () => {
-    const prefix = 'APP';
-    const randomNum = Math.floor(10000 + Math.random() * 90000);
-    const timestamp = new Date().getTime().toString().slice(-4);
-    return `${prefix}-${randomNum}-${timestamp}`;
-  };
-
-  const handleSubmit = () => {
-    setValidationErrors([]);
-    
-    if (!canSubmit) {
-      toast({
-        title: t("application.validation.error"),
-        description: t("application.validation.completeAllFields"),
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (isLastStep) {
-      const applicationId = generateApplicationId();
-      const newApplication = {
-        id: applicationId,
-        program: formData.program?.name || 'برنامج غير معروف',
-        university: formData.university || 'جامعة غير معروفة',
-        date: new Date().toISOString().split('T')[0],
-        status: 'pending',
-        timeline: [
-          {
-            status: 'pending',
-            date: new Date().toISOString(),
-            note: 'تم استلام الطلب وهو قيد المراجعة'
-          }
-        ],
-        documents: [
-          { name: 'جواز السفر', status: 'required' },
-          { name: 'الشهادة الثانوية', status: 'required' },
-          { name: 'كشف الدرجات', status: 'required' }
-        ],
-        messages: 0,
-        formData: formData
-      };
-
-      // Get existing applications from localStorage
-      const existingApps = JSON.parse(localStorage.getItem('studentApplications') || '[]');
-      
-      // Add new application
-      existingApps.push(newApplication);
-      
-      // Store updated applications
-      localStorage.setItem('studentApplications', JSON.stringify(existingApps));
-
-      // Call the original onSubmit
-      onSubmit();
-
-      // Show success message
-      toast({
-        title: t("application.submission.success"),
-        description: t("application.submission.successMessage")
-      });
-
-      // Navigate to the applications dashboard
-      setTimeout(() => {
-        navigate(`/dashboard/applications/${applicationId}`);
-      }, 1500);
-    } else {
-      onSubmit();
-    }
-  };
-
   return (
-    <div className="mt-6">
-      {validationErrors.length > 0 && (
-        <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-red-800">{t("application.validation.pleaseCorrect")}</p>
-              <ul className="mt-1 text-sm text-red-600 list-disc list-inside">
-                {validationErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-unlimited-blue" />
+            مراجعة وتأكيد الطلب
+          </div>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <HelpCircle className="h-5 w-5 text-unlimited-gray" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="w-80">
+                <p>يرجى مراجعة جميع المعلومات بعناية قبل إرسال الطلب. بعد الإرسال، سيتم معالجة طلبك من قبل فريقنا وسيتم إعلامك في حال الحاجة لأي معلومات إضافية.</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </CardTitle>
+        <CardDescription>راجع معلومات طلبك قبل التقديم النهائي</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h3 className="text-sm font-medium text-unlimited-dark-blue">المعلومات الشخصية</h3>
+            <Button variant="ghost" size="sm" className="text-unlimited-blue h-auto py-0">تعديل</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">الاسم الكامل</p>
+              <p className="font-medium">{applicationData.personalInfo.fullName}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">الجنسية</p>
+              <p className="font-medium">{applicationData.personalInfo.nationality}</p>
+            </div>
+            {applicationData.personalInfo.residence && (
+              <div className="space-y-1">
+                <p className="text-unlimited-gray">بلد الإقامة</p>
+                <p className="font-medium">{applicationData.personalInfo.residence}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h3 className="text-sm font-medium text-unlimited-dark-blue">المؤهلات الأكاديمية</h3>
+            <Button variant="ghost" size="sm" className="text-unlimited-blue h-auto py-0">تعديل</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">المؤهل العلمي</p>
+              <p className="font-medium">{applicationData.educationInfo.level}</p>
+            </div>
+            {applicationData.educationInfo.university && (
+              <div className="space-y-1">
+                <p className="text-unlimited-gray">الجامعة/المدرسة</p>
+                <p className="font-medium">{applicationData.educationInfo.university}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h3 className="text-sm font-medium text-unlimited-dark-blue">تفاصيل البرنامج المرغوب</h3>
+            <Button variant="ghost" size="sm" className="text-unlimited-blue h-auto py-0">تعديل</Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">الجامعة</p>
+              <p className="font-medium">{applicationData.programInfo.university}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">التخصص</p>
+              <p className="font-medium">{applicationData.programInfo.program}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">الدرجة العلمية</p>
+              <p className="font-medium">{applicationData.programInfo.degreeLevel}</p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-unlimited-gray">العام الدراسي</p>
+              <p className="font-medium">{applicationData.programInfo.academicYear}</p>
             </div>
           </div>
         </div>
-      )}
-      
-      <div className="flex flex-wrap gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={isSubmitting}
-          className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
-        >
-          {isRtl ? (
-            <>
-              {t('application.navigation.previous')}
-              <ArrowRight className="h-4 w-4" />
-            </>
-          ) : (
-            <>
-              <ArrowLeft className="h-4 w-4" />
-              {t('application.navigation.previous')}
-            </>
-          )}
+
+        <div className="bg-unlimited-blue/5 border border-unlimited-blue/20 rounded-lg p-4 text-sm flex gap-3">
+          <Check className="text-unlimited-success h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-medium text-unlimited-dark-blue mb-1">المستندات المطلوبة</p>
+            <p className="text-unlimited-gray">
+              سيتم إعلامك بالمستندات المطلوبة بعد تقديم الطلب. يرجى التأكد من تحميل جميع المستندات المطلوبة في أقرب وقت ممكن لضمان معالجة طلبك بسرعة.
+            </p>
+          </div>
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Button variant="outline" onClick={onCancel}>
+          تعديل البيانات
         </Button>
-        
-        <Button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} />
-              {t('application.buttons.submitting')}
-            </>
-          ) : (
-            <>
-              <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} />
-              {t(isLastStep ? 'application.buttons.submit' : 'application.buttons.next')}
-            </>
-          )}
+        <Button onClick={onSubmit}>
+          تقديم الطلب
         </Button>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 };
 

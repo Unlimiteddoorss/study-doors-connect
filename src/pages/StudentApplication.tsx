@@ -1,154 +1,150 @@
 
-import { useState } from 'react';
-import { Card } from "@/components/ui/card";
-import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
-import ApplicationSteps from '@/components/student/ApplicationSteps';
-import PersonalInfoForm from '@/components/student/PersonalInfoForm';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useToast } from '@/hooks/use-toast';
+import StudentApplicationForm from '@/components/applications/StudentApplicationForm';
 import StudentApplicationFormSubmit from '@/components/applications/StudentApplicationFormSubmit';
-import { useTranslation } from 'react-i18next';
-import DocumentsUploadForm from '@/components/student/DocumentsUploadForm';
-import AcademicInfoForm from '@/components/student/AcademicInfoForm';
-import ProgramSelectionForm from '@/components/student/ProgramSelectionForm';
-import ApplicationReview from '@/components/student/ApplicationReview';
 import ApplicationSubmissionHandler from '@/components/applications/ApplicationSubmissionHandler';
-
-// تعريف واجهة بيانات الطلب
-interface ApplicationData {
-  personalInfo?: any;
-  documents?: any[];
-  academicInfo?: any;
-  program?: any;
-  university?: string;
-}
+import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
 
 const StudentApplication = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(true);
-  const [formData, setFormData] = useState<ApplicationData>({});
+  const [step, setStep] = useState<'form' | 'review' | 'submitting' | 'completed'>('form');
+  const [formData, setFormData] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitSuccess, setIsSubmitSuccess] = useState<boolean>(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [applicationId, setApplicationId] = useState<string | undefined>(undefined);
+  
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const { t, i18n } = useTranslation();
-  const isRtl = i18n.language === 'ar';
 
-  // التحقق من اكتمال البيانات حسب الخطوة الحالية
-  const validateCurrentStep = () => {
-    if (currentStep === 1) {
-      // التحقق من بيانات الطالب الشخصية
-      if (!formData.personalInfo?.firstName || !formData.personalInfo?.lastName) {
-        toast({
-          title: t("application.validation.error"),
-          description: t("application.validation.personalInfoIncomplete"),
-          variant: "destructive",
-        });
-        return false;
-      }
-    } else if (currentStep === 2) {
-      // التحقق من المستندات
-      // هنا يمكن التحقق من وجود المستندات المطلوبة
-    } else if (currentStep === 3) {
-      // التحقق من المعلومات الأكاديمية
-      if (!formData.academicInfo?.education) {
-        toast({
-          title: t("application.validation.error"),
-          description: t("application.validation.academicInfoIncomplete"),
-          variant: "destructive",
-        });
-        return false;
-      }
-    } else if (currentStep === 4) {
-      // التحقق من اختيار البرنامج
-      if (!formData.program?.name || !formData.university) {
-        toast({
-          title: t("application.validation.error"),
-          description: t("application.validation.programSelectionIncomplete"),
-          variant: "destructive",
-        });
-        return false;
-      }
-    }
+  const handleFormSubmit = (data: any) => {
+    setFormData(data);
+    setStep('review');
+  };
+
+  const handleReviewBack = () => {
+    setStep('form');
+  };
+
+  const submitApplication = async () => {
+    if (!formData) return;
     
-    return true;
-  };
-
-  // العودة للخطوة السابقة
-  const handleBack = () => {
-    setCurrentStep((prev) => Math.max(1, prev - 1));
-  };
-
-  // الانتقال للخطوة التالية أو إرسال الطلب
-  const handleNext = () => {
-    if (!validateCurrentStep()) return;
-
-    if (currentStep < 5) {
-      setCurrentStep((prev) => prev + 1);
+    setStep('submitting');
+    setIsSubmitting(true);
+    
+    try {
+      // Here we would normally submit the application data to the backend
+      // Simulating API call
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      
+      // Generate a random application ID
+      const generatedId = `APP-${Math.floor(Math.random() * 1000000).toString().padStart(6, '0')}`;
+      setApplicationId(generatedId);
+      
+      setIsSubmitSuccess(true);
+      setStep('completed');
+      
+      // Show success toast
+      toast({
+        title: "تم إرسال طلبك بنجاح",
+        description: `رقم الطلب: ${generatedId}`,
+      });
+      
+      // Add the application to local storage for demo purposes
+      try {
+        const existingApps = localStorage.getItem('studentApplications');
+        const applications = existingApps ? JSON.parse(existingApps) : [];
+        
+        applications.push({
+          id: generatedId,
+          date: new Date().toISOString().split('T')[0],
+          program: formData.desiredProgram,
+          university: formData.desiredUniversity,
+          status: 'pending',
+          statusColor: 'text-yellow-600 bg-yellow-100',
+        });
+        
+        localStorage.setItem('studentApplications', JSON.stringify(applications));
+      } catch (error) {
+        console.error('Error saving application to local storage', error);
+      }
+      
+      return { success: true, applicationId: generatedId };
+    } catch (error) {
+      setSubmitError("حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.");
+      setIsSubmitSuccess(false);
+      return { success: false, error: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى." };
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // تحديث بيانات النموذج
-  const updateFormData = (step: number, data: any) => {
-    setFormData(prevData => {
-      switch(step) {
-        case 1:
-          return { ...prevData, personalInfo: { ...prevData.personalInfo, ...data } };
-        case 2:
-          return { ...prevData, documents: data };
-        case 3:
-          return { ...prevData, academicInfo: { ...prevData.academicInfo, ...data } };
-        case 4:
-          return { ...prevData, program: data.program, university: data.university };
-        default:
-          return prevData;
-      }
-    });
+  const resetForm = () => {
+    setFormData(null);
+    setStep('form');
+    setIsSubmitSuccess(false);
+    setSubmitError(null);
+    setApplicationId(undefined);
   };
 
-  const isFormComplete = () => {
-    // التحقق من اكتمال جميع البيانات المطلوبة للطلب
-    return (
-      formData.personalInfo?.firstName && 
-      formData.personalInfo?.lastName &&
-      formData.academicInfo?.education &&
-      formData.program?.name &&
-      formData.university
-    );
+  const viewApplication = () => {
+    if (applicationId) {
+      navigate(`/dashboard/applications/${applicationId}`);
+    }
   };
 
-  const renderStepContent = () => {
-    switch(currentStep) {
-      case 1:
+  const renderStep = () => {
+    switch (step) {
+      case 'form':
+        return <StudentApplicationForm onSubmit={handleFormSubmit} />;
+      
+      case 'review':
+        if (!formData) return null;
+        
+        const applicationDataForReview = {
+          personalInfo: {
+            fullName: `${formData.firstName} ${formData.middleName} ${formData.lastName}`,
+            nationality: formData.nationality,
+            residence: formData.residenceCountry,
+          },
+          educationInfo: {
+            level: formData.educationLevel === 'highschool' ? 'الثانوية العامة' : 
+                  formData.educationLevel === 'bachelor' ? 'بكالوريوس' : 
+                  formData.educationLevel === 'master' ? 'ماجستير' : 'دكتوراه',
+            university: formData.universityName,
+          },
+          programInfo: {
+            university: formData.desiredUniversity,
+            program: formData.desiredProgram,
+            degreeLevel: formData.degreeLevel === 'bachelor' ? 'بكالوريوس' : 
+                        formData.degreeLevel === 'master' ? 'ماجستير' : 'دكتوراه',
+            academicYear: formData.academicYear,
+          }
+        };
+        
         return (
-          <PersonalInfoForm 
-            initialData={formData.personalInfo} 
-            onSave={(data) => updateFormData(1, data)}
+          <StudentApplicationFormSubmit 
+            onSubmit={submitApplication}
+            onCancel={handleReviewBack}
+            applicationData={applicationDataForReview}
           />
         );
-      case 2:
+      
+      case 'submitting':
+      case 'completed':
         return (
-          <DocumentsUploadForm 
-            initialDocuments={formData.documents} 
-            onSave={(data) => updateFormData(2, data)}
+          <ApplicationSubmissionHandler
+            isSubmitting={isSubmitting}
+            isSuccess={isSubmitSuccess}
+            error={submitError}
+            applicationId={applicationId}
+            handleSubmit={submitApplication}
+            resetForm={resetForm}
           />
         );
-      case 3:
-        return (
-          <AcademicInfoForm 
-            initialData={formData.academicInfo} 
-            onSave={(data) => updateFormData(3, data)}
-          />
-        );
-      case 4:
-        return (
-          <ProgramSelectionForm 
-            initialData={{ program: formData.program, university: formData.university }}
-            onSave={(data) => updateFormData(4, data)}
-          />
-        );
-      case 5:
-        return (
-          <ApplicationReview formData={formData} />
-        );
+        
       default:
         return null;
     }
@@ -156,40 +152,9 @@ const StudentApplication = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto py-8 px-4">
-        <StudentApplicationHeader />
-        
-        <Card className="p-6">
-          <ApplicationSteps currentStep={currentStep} />
-          
-          <div className="mb-6">
-            {renderStepContent()}
-          </div>
-          
-          {currentStep < 5 ? (
-            <StudentApplicationFormSubmit
-              isLastStep={false}
-              isSubmitting={isSubmitting}
-              canSubmit={canSubmit}
-              formData={formData}
-              onBack={handleBack}
-              onSubmit={handleNext}
-            />
-          ) : (
-            <div className="mt-8">
-              <ApplicationSubmissionHandler 
-                formData={formData} 
-                onSubmit={() => {
-                  // Show success message and redirect to dashboard
-                  toast({
-                    title: t("application.submission.success"),
-                    description: t("application.submission.successMessage")
-                  });
-                }}
-              />
-            </div>
-          )}
-        </Card>
+      <div className="max-w-5xl mx-auto pb-16">
+        <StudentApplicationHeader showNewButton={false} />
+        {renderStep()}
       </div>
     </DashboardLayout>
   );

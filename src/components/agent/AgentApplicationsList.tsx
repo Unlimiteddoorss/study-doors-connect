@@ -1,9 +1,6 @@
 
-import { useState } from 'react';
-import { Eye, FileText, MessageCircle, MoreHorizontal, Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -12,264 +9,169 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Eye, Filter } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/dropdown-menu";
 
-type ApplicationStatus = 'pending' | 'processing' | 'approved' | 'rejected' | 'completed';
-
-type Application = {
-  id: string;
-  studentId: string;
-  studentName: string;
-  program: string;
-  university: string;
-  submittedDate: string;
-  status: ApplicationStatus;
-};
-
-const statusConfig: Record<ApplicationStatus, { label: string; color: string }> = {
-  pending: { label: 'قيد الانتظار', color: 'bg-unlimited-warning text-white' },
-  processing: { label: 'قيد المعالجة', color: 'bg-unlimited-info text-white' },
-  approved: { label: 'مقبول', color: 'bg-unlimited-success text-white' },
-  rejected: { label: 'مرفوض', color: 'bg-unlimited-danger text-white' },
-  completed: { label: 'مكتمل', color: 'bg-unlimited-blue text-white' },
-};
-
-const initialApplications: Application[] = [
+// Mock data for applications
+const mockApplications = [
   {
-    id: 'APP-001',
-    studentId: 'STD-001',
-    studentName: 'أحمد محمد',
-    program: 'هندسة البرمجيات',
-    university: 'جامعة لندن',
-    submittedDate: '2023-04-01',
-    status: 'approved',
+    id: "APP-123456",
+    studentName: "أحمد محمود",
+    program: "هندسة البرمجيات",
+    university: "جامعة إسطنبول التقنية",
+    date: "2025-03-15",
+    status: "pending",
+    statusText: "قيد المعالجة"
   },
   {
-    id: 'APP-002',
-    studentId: 'STD-001',
-    studentName: 'أحمد محمد',
-    program: 'علوم الحاسب',
-    university: 'جامعة أكسفورد',
-    submittedDate: '2023-04-03',
-    status: 'processing',
+    id: "APP-123457",
+    studentName: "فاطمة علي",
+    program: "إدارة الأعمال",
+    university: "جامعة سابانجي",
+    date: "2025-03-10",
+    status: "approved",
+    statusText: "مقبول"
   },
   {
-    id: 'APP-003',
-    studentId: 'STD-002',
-    studentName: 'سارة عبدالله',
-    program: 'إدارة الأعمال',
-    university: 'جامعة هارفارد',
-    submittedDate: '2023-04-05',
-    status: 'pending',
+    id: "APP-123458",
+    studentName: "محمد خالد",
+    program: "الطب البشري",
+    university: "جامعة إسطنبول ميديبول",
+    date: "2025-03-08",
+    status: "conditional",
+    statusText: "قبول مشروط"
   },
   {
-    id: 'APP-004',
-    studentId: 'STD-003',
-    studentName: 'محمد علي',
-    program: 'الطب البشري',
-    university: 'جامعة تورنتو',
-    submittedDate: '2023-04-07',
-    status: 'rejected',
-  },
-  {
-    id: 'APP-005',
-    studentId: 'STD-003',
-    studentName: 'محمد علي',
-    program: 'الهندسة الطبية',
-    university: 'جامعة ملبورن',
-    submittedDate: '2023-04-08',
-    status: 'approved',
-  },
-  {
-    id: 'APP-006',
-    studentId: 'STD-003',
-    studentName: 'محمد علي',
-    program: 'علوم البيانات',
-    university: 'جامعة طوكيو',
-    submittedDate: '2023-04-10',
-    status: 'completed',
-  },
-  {
-    id: 'APP-007',
-    studentId: 'STD-005',
-    studentName: 'عبدالله خالد',
-    program: 'الذكاء الاصطناعي',
-    university: 'جامعة كامبريدج',
-    submittedDate: '2023-04-12',
-    status: 'pending',
-  },
+    id: "APP-123459",
+    studentName: "نور أحمد",
+    program: "علوم الحاسب",
+    university: "جامعة أوزيغين",
+    date: "2025-03-05",
+    status: "rejected",
+    statusText: "مرفوض"
+  }
 ];
 
-export function AgentApplicationsList() {
-  const [applications, setApplications] = useState<Application[]>(initialApplications);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all');
-  const { toast } = useToast();
-
-  const filteredApplications = applications.filter((application) => {
-    const matchesSearch = 
-      application.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      application.program.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      application.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      application.id.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesStatus = statusFilter === 'all' || application.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+const AgentApplicationsList = () => {
+  const [applications] = useState(mockApplications);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleViewApplication = (applicationId: string) => {
-    toast({
-      title: "عرض تفاصيل الطلب",
-      description: `تم فتح الطلب رقم ${applicationId}`,
-    });
+    navigate(`/agent/applications/${applicationId}`);
   };
 
-  const handleSendMessage = (applicationId: string) => {
-    toast({
-      title: "إرسال رسالة",
-      description: `تم فتح المحادثة حول الطلب رقم ${applicationId}`,
-    });
+  const getStatusBadgeStyle = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
+      case 'approved':
+        return 'bg-green-100 text-green-800 hover:bg-green-200';
+      case 'conditional':
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+      case 'rejected':
+        return 'bg-red-100 text-red-800 hover:bg-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+    }
   };
 
-  const handleCheckStatus = (applicationId: string) => {
-    toast({
-      title: "التحقق من حالة الطلب",
-      description: `جاري التحقق من حالة الطلب رقم ${applicationId}`,
-    });
-  };
+  const filteredApplications = selectedStatus 
+    ? applications.filter(app => app.status === selectedStatus)
+    : applications;
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
-        <div className="relative w-full sm:w-auto">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
-          <Input
-            placeholder="البحث في الطلبات..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 w-full sm:w-[300px]"
-          />
+      <div className="flex justify-between items-center pb-4">
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-unlimited-gray" />
+          <span className="text-sm text-unlimited-gray">تصفية:</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                {selectedStatus ? 
+                  applications.find(app => app.status === selectedStatus)?.statusText : 
+                  'جميع الحالات'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setSelectedStatus(null)}>
+                جميع الحالات
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedStatus('pending')}>
+                قيد المعالجة
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedStatus('approved')}>
+                مقبول
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedStatus('conditional')}>
+                قبول مشروط
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSelectedStatus('rejected')}>
+                مرفوض
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ApplicationStatus | 'all')}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="الحالة" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">جميع الحالات</SelectItem>
-            <SelectItem value="pending">قيد الانتظار</SelectItem>
-            <SelectItem value="processing">قيد المعالجة</SelectItem>
-            <SelectItem value="approved">مقبول</SelectItem>
-            <SelectItem value="rejected">مرفوض</SelectItem>
-            <SelectItem value="completed">مكتمل</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
-
-      <div className="rounded-md border">
+      
+      <div className="border rounded-md overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">رقم الطلب</TableHead>
-              <TableHead>الطالب</TableHead>
-              <TableHead className="hidden md:table-cell">البرنامج</TableHead>
-              <TableHead className="hidden md:table-cell">الجامعة</TableHead>
+              <TableHead>رقم الطلب</TableHead>
+              <TableHead>اسم الطالب</TableHead>
+              <TableHead>البرنامج</TableHead>
+              <TableHead>الجامعة</TableHead>
+              <TableHead>التاريخ</TableHead>
               <TableHead>الحالة</TableHead>
-              <TableHead className="hidden md:table-cell">تاريخ التقديم</TableHead>
-              <TableHead className="text-left">الإجراءات</TableHead>
+              <TableHead className="text-right">إجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredApplications.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center h-40 text-unlimited-gray">
-                  لا توجد بيانات متطابقة مع البحث
+            {filteredApplications.map((application) => (
+              <TableRow key={application.id}>
+                <TableCell className="font-medium">{application.id}</TableCell>
+                <TableCell>{application.studentName}</TableCell>
+                <TableCell>{application.program}</TableCell>
+                <TableCell>{application.university}</TableCell>
+                <TableCell>{new Date(application.date).toLocaleDateString('ar-SA')}</TableCell>
+                <TableCell>
+                  <Badge className={getStatusBadgeStyle(application.status)}>
+                    {application.statusText}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => handleViewApplication(application.id)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
-            ) : (
-              filteredApplications.map((application) => (
-                <TableRow key={application.id}>
-                  <TableCell className="font-medium">{application.id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p>{application.studentName}</p>
-                      <p className="text-xs text-unlimited-gray">{application.studentId}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">{application.program}</TableCell>
-                  <TableCell className="hidden md:table-cell">{application.university}</TableCell>
-                  <TableCell>
-                    <Badge className={statusConfig[application.status].color}>
-                      {statusConfig[application.status].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">{application.submittedDate}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => handleViewApplication(application.id)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => handleSendMessage(application.id)}
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleViewApplication(application.id)}>
-                            عرض تفاصيل الطلب
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleSendMessage(application.id)}>
-                            إرسال رسالة
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleCheckStatus(application.id)}>
-                            التحقق من الحالة
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <FileText className="h-4 w-4 mr-2" />
-                            المستندات
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+            ))}
+            {filteredApplications.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center text-unlimited-gray">
+                  لا توجد طلبات تطابق التصفية المحددة
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
     </div>
   );
-}
+};
+
+export default AgentApplicationsList;

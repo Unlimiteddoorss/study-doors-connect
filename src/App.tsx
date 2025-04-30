@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
@@ -7,6 +6,7 @@ import Countries from "./pages/Countries";
 import CountryDetails from "./pages/CountryDetails";
 import Programs from "./pages/Programs";
 import ProgramDetails from "./pages/ProgramDetails";
+import ProgramsSearch from "./pages/ProgramsSearch";
 import Scholarships from "./pages/Scholarships";
 import Universities from "./pages/Universities";
 import TurkishUniversities from "./pages/TurkishUniversities";
@@ -122,6 +122,7 @@ function App() {
         <Route path="/countries" element={<Countries />} />
         <Route path="/countries/:id" element={<CountryDetails />} />
         <Route path="/programs" element={<Programs />} />
+        <Route path="/programs/search" element={<ProgramsSearch />} />
         <Route path="/programs/:id" element={<ProgramDetails />} />
         <Route path="/medical-programs" element={<MedicalPrograms />} />
         <Route path="/engineering-programs" element={<EngineeringPrograms />} />

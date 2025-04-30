@@ -1,11 +1,20 @@
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { type Contact } from '@/pages/messaging/UserMessages';
+
+export type Contact = {
+  id: string;
+  name: string;
+  role: 'admin' | 'agent' | 'student';
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+  avatar?: string;
+};
 
 interface ContactsListProps {
   contacts: Contact[];
@@ -38,7 +47,11 @@ const ContactsList = ({ contacts, activeContactId, onSelectContact }: ContactsLi
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className={`h-10 w-10 rounded-full ${getRoleColor(contact.role)} flex items-center justify-center text-white`}>
-                <User className="h-6 w-6" />
+                {contact.avatar ? (
+                  <img src={contact.avatar} alt={contact.name} className="h-full w-full rounded-full object-cover" />
+                ) : (
+                  <User className="h-6 w-6" />
+                )}
               </div>
               <div className="mr-3">
                 <div className="font-medium">{contact.name}</div>
