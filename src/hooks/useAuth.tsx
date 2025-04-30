@@ -1,8 +1,8 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
 import { useNavigate } from 'react-router-dom';
+import { createUserRole } from '@/lib/supabase';
 
 interface AuthUser {
   id: string;
@@ -176,18 +176,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // If user was created successfully
       if (data?.user) {
         try {
-          // Insert user role directly
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: data.user.id,
-              role: role,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
+          // Use the secure database function to create user role
+          const roleCreated = await createUserRole(data.user.id, role);
             
-          if (roleError) {
-            console.error('Error creating user role:', roleError);
+          if (!roleCreated) {
+            console.error('Error creating user role');
           }
         } catch (roleErr) {
           console.error('Error assigning role:', roleErr);

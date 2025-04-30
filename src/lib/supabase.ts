@@ -63,7 +63,7 @@ export const withSupabase = async <T>(callback: (client: typeof supabase) => Pro
 };
 
 /**
- * Create a user role safely via direct database insert
+ * Create a user role using the database function
  * @param userId The user ID to create a role for
  * @param role The role to assign to the user
  * @returns Promise<boolean> Whether the operation was successful
@@ -73,22 +73,18 @@ export const createUserRole = async (
   role: 'student' | 'admin' | 'agent'
 ): Promise<boolean> => {
   try {
-    // Direct insert to user_roles table bypassing RLS
-    const { error } = await supabase
-      .from('user_roles')
-      .insert({
-        user_id: userId,
-        role: role,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+    // Call the database function to create a user role
+    const { data, error } = await supabase.rpc('create_user_role', {
+      user_id: userId,
+      user_role: role
+    });
     
     if (error) {
-      console.error('Error creating user role:', error);
+      console.error('Error creating user role with RPC:', error);
       return false;
     }
     
-    return true;
+    return data || false;
   } catch (error) {
     console.error('Error creating user role:', error);
     return false;

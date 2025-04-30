@@ -358,6 +358,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_user_role: {
+        Args: { user_id: string; user_role: string }
+        Returns: boolean
+      }
       mark_messages_read: {
         Args: { p_application_id: string; p_user_id: string }
         Returns: undefined
