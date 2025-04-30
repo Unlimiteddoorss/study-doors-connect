@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { checkSupabaseConnection, hasValidSupabaseCredentials } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
@@ -13,11 +14,11 @@ export const SupabaseStatus = () => {
   const { t } = useTranslation();
 
   useEffect(() => {
-    // التحقق من توفر بيانات اعتماد Supabase
+    // Check for Supabase credentials
     const credentials = hasValidSupabaseCredentials();
     setHasCredentials(credentials);
     
-    // إذا كانت بيانات الاعتماد صالحة، نتحقق من الاتصال
+    // If credentials are valid, check connection
     const checkConnection = async () => {
       if (credentials) {
         try {
@@ -36,14 +37,14 @@ export const SupabaseStatus = () => {
           setIsConnected(false);
         }
       } else {
-        // لا توجد بيانات اعتماد صالحة
+        // No valid credentials
         setIsConnected(false);
       }
     };
 
     checkConnection();
     
-    // التحقق من الاتصال كل 5 دقائق
+    // Check connection every 5 minutes
     const interval = setInterval(checkConnection, 5 * 60 * 1000);
     
     return () => clearInterval(interval);

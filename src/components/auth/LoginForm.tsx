@@ -5,21 +5,34 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { useTranslation } from 'react-i18next';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [supabaseConfigured] = useState(hasValidSupabaseCredentials());
   
   const { signIn } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!supabaseConfigured) {
+      toast({
+        title: "خطأ",
+        description: "يجب تكوين Supabase قبل تسجيل الدخول",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!email || !password) {
       toast({
@@ -35,18 +48,9 @@ const LoginForm = () => {
     try {
       await signIn(email, password);
       
+      console.log("Login successful, redirecting...");
       // Role-based redirection handled in useAuth hook
-      // Check local storage for role to ensure proper redirection
-      const userRole = localStorage.getItem('userRole');
-      console.log("User role after login:", userRole);
-      
-      if (userRole === 'admin') {
-        navigate('/admin');
-      } else if (userRole === 'agent') {
-        navigate('/agent');
-      } else {
-        navigate('/dashboard/applications');
-      }
+      // No need to navigate here, it's handled in the signIn function in useAuth
     } catch (error: any) {
       console.error('Login failed:', error);
       toast({
@@ -74,6 +78,7 @@ const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={!supabaseConfigured}
         />
       </div>
       
@@ -82,7 +87,7 @@ const LoginForm = () => {
           <Label htmlFor="password">كلمة المرور</Label>
           <Link 
             to="/forgot-password" 
-            className="text-sm text-unlimited-blue hover:underline"
+            className={`text-sm text-unlimited-blue hover:underline ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}
           >
             نسيت كلمة المرور؟
           </Link>
@@ -95,6 +100,7 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={!supabaseConfigured}
           />
           <button
             type="button"
@@ -113,16 +119,23 @@ const LoginForm = () => {
       <Button 
         type="submit" 
         className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90" 
-        disabled={isLoading}
+        disabled={isLoading || !supabaseConfigured}
       >
-        {isLoading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <span>جاري تسجيل الدخول...</span>
+          </div>
+        ) : (
+          'تسجيل الدخول'
+        )}
       </Button>
       
       <p className="text-center text-unlimited-gray text-sm">
         ليس لديك حساب؟{' '}
         <Link 
           to="/register" 
-          className="text-unlimited-blue hover:underline font-medium"
+          className={`text-unlimited-blue hover:underline font-medium ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}
         >
           إنشاء حساب جديد
         </Link>
