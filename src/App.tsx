@@ -70,6 +70,8 @@ function App() {
           element={
             userRole === 'admin' ? 
               <Navigate to="/admin" replace /> : 
+              userRole === 'agent' ?
+              <Navigate to="/agent" replace /> :
               <Navigate to="/dashboard/applications" replace />
           } 
         />

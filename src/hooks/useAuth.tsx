@@ -1,3 +1,4 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
@@ -132,12 +133,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             description: "مرحبًا بك في نظام طلبات الإلتحاق"
           });
 
+          console.log("Login successful, role detected:", role);
+          
           // Navigate based on role
           if (role === 'admin') {
+            console.log("Redirecting to admin dashboard");
             navigate('/admin');
           } else if (role === 'agent') {
+            console.log("Redirecting to agent dashboard");
             navigate('/agent');
           } else {
+            console.log("Redirecting to student dashboard");
             navigate('/dashboard/applications');
           }
         } catch (error) {

@@ -46,10 +46,10 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const result = await signIn(email, password);
+      await signIn(email, password);
       
-      console.log("Login successful, redirecting...");
-      // Role-based redirection handled in useAuth hook
+      // Note: Navigation is now handled in the useAuth hook's signIn function
+      // based on the user's role, so we don't need explicit navigation here
     } catch (error: any) {
       console.error('Login failed:', error);
       toast({
