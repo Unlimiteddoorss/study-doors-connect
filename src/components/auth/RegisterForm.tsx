@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
-import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { hasValidSupabaseCredentials, createUserRole } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -148,18 +148,14 @@ const RegisterForm = () => {
       
       if (authData?.user) {
         try {
-          // Step 2: Insert user role directly
-          const { error: roleError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: authData.user.id,
-              role: formData.userType,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            });
+          // Step 2: Insert user role directly using our helper function
+          const roleCreated = await createUserRole(
+            authData.user.id,
+            formData.userType as 'student' | 'admin' | 'agent'
+          );
           
-          if (roleError) {
-            console.error('Error creating user role:', roleError);
+          if (!roleCreated) {
+            console.error('Error creating user role');
             // Continue because the auth part succeeded
           }
           
