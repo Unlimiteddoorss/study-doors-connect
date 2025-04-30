@@ -18,8 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MoreHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import TableSkeleton from './TableSkeleton';
-import TablePagination from './TablePagination';
+import { TableSkeleton } from './TableSkeleton';
+import { TablePagination } from './TablePagination';
 
 export interface FilterableTableProps {
   data: any[];
@@ -180,4 +180,4 @@ const FilterableTable = ({
   );
 };
 
-export default FilterableTable;
+export { FilterableTable };

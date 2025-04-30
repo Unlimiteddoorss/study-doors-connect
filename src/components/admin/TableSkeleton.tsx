@@ -7,7 +7,7 @@ interface TableSkeletonProps {
   rows?: number;
 }
 
-export const TableSkeleton = ({ columns, rows = 5 }: TableSkeletonProps) => {
+const TableSkeleton = ({ columns, rows = 5 }: TableSkeletonProps) => {
   return (
     <>
       {Array.from({ length: rows }).map((_, i) => (
@@ -22,3 +22,5 @@ export const TableSkeleton = ({ columns, rows = 5 }: TableSkeletonProps) => {
     </>
   );
 };
+
+export { TableSkeleton };

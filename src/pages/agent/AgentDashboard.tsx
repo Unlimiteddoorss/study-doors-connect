@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
@@ -6,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, LineChart } from "@/components/ui/chart";
 import { AgentStudentsList } from '@/components/agent/AgentStudentsList';
-import { AgentApplicationsList } from '@/components/agent/AgentApplicationsList';
+import AgentApplicationsList from '@/components/agent/AgentApplicationsList';
 
 const AgentDashboard = () => {
   const [period, setPeriod] = useState<'weekly' | 'monthly' | 'yearly'>('monthly');
