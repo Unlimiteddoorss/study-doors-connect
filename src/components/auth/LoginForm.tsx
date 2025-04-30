@@ -46,11 +46,10 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      await signIn(email, password);
+      const result = await signIn(email, password);
       
       console.log("Login successful, redirecting...");
       // Role-based redirection handled in useAuth hook
-      // No need to navigate here, it's handled in the signIn function in useAuth
     } catch (error: any) {
       console.error('Login failed:', error);
       toast({
@@ -78,7 +77,7 @@ const LoginForm = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          disabled={!supabaseConfigured}
+          disabled={!supabaseConfigured || isLoading}
         />
       </div>
       
@@ -87,7 +86,7 @@ const LoginForm = () => {
           <Label htmlFor="password">كلمة المرور</Label>
           <Link 
             to="/forgot-password" 
-            className={`text-sm text-unlimited-blue hover:underline ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}
+            className={`text-sm text-unlimited-blue hover:underline ${(!supabaseConfigured || isLoading) ? 'pointer-events-none opacity-50' : ''}`}
           >
             نسيت كلمة المرور؟
           </Link>
@@ -100,11 +99,12 @@ const LoginForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            disabled={!supabaseConfigured}
+            disabled={!supabaseConfigured || isLoading}
           />
           <button
             type="button"
             onClick={toggleShowPassword}
+            disabled={!supabaseConfigured || isLoading}
             className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
           >
             {showPassword ? (

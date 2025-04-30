@@ -45,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           });
 
           localStorage.setItem('userRole', userRole?.role || 'student');
+          localStorage.setItem('userId', session.user.id);
         } catch (error) {
           console.error('Error fetching user role:', error);
           setUser({
@@ -53,10 +54,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             role: 'student'
           });
           localStorage.setItem('userRole', 'student');
+          localStorage.setItem('userId', session.user.id);
         }
       } else {
         setUser(null);
         localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
       }
     });
 
@@ -79,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               role: (userRole?.role as 'student' | 'admin' | 'agent') || 'student'
             });
             localStorage.setItem('userRole', userRole?.role || 'student');
+            localStorage.setItem('userId', session.user.id);
           } catch (error) {
             console.error('Error fetching user role:', error);
             setUser({
@@ -87,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               role: 'student'
             });
             localStorage.setItem('userRole', 'student');
+            localStorage.setItem('userId', session.user.id);
           }
         }
         
@@ -120,6 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           const role = userRole?.role || 'student';
           localStorage.setItem('userRole', role);
+          localStorage.setItem('userId', data.user.id);
 
           toast({
             title: "تم تسجيل الدخول بنجاح",
@@ -137,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (error) {
           console.error('Error fetching user role:', error);
           localStorage.setItem('userRole', 'student');
+          localStorage.setItem('userId', data.user.id);
           navigate('/dashboard/applications');
         }
       }
@@ -153,16 +160,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, role: 'student' | 'admin' | 'agent' = 'student') => {
     try {
-      const { data, error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ 
+        email, 
+        password,
+        options: {
+          data: {
+            role: role
+          }
+        }
+      });
       
       if (error) throw error;
 
       if (data?.user) {
         // Insert user role
-        await supabase.from('user_roles').insert({
+        const { error: roleError } = await supabase.from('user_roles').insert({
           user_id: data.user.id,
           role: role
         });
+
+        if (roleError) {
+          console.error('Error adding user role:', roleError);
+          throw roleError;
+        }
 
         toast({
           title: "تم التسجيل بنجاح",
@@ -178,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: error.message || "حدث خطأ أثناء إنشاء الحساب",
         variant: "destructive"
       });
+      throw error;
     }
   };
 
@@ -188,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error;
       
       localStorage.removeItem('userRole');
+      localStorage.removeItem('userId');
       setUser(null);
       
       toast({

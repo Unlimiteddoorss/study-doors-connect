@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff, User, Mail, Phone, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, ShieldCheck, Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -16,6 +16,8 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
+import { hasValidSupabaseCredentials } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -31,9 +33,11 @@ const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [supabaseConfigured] = useState(hasValidSupabaseCredentials());
   
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
   // Calculate password strength
   const calculatePasswordStrength = (password: string): number => {
@@ -115,79 +119,29 @@ const RegisterForm = () => {
       });
       return;
     }
+
+    if (!supabaseConfigured) {
+      toast({
+        title: 'خطأ',
+        description: 'يجب تكوين Supabase قبل التسجيل',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     setIsLoading(true);
     
     try {
-      // Register with Supabase if configured
-      if (supabase) {
-        const { data, error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              full_name: formData.fullName,
-              phone: formData.phone,
-              user_type: formData.userType,
-            },
-          }
-        });
-        
-        if (error) {
-          throw error;
-        }
-        
-        // Store role in user_roles table
-        if (data.user) {
-          const { error: roleError } = await (supabase.rpc as any)('execute_sql', {
-            sql_string: `
-              INSERT INTO user_roles (user_id, role)
-              VALUES ('${data.user.id}', '${formData.userType}');
-            `
-          });
-          
-          if (roleError) console.error('Error setting user role:', roleError);
-          
-          // Store in localStorage for immediate use
-          localStorage.setItem('userRole', formData.userType);
-        }
-        
-        toast({
-          title: 'تم إنشاء الحساب بنجاح',
-          description: 'مرحباً بك في منصة أبواب غير محدودة',
-        });
-        
-        // Redirect based on user type
-        if (formData.userType === 'student') {
-          navigate('/dashboard');
-        } else if (formData.userType === 'agent') {
-          navigate('/agent');
-        }
-      } else {
-        // Fallback for demo purposes when Supabase is not configured
-        // Store in localStorage for demo purposes
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        users.push({
-          ...formData,
-          id: Date.now(),
-          password: '*****', // don't store actual password in local storage
-          createdAt: new Date().toISOString(),
-        });
-        localStorage.setItem('users', JSON.stringify(users));
-        localStorage.setItem('userRole', formData.userType);
-        
-        toast({
-          title: 'تم إنشاء الحساب بنجاح (وضع العرض)',
-          description: 'مرحباً بك في منصة أبواب غير محدودة',
-        });
-        
-        // Redirect based on user type
-        if (formData.userType === 'student') {
-          navigate('/dashboard');
-        } else if (formData.userType === 'agent') {
-          navigate('/agent');
-        }
-      }
+      // Use the signUp method from useAuth instead of directly using Supabase
+      await signUp(formData.email, formData.password, formData.userType as 'student' | 'admin' | 'agent');
+      
+      toast({
+        title: 'تم إنشاء الحساب بنجاح',
+        description: 'مرحباً بك في منصة أبواب غير محدودة',
+      });
+      
+      // Navigate to login after successful registration
+      navigate('/login');
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({
@@ -214,6 +168,7 @@ const RegisterForm = () => {
             onChange={handleChange}
             className="pl-10"
             required
+            disabled={!supabaseConfigured}
           />
         </div>
       </div>
@@ -231,6 +186,7 @@ const RegisterForm = () => {
             onChange={handleChange}
             className="pl-10"
             required
+            disabled={!supabaseConfigured}
           />
         </div>
       </div>
@@ -247,6 +203,7 @@ const RegisterForm = () => {
             onChange={handleChange}
             className="pl-10"
             required
+            disabled={!supabaseConfigured}
           />
         </div>
       </div>
@@ -256,6 +213,7 @@ const RegisterForm = () => {
         <Select 
           value={formData.userType} 
           onValueChange={(value) => handleSelectChange('userType', value)}
+          disabled={!supabaseConfigured}
         >
           <SelectTrigger>
             <SelectValue placeholder="اختر نوع المستخدم" />
@@ -280,6 +238,7 @@ const RegisterForm = () => {
             onChange={handleChange}
             className="pl-10"
             required
+            disabled={!supabaseConfigured}
           />
           <Button
             type="button"
@@ -287,6 +246,7 @@ const RegisterForm = () => {
             variant="ghost"
             size="icon"
             className="absolute right-0 top-0 h-full px-3"
+            disabled={!supabaseConfigured}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -338,6 +298,7 @@ const RegisterForm = () => {
             onChange={handleChange}
             className="pl-10"
             required
+            disabled={!supabaseConfigured}
           />
           <Button
             type="button"
@@ -345,6 +306,7 @@ const RegisterForm = () => {
             variant="ghost"
             size="icon"
             className="absolute right-0 top-0 h-full px-3"
+            disabled={!supabaseConfigured}
           >
             {showConfirmPassword ? (
               <EyeOff className="h-4 w-4" />
@@ -362,7 +324,8 @@ const RegisterForm = () => {
         <Checkbox 
           id="terms" 
           checked={formData.agreeTerms} 
-          onCheckedChange={handleCheckboxChange} 
+          onCheckedChange={handleCheckboxChange}
+          disabled={!supabaseConfigured}
         />
         <div className="grid gap-1.5 leading-none">
           <label
@@ -384,16 +347,23 @@ const RegisterForm = () => {
       <Button 
         type="submit" 
         className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90" 
-        disabled={isLoading}
+        disabled={isLoading || !supabaseConfigured}
       >
-        {isLoading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
+        {isLoading ? (
+          <div className="flex items-center justify-center">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <span>جاري إنشاء الحساب...</span>
+          </div>
+        ) : (
+          'إنشاء حساب'
+        )}
       </Button>
       
       <p className="text-center text-unlimited-gray text-sm">
         لديك حساب بالفعل؟{' '}
         <Link 
           to="/login" 
-          className="text-unlimited-blue hover:underline font-medium"
+          className={`text-unlimited-blue hover:underline font-medium ${!supabaseConfigured ? 'pointer-events-none opacity-50' : ''}`}
         >
           تسجيل الدخول
         </Link>
