@@ -1,229 +1,243 @@
-import { useState } from 'react';
-import { Card } from "@/components/ui/card";
-import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
-import ApplicationSteps from '@/components/student/ApplicationSteps';
-import PersonalInfoForm from '@/components/student/PersonalInfoForm';
-import { useToast } from '@/hooks/use-toast';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import StudentApplicationFormSubmit from '@/components/applications/StudentApplicationFormSubmit';
-import { useTranslation } from 'react-i18next';
-import DocumentsUploadForm from '@/components/student/DocumentsUploadForm';
-import AcademicInfoForm from '@/components/student/AcademicInfoForm';
-import ProgramSelectionForm from '@/components/student/ProgramSelectionForm';
-import ApplicationReview from '@/components/student/ApplicationReview';
-import ApplicationSubmissionHandler from '@/components/applications/ApplicationSubmissionHandler';
-import { useNavigate } from 'react-router-dom';
-import { hasValidSupabaseCredentials } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
 
-// Define application data interface
-interface ApplicationData {
-  personalInfo?: any;
-  documents?: any[];
-  academicInfo?: any;
-  program?: any;
-  university?: string;
-}
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { useToast } from '@/hooks/use-toast';
+import { StudentApplicationForm } from '@/components/applications/StudentApplicationForm';
+import { StudentApplicationFormSubmit } from '@/components/applications/StudentApplicationFormSubmit';
+import { ApplicationSubmissionHandler } from '@/components/applications/ApplicationSubmissionHandler';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { BookOpen, University, Search } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const StudentApplication = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [canSubmit, setCanSubmit] = useState(true);
-  const [formData, setFormData] = useState<ApplicationData>({});
-  const { toast } = useToast();
-  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { user } = useAuth();
-  const isRtl = i18n.language === 'ar';
-  const hasSupabase = hasValidSupabaseCredentials();
-
-  // Check if user is logged in
-  if (!user) {
-    return (
-      <DashboardLayout>
-        <div className="max-w-5xl mx-auto py-8 px-4">
-          <Alert className="mb-4 border-yellow-300 bg-yellow-50">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              {t("auth.requiredLogin", "يجب تسجيل الدخول لتقديم طلب جديد.")}
-            </AlertDescription>
-          </Alert>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  // Validate current step data
-  const validateCurrentStep = () => {
-    if (currentStep === 1) {
-      // التحقق من بيانات الطالب الشخصية
-      if (!formData.personalInfo?.firstName || !formData.personalInfo?.lastName) {
-        toast({
-          title: t("application.validation.error"),
-          description: t("application.validation.personalInfoIncomplete"),
-          variant: "destructive",
-        });
-        return false;
-      }
-    } else if (currentStep === 2) {
-      // التحقق من المستندات
-      // هنا يمكن التحقق من وجود المستندات المطلوبة
-    } else if (currentStep === 3) {
-      // التحقق من المعلومات الأكاديمية
-      if (!formData.academicInfo?.education) {
-        toast({
-          title: t("application.validation.error"),
-          description: t("application.validation.academicInfoIncomplete"),
-          variant: "destructive",
-        });
-        return false;
-      }
-    } else if (currentStep === 4) {
-      // التحقق من اختيار البرنامج
-      if (!formData.program?.name || !formData.university) {
-        toast({
-          title: t("application.validation.error"),
-          description: t("application.validation.programSelectionIncomplete"),
-          variant: "destructive",
-        });
-        return false;
-      }
+  
+  const [step, setStep] = useState(1);
+  const [selectedUniversity, setSelectedUniversity] = useState<number | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<number | null>(null);
+  const [personalInfo, setPersonalInfo] = useState({});
+  const [academicInfo, setAcademicInfo] = useState({});
+  const [universities, setUniversities] = useState([
+    { id: 1, name: 'جامعة الملك سعود', name_ar: 'جامعة الملك سعود', country: 'المملكة العربية السعودية', city: 'الرياض' },
+    { id: 2, name: 'Istanbul Technical University', name_ar: 'جامعة إسطنبول التقنية', country: 'تركيا', city: 'إسطنبول' },
+    { id: 3, name: 'Cairo University', name_ar: 'جامعة القاهرة', country: 'مصر', city: 'القاهرة' },
+  ]);
+  
+  const [programs, setPrograms] = useState([
+    { id: 1, university_id: 1, name: 'Software Engineering', name_ar: 'هندسة البرمجيات', degree_type: 'bachelor' },
+    { id: 2, university_id: 1, name: 'Computer Science', name_ar: 'علوم الحاسب', degree_type: 'bachelor' },
+    { id: 3, university_id: 2, name: 'Medicine', name_ar: 'الطب البشري', degree_type: 'medicine' },
+    { id: 4, university_id: 2, name: 'Civil Engineering', name_ar: 'الهندسة المدنية', degree_type: 'bachelor' },
+    { id: 5, university_id: 3, name: 'Business Administration', name_ar: 'إدارة الأعمال', degree_type: 'master' },
+  ]);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const filteredPrograms = programs.filter(program => 
+    !selectedUniversity || program.university_id === selectedUniversity
+  );
+  
+  const handleSubmit = async () => {
+    if (!selectedUniversity || !selectedProgram) {
+      toast({
+        title: "خطأ في البيانات",
+        description: "يرجى اختيار الجامعة والبرنامج الدراسي",
+        variant: "destructive",
+      });
+      return;
     }
     
-    return true;
-  };
-
-  // Go to previous step
-  const handleBack = () => {
-    setCurrentStep((prev) => Math.max(1, prev - 1));
-  };
-
-  // Go to next step or submit
-  const handleNext = () => {
-    if (!validateCurrentStep()) return;
-
-    if (currentStep < 5) {
-      setCurrentStep((prev) => prev + 1);
+    setIsSubmitting(true);
+    
+    try {
+      // In a real application, you would submit to Supabase here
+      // For now, we'll simulate a submission
+      
+      setTimeout(() => {
+        toast({
+          title: "تم تقديم الطلب بنجاح",
+          description: "سيتم مراجعة طلبك والرد عليك في أقرب وقت",
+        });
+        
+        navigate('/dashboard/applications');
+      }, 1500);
+      
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      toast({
+        title: "خطأ في تقديم الطلب",
+        description: "حدث خطأ أثناء تقديم طلبك. الرجاء المحاولة مرة أخرى",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
-
-  // Update form data
-  const updateFormData = (step: number, data: any) => {
-    setFormData(prevData => {
-      switch(step) {
-        case 1:
-          return { ...prevData, personalInfo: { ...prevData.personalInfo, ...data } };
-        case 2:
-          return { ...prevData, documents: data };
-        case 3:
-          return { ...prevData, academicInfo: { ...prevData.academicInfo, ...data } };
-        case 4:
-          return { ...prevData, program: data.program, university: data.university };
-        default:
-          return prevData;
-      }
-    });
+  
+  const nextStep = () => {
+    setStep(step + 1);
   };
-
-  // Check if form is complete
-  const isFormComplete = () => {
-    // التحقق من اكتمال جميع البيانات المطلوبة للطلب
-    return (
-      formData.personalInfo?.firstName && 
-      formData.personalInfo?.lastName &&
-      formData.academicInfo?.education &&
-      formData.program?.name &&
-      formData.university
-    );
+  
+  const prevStep = () => {
+    setStep(step - 1);
   };
-
-  // Render current step content
-  const renderStepContent = () => {
-    switch(currentStep) {
-      case 1:
-        return (
-          <PersonalInfoForm 
-            initialData={formData.personalInfo} 
-            onSave={(data) => updateFormData(1, data)}
-          />
-        );
-      case 2:
-        return (
-          <DocumentsUploadForm 
-            initialDocuments={formData.documents} 
-            onSave={(data) => updateFormData(2, data)}
-          />
-        );
-      case 3:
-        return (
-          <AcademicInfoForm 
-            initialData={formData.academicInfo} 
-            onSave={(data) => updateFormData(3, data)}
-          />
-        );
-      case 4:
-        return (
-          <ProgramSelectionForm 
-            initialData={{ program: formData.program, university: formData.university }}
-            onSave={(data) => updateFormData(4, data)}
-          />
-        );
-      case 5:
-        return (
-          <ApplicationReview formData={formData} />
-        );
-      default:
-        return null;
-    }
-  };
-
+  
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto py-8 px-4">
-        <StudentApplicationHeader />
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-2xl font-bold mb-6">تقديم طلب التحاق</h1>
         
-        {!hasSupabase && (
-          <Alert className="mb-4 border-yellow-300 bg-yellow-50">
-            <AlertTriangle className="h-5 w-5 text-yellow-600" />
-            <AlertDescription className="text-yellow-800">
-              {t("supabase.setup.requiredForSubmission", "تكوين Supabase مطلوب لتقديم الطلبات. يرجى الرجوع إلى دليل الإعداد في الصفحة الرئيسية.")}
-            </AlertDescription>
-          </Alert>
-        )}
-        
-        <Card className="p-6">
-          <ApplicationSteps currentStep={currentStep} />
-          
-          <div className="mb-6">
-            {renderStepContent()}
-          </div>
-          
-          {currentStep < 5 ? (
-            <StudentApplicationFormSubmit
-              isLastStep={false}
-              isSubmitting={isSubmitting}
-              canSubmit={canSubmit}
-              formData={formData}
-              onBack={handleBack}
-              onSubmit={handleNext}
-            />
-          ) : (
-            <div className="mt-8">
-              <ApplicationSubmissionHandler 
-                formData={formData} 
-                onSubmit={() => {
-                  // Show success message and redirect to dashboard
-                  toast({
-                    title: t("application.submission.success"),
-                    description: t("application.submission.successMessage")
-                  });
-                  navigate('/dashboard/applications');
-                }}
-              />
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>اختيار الجامعة والبرنامج</CardTitle>
+            <CardDescription>قم باختيار الجامعة والبرنامج الدراسي الذي ترغب بالتقديم إليه</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="university">الجامعة</Label>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <Select value={selectedUniversity?.toString()} onValueChange={(value) => setSelectedUniversity(Number(value))}>
+                      <SelectTrigger id="university" className="w-full">
+                        <SelectValue placeholder="اختر الجامعة" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {universities.map(uni => (
+                          <SelectItem key={uni.id} value={uni.id.toString()}>
+                            {uni.name_ar} - {uni.city}, {uni.country}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button variant="outline" size="icon">
+                    <Search className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="program">البرنامج الدراسي</Label>
+                <Select 
+                  value={selectedProgram?.toString()} 
+                  onValueChange={(value) => setSelectedProgram(Number(value))}
+                  disabled={!selectedUniversity}
+                >
+                  <SelectTrigger id="program" className="w-full">
+                    <SelectValue placeholder={selectedUniversity ? "اختر البرنامج الدراسي" : "اختر الجامعة أولاً"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredPrograms.map(program => (
+                      <SelectItem key={program.id} value={program.id.toString()}>
+                        {program.name_ar} ({program.degree_type === 'bachelor' ? 'بكالوريوس' : 
+                          program.degree_type === 'master' ? 'ماجستير' : 
+                          program.degree_type === 'phd' ? 'دكتوراه' : 
+                          program.degree_type === 'medicine' ? 'طب' : program.degree_type})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {selectedUniversity && selectedProgram && (
+                <div className="bg-blue-50 p-4 rounded-md">
+                  <h3 className="font-semibold text-unlimited-dark-blue mb-2">ملخص الطلب</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-start gap-3">
+                      <University className="h-5 w-5 mt-1 text-unlimited-blue" />
+                      <div>
+                        <p className="text-sm text-unlimited-gray">الجامعة</p>
+                        <p className="font-medium">
+                          {universities.find(u => u.id === selectedUniversity)?.name_ar}
+                        </p>
+                        <p className="text-sm text-unlimited-gray">
+                          {universities.find(u => u.id === selectedUniversity)?.city}, 
+                          {universities.find(u => u.id === selectedUniversity)?.country}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <BookOpen className="h-5 w-5 mt-1 text-unlimited-blue" />
+                      <div>
+                        <p className="text-sm text-unlimited-gray">البرنامج الدراسي</p>
+                        <p className="font-medium">
+                          {programs.find(p => p.id === selectedProgram)?.name_ar}
+                        </p>
+                        <p className="text-sm text-unlimited-gray">
+                          {programs.find(p => p.id === selectedProgram)?.degree_type === 'bachelor' ? 'بكالوريوس' : 
+                           programs.find(p => p.id === selectedProgram)?.degree_type === 'master' ? 'ماجستير' : 
+                           programs.find(p => p.id === selectedProgram)?.degree_type === 'phd' ? 'دكتوراه' : 
+                           programs.find(p => p.id === selectedProgram)?.degree_type === 'medicine' ? 'طب' : 
+                           programs.find(p => p.id === selectedProgram)?.degree_type}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>بيانات طلب الالتحاق</CardTitle>
+            <CardDescription>يرجى تعبئة النموذج التالي بالبيانات المطلوبة</CardDescription>
+          </CardHeader>
+          <CardContent className="p-6">
+            <Tabs defaultValue="personal" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="personal">البيانات الشخصية</TabsTrigger>
+                <TabsTrigger value="academic">البيانات الأكاديمية</TabsTrigger>
+              </TabsList>
+              <TabsContent value="personal" className="pt-6">
+                <StudentApplicationForm
+                  type="personal"
+                  value={personalInfo}
+                  onChange={setPersonalInfo}
+                />
+              </TabsContent>
+              <TabsContent value="academic" className="pt-6">
+                <StudentApplicationForm
+                  type="academic"
+                  value={academicInfo}
+                  onChange={setAcademicInfo}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+          <CardFooter className="flex justify-between">
+            <Button variant="outline">حفظ كمسودة</Button>
+            <StudentApplicationFormSubmit
+              onSubmit={handleSubmit}
+              isSubmitting={isSubmitting}
+              university={universities.find(u => u.id === selectedUniversity)}
+              program={programs.find(p => p.id === selectedProgram)}
+              isValid={!!selectedUniversity && !!selectedProgram}
+            />
+          </CardFooter>
         </Card>
       </div>
     </DashboardLayout>

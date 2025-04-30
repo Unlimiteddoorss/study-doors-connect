@@ -1,18 +1,21 @@
 
 import { Routes, Route } from "react-router-dom";
 import AgentDashboard from "@/pages/agent/AgentDashboard";
+import AgentApplications from "@/pages/agent/AgentApplications";
+import AgentStudents from "@/pages/agent/AgentStudents";
+import AgentProfile from "@/pages/agent/AgentProfile";
+import AgentMessages from "@/pages/agent/AgentMessages";
+import AgentReports from "@/pages/agent/AgentReports";
 
 export const AgentRoutes = () => {
   return (
     <Routes>
       <Route index element={<AgentDashboard />} />
-      {/* Add more agent routes here as they are developed */}
-      <Route path="students" element={<div>Agent Students Management</div>} />
-      <Route path="applications" element={<div>Agent Applications Management</div>} />
-      <Route path="messages" element={<div>Agent Messages</div>} />
-      <Route path="notifications" element={<div>Agent Notifications</div>} />
-      <Route path="profile" element={<div>Agent Profile</div>} />
-      <Route path="settings" element={<div>Agent Settings</div>} />
+      <Route path="applications" element={<AgentApplications />} />
+      <Route path="students" element={<AgentStudents />} />
+      <Route path="profile" element={<AgentProfile />} />
+      <Route path="messages" element={<AgentMessages />} />
+      <Route path="reports" element={<AgentReports />} />
     </Routes>
   );
 };

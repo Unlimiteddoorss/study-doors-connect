@@ -1,725 +1,499 @@
 
 import { useState } from 'react';
-import { CheckCircle, Download, Edit, Eye, MoreHorizontal, Plus, Search, Trash, Upload, MessageSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { FilterableTable } from '@/components/admin/FilterableTable';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Link } from 'react-router-dom';
-
-// Countries data
-const availableCountries = [
-  'Australia', 'Azerbaijan', 'Bosnia and Herzegovina', 'Czech Republic', 'Egypt', 
-  'Georgia', 'Germany', 'Hungary', 'Ireland', 'Kosovo', 'Macedonia', 'Malaysia', 
-  'Malta', 'Montenegro', 'Northern Cyprus', 'Poland', 'Scotland', 'Serbia', 'Spain', 
-  'Turkey', 'United Kingdom', 'United States'
-];
-
-// Degree types
-const degreeTypes = [
-  'Associate', 'Bachelor', 'Diploma', 'Doctorate', 'Foundation Year', 
-  'Language Course', 'Master', 'Training Course'
-];
-
-// Program specialties - first 20 for brevity
-const programSpecialties = [
-  'Accounting and Auditing', 'Accounting, Finance & Economics', 'Aerospace, Aeronautical', 
-  'Agriculture', 'Agriculture Engineering', 'Animal Science', 'Anthropology', 'Arabic', 
-  'Archaeology', 'Architectural Engineering', 'Architecture', 'Art', 'Astronomy', 
-  'Aviation Management', 'Aviation Technology', 'Biochemistry', 'Biology', 'Biomedical', 
-  'Biomedical Engineering', 'Business Administration, Management, General'
-];
-
-type Program = {
-  id: string;
-  name: string;
-  university: string;
-  department: string;
-  level: 'bachelor' | 'master' | 'phd';
-  duration: string;
-  language: string;
-  fees: number;
-  status: 'active' | 'inactive' | 'new';
-  applicationCount: number;
-  country: string;
-};
-
-const initialPrograms: Program[] = [
-  {
-    id: 'PRG-001',
-    name: 'الطب البشري',
-    university: 'جامعة إسطنبول',
-    department: 'كلية الطب',
-    level: 'bachelor',
-    duration: '6 سنوات',
-    language: 'إنجليزية',
-    fees: 8500,
-    status: 'active',
-    applicationCount: 45,
-    country: 'Turkey'
-  },
-  {
-    id: 'PRG-002',
-    name: 'طب الأسنان',
-    university: 'جامعة وارسو',
-    department: 'كلية طب الأسنان',
-    level: 'bachelor',
-    duration: '5 سنوات',
-    language: 'إنجليزية',
-    fees: 7200,
-    status: 'active',
-    applicationCount: 32,
-    country: 'Poland'
-  },
-  {
-    id: 'PRG-003',
-    name: 'هندسة البرمجيات',
-    university: 'جامعة براغ',
-    department: 'كلية الهندسة',
-    level: 'bachelor',
-    duration: '4 سنوات',
-    language: 'إنجليزية',
-    fees: 5000,
-    status: 'active',
-    applicationCount: 56,
-    country: 'Czech Republic'
-  },
-  {
-    id: 'PRG-004',
-    name: 'علوم الحاسوب',
-    university: 'جامعة بودابست',
-    department: 'كلية تكنولوجيا المعلومات',
-    level: 'master',
-    duration: '2 سنوات',
-    language: 'إنجليزية',
-    fees: 6200,
-    status: 'new',
-    applicationCount: 12,
-    country: 'Hungary'
-  },
-  {
-    id: 'PRG-005',
-    name: 'الصيدلة',
-    university: 'جامعة أنقرة',
-    department: 'كلية الصيدلة',
-    level: 'bachelor',
-    duration: '5 سنوات',
-    language: 'تركية وإنجليزية',
-    fees: 6800,
-    status: 'active',
-    applicationCount: 38,
-    country: 'Turkey'
-  },
-  {
-    id: 'PRG-006',
-    name: 'إدارة الأعمال',
-    university: 'جامعة إسطنبول',
-    department: 'كلية إدارة الأعمال',
-    level: 'master',
-    duration: '2 سنوات',
-    language: 'إنجليزية',
-    fees: 4500,
-    status: 'inactive',
-    applicationCount: 20,
-    country: 'Turkey'
-  },
-  {
-    id: 'PRG-007',
-    name: 'الذكاء الاصطناعي',
-    university: 'جامعة براغ',
-    department: 'كلية علوم الحاسوب',
-    level: 'phd',
-    duration: '3 سنوات',
-    language: 'إنجليزية',
-    fees: 9000,
-    status: 'new',
-    applicationCount: 8,
-    country: 'Czech Republic'
-  },
-];
-
-const statusConfig = {
-  active: { label: 'نشط', color: 'bg-unlimited-success text-white' },
-  inactive: { label: 'غير نشط', color: 'bg-unlimited-gray text-white' },
-  new: { label: 'جديد', color: 'bg-unlimited-warning text-white' },
-};
-
-const levelConfig = {
-  bachelor: 'بكالوريوس',
-  master: 'ماجستير',
-  phd: 'دكتوراه',
-};
+import { PlusCircle, Search, Filter, Edit, Trash2, GraduationCap, Check, X } from 'lucide-react';
 
 const ManagePrograms = () => {
-  const [programs, setPrograms] = useState<Program[]>(initialPrograms);
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [universityFilter, setUniversityFilter] = useState<string>('all');
-  const [levelFilter, setLevelFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [countryFilter, setCountryFilter] = useState<string>('all');
+  const [universityFilter, setUniversityFilter] = useState('all');
+  const [degreeFilter, setDegreeFilter] = useState('all');
+  const [isLoading, setIsLoading] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [isContactDialogOpen, setIsContactDialogOpen] = useState(false);
-  const [selectedProgramId, setSelectedProgramId] = useState<string | null>(null);
-  
-  // Form fields for new program
-  const [newProgram, setNewProgram] = useState({
-    name: '',
-    university: '',
-    department: '',
-    level: 'bachelor',
-    duration: '',
-    language: '',
-    fees: 0,
-    country: '',
-    specialty: '',
-  });
-
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
   const { toast } = useToast();
 
-  const universities = Array.from(new Set(programs.map(program => program.university)));
-  const countries = Array.from(new Set(programs.map(program => program.country)));
+  // Mock data for programs
+  const [programs, setPrograms] = useState([
+    {
+      id: 1,
+      name: "Software Engineering",
+      name_ar: "هندسة البرمجيات",
+      university_id: 1,
+      university_name: "جامعة الملك سعود",
+      degree_type: "bachelor",
+      duration: 4,
+      language: "English",
+      tuition_fee: 120000,
+      quota: 50,
+      description: "Bachelor's degree in Software Engineering",
+      description_ar: "برنامج بكالوريوس في هندسة البرمجيات",
+      is_active: true
+    },
+    {
+      id: 2,
+      name: "Medicine",
+      name_ar: "الطب البشري",
+      university_id: 2,
+      university_name: "جامعة إسطنبول التقنية",
+      degree_type: "medicine",
+      duration: 6,
+      language: "Turkish",
+      tuition_fee: 200000,
+      quota: 30,
+      description: "Medicine program with specialization options",
+      description_ar: "برنامج الطب البشري مع خيارات التخصص",
+      is_active: true
+    },
+    {
+      id: 3,
+      name: "Business Administration",
+      name_ar: "إدارة الأعمال",
+      university_id: 3,
+      university_name: "جامعة القاهرة",
+      degree_type: "master",
+      duration: 2,
+      language: "English",
+      tuition_fee: 80000,
+      quota: 40,
+      description: "Master's degree in Business Administration",
+      description_ar: "برنامج ماجستير في إدارة الأعمال",
+      is_active: false
+    },
+  ]);
 
+  // Filter programs based on search and filters
   const filteredPrograms = programs.filter((program) => {
-    const matchesSearch = 
+    const matchesSearch =
       program.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      program.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      program.id.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesUniversity = universityFilter === 'all' || program.university === universityFilter;
-    const matchesLevel = levelFilter === 'all' || program.level === levelFilter;
-    const matchesStatus = statusFilter === 'all' || program.status === statusFilter;
-    const matchesCountry = countryFilter === 'all' || program.country === countryFilter;
-    
-    return matchesSearch && matchesUniversity && matchesLevel && matchesStatus && matchesCountry;
+      program.name_ar.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesUniversity = universityFilter === "all" || program.university_id.toString() === universityFilter;
+    const matchesDegree = degreeFilter === "all" || program.degree_type === degreeFilter;
+
+    return matchesSearch && matchesUniversity && matchesDegree;
   });
 
+  // Extract unique universities for filter
+  const universities = [...new Set(programs.map((program) => ({ 
+    id: program.university_id, 
+    name: program.university_name 
+  })))];
+
+  // Degree types configuration for UI
+  const degreeTypes = {
+    bachelor: { label: 'بكالوريوس', value: 'bachelor' },
+    master: { label: 'ماجستير', value: 'master' },
+    phd: { label: 'دكتوراه', value: 'phd' },
+    medicine: { label: 'طب', value: 'medicine' },
+    diploma: { label: 'دبلوم', value: 'diploma' },
+  };
+
+  // Handlers
   const handleAddProgram = () => {
-    const newProgramEntry = {
-      id: `PRG-${String(programs.length + 1).padStart(3, '0')}`,
-      name: newProgram.name,
-      university: newProgram.university,
-      department: newProgram.department,
-      level: newProgram.level as 'bachelor' | 'master' | 'phd',
-      duration: newProgram.duration,
-      language: newProgram.language,
-      fees: parseFloat(String(newProgram.fees)),
-      status: 'new' as const,
-      applicationCount: 0,
-      country: newProgram.country
+    setIsAddDialogOpen(true);
+  };
+
+  const handleSaveNewProgram = (formData) => {
+    // Here you would typically make an API call to add the program
+    const newProgram = {
+      id: programs.length + 1,
+      ...formData,
+      is_active: true
     };
-
-    setPrograms([...programs, newProgramEntry]);
     
-    toast({
-      title: "تمت إضافة البرنامج",
-      description: "تم إضافة البرنامج الجديد بنجاح",
-    });
-    
-    // Reset form
-    setNewProgram({
-      name: '',
-      university: '',
-      department: '',
-      level: 'bachelor',
-      duration: '',
-      language: '',
-      fees: 0,
-      country: '',
-      specialty: '',
-    });
-    
+    setPrograms([...programs, newProgram]);
     setIsAddDialogOpen(false);
-  };
-
-  const handleImportPrograms = () => {
+    
     toast({
-      title: "تم استيراد البيانات",
-      description: "تم استيراد بيانات البرامج بنجاح",
-    });
-    setIsImportDialogOpen(false);
-  };
-
-  const handleExportPrograms = () => {
-    toast({
-      title: "تم تصدير البيانات",
-      description: "تم تصدير بيانات البرامج بنجاح",
+      title: "تمت الإضافة بنجاح",
+      description: `تمت إضافة ${formData.name_ar} إلى قائمة البرامج`,
     });
   };
 
-  const handleDeleteProgram = (id: string) => {
-    setPrograms(programs.filter((program) => program.id !== id));
-    toast({
-      title: "تم حذف البرنامج",
-      description: `تم حذف البرنامج رقم ${id} بنجاح`,
-    });
+  const handleEditProgram = (program) => {
+    setSelectedProgram(program);
+    setIsEditDialogOpen(true);
   };
 
-  const handleToggleProgramStatus = (id: string) => {
-    setPrograms(
-      programs.map((program) =>
-        program.id === id
-          ? {
-              ...program,
-              status: program.status === 'active' ? 'inactive' : 'active',
-            }
-          : program
-      )
+  const handleSaveEditedProgram = (formData) => {
+    // Here you would typically make an API call to update the program
+    const updatedPrograms = programs.map((prog) =>
+      prog.id === selectedProgram.id ? { ...prog, ...formData } : prog
     );
     
-    const program = programs.find((p) => p.id === id);
-    if (program) {
-      toast({
-        title: "تم تغيير الحالة",
-        description: `تم تغيير حالة البرنامج ${program.name} بنجاح`,
-      });
-    }
-  };
-
-  const handleContactProgram = (id: string) => {
-    setSelectedProgramId(id);
-    setIsContactDialogOpen(true);
-  };
-
-  const handleSendMessage = () => {
+    setPrograms(updatedPrograms);
+    setIsEditDialogOpen(false);
+    
     toast({
-      title: "تم إرسال الرسالة",
-      description: "تم إرسال الرسالة بنجاح إلى المسؤولين عن البرنامج",
+      title: "تم التحديث بنجاح",
+      description: `تم تحديث بيانات ${formData.name_ar}`,
     });
-    setIsContactDialogOpen(false);
   };
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setNewProgram(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const handleDeleteProgram = (program) => {
+    // Here you would typically confirm before deletion
+    const updatedPrograms = programs.filter((prog) => prog.id !== program.id);
+    setPrograms(updatedPrograms);
+    
+    toast({
+      title: "تم الحذف بنجاح",
+      description: `تم حذف ${program.name_ar} من قائمة البرامج`,
+    });
+  };
+
+  const handleToggleProgramStatus = (program) => {
+    const updatedPrograms = programs.map((prog) =>
+      prog.id === program.id ? { ...prog, is_active: !prog.is_active } : prog
+    );
+    
+    setPrograms(updatedPrograms);
+    
+    toast({
+      title: program.is_active ? "تم تعطيل البرنامج" : "تم تفعيل البرنامج",
+      description: `تم ${program.is_active ? "تعطيل" : "تفعيل"} برنامج ${program.name_ar}`,
+    });
   };
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة البرامج الدراسية</h2>
-          
-          <div className="flex flex-col md:flex-row gap-2">
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  إضافة برنامج
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                  <DialogTitle>إضافة برنامج جديد</DialogTitle>
-                  <DialogDescription>
-                    أدخل معلومات البرنامج الدراسي الجديد. اضغط على حفظ عند الانتهاء.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">اسم البرنامج</label>
-                    <Input 
-                      className="col-span-3" 
-                      value={newProgram.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الدولة</label>
-                    <div className="col-span-3">
-                      <Select 
-                        value={newProgram.country}
-                        onValueChange={(value) => handleInputChange('country', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر الدولة" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[300px] overflow-y-auto">
-                          {availableCountries.map((country) => (
-                            <SelectItem key={country} value={country}>{country}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الجامعة</label>
-                    <Input 
-                      className="col-span-3" 
-                      value={newProgram.university}
-                      onChange={(e) => handleInputChange('university', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">القسم</label>
-                    <Input 
-                      className="col-span-3" 
-                      value={newProgram.department}
-                      onChange={(e) => handleInputChange('department', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">التخصص</label>
-                    <div className="col-span-3">
-                      <Select 
-                        value={newProgram.specialty}
-                        onValueChange={(value) => handleInputChange('specialty', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر التخصص" />
-                        </SelectTrigger>
-                        <SelectContent className="max-h-[300px] overflow-y-auto">
-                          {programSpecialties.map((specialty) => (
-                            <SelectItem key={specialty} value={specialty}>{specialty}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">المستوى</label>
-                    <div className="col-span-3">
-                      <Select 
-                        value={newProgram.level}
-                        onValueChange={(value) => handleInputChange('level', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر المستوى" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="bachelor">بكالوريوس</SelectItem>
-                          <SelectItem value="master">ماجستير</SelectItem>
-                          <SelectItem value="phd">دكتوراه</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">مدة الدراسة</label>
-                    <Input 
-                      className="col-span-3" 
-                      value={newProgram.duration}
-                      onChange={(e) => handleInputChange('duration', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">لغة الدراسة</label>
-                    <Input 
-                      className="col-span-3" 
-                      value={newProgram.language}
-                      onChange={(e) => handleInputChange('language', e.target.value)}
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <label className="text-right col-span-1">الرسوم (دولار)</label>
-                    <Input 
-                      type="number" 
-                      className="col-span-3"
-                      value={newProgram.fees}
-                      onChange={(e) => handleInputChange('fees', parseFloat(e.target.value))} 
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="mr-2">
-                    إلغاء
-                  </Button>
-                  <Button type="submit" onClick={handleAddProgram}>
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    حفظ
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  استيراد
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>استيراد بيانات البرامج</DialogTitle>
-                  <DialogDescription>
-                    يرجى تحميل ملف CSV أو Excel يحتوي على بيانات البرامج.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
-                    <p className="mt-2 text-sm text-unlimited-gray">
-                      اسحب وأفلت الملف هنا أو انقر للاختيار
-                    </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      اختيار ملف
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button type="submit" onClick={handleImportPrograms}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    استيراد البيانات
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button variant="outline" onClick={handleExportPrograms}>
-              <Download className="h-4 w-4 mr-2" />
-              تصدير
-            </Button>
-          </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-unlimited-dark-blue">إدارة البرامج الدراسية</h1>
+          <Button onClick={handleAddProgram} className="gap-2">
+            <PlusCircle className="h-4 w-4" />
+            إضافة برنامج
+          </Button>
         </div>
-        
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full md:w-auto">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
-            <Input
-              placeholder="البحث عن برنامج..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-full md:w-[300px]"
-            />
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-2 items-center">
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الدولة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الدول</SelectItem>
-                {countries.map((country) => (
-                  <SelectItem key={country} value={country}>{country}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={universityFilter} onValueChange={setUniversityFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الجامعة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الجامعات</SelectItem>
-                {universities.map((university) => (
-                  <SelectItem key={university} value={university}>{university}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={levelFilter} onValueChange={setLevelFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="المستوى" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع المستويات</SelectItem>
-                <SelectItem value="bachelor">بكالوريوس</SelectItem>
-                <SelectItem value="master">ماجستير</SelectItem>
-                <SelectItem value="phd">دكتوراه</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الحالة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
-                <SelectItem value="active">نشط</SelectItem>
-                <SelectItem value="inactive">غير نشط</SelectItem>
-                <SelectItem value="new">جديد</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">رقم البرنامج</TableHead>
-                <TableHead>اسم البرنامج</TableHead>
-                <TableHead className="hidden md:table-cell">الجامعة</TableHead>
-                <TableHead className="hidden lg:table-cell">الدولة</TableHead>
-                <TableHead className="hidden lg:table-cell">المستوى</TableHead>
-                <TableHead className="hidden lg:table-cell">المدة</TableHead>
-                <TableHead>الرسوم</TableHead>
-                <TableHead>الطلبات</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-left">الإجراءات</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredPrograms.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={10} className="text-center h-40 text-unlimited-gray">
-                    لا توجد بيانات متطابقة مع البحث
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredPrograms.map((program) => (
-                  <TableRow key={program.id}>
-                    <TableCell className="font-medium">{program.id}</TableCell>
-                    <TableCell>
-                      <div>
-                        <p>{program.name}</p>
-                        <p className="text-xs text-unlimited-gray hidden md:block lg:hidden">{program.university}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">{program.university}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{program.country}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{levelConfig[program.level]}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{program.duration}</TableCell>
-                    <TableCell>{program.fees} $</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-medium">
-                        {program.applicationCount}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={statusConfig[program.status].color}>
-                        {statusConfig[program.status].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8"
-                          onClick={() => handleContactProgram(program.id)}
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>خيارات البرنامج</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleToggleProgramStatus(program.id)}>
-                              {program.status === 'active' ? 'تعطيل البرنامج' : 'تفعيل البرنامج'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>عرض تفاصيل البرنامج</DropdownMenuItem>
-                            <DropdownMenuItem>عرض طلبات الالتحاق</DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Link to="/admin/messages" className="flex items-center w-full">
-                                <MessageSquare className="h-4 w-4 mr-2" />
-                                التواصل مع إدارة البرنامج
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-unlimited-danger focus:text-unlimited-danger"
-                              onClick={() => handleDeleteProgram(program.id)}
-                            >
-                              <Trash className="h-4 w-4 mr-2" />
-                              حذف
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
 
-      <Dialog open={isContactDialogOpen} onOpenChange={setIsContactDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>التواصل مع إدارة البرنامج</DialogTitle>
-            <DialogDescription>
-              {selectedProgramId && programs.find(p => p.id === selectedProgramId)?.name}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label className="text-right col-span-1">الموضوع</label>
-              <Input className="col-span-3" placeholder="موضوع الرسالة" />
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-unlimited-gray" />
+              <Input
+                placeholder="بحث باسم البرنامج"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
-            <div className="grid grid-cols-4 items-start gap-4">
-              <label className="text-right col-span-1 mt-3">الرسالة</label>
-              <div className="col-span-3">
-                <textarea 
-                  className="w-full border rounded-md p-2 h-32" 
-                  placeholder="اكتب رسالتك هنا..."
-                ></textarea>
-              </div>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label className="text-right col-span-1">المرفقات</label>
-              <div className="col-span-3">
-                <Button variant="outline" className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  إضافة مرفقات
-                </Button>
-              </div>
-            </div>
+            <Select value={universityFilter} onValueChange={setUniversityFilter}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="فلترة حسب الجامعة" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل الجامعات</SelectItem>
+                {universities.map((university) => (
+                  <SelectItem key={university.id} value={university.id.toString()}>
+                    {university.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={degreeFilter} onValueChange={setDegreeFilter}>
+              <SelectTrigger>
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="فلترة حسب الدرجة العلمية" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل الدرجات</SelectItem>
+                {Object.values(degreeTypes).map((degree) => (
+                  <SelectItem key={degree.value} value={degree.value}>
+                    {degree.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsContactDialogOpen(false)} className="mr-2">
-              إلغاء
-            </Button>
-            <Button onClick={handleSendMessage}>
-              <MessageSquare className="h-4 w-4 mr-2" />
-              إرسال
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          <FilterableTable
+            data={filteredPrograms}
+            isLoading={isLoading}
+            columns={[
+              { header: "اسم البرنامج (عربي)", accessor: "name_ar" },
+              { header: "اسم البرنامج (إنجليزي)", accessor: "name", hideOnMobile: true },
+              { header: "الجامعة", accessor: "university_name" },
+              { 
+                header: "الدرجة العلمية", 
+                accessor: "degree_type",
+                render: (degree_type) => (
+                  <span>{degreeTypes[degree_type]?.label || degree_type}</span>
+                )
+              },
+              { header: "المدة (سنوات)", accessor: "duration" },
+              { 
+                header: "الرسوم الدراسية", 
+                accessor: "tuition_fee",
+                render: (fee) => <span>{fee.toLocaleString()} ر.س</span>,
+                hideOnMobile: true
+              },
+              { 
+                header: "المقاعد", 
+                accessor: "quota",
+                hideOnMobile: true
+              },
+              {
+                header: "الحالة",
+                accessor: "is_active",
+                render: (is_active) => (
+                  <Badge className={is_active ? "bg-green-500 text-white" : "bg-gray-500 text-white"}>
+                    {is_active ? "متاح" : "غير متاح"}
+                  </Badge>
+                ),
+              },
+            ]}
+            actions={(program) => [
+              {
+                icon: program.is_active ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />,
+                label: program.is_active ? "تعطيل" : "تفعيل",
+                onClick: () => handleToggleProgramStatus(program),
+              },
+              {
+                icon: <Edit className="h-4 w-4" />,
+                label: "تعديل",
+                onClick: () => handleEditProgram(program),
+              },
+              {
+                icon: <Trash2 className="h-4 w-4" />,
+                label: "حذف",
+                onClick: () => handleDeleteProgram(program),
+                destructive: true,
+              },
+            ]}
+          />
+        </Card>
+
+        {/* Add Program Dialog */}
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>إضافة برنامج جديد</DialogTitle>
+              <DialogDescription>أدخل بيانات البرنامج الدراسي الجديد.</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name_ar" className="text-right">الاسم (عربي)</Label>
+                  <Input id="name_ar" className="col-span-3" placeholder="أدخل اسم البرنامج بالعربية" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">الاسم (إنجليزي)</Label>
+                  <Input id="name" className="col-span-3" placeholder="أدخل اسم البرنامج بالإنجليزية" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="university_id" className="text-right">الجامعة</Label>
+                  <Select>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="اختر الجامعة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {universities.map((university) => (
+                        <SelectItem key={university.id} value={university.id.toString()}>
+                          {university.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="degree_type" className="text-right">الدرجة العلمية</Label>
+                  <Select>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="اختر الدرجة العلمية" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.values(degreeTypes).map((degree) => (
+                        <SelectItem key={degree.value} value={degree.value}>
+                          {degree.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="duration" className="text-right">المدة (سنوات)</Label>
+                  <Input id="duration" type="number" className="col-span-3" placeholder="أدخل المدة" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="tuition_fee" className="text-right">الرسوم</Label>
+                  <Input id="tuition_fee" type="number" className="col-span-3" placeholder="أدخل الرسوم الدراسية" />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="quota" className="text-right">المقاعد</Label>
+                  <Input id="quota" type="number" className="col-span-3" placeholder="أدخل عدد المقاعد" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-5 items-center gap-4">
+                  <Label htmlFor="language" className="text-right">لغة الدراسة</Label>
+                  <Select>
+                    <SelectTrigger className="col-span-4">
+                      <SelectValue placeholder="اختر لغة الدراسة" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Arabic">العربية</SelectItem>
+                      <SelectItem value="English">الإنجليزية</SelectItem>
+                      <SelectItem value="Turkish">التركية</SelectItem>
+                      <SelectItem value="French">الفرنسية</SelectItem>
+                      <SelectItem value="German">الألمانية</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                  <Label htmlFor="description_ar" className="text-right">وصف البرنامج</Label>
+                  <Textarea id="description_ar" className="col-span-4" placeholder="أدخل وصف البرنامج بالعربية" />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>إلغاء</Button>
+              <Button onClick={() => {
+                handleSaveNewProgram({
+                  name: "Program Name",
+                  name_ar: "اسم البرنامج",
+                  university_id: 1,
+                  university_name: "جامعة الملك سعود",
+                  degree_type: "bachelor",
+                  duration: 4,
+                  language: "English",
+                  tuition_fee: 100000,
+                  quota: 40,
+                  description: "Program description",
+                  description_ar: "وصف البرنامج",
+                });
+              }}>حفظ</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Program Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>تعديل بيانات البرنامج</DialogTitle>
+              <DialogDescription>
+                {selectedProgram && `تعديل بيانات ${selectedProgram.name_ar}`}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedProgram && (
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_name_ar" className="text-right">الاسم (عربي)</Label>
+                    <Input id="edit_name_ar" className="col-span-3" defaultValue={selectedProgram.name_ar} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_name" className="text-right">الاسم (إنجليزي)</Label>
+                    <Input id="edit_name" className="col-span-3" defaultValue={selectedProgram.name} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_university_id" className="text-right">الجامعة</Label>
+                    <Select defaultValue={selectedProgram.university_id.toString()}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {universities.map((university) => (
+                          <SelectItem key={university.id} value={university.id.toString()}>
+                            {university.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_degree_type" className="text-right">الدرجة العلمية</Label>
+                    <Select defaultValue={selectedProgram.degree_type}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(degreeTypes).map((degree) => (
+                          <SelectItem key={degree.value} value={degree.value}>
+                            {degree.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_duration" className="text-right">المدة</Label>
+                    <Input id="edit_duration" type="number" className="col-span-3" defaultValue={selectedProgram.duration} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_tuition_fee" className="text-right">الرسوم</Label>
+                    <Input id="edit_tuition_fee" type="number" className="col-span-3" defaultValue={selectedProgram.tuition_fee} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_quota" className="text-right">المقاعد</Label>
+                    <Input id="edit_quota" type="number" className="col-span-3" defaultValue={selectedProgram.quota} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_language" className="text-right">لغة الدراسة</Label>
+                    <Input id="edit_language" className="col-span-3" defaultValue={selectedProgram.language} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="edit_is_active" className="text-right">الحالة</Label>
+                    <Select defaultValue={selectedProgram.is_active ? "true" : "false"}>
+                      <SelectTrigger className="col-span-3">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">متاح</SelectItem>
+                        <SelectItem value="false">غير متاح</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>إلغاء</Button>
+              <Button onClick={() => handleSaveEditedProgram(selectedProgram)}>حفظ التغييرات</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </DashboardLayout>
   );
 };
