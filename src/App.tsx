@@ -72,30 +72,28 @@ function App() {
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
         
         {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<DashboardLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="profile" element={<StudentProfile />} />
-          <Route path="applications" element={<StudentApplications />} />
-          <Route path="applications/:id" element={<ApplicationDetails />} />
-          <Route path="notifications" element={<StudentNotifications />} />
-          <Route path="settings" element={<AccountSettings />} />
-          <Route path="login-activity" element={<LoginActivity />} />
-          <Route path="messages" element={<UserMessages />} />
-          
-          {/* Admin Routes */}
-          <Route path="admin" element={<AdminDashboard />} />
-          <Route path="admin/students" element={<ManageStudents />} />
-          <Route path="admin/programs" element={<ManagePrograms />} />
-          <Route path="admin/universities" element={<ManageUniversities />} />
-          <Route path="admin/applications" element={<ManageApplications />} />
-          <Route path="admin/agents" element={<ManageAgents />} />
-          <Route path="admin/messages" element={<AdminMessages />} />
-          <Route path="admin/notifications" element={<AdminNotifications />} />
-          <Route path="admin/reports" element={<Reports />} />
-          
-          {/* Agent Routes */}
-          <Route path="agent" element={<AgentDashboard />} />
-        </Route>
+        <Route path="/dashboard" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
+        <Route path="/dashboard/profile" element={<DashboardLayout><StudentProfile /></DashboardLayout>} />
+        <Route path="/dashboard/applications" element={<DashboardLayout><StudentApplications /></DashboardLayout>} />
+        <Route path="/dashboard/applications/:id" element={<DashboardLayout><ApplicationDetails /></DashboardLayout>} />
+        <Route path="/dashboard/notifications" element={<DashboardLayout><StudentNotifications /></DashboardLayout>} />
+        <Route path="/dashboard/settings" element={<DashboardLayout><AccountSettings /></DashboardLayout>} />
+        <Route path="/dashboard/login-activity" element={<DashboardLayout><LoginActivity /></DashboardLayout>} />
+        <Route path="/dashboard/messages" element={<DashboardLayout><UserMessages /></DashboardLayout>} />
+        
+        {/* Admin Routes */}
+        <Route path="/dashboard/admin" element={<DashboardLayout userRole="admin"><AdminDashboard /></DashboardLayout>} />
+        <Route path="/dashboard/admin/students" element={<DashboardLayout userRole="admin"><ManageStudents /></DashboardLayout>} />
+        <Route path="/dashboard/admin/programs" element={<DashboardLayout userRole="admin"><ManagePrograms /></DashboardLayout>} />
+        <Route path="/dashboard/admin/universities" element={<DashboardLayout userRole="admin"><ManageUniversities /></DashboardLayout>} />
+        <Route path="/dashboard/admin/applications" element={<DashboardLayout userRole="admin"><ManageApplications /></DashboardLayout>} />
+        <Route path="/dashboard/admin/agents" element={<DashboardLayout userRole="admin"><ManageAgents /></DashboardLayout>} />
+        <Route path="/dashboard/admin/messages" element={<DashboardLayout userRole="admin"><AdminMessages /></DashboardLayout>} />
+        <Route path="/dashboard/admin/notifications" element={<DashboardLayout userRole="admin"><AdminNotifications /></DashboardLayout>} />
+        <Route path="/dashboard/admin/reports" element={<DashboardLayout userRole="admin"><Reports /></DashboardLayout>} />
+        
+        {/* Agent Routes */}
+        <Route path="/dashboard/agent" element={<DashboardLayout userRole="agent"><AgentDashboard /></DashboardLayout>} />
         
         {/* 404 Page */}
         <Route path="*" element={<NotFound />} />

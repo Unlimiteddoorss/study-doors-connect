@@ -10,14 +10,16 @@ const FeaturedPrograms = () => {
   // إضافة برنامج هندسة البرمجيات كبرنامج مميز
   const softwareEngineeringProgram = {
     id: 'software-engineering',
-    name: 'هندسة البرمجيات',
+    title: 'هندسة البرمجيات',
     university: 'جامعة اسطنبول التقنية',
-    degree: 'بكالوريوس',
-    duration: '4 سنوات',
+    location: 'Turkey، إسطنبول',
     language: 'الإنجليزية',
-    tuition: '5500 دولار/سنوياً',
+    duration: '4 سنوات',
+    deadline: '2024/12/31',
+    fee: '5500 دولار/سنوياً',
     isFeatured: true,
-    image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png'
+    image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png',
+    badges: ['بكالوريوس', 'معتمد دولياً', 'فرصة تدريب عملي']
   };
 
   // Filter featured programs
