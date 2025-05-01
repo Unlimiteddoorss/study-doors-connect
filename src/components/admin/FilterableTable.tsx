@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal, Search, Edit, Eye, Trash } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import { TableSkeleton } from './TableSkeleton';
 import { TablePagination } from './TablePagination';
@@ -112,7 +112,7 @@ const FilterableTable = ({
       defaultActions.push({
         label: 'عرض التفاصيل',
         onClick: () => onViewDetails(row),
-        icon: <Search className="h-4 w-4" />
+        icon: <Eye className="h-4 w-4" />
       });
     }
     
@@ -120,7 +120,7 @@ const FilterableTable = ({
       defaultActions.push({
         label: 'تعديل',
         onClick: () => onEdit(row),
-        icon: <Search className="h-4 w-4" />
+        icon: <Edit className="h-4 w-4" />
       });
     }
     
@@ -128,7 +128,7 @@ const FilterableTable = ({
       defaultActions.push({
         label: 'حذف',
         onClick: () => onDelete(row),
-        icon: <Search className="h-4 w-4" />
+        icon: <Trash className="h-4 w-4" />
       });
     }
     
@@ -178,7 +178,7 @@ const FilterableTable = ({
               </TableRow>
             ) : (
               filteredData.map((row, rowIndex) => (
-                <TableRow key={rowIndex}>
+                <TableRow key={rowIndex} className="hover:bg-gray-50">
                   {columns.map((column) => (
                     <TableCell 
                       key={column.accessor}
@@ -219,13 +219,19 @@ const FilterableTable = ({
         </Table>
       </div>
       
-      {onPageChange && (
+      {onPageChange && totalPages > 1 && (
         <div className="flex items-center justify-end">
           <TablePagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={onPageChange}
           />
+        </div>
+      )}
+      
+      {totalItems > 0 && (
+        <div className="text-sm text-unlimited-gray text-right">
+          إجمالي النتائج: {totalItems} | الصفحة {currentPage} من {totalPages}
         </div>
       )}
     </div>

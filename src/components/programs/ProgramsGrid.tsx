@@ -1,64 +1,63 @@
 
 import React from 'react';
-import { Program } from '@/components/programs/ProgramCard';
-import ProgramCard from '@/components/programs/ProgramCard';
-import { Button } from '@/components/ui/button';
-import Pagination from '@/components/shared/Pagination';
+import ProgramCard from './ProgramCard';
+import { Link } from 'react-router-dom';
+
+interface Program {
+  id: string;
+  name: string;
+  university: string;
+  degree: string;
+  duration: string;
+  language: string;
+  tuition: string;
+  image?: string;
+  isFeatured?: boolean;
+}
 
 interface ProgramsGridProps {
   programs: Program[];
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (pageNumber: number) => void;
-  isLoading?: boolean;
-  onResetFilters?: () => void;
+  emptyMessage?: string;
 }
 
-const ProgramsGrid: React.FC<ProgramsGridProps> = ({
-  programs,
-  currentPage,
-  totalPages,
-  onPageChange,
-  isLoading = false,
-  onResetFilters,
-}) => {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-unlimited-blue"></div>
-      </div>
-    );
-  }
+const ProgramsGrid = ({ programs, emptyMessage = "لم يتم العثور على برامج مطابقة للمعايير المحددة" }: ProgramsGridProps) => {
+  // إضافة برنامج هندسة البرمجيات
+  const softwareEngineeringProgram = {
+    id: 'software-engineering',
+    name: 'هندسة البرمجيات',
+    university: 'جامعة اسطنبول التقنية',
+    degree: 'بكالوريوس',
+    duration: '4 سنوات',
+    language: 'الإنجليزية',
+    tuition: '5500 دولار/سنوياً',
+    isFeatured: true
+  };
 
-  if (programs.length === 0) {
+  // دمج البرامج مع برنامج هندسة البرمجيات
+  const allPrograms = [softwareEngineeringProgram, ...programs];
+
+  if (allPrograms.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على برامج تطابق بحثك</p>
-        {onResetFilters && (
-          <Button onClick={onResetFilters} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
-            إعادة ضبط البحث
-          </Button>
-        )}
+      <div className="text-center p-12 border border-dashed rounded-md bg-gray-50">
+        <p className="text-unlimited-gray">{emptyMessage}</p>
       </div>
     );
   }
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {programs.map((program) => (
-          <ProgramCard key={program.id} program={program} />
-        ))}
-      </div>
-      
-      {totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={onPageChange}
-        />
-      )}
-    </>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {allPrograms.map((program) => (
+        program.id === 'software-engineering' ? (
+          <Link key={program.id} to="/programs/software-engineering" className="transition-transform hover:scale-[1.02]">
+            <ProgramCard program={program} />
+          </Link>
+        ) : (
+          <Link key={program.id} to={`/program/${program.id}`} className="transition-transform hover:scale-[1.02]">
+            <ProgramCard program={program} />
+          </Link>
+        )
+      ))}
+    </div>
   );
 };
 

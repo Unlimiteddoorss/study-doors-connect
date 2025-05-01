@@ -7,10 +7,26 @@ import ProgramCard from '../programs/ProgramCard';
 import { dummyPrograms } from '@/data/programsData';
 
 const FeaturedPrograms = () => {
+  // إضافة برنامج هندسة البرمجيات كبرنامج مميز
+  const softwareEngineeringProgram = {
+    id: 'software-engineering',
+    name: 'هندسة البرمجيات',
+    university: 'جامعة اسطنبول التقنية',
+    degree: 'بكالوريوس',
+    duration: '4 سنوات',
+    language: 'الإنجليزية',
+    tuition: '5500 دولار/سنوياً',
+    isFeatured: true,
+    image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png'
+  };
+
   // Filter featured programs
   const featuredPrograms = dummyPrograms
     .filter(program => program.isFeatured)
-    .slice(0, 3);
+    .slice(0, 2);
+
+  // Combine with software engineering program
+  const allFeaturedPrograms = [softwareEngineeringProgram, ...featuredPrograms];
 
   return (
     <section className="py-16 bg-gray-50">
@@ -29,8 +45,14 @@ const FeaturedPrograms = () => {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
-          {featuredPrograms.map((program) => (
-            <ProgramCard key={program.id} program={program} />
+          {allFeaturedPrograms.map((program) => (
+            <Link 
+              key={program.id} 
+              to={program.id === 'software-engineering' ? '/programs/software-engineering' : `/program/${program.id}`}
+              className="transition-transform hover:scale-[1.02]"
+            >
+              <ProgramCard program={program} />
+            </Link>
           ))}
         </div>
       </div>

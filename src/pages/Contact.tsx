@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -499,7 +500,7 @@ const Contact = () => {
                 <h3 className="font-bold text-lg mb-2">هل خدمات الاستشارة التعليمية لديكم مجانية؟</h3>
                 <p className="text-unlimited-gray">
                   نعم، نقدم استشارات تعليمية مجانية للطلاب الراغبين في الدراسة بالخارج. نساعدك في 
-                  اختيار الجامعة والبرنامج المناسب، وشرح متطلبات القبول، وتقديم ا��نصائح حول الإقامة والتأشيرة.
+                  اختيار الجامعة والبرنامج المناسب، وشرح متطلبات القبول، وتقديم النصائح حول الإقامة والتأشيرة.
                 </p>
               </CardContent>
             </Card>
