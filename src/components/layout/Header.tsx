@@ -24,7 +24,8 @@ const Header = () => {
   // معلومات الاتصال المحدثة
   const contactInfo = {
     phone: "+90 55 24 212 214",
-    email: "unlimiteddoorss@gmail.com"
+    email: "unlimiteddoorss@gmail.com",
+    address: "اسطنبول Bahçelievler تركيا"
   };
 
   const toggleMenu = () => {
