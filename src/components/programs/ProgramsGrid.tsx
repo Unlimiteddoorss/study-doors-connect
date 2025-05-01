@@ -105,8 +105,8 @@ const ProgramsGrid = ({
               deadline: '2024/12/31',
               fee: softwareProgram.tuition,
               image: isTechUnivSoftwareEngProgram 
-                ? '/lovable-uploads/a0d3407c-db28-452b-9d6f-84824ac5096f.png' 
-                : '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png',
+                ? '/lovable-uploads/51522d38-6d96-4884-8ab7-d1e182003a1d.png' 
+                : '/lovable-uploads/6081461c-4214-40a6-ab56-0a9480d441d5.png',
               isFeatured: softwareProgram.isFeatured,
               badges: [
                 softwareProgram.degree, 

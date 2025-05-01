@@ -322,7 +322,7 @@ const kulturUniversityPrograms: UniversityProgram[] = [
   {
     id: 'ku-communication-arts',
     name: 'Communication Arts',
-    nameAr: 'فنون التواصل',
+    nameAr: 'ف��ون التواصل',
     degree: 'Bachelor',
     language: 'Turkish',
     campus: 'Yenibosna',
