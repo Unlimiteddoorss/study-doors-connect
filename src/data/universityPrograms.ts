@@ -14,6 +14,10 @@ export interface UniversityProgram {
   available: boolean;
 }
 
+// Add available degrees and languages
+export const availableDegrees = ["Bachelor", "Master", "PhD", "Doctorate", "Diploma", "Vocational School"];
+export const availableLanguages = ["English", "Turkish", "Arabic"];
+
 // Create Istanbul Kultur University programs
 const kulturUniversityPrograms: UniversityProgram[] = [
   {

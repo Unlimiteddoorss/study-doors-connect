@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Code, FileCheck, GraduationCap, Info, Languages, Layout, Map, Monitor, School, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, Code, FileCheck, GraduationCap, Info, Languages, Layout, Map, Monitor, Phone, Mail, School, Users } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
