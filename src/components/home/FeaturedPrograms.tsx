@@ -18,17 +18,32 @@ const FeaturedPrograms = () => {
     deadline: '2024/12/31',
     fee: '5500 دولار/سنوياً',
     isFeatured: true,
-    image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png',
+    image: '/lovable-uploads/3282f8fb-3607-47d2-a8fa-d442b2cb1485.png',
     badges: ['بكالوريوس', 'معتمد دولياً', 'فرصة تدريب عملي']
+  };
+  
+  const kulturSoftwareEngineeringProgram = {
+    id: 'kultur-software-engineering',
+    title: 'هندسة البرمجيات',
+    university: 'جامعة اسطنبول كولتور',
+    location: 'Turkey، إسطنبول',
+    language: 'الإنجليزية',
+    duration: '4 سنوات',
+    deadline: '2024/12/31',
+    fee: '7600 دولار/سنوياً',
+    discount: '3800 دولار/سنوياً',
+    isFeatured: true,
+    image: '/lovable-uploads/51522d38-6d96-4884-8ab7-d1e182003a1d.png',
+    badges: ['بكالوريوس', 'معتمد دولياً', 'خصم 50%']
   };
 
   // Filter featured programs
   const featuredPrograms = dummyPrograms
     .filter(program => program.isFeatured)
-    .slice(0, 2);
+    .slice(0, 1);
 
   // Combine with software engineering program
-  const allFeaturedPrograms = [softwareEngineeringProgram, ...featuredPrograms];
+  const allFeaturedPrograms = [softwareEngineeringProgram, kulturSoftwareEngineeringProgram, ...featuredPrograms];
 
   return (
     <section className="py-16 bg-gray-50">
@@ -50,7 +65,9 @@ const FeaturedPrograms = () => {
           {allFeaturedPrograms.map((program) => (
             <Link 
               key={program.id} 
-              to={program.id === 'software-engineering' ? '/programs/software-engineering' : `/program/${program.id}`}
+              to={program.id === 'software-engineering' ? '/programs/software-engineering' : 
+                  program.id === 'kultur-software-engineering' ? '/programs/software-engineering' : 
+                  `/program/${program.id}`}
               className="transition-transform hover:scale-[1.02]"
             >
               <ProgramCard program={program} />

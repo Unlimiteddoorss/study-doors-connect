@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,12 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const isLoggedIn = false;
   const isAdmin = true;
+
+  // معلومات الاتصال المحدثة
+  const contactInfo = {
+    phone: "+90 55 24 212 214",
+    email: "unlimiteddoorss@gmail.com"
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

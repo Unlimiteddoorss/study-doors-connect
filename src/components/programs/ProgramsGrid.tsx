@@ -3,6 +3,7 @@ import React from 'react';
 import ProgramCard from './ProgramCard';
 import { Link } from 'react-router-dom';
 import { TablePagination } from '@/components/admin/TablePagination';
+import { Program } from './ProgramCard';
 
 interface ExtendedProgramBase {
   id: string | number;
@@ -20,26 +21,11 @@ interface SoftwareEngineeringProgram extends ExtendedProgramBase {
   image?: string;
 }
 
-interface StandardProgram extends ExtendedProgramBase {
-  id: number;
-  title: string;
-  university: string;
-  location: string;
-  language: string;
-  duration: string;
-  deadline: string;
-  fee: string;
-  discount?: string;
-  image: string;
-  scholarshipAvailable?: boolean;
-  badges?: string[];
-}
-
 // Union type for both program formats
-type Program = StandardProgram | SoftwareEngineeringProgram;
+type ProgramType = Program | SoftwareEngineeringProgram;
 
 interface ProgramsGridProps {
-  programs: Program[];
+  programs: ProgramType[];
   emptyMessage?: string;
   currentPage?: number;
   totalPages?: number;
@@ -66,9 +52,21 @@ const ProgramsGrid = ({
     tuition: '5500 دولار/سنوياً',
     isFeatured: true
   };
+  
+  // إضافة برنامج هندسة البرمجيات لجامعة كولتور
+  const kulturSoftwareEngineeringProgram: SoftwareEngineeringProgram = {
+    id: 'kultur-software-engineering',
+    name: 'هندسة البرمجيات',
+    university: 'جامعة اسطنبول كولتور',
+    degree: 'بكالوريوس',
+    duration: '4 سنوات',
+    language: 'الإنجليزية',
+    tuition: '7600 دولار/سنوياً',
+    isFeatured: true
+  };
 
   // دمج البرامج مع برنامج هندسة البرمجيات
-  const allPrograms = [softwareEngineeringProgram, ...programs];
+  const allPrograms = [softwareEngineeringProgram, kulturSoftwareEngineeringProgram, ...programs];
 
   if (allPrograms.length === 0) {
     return (
@@ -91,12 +89,13 @@ const ProgramsGrid = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {allPrograms.map((program) => {
           // Determine if this is the software engineering program by ID
-          const isSoftwareEngProgram = program.id === 'software-engineering';
+          const isTechUnivSoftwareEngProgram = program.id === 'software-engineering';
+          const isKulturUnivSoftwareEngProgram = program.id === 'kultur-software-engineering';
           
-          if (isSoftwareEngProgram) {
+          if (isTechUnivSoftwareEngProgram || isKulturUnivSoftwareEngProgram) {
             const softwareProgram = program as SoftwareEngineeringProgram;
             // Transform to match ProgramCard expected props
-            const adaptedProgram = {
+            const adaptedProgram: Program = {
               id: softwareProgram.id,
               title: softwareProgram.name,
               university: softwareProgram.university,
@@ -105,9 +104,16 @@ const ProgramsGrid = ({
               duration: softwareProgram.duration,
               deadline: '2024/12/31',
               fee: softwareProgram.tuition,
-              image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png',
+              image: isTechUnivSoftwareEngProgram 
+                ? '/lovable-uploads/3282f8fb-3607-47d2-a8fa-d442b2cb1485.png' 
+                : '/lovable-uploads/51522d38-6d96-4884-8ab7-d1e182003a1d.png',
               isFeatured: softwareProgram.isFeatured,
-              badges: [softwareProgram.degree, 'معتمد دولياً', 'فرصة تدريب عملي']
+              badges: [
+                softwareProgram.degree, 
+                'معتمد دولياً', 
+                isKulturUnivSoftwareEngProgram ? 'خصم 50%' : 'فرصة تدريب عملي'
+              ],
+              discount: isKulturUnivSoftwareEngProgram ? '3800 دولار/سنوياً' : undefined
             };
             
             return (
@@ -117,7 +123,7 @@ const ProgramsGrid = ({
             );
           } else {
             // Regular program
-            const standardProgram = program as StandardProgram;
+            const standardProgram = program as Program;
             return (
               <Link key={program.id} to={`/program/${program.id}`} className="transition-transform hover:scale-[1.02]">
                 <ProgramCard program={standardProgram} />
