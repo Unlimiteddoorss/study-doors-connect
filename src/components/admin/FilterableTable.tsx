@@ -27,6 +27,7 @@ export interface FilterableTableProps {
     header: string;
     accessor: string;
     render?: (value: any, row: any) => React.ReactNode;
+    hideOnMobile?: boolean;
   }[];
   isLoading?: boolean;
   currentPage?: number;
@@ -42,6 +43,9 @@ export interface FilterableTableProps {
   emptyStateMessage?: string;
   searchPlaceholder?: string;
   searchEnabled?: boolean;
+  onViewDetails?: (row: any) => void;
+  onEdit?: (row: any) => void;
+  onDelete?: (row: any) => void;
 }
 
 const FilterableTable = ({
@@ -57,6 +61,9 @@ const FilterableTable = ({
   emptyStateMessage = "لا توجد بيانات لعرضها",
   searchPlaceholder = "بحث...",
   searchEnabled = true,
+  onViewDetails,
+  onEdit,
+  onDelete,
 }: FilterableTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState(data);
@@ -93,6 +100,43 @@ const FilterableTable = ({
     return <TableSkeleton columns={columns.length} rows={5} />;
   }
 
+  // Generate default actions if the callback props are provided
+  const getActions = (row: any) => {
+    if (actions) {
+      return actions(row);
+    }
+    
+    const defaultActions = [];
+    
+    if (onViewDetails) {
+      defaultActions.push({
+        label: 'عرض التفاصيل',
+        onClick: () => onViewDetails(row),
+        icon: <Search className="h-4 w-4" />
+      });
+    }
+    
+    if (onEdit) {
+      defaultActions.push({
+        label: 'تعديل',
+        onClick: () => onEdit(row),
+        icon: <Search className="h-4 w-4" />
+      });
+    }
+    
+    if (onDelete) {
+      defaultActions.push({
+        label: 'حذف',
+        onClick: () => onDelete(row),
+        icon: <Search className="h-4 w-4" />
+      });
+    }
+    
+    return defaultActions.length ? defaultActions : undefined;
+  };
+
+  const shouldShowActions = actions || onViewDetails || onEdit || onDelete;
+
   return (
     <div className="space-y-4">
       {searchEnabled && (
@@ -112,16 +156,21 @@ const FilterableTable = ({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead key={column.header}>{column.header}</TableHead>
+                <TableHead 
+                  key={column.header} 
+                  className={column.hideOnMobile ? "hidden md:table-cell" : ""}
+                >
+                  {column.header}
+                </TableHead>
               ))}
-              {actions && <TableHead className="w-[80px]">إجراءات</TableHead>}
+              {shouldShowActions && <TableHead className="w-[80px]">إجراءات</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={actions ? columns.length + 1 : columns.length}
+                  colSpan={shouldShowActions ? columns.length + 1 : columns.length}
                   className="text-center h-32"
                 >
                   {emptyStateMessage}
@@ -131,13 +180,16 @@ const FilterableTable = ({
               filteredData.map((row, rowIndex) => (
                 <TableRow key={rowIndex}>
                   {columns.map((column) => (
-                    <TableCell key={column.accessor}>
+                    <TableCell 
+                      key={column.accessor}
+                      className={column.hideOnMobile ? "hidden md:table-cell" : ""}
+                    >
                       {column.render
                         ? column.render(row[column.accessor], row)
                         : row[column.accessor]}
                     </TableCell>
                   ))}
-                  {actions && (
+                  {shouldShowActions && (
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -146,7 +198,7 @@ const FilterableTable = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {actions(row).map((action, i) => (
+                          {getActions(row)?.map((action, i) => (
                             <DropdownMenuItem
                               key={i}
                               onClick={action.onClick}
