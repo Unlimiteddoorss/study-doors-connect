@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import SectionTitle from '@/components/shared/SectionTitle';
 import ProgramCard from '@/components/programs/ProgramCard';
 import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramFilters from '@/components/programs/ProgramFilters';
-import { dummyPrograms, availableCountries } from '@/data/programsData';
+import { dummyPrograms, availableCountries, Program } from '@/data/programsData';
 import { useToast } from '@/hooks/use-toast';
 
 // ترجمة أسماء الدول إلى العربية
@@ -40,7 +39,7 @@ const countryTranslations: Record<string, string> = {
 const Programs = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredPrograms, setFilteredPrograms] = useState(dummyPrograms);
+  const [filteredPrograms, setFilteredPrograms] = useState<Program[]>(dummyPrograms);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedDegree, setSelectedDegree] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
@@ -101,16 +100,12 @@ const Programs = () => {
         break;
       case "priceAsc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          return priceA - priceB;
+          return a.discountedFee - b.discountedFee;
         });
         break;
       case "priceDesc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          return priceB - priceA;
+          return b.discountedFee - a.discountedFee;
         });
         break;
       case "relevance":
@@ -353,10 +348,7 @@ const Programs = () => {
             {currentPrograms.map((program) => (
               <ProgramCard 
                 key={program.id} 
-                program={{
-                  ...program,
-                  location: translateCountry(program.location)
-                }}
+                program={program as any} // Use type assertion to avoid type errors
               />
             ))}
           </div>

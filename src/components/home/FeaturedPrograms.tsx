@@ -35,7 +35,7 @@ const FeaturedPrograms = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
           {featuredPrograms.map((program) => (
-            <ProgramCard key={program.id} program={program} />
+            <ProgramCard key={program.id} program={program as any} />
           ))}
         </div>
       </div>

@@ -2,7 +2,7 @@ export interface Program {
   id: number;
   name?: string;
   nameAr?: string;
-  title?: string; // Keep for backward compatibility
+  title: string; // Making title required to fix type issues
   university: string;
   universityAr?: string;
   universityId: number;
@@ -25,6 +25,11 @@ export interface Program {
   reviewsCount: number;
   discount?: number;
   fee?: string; // Keep for backward compatibility
+  scholarshipAvailable?: boolean; // Add missing fields
+  badges?: string[]; // Add missing fields
+  campus?: string; // Add for university specific info
+  deposit?: number; // Add for deposit information
+  prepFee?: number; // Add for prep school fee
 }
 
 // Add available countries, degree types, and program specialties
@@ -292,7 +297,7 @@ export const dummyPrograms: Program[] = [
     nameAr: "هندسة ميكانيكية",
     title: "هندسة ميكانيكية",
     university: "Gazi University",
-    universityAr: "جامعة غازي",
+    universityAr: "جامعة غazi",
     universityId: 11,
     location: "Ankara, Turkey",
     locationAr: "أنقرة، تركيا",
@@ -355,7 +360,7 @@ export interface University {
   fees: string;
   image: string;
   languages?: string[];
-  accreditations?: string[];
+  accreditations?: string[]; // Fixed: Changed from string to string[]
   isFeatured?: boolean;
   website?: string;
 }
@@ -541,7 +546,7 @@ export const turkishUniversities: University[] = [
   {
     id: 11,
     name: "Gazi University",
-    nameAr: "جامعة غازي",
+    nameAr: "جامعة غazi",
     location: "Ankara, Turkey",
     country: "Turkey",
     city: "Ankara",
@@ -553,7 +558,7 @@ export const turkishUniversities: University[] = [
     fees: "$600-2000",
     image: "/lovable-uploads/gazi.png",
     languages: ["Turkish", "English"],
-    accreditations: "YÖK"
+    accreditations: ["YÖK"] // Fixed: Changed to array
   },
   {
     id: 12,
@@ -570,6 +575,6 @@ export const turkishUniversities: University[] = [
     fees: "$500-1800",
     image: "/lovable-uploads/cukurova.png",
     languages: ["Turkish", "English"],
-    accreditations: "YÖK"
+    accreditations: ["YÖK"] // Fixed: Changed to array
   }
 ];
