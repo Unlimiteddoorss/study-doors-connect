@@ -1,11 +1,12 @@
 
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle, Save } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { validateApplicationStep } from '@/utils/applicationUtils';
+import { useNavigate } from 'react-router-dom';
 
 // Define window interface to support gtag
 declare global {
@@ -23,6 +24,7 @@ interface StudentApplicationFormSubmitProps {
   progress: number;
   onBack: () => void;
   onSubmit: () => void;
+  onSaveAsDraft?: () => void;
 }
 
 const StudentApplicationFormSubmit = ({
@@ -33,14 +35,48 @@ const StudentApplicationFormSubmit = ({
   formData,
   progress,
   onBack,
-  onSubmit
+  onSubmit,
+  onSaveAsDraft
 }: StudentApplicationFormSubmitProps) => {
   const { toast } = useToast();
   const { t, i18n } = useTranslation();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const isRtl = i18n.language === 'ar';
+  const navigate = useNavigate();
+
+  // Check if user is authenticated
+  const isAuthenticated = () => {
+    // For demo purposes, we consider the user as authenticated if there's a userRole in localStorage
+    return !!localStorage.getItem('userRole');
+  };
 
   const handleSubmit = () => {
+    // Check authentication first
+    if (!isAuthenticated()) {
+      toast({
+        title: t("auth.required", "تسجيل الدخول مطلوب"),
+        description: t("auth.pleaseLogin", "يرجى تسجيل الدخول للمتابعة"),
+        variant: "destructive"
+      });
+      
+      // Save current progress to localStorage
+      if (onSaveAsDraft) {
+        onSaveAsDraft();
+        
+        toast({
+          title: t("application.draft.saved", "تم حفظ المسودة"),
+          description: t("application.draft.redirectLogin", "سيتم توجيهك لصفحة تسجيل الدخول"),
+        });
+      }
+      
+      // Redirect to login page
+      setTimeout(() => {
+        navigate('/login', { state: { returnUrl: '/apply' } });
+      }, 1500);
+      
+      return;
+    }
+    
     // Reset validation errors
     setValidationErrors([]);
     
@@ -74,7 +110,6 @@ const StudentApplicationFormSubmit = ({
       } else {
         // Fallback tracking for when gtag is not available
         console.log("Google Analytics not available, tracking locally");
-        // You could implement a custom event tracking solution here
       }
     } catch (error) {
       console.error("Analytics error:", error);
@@ -98,6 +133,17 @@ const StudentApplicationFormSubmit = ({
     }
   };
 
+  const handleSaveDraft = () => {
+    if (onSaveAsDraft) {
+      onSaveAsDraft();
+      
+      toast({
+        title: t("application.draft.saved", "تم حفظ المسودة"),
+        description: t("application.draft.savedDescription", "يمكنك العودة لاستكمال الطلب لاحقاً"),
+      });
+    }
+  };
+
   return (
     <div className="mt-6">
       {/* Progress Bar */}
@@ -106,7 +152,14 @@ const StudentApplicationFormSubmit = ({
           <span className="font-medium">{t('application.progress', 'تقدم الطلب')}</span>
           <span>{progress}%</span>
         </div>
-        <Progress value={progress} className={`h-2 ${progress >= 75 ? 'bg-unlimited-success' : progress >= 50 ? 'bg-unlimited-blue' : progress >= 25 ? 'bg-yellow-500' : 'bg-unlimited-gray'}`} />
+        <Progress 
+          value={progress} 
+          className={`h-2 ${
+            progress >= 75 ? 'bg-green-500' : 
+            progress >= 50 ? 'bg-unlimited-blue' : 
+            progress >= 25 ? 'bg-yellow-500' : 'bg-red-400'
+          }`} 
+        />
       </div>
       
       {/* Validation errors display */}
@@ -150,12 +203,25 @@ const StudentApplicationFormSubmit = ({
           </Button>
         )}
         
+        {/* Save as draft button */}
+        {onSaveAsDraft && (
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleSaveDraft}
+            className="order-3 sm:order-2 flex items-center gap-1"
+          >
+            <Save className="h-4 w-4 mr-1" />
+            {t('application.buttons.saveAsDraft', 'حفظ كمسودة')}
+          </Button>
+        )}
+        
         {isLastStep ? (
           <Button
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+            className="w-full sm:w-auto order-1 sm:order-3 bg-unlimited-blue hover:bg-unlimited-dark-blue"
           >
             {isSubmitting ? (
               <>
@@ -174,7 +240,7 @@ const StudentApplicationFormSubmit = ({
             type="button"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`w-full sm:w-auto order-1 sm:order-2 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+            className={`w-full sm:w-auto order-1 sm:order-3 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
           >
             {isRtl ? (
               <>

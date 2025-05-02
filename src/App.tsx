@@ -69,16 +69,20 @@ function App() {
     localStorage.setItem('userRole', userRole);
   }, [userRole]);
 
+  // We've improved this function to provide better redirection
   const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: UserRole[] }) => {
-    const isAuthenticated = true; // For testing purposes
+    const isAuthenticated = localStorage.getItem('userRole') !== null; // Simple authentication check
     const hasPermission = allowedRoles.includes(userRole);
+    const location = useLocation();
     
-    console.log(`Route check - User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}, Has permission: ${hasPermission}`);
+    console.log(`Route check - User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}, Has permission: ${hasPermission}, Is authenticated: ${isAuthenticated}`);
 
+    // If not authenticated, redirect to login with return URL
     if (!isAuthenticated) {
-      return <Navigate to="/login" replace />;
+      return <Navigate to="/login" state={{ returnUrl: location.pathname }} replace />;
     }
 
+    // If authenticated but doesn't have permission
     if (!hasPermission) {
       return <Navigate to="/unauthorized" replace />;
     }
@@ -150,9 +154,8 @@ function App() {
 
         {/* Student Application Routes - completely separate from admin pages */}
         <Route path="/apply" element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <StudentApplication />
-          </ProtectedRoute>
+          // Anyone can start an application, but they'll need to login to submit
+          <StudentApplication />
         } />
         <Route path="/dashboard/applications" element={
           <ProtectedRoute allowedRoles={['student']}>
