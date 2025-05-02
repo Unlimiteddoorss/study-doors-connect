@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

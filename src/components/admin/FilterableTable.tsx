@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MoreHorizontal, Search, Edit, Eye, Trash } from 'lucide-react';
+import { MoreHorizontal, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TableSkeleton } from './TableSkeleton';
 import { TablePagination } from './TablePagination';
@@ -27,7 +27,6 @@ export interface FilterableTableProps {
     header: string;
     accessor: string;
     render?: (value: any, row: any) => React.ReactNode;
-    hideOnMobile?: boolean;
   }[];
   isLoading?: boolean;
   currentPage?: number;
@@ -43,9 +42,6 @@ export interface FilterableTableProps {
   emptyStateMessage?: string;
   searchPlaceholder?: string;
   searchEnabled?: boolean;
-  onViewDetails?: (row: any) => void;
-  onEdit?: (row: any) => void;
-  onDelete?: (row: any) => void;
 }
 
 const FilterableTable = ({
@@ -61,9 +57,6 @@ const FilterableTable = ({
   emptyStateMessage = "لا توجد بيانات لعرضها",
   searchPlaceholder = "بحث...",
   searchEnabled = true,
-  onViewDetails,
-  onEdit,
-  onDelete,
 }: FilterableTableProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState(data);
@@ -100,43 +93,6 @@ const FilterableTable = ({
     return <TableSkeleton columns={columns.length} rows={5} />;
   }
 
-  // Generate default actions if the callback props are provided
-  const getActions = (row: any) => {
-    if (actions) {
-      return actions(row);
-    }
-    
-    const defaultActions = [];
-    
-    if (onViewDetails) {
-      defaultActions.push({
-        label: 'عرض التفاصيل',
-        onClick: () => onViewDetails(row),
-        icon: <Eye className="h-4 w-4" />
-      });
-    }
-    
-    if (onEdit) {
-      defaultActions.push({
-        label: 'تعديل',
-        onClick: () => onEdit(row),
-        icon: <Edit className="h-4 w-4" />
-      });
-    }
-    
-    if (onDelete) {
-      defaultActions.push({
-        label: 'حذف',
-        onClick: () => onDelete(row),
-        icon: <Trash className="h-4 w-4" />
-      });
-    }
-    
-    return defaultActions.length ? defaultActions : undefined;
-  };
-
-  const shouldShowActions = actions || onViewDetails || onEdit || onDelete;
-
   return (
     <div className="space-y-4">
       {searchEnabled && (
@@ -156,21 +112,16 @@ const FilterableTable = ({
           <TableHeader>
             <TableRow>
               {columns.map((column) => (
-                <TableHead 
-                  key={column.header} 
-                  className={column.hideOnMobile ? "hidden md:table-cell" : ""}
-                >
-                  {column.header}
-                </TableHead>
+                <TableHead key={column.header}>{column.header}</TableHead>
               ))}
-              {shouldShowActions && <TableHead className="w-[80px]">إجراءات</TableHead>}
+              {actions && <TableHead className="w-[80px]">إجراءات</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredData.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={shouldShowActions ? columns.length + 1 : columns.length}
+                  colSpan={actions ? columns.length + 1 : columns.length}
                   className="text-center h-32"
                 >
                   {emptyStateMessage}
@@ -178,18 +129,15 @@ const FilterableTable = ({
               </TableRow>
             ) : (
               filteredData.map((row, rowIndex) => (
-                <TableRow key={rowIndex} className="hover:bg-gray-50">
+                <TableRow key={rowIndex}>
                   {columns.map((column) => (
-                    <TableCell 
-                      key={column.accessor}
-                      className={column.hideOnMobile ? "hidden md:table-cell" : ""}
-                    >
+                    <TableCell key={column.accessor}>
                       {column.render
                         ? column.render(row[column.accessor], row)
                         : row[column.accessor]}
                     </TableCell>
                   ))}
-                  {shouldShowActions && (
+                  {actions && (
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -198,7 +146,7 @@ const FilterableTable = ({
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          {getActions(row)?.map((action, i) => (
+                          {actions(row).map((action, i) => (
                             <DropdownMenuItem
                               key={i}
                               onClick={action.onClick}
@@ -219,19 +167,13 @@ const FilterableTable = ({
         </Table>
       </div>
       
-      {onPageChange && totalPages > 1 && (
+      {onPageChange && (
         <div className="flex items-center justify-end">
           <TablePagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={onPageChange}
           />
-        </div>
-      )}
-      
-      {totalItems > 0 && (
-        <div className="text-sm text-unlimited-gray text-right">
-          إجمالي النتائج: {totalItems} | الصفحة {currentPage} من {totalPages}
         </div>
       )}
     </div>

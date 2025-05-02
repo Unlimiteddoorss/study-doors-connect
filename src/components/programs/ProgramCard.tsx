@@ -6,7 +6,7 @@ import { School, Map, Calendar, DollarSign, Clock, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export interface Program {
-  id: string | number;
+  id: number;
   title: string;
   university: string;
   location: string;
@@ -119,7 +119,7 @@ const ProgramCard = ({ program }: ProgramCardProps) => {
       
       <CardFooter className="pt-0">
         <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
-          <Link to={`/program/${program.id}`} className="flex items-center justify-center">
+          <Link to={`/programs/${program.id}`} className="flex items-center justify-center">
             عرض التفاصيل
           </Link>
         </Button>
