@@ -4,6 +4,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ArrowRight, Check, ArrowLeft, Loader2, AlertTriangle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
+import { validateApplicationStep } from '@/utils/applicationUtils';
 
 // Define window interface to support gtag
 declare global {
@@ -16,6 +18,9 @@ interface StudentApplicationFormSubmitProps {
   isLastStep: boolean;
   isSubmitting: boolean;
   canSubmit: boolean;
+  currentStep: number;
+  formData: any;
+  progress: number;
   onBack: () => void;
   onSubmit: () => void;
 }
@@ -24,6 +29,9 @@ const StudentApplicationFormSubmit = ({
   isLastStep,
   isSubmitting,
   canSubmit,
+  currentStep,
+  formData,
+  progress,
   onBack,
   onSubmit
 }: StudentApplicationFormSubmitProps) => {
@@ -36,7 +44,10 @@ const StudentApplicationFormSubmit = ({
     // Reset validation errors
     setValidationErrors([]);
     
-    if (!canSubmit) {
+    // Validate the current step
+    const { isValid, errors } = validateApplicationStep(currentStep, formData, t);
+    
+    if (!isValid) {
       // Show validation errors and prevent submission
       toast({
         title: t("application.validation.error", "خطأ في البيانات"),
@@ -44,14 +55,7 @@ const StudentApplicationFormSubmit = ({
         variant: "destructive"
       });
       
-      // For demo purposes, show some sample validation errors
-      if (isLastStep) {
-        setValidationErrors([
-          t("application.validation.errors.missingDocuments", "بعض المستندات المطلوبة غير محملة"),
-          t("application.validation.errors.incompleteProfile", "الملف الشخصي غير مكتمل")
-        ]);
-      }
-      
+      setValidationErrors(errors);
       return;
     }
     
@@ -64,16 +68,14 @@ const StudentApplicationFormSubmit = ({
         window.gtag('event', 'form_submission', {
           'event_category': 'application',
           'event_label': 'student_application',
-          'value': isLastStep ? 'final_submit' : 'next_step'
+          'value': isLastStep ? 'final_submit' : 'next_step',
+          'step': currentStep
         });
       } else {
         // Fallback tracking for when gtag is not available
         console.log("Google Analytics not available, tracking locally");
         // You could implement a custom event tracking solution here
       }
-      
-      // Additional tracking services could be added here
-      
     } catch (error) {
       console.error("Analytics error:", error);
       // Don't stop the form submission if analytics fails
@@ -88,11 +90,25 @@ const StudentApplicationFormSubmit = ({
         title: t("application.submission.success", "تم التقديم بنجاح"),
         description: t("application.submission.successMessage", "تم تقديم طلبك بنجاح وسيتم مراجعته قريباً"),
       });
+    } else {
+      toast({
+        title: t("application.step.saved", "تم حفظ البيانات"),
+        description: t("application.step.savedDescription", "تم حفظ بيانات هذه الخطوة بنجاح"),
+      });
     }
   };
 
   return (
     <div className="mt-6">
+      {/* Progress Bar */}
+      <div className="mb-6">
+        <div className="flex justify-between mb-2 text-sm">
+          <span className="font-medium">{t('application.progress', 'تقدم الطلب')}</span>
+          <span>{progress}%</span>
+        </div>
+        <Progress value={progress} className={`h-2 ${progress >= 75 ? 'bg-unlimited-success' : progress >= 50 ? 'bg-unlimited-blue' : progress >= 25 ? 'bg-yellow-500' : 'bg-unlimited-gray'}`} />
+      </div>
+      
       {/* Validation errors display */}
       {validationErrors.length > 0 && (
         <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
@@ -112,25 +128,28 @@ const StudentApplicationFormSubmit = ({
       
       {/* Buttons */}
       <div className="flex flex-wrap gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onBack}
-          disabled={isSubmitting}
-          className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
-        >
-          {isRtl ? (
-            <>
-              {t('application.navigation.previous', "السابق")}
-              <ArrowRight className="h-4 w-4" />
-            </>
-          ) : (
-            <>
-              <ArrowLeft className="h-4 w-4" />
-              {t('application.navigation.previous', "السابق")}
-            </>
-          )}
-        </Button>
+        {currentStep > 1 && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onBack}
+            disabled={isSubmitting}
+            className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+          >
+            {isRtl ? (
+              <>
+                {t('application.navigation.previous', "السابق")}
+                <ArrowRight className="h-4 w-4" />
+              </>
+            ) : (
+              <>
+                <ArrowLeft className="h-4 w-4" />
+                {t('application.navigation.previous', "السابق")}
+              </>
+            )}
+          </Button>
+        )}
+        
         {isLastStep ? (
           <Button
             type="button"
