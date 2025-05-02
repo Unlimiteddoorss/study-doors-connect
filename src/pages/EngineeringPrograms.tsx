@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -5,7 +6,7 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { dummyPrograms, Program, availableCountries } from '@/data/programsData';
+import { dummyPrograms } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -35,114 +36,90 @@ const countryTranslations: Record<string, string> = {
 };
 
 // Create engineering programs data
-const engineeringPrograms: Program[] = [
-  ...dummyPrograms.filter(program => 
-    (program.title || program.name || "").includes('هندسة')
-  ),
-  {
-    id: 201,
-    name: "Civil Engineering",
-    nameAr: "بكالوريوس الهندسة المدنية",
-    title: "بكالوريوس الهندسة المدنية",
-    university: "جامعة اسطنبول التقنية",
-    universityAr: "جامعة اسطنبول التقنية",
-    universityId: 5,
-    location: "Turkey، إسطنبول",
-    language: "إنجليزية",
-    languageAr: "إنجليزية",
-    degree: "Bachelor",
-    degreeAr: "بكالوريوس",
-    duration: "4 سنوات",
-    deadline: "30/08/2023",
-    tuitionFee: 5200,
-    tuitionPeriod: "سنوياً",
-    discountedFee: 5200,
-    fee: "$5,200 / سنة",
-    image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    isFeatured: true,
-    features: ["معتمد دولياً", "تدريب عملي"],
-    description: "برنامج هندسة مدنية شامل يغطي جميع جوانب التصميم والبناء والتحليل الهيكلي",
-    rating: 4.7,
-    reviewsCount: 156,
-    scholarshipAvailable: false,
-    badges: ["معتمد دولياً", "تدريب عملي"]
-  },
-  {
-    id: 202,
-    title: "بكالوريوس هندسة البرمجيات",
-    university: "جامعة الشرق الأوسط التقنية",
-    universityId: 3,
-    location: "Turkey، أنقرة",
-    language: "إنجليزية",
-    degree: "Bachelor",
-    degreeAr: "بكالوريوس",
-    duration: "4 سنوات",
-    deadline: "15/08/2023",
-    tuitionFee: 4800,
-    tuitionPeriod: "سنوياً",
-    discountedFee: 4200,
-    fee: "$4,800 / سنة",
-    image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    features: ["وظائف مضمونة", "تقنيات حديثة"],
-    description: "برنامج متميز في هندسة البرمجيات مع تركيز على التقنيات الحديثة والتطبيقات العملية",
-    rating: 4.6,
-    reviewsCount: 175,
-    scholarshipAvailable: false,
-    badges: ["وظائف مضمونة", "تقنيات حديثة"]
-  },
-  {
-    id: 203,
-    title: "بكالوريوس الهندسة الميكانيكية",
-    university: "جامعة إسطنبول بيلجي",
-    location: "Turkey، إسطنبول",
-    language: "إنجليزية",
-    duration: "4 سنوات",
-    deadline: "10/09/2023",
-    fee: "$5,500 / سنة",
-    image: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    scholarshipAvailable: true,
-    badges: ["معدات حديثة", "برامج تبادل طلابي"]
-  },
-  {
-    id: 204,
-    title: "بكالوريوس الهندسة الكهربائية",
-    university: "جامعة يلدز التقنية",
-    location: "Turkey، إسطنبول",
-    language: "تركية وإنجليزية",
-    duration: "4 سنوات",
-    deadline: "05/08/2023",
-    fee: "$4,900 / سنة",
-    discount: "$4,500 / سنة",
-    image: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    badges: ["معامل متطورة", "تدريب صناعي"]
-  },
-  {
-    id: 205,
-    title: "ماجستير هندسة الإلكترونيات",
-    university: "جامعة غazi",
-    location: "Turkey، أنقرة",
-    language: "إنجليزية",
-    duration: "2 سنوات",
-    deadline: "20/08/2023",
-    fee: "$6,800 / سنة",
-    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    isFeatured: true,
-    badges: ["بحث متقدم", "فرص عمل دولية"]
-  },
-  {
-    id: 206,
-    title: "بكالوريوس هندسة الطيران",
-    university: "جامعة اسطنبول التقنية",
-    location: "Turkey، إسطنبول",
-    language: "إنجليزية",
-    duration: "4 سنوات",
-    deadline: "01/09/2023",
-    fee: "$7,200 / سنة",
-    image: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    scholarshipAvailable: true,
-    badges: ["فرص تدريب في شركات الطيران", "معامل محاكاة حديثة"]
-  }
-];
+const engineeringPrograms = dummyPrograms
+  .filter(program => 
+    program.title.includes('هندسة')
+  )
+  .concat([
+    {
+      id: 201,
+      title: "بكالوريوس الهندسة المدنية",
+      university: "جامعة اسطنبول التقنية",
+      location: "Turkey، إسطنبول",
+      language: "إنجليزية",
+      duration: "4 سنوات",
+      deadline: "30/08/2023",
+      fee: "$5,200 / سنة",
+      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      isFeatured: true,
+      badges: ["معتمد دوليًا", "تدريب عملي"]
+    },
+    {
+      id: 202,
+      title: "بكالوريوس هندسة البرمجيات",
+      university: "جامعة الشرق الأوسط التقنية",
+      location: "Turkey، أنقرة",
+      language: "إنجليزية",
+      duration: "4 سنوات",
+      deadline: "15/08/2023",
+      fee: "$4,800 / سنة",
+      discount: "$4,200 / سنة",
+      image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      badges: ["وظائف مضمونة", "تقنيات حديثة"]
+    },
+    {
+      id: 203,
+      title: "بكالوريوس الهندسة الميكانيكية",
+      university: "جامعة إسطنبول بيلجي",
+      location: "Turkey، إسطنبول",
+      language: "إنجليزية",
+      duration: "4 سنوات",
+      deadline: "10/09/2023",
+      fee: "$5,500 / سنة",
+      image: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      scholarshipAvailable: true,
+      badges: ["معدات حديثة", "برامج تبادل طلابي"]
+    },
+    {
+      id: 204,
+      title: "بكالوريوس الهندسة الكهربائية",
+      university: "جامعة يلدز التقنية",
+      location: "Turkey، إسطنبول",
+      language: "تركية وإنجليزية",
+      duration: "4 سنوات",
+      deadline: "05/08/2023",
+      fee: "$4,900 / سنة",
+      discount: "$4,500 / سنة",
+      image: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      badges: ["معامل متطورة", "تدريب صناعي"]
+    },
+    {
+      id: 205,
+      title: "ماجستير هندسة الإلكترونيات",
+      university: "جامعة غازي",
+      location: "Turkey، أنقرة",
+      language: "إنجليزية",
+      duration: "2 سنوات",
+      deadline: "20/08/2023",
+      fee: "$6,800 / سنة",
+      image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      isFeatured: true,
+      badges: ["بحث متقدم", "فرص عمل دولية"]
+    },
+    {
+      id: 206,
+      title: "بكالوريوس هندسة الطيران",
+      university: "جامعة اسطنبول التقنية",
+      location: "Turkey، إسطنبول",
+      language: "إنجليزية",
+      duration: "4 سنوات",
+      deadline: "01/09/2023",
+      fee: "$7,200 / سنة",
+      image: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+      scholarshipAvailable: true,
+      badges: ["فرص تدريب في شركات الطيران", "معامل محاكاة حديثة"]
+    }
+  ]);
 
 const EngineeringPrograms = () => {
   const { toast } = useToast();
@@ -163,7 +140,7 @@ const EngineeringPrograms = () => {
     if (searchTerm) {
       result = result.filter(
         program =>
-          (program.title || program.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
           program.university.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -179,9 +156,9 @@ const EngineeringPrograms = () => {
     // Apply degree filter
     if (selectedDegree && selectedDegree !== "all") {
       result = result.filter(program => {
-        if ((program.title || program.name || "").includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
-        if ((program.title || program.name || "").includes('ماجستير') && selectedDegree === 'Master') return true;
-        if ((program.title || program.name || "").includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
+        if (program.title.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
+        if (program.title.includes('ماجستير') && selectedDegree === 'Master') return true;
+        if (program.title.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
         return false;
       });
     }
@@ -189,20 +166,19 @@ const EngineeringPrograms = () => {
     // Apply specialty filter
     if (selectedSpecialty && selectedSpecialty !== "all") {
       result = result.filter(program => {
-        const title = program.title || program.name || "";
         switch(selectedSpecialty) {
           case "Civil":
-            return title.includes('مدنية');
+            return program.title.includes('مدنية');
           case "Computer":
-            return title.includes('برمجيات') || title.includes('حاسوب');
+            return program.title.includes('برمجيات') || program.title.includes('حاسوب');
           case "Mechanical":
-            return title.includes('ميكانيكية');
+            return program.title.includes('ميكانيكية');
           case "Electrical":
-            return title.includes('كهربائية');
+            return program.title.includes('كهربائية');
           case "Electronics":
-            return title.includes('إلكترونيات');
+            return program.title.includes('إلكترونيات');
           case "Aerospace":
-            return title.includes('طيران');
+            return program.title.includes('طيران');
           default:
             return true;
         }
@@ -215,10 +191,18 @@ const EngineeringPrograms = () => {
         // In a real app, this would sort by date added
         break;
       case "priceAsc":
-        result = [...result].sort((a, b) => a.discountedFee - b.discountedFee);
+        result = [...result].sort((a, b) => {
+          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          return priceA - priceB;
+        });
         break;
       case "priceDesc":
-        result = [...result].sort((a, b) => b.discountedFee - a.discountedFee);
+        result = [...result].sort((a, b) => {
+          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          return priceB - priceA;
+        });
         break;
       case "relevance":
       default:

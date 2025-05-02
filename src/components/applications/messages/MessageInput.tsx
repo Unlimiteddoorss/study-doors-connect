@@ -1,159 +1,108 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, Paperclip } from 'lucide-react';
-import { useMessageAttachments } from '@/hooks/useMessageAttachments';
-import MessageAttachments from '@/components/messages/MessageAttachments';
-import { validateFileType } from '@/utils/messageUtils';
+import { Send, Paperclip } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface MessageInputProps {
-  onSendMessage: (message: string, attachments: File[]) => void;
-  isSending?: boolean;
-  placeholder?: string;
-  maxLength?: number;
+  onSendMessage: (text: string, attachments: File[]) => void;
+  isSending: boolean;
 }
 
-const MessageInput = ({ 
-  onSendMessage, 
-  isSending = false, 
-  placeholder = 'اكتب رسالة...', 
-  maxLength = 1000 
-}: MessageInputProps) => {
-  const [message, setMessage] = useState('');
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const MessageInput = ({ onSendMessage, isSending }: MessageInputProps) => {
+  const { t, i18n } = useTranslation();
   const { toast } = useToast();
-  
-  const { 
-    attachments, 
-    addAttachments, 
-    removeAttachment, 
-    clearAttachments,
-    hasAttachments,
-    isFull 
-  } = useMessageAttachments();
-  
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [message]);
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      if (message.trim() || hasAttachments) {
-        handleSendMessage();
-      }
-    }
-  };
-  
-  const handleSendMessage = () => {
-    if (!isSending && (message.trim() || hasAttachments)) {
-      onSendMessage(
-        message, 
-        attachments.map(att => att.file)
-      );
-      setMessage('');
-      clearAttachments();
-      
-      if (textareaRef.current) {
-        textareaRef.current.style.height = 'auto';
-      }
-    }
+  const isRtl = i18n.language === 'ar';
+  const [newMessage, setNewMessage] = useState('');
+  const [attachments, setAttachments] = useState<File[]>([]);
+
+  const handleAttachmentUpload = (files: FileList | null) => {
+    if (!files) return;
+    const newAttachments = Array.from(files);
+    setAttachments([...attachments, ...newAttachments]);
+    
+    toast({
+      title: "تم إرفاق الملفات",
+      description: `تم إرفاق ${newAttachments.length} ملف/ملفات بنجاح.`
+    });
   };
 
-  const handleFileClick = () => {
-    if (isFull) {
-      toast({
-        title: "تنبيه",
-        description: "لقد وصلت إلى الحد الأقصى من المرفقات المسموح بها",
-        variant: "destructive"
-      });
-      return;
-    }
-    fileInputRef.current?.click();
+  const removeAttachment = (index: number) => {
+    setAttachments(attachments.filter((_, i) => i !== index));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const selectedFile = files[0];
-    if (!validateFileType(selectedFile)) {
-      toast({
-        title: "تنبيه",
-        description: "نوع الملف غير مدعوم",
-        variant: "destructive"
-      });
-      return;
+  const handleSend = () => {
+    if (newMessage.trim() || attachments.length > 0) {
+      onSendMessage(newMessage, attachments);
+      setNewMessage('');
+      setAttachments([]);
     }
-
-    // Handle file attachment
-    addAttachments(files);
   };
 
   return (
-    <div className="space-y-2">
-      {hasAttachments && (
-        <MessageAttachments
-          attachments={attachments}
-          onRemove={removeAttachment}
-        />
+    <div>
+      {attachments.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {attachments.map((file, index) => (
+            <div key={index} className="flex items-center gap-1 bg-gray-100 rounded p-1 pr-2 text-sm">
+              <span className="max-w-[150px] truncate">{file.name}</span>
+              <button
+                type="button"
+                className="text-red-500 hover:text-red-700 ml-1"
+                onClick={() => removeAttachment(index)}
+              >
+                &times;
+              </button>
+            </div>
+          ))}
+        </div>
       )}
       
-      <div className="flex w-full items-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className={`flex-shrink-0 ${isFull ? 'opacity-50' : ''}`}
-          onClick={handleFileClick}
-          disabled={isSending || isFull}
-        >
-          <Paperclip className="h-4 w-4" />
+      <div className="flex gap-2">
+        <div className="relative">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="h-10 w-10"
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
           <input
-            ref={fileInputRef}
             type="file"
+            className="absolute inset-0 opacity-0 cursor-pointer"
             multiple
-            className="hidden"
-            onChange={handleFileChange}
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+            onChange={(e) => handleAttachmentUpload(e.target.files)}
           />
-        </Button>
+        </div>
         
         <Textarea
-          ref={textareaRef}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="min-h-10 flex-1 resize-none overflow-hidden rounded-md py-2"
-          rows={1}
-          maxLength={maxLength}
-          disabled={isSending}
+          placeholder={t("application.messages.inputPlaceholder")}
+          className="flex-1"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
         />
         
         <Button
           type="button"
-          size="icon"
-          onClick={handleSendMessage}
-          disabled={isSending || (!message.trim() && !hasAttachments)}
-          className="flex-shrink-0 bg-unlimited-blue hover:bg-unlimited-dark-blue h-10"
+          onClick={handleSend}
+          disabled={isSending || (newMessage.trim() === '' && attachments.length === 0)}
         >
-          {isSending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
+          <Send className={`h-4 w-4 ${isRtl ? 'mr-1' : 'ml-1'}`} />
+          {t("application.messages.send")}
         </Button>
       </div>
       
-      <p className="text-xs text-unlimited-gray text-center">
-        يمكنك إرفاق ملفات (الحد الأقصى: 5 ملفات، 5 ميجابايت لكل ملف)
+      <p className="text-xs text-unlimited-gray mt-2 text-center">
+        {t("application.messages.enterHint", "يمكنك استخدام الزر Enter للإرسال. استخدم Shift + Enter لإضافة سطر جديد.")}
       </p>
     </div>
   );

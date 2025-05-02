@@ -1,415 +1,308 @@
 
 import { useState, useRef, useEffect } from 'react';
+import { Send, User, Search, MoreVertical, Paperclip, Image, File, X, MessageSquare } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import MessageInput from '@/components/applications/messages/MessageInput';
-import MessagesList from '@/components/messaging/MessagesList';
-import ContactsList from '@/components/messaging/ContactsList';
-import { User, MessageSquare, Search, Paperclip, Plus } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ar } from 'date-fns/locale';
 
-export type Contact = {
-  id: string;
-  name: string;
-  role: 'admin' | 'agent' | 'student';
-  avatar?: string;
-  lastMessage: string;
-  unreadCount: number;
-  lastMessageTime: Date;
-};
+type MessageType = 'text' | 'image' | 'file';
 
-export type Message = {
+type Message = {
   id: string;
   content: string;
-  sender: 'admin' | 'agent' | 'student';
+  sender: 'user' | 'agent' | 'admin';
+  type: MessageType;
   timestamp: Date;
   read: boolean;
-  attachments?: {
-    name: string;
-    url: string;
-    type: string;
-  }[];
 };
 
-export type Conversation = {
+type Conversation = {
   id: string;
-  contact: Contact;
+  participants: {
+    id: string;
+    name: string;
+    avatar?: string;
+    role: 'user' | 'agent' | 'admin';
+  }[];
+  lastMessage: string;
+  updatedAt: Date;
+  unreadCount: number;
   messages: Message[];
 };
 
+// بيانات محادثات تجريبية
+const initialConversations: Conversation[] = [
+  {
+    id: 'conv-1',
+    participants: [
+      { id: 'user-1', name: 'أحمد محمد', role: 'user' },
+      { id: 'admin-1', name: 'فريق الدعم', role: 'admin' },
+    ],
+    lastMessage: 'شكراً لكم على المتابعة السريعة',
+    updatedAt: new Date(2023, 3, 15, 10, 30),
+    unreadCount: 2,
+    messages: [
+      {
+        id: 'msg-1',
+        content: 'السلام عليكم، لدي استفسار حول طلب التسجيل الخاص بي',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 15, 10, 0),
+        read: true,
+      },
+      {
+        id: 'msg-2',
+        content: 'أهلاً بك، كيف يمكننا مساعدتك؟',
+        sender: 'admin',
+        type: 'text',
+        timestamp: new Date(2023, 3, 15, 10, 5),
+        read: true,
+      },
+      {
+        id: 'msg-3',
+        content: 'أريد معرفة حالة طلبي للالتحاق بجامعة لندن',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 15, 10, 10),
+        read: true,
+      },
+      {
+        id: 'msg-4',
+        content: 'تم التحقق من طلبك، وهو حالياً قيد المراجعة من قبل الجامعة. سنخبرك فور وصول الرد.',
+        sender: 'admin',
+        type: 'text',
+        timestamp: new Date(2023, 3, 15, 10, 20),
+        read: true,
+      },
+      {
+        id: 'msg-5',
+        content: 'شكراً لكم على المتابعة السريعة',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 15, 10, 30),
+        read: false,
+      },
+    ],
+  },
+  {
+    id: 'conv-2',
+    participants: [
+      { id: 'user-2', name: 'سارة عبدالله', role: 'user' },
+      { id: 'admin-1', name: 'فريق الدعم', role: 'admin' },
+    ],
+    lastMessage: 'تم إرسال المستندات المطلوبة',
+    updatedAt: new Date(2023, 3, 14, 14, 45),
+    unreadCount: 0,
+    messages: [
+      {
+        id: 'msg-6',
+        content: 'مرحباً، أرغب في معرفة المستندات المطلوبة للتقديم',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 14, 14, 30),
+        read: true,
+      },
+      {
+        id: 'msg-7',
+        content: 'مرحباً سارة، يمكنك الاطلاع على قائمة المستندات المطلوبة في صفحة التقديم. هل تحتاجين إلى مساعدة محددة؟',
+        sender: 'admin',
+        type: 'text',
+        timestamp: new Date(2023, 3, 14, 14, 35),
+        read: true,
+      },
+      {
+        id: 'msg-8',
+        content: 'نعم، هل الشهادة الجامعية مترجمة أم يمكن إرسالها باللغة العربية؟',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 14, 14, 40),
+        read: true,
+      },
+      {
+        id: 'msg-9',
+        content: 'يجب أن تكون الشهادة مترجمة إلى اللغة الإنجليزية ومصدقة من وزارة الخارجية.',
+        sender: 'admin',
+        type: 'text',
+        timestamp: new Date(2023, 3, 14, 14, 42),
+        read: true,
+      },
+      {
+        id: 'msg-10',
+        content: 'تم إرسال المستندات المطلوبة',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 14, 14, 45),
+        read: true,
+      },
+    ],
+  },
+  {
+    id: 'conv-3',
+    participants: [
+      { id: 'user-3', name: 'محمد علي', role: 'user' },
+      { id: 'agent-1', name: 'خالد الأحمد', role: 'agent' },
+    ],
+    lastMessage: 'سأقوم بالتواصل مع الجامعة ومتابعة طلبك',
+    updatedAt: new Date(2023, 3, 16, 9, 15),
+    unreadCount: 3,
+    messages: [
+      {
+        id: 'msg-11',
+        content: 'السلام عليكم، هل هناك جديد بشأن طلب الإقامة؟',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 16, 9, 0),
+        read: true,
+      },
+      {
+        id: 'msg-12',
+        content: 'صباح الخير محمد، لم أتلق تحديثات حتى الآن، سأقوم بالتواصل مع الجامعة اليوم.',
+        sender: 'agent',
+        type: 'text',
+        timestamp: new Date(2023, 3, 16, 9, 5),
+        read: true,
+      },
+      {
+        id: 'msg-13',
+        content: 'هل هناك مستندات إضافية مطلوبة؟',
+        sender: 'user',
+        type: 'text',
+        timestamp: new Date(2023, 3, 16, 9, 10),
+        read: false,
+      },
+      {
+        id: 'msg-14',
+        content: 'سأقوم بالتواصل مع الجامعة ومتابعة طلبك',
+        sender: 'agent',
+        type: 'text',
+        timestamp: new Date(2023, 3, 16, 9, 15),
+        read: false,
+      },
+    ],
+  },
+];
+
 const UserMessages = () => {
-  const [contacts, setContacts] = useState<Contact[]>([
-    {
-      id: 'contact-1',
-      name: 'فريق الدعم',
-      role: 'admin',
-      lastMessage: 'شكراً لكم على المساعدة',
-      unreadCount: 2,
-      lastMessageTime: new Date(2023, 3, 15, 10, 30),
-    },
-    {
-      id: 'contact-2',
-      name: 'محمد الخالدي (وكيل)',
-      role: 'agent',
-      lastMessage: 'سأتواصل معك قريباً بخصوص مستنداتك',
-      unreadCount: 3,
-      lastMessageTime: new Date(2023, 3, 14, 14, 45),
-    },
-    {
-      id: 'contact-3',
-      name: 'مستشار القبول - جامعة إسطنبول',
-      role: 'admin',
-      lastMessage: 'تم استلام مستنداتك وسيتم مراجعتها',
-      unreadCount: 0,
-      lastMessageTime: new Date(2023, 3, 10, 9, 15),
-    }
-  ]);
-  
-  const [conversations, setConversations] = useState<Conversation[]>([
-    {
-      id: 'conv-1',
-      contact: contacts[0],
-      messages: [
-        {
-          id: 'msg-1',
-          content: 'السلام عليكم، لدي استفسار حول طلب التسجيل الخاص بي',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 15, 10, 0),
-          read: true,
-        },
-        {
-          id: 'msg-2',
-          content: 'أهلاً بك، كيف يمكننا مساعدتك؟',
-          sender: 'admin',
-          timestamp: new Date(2023, 3, 15, 10, 5),
-          read: true,
-        },
-        {
-          id: 'msg-3',
-          content: 'هل يمكنكم إخباري عن حالة طلبي؟',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 15, 10, 10),
-          read: true,
-        },
-        {
-          id: 'msg-4',
-          content: 'طلبك قيد المراجعة حالياً، سنخبرك بأي تحديثات خلال 48 ساعة',
-          sender: 'admin',
-          timestamp: new Date(2023, 3, 15, 10, 20),
-          read: true,
-        },
-        {
-          id: 'msg-5',
-          content: 'شكراً لكم على المساعدة',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 15, 10, 30),
-          read: false,
-        },
-      ],
-    },
-    {
-      id: 'conv-2',
-      contact: contacts[1],
-      messages: [
-        {
-          id: 'msg-6',
-          content: 'مرحباً، أريد المساعدة بخصوص برنامج الطب البشري',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 14, 14, 30),
-          read: true,
-        },
-        {
-          id: 'msg-7',
-          content: 'أهلاً بك، أنا الوكيل المسؤول عن التقديم للجامعات البولندية. كيف يمكنني مساعدتك؟',
-          sender: 'agent',
-          timestamp: new Date(2023, 3, 14, 14, 35),
-          read: true,
-        },
-        {
-          id: 'msg-8',
-          content: 'أحتاج لمعرفة المستندات المطلوبة والمواعيد النهائية للتقديم',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 14, 14, 40),
-          read: true,
-        },
-        {
-          id: 'msg-9',
-          content: 'سأرسل لك قائمة بكل المستندات المطلوبة ومواعيد التقديم قريباً',
-          sender: 'agent',
-          timestamp: new Date(2023, 3, 14, 14, 42),
-          read: false,
-        },
-        {
-          id: 'msg-10',
-          content: 'سأتواصل معك قريباً بخصوص مستنداتك',
-          sender: 'agent',
-          timestamp: new Date(2023, 3, 14, 14, 45),
-          read: false,
-        },
-      ],
-    },
-    {
-      id: 'conv-3',
-      contact: contacts[2],
-      messages: [
-        {
-          id: 'msg-11',
-          content: 'السلام عليكم، أود الاستفسار عن برنامج الماجستير في إدارة الأعمال',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 10, 9, 0),
-          read: true,
-        },
-        {
-          id: 'msg-12',
-          content: 'أهلاً بك، يمكنك الاطلاع على تفاصيل البرنامج من خلال الرابط التالي...',
-          sender: 'admin',
-          timestamp: new Date(2023, 3, 10, 9, 5),
-          read: true,
-        },
-        {
-          id: 'msg-13',
-          content: 'قمت بتحميل المستندات المطلوبة، هل هناك شيء آخر؟',
-          sender: 'student',
-          timestamp: new Date(2023, 3, 10, 9, 10),
-          read: true,
-        },
-        {
-          id: 'msg-14',
-          content: 'تم استلام مستنداتك وسيتم مراجعتها',
-          sender: 'admin',
-          timestamp: new Date(2023, 3, 10, 9, 15),
-          read: true,
-        },
-      ],
-    },
-  ]);
-  
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(null);
-  const [newMessage, setNewMessage] = useState('');
+  const [conversations, setConversations] = useState(initialConversations);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [newMessage, setNewMessage] = useState('');
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
+  const [isAttachmentDialogOpen, setIsAttachmentDialogOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Filter contacts based on search query
-  const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    contact.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // تصفية المحادثات حسب البحث
+  const filteredConversations = conversations.filter((conversation) => {
+    const participantNames = conversation.participants.map(p => p.name.toLowerCase());
+    return participantNames.some(name => name.includes(searchQuery.toLowerCase())) ||
+      conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+  });
 
-  // Handle selecting a conversation
-  const handleSelectConversation = (contactId: string) => {
-    const conversation = conversations.find(conv => conv.contact.id === contactId) || null;
-    
-    if (conversation) {
-      setActiveConversation(conversation);
-      
-      // Mark messages as read
-      if (conversation.contact.unreadCount > 0) {
-        setContacts(prevContacts => 
-          prevContacts.map(c => 
-            c.id === contactId ? { ...c, unreadCount: 0 } : c
-          )
-        );
-        
-        setConversations(prevConversations =>
-          prevConversations.map(conv => {
-            if (conv.id === conversation.id) {
-              return {
-                ...conv,
-                messages: conv.messages.map(msg => ({ ...msg, read: true })),
-                contact: { ...conv.contact, unreadCount: 0 }
-              };
-            }
-            return conv;
-          })
-        );
-      }
+  // التمرير إلى آخر رسالة عند اختيار محادثة
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, [selectedConversation]);
 
-  // Send a new message
-  const handleSendMessage = (messageText: string, attachments: File[]) => {
-    if (!activeConversation) return;
+  // تحديث حالة قراءة الرسائل عند فتح محادثة
+  const handleSelectConversation = (conversation: Conversation) => {
+    setSelectedConversation(conversation);
     
-    const newMsg: Message = {
-      id: `msg-${Date.now()}`,
-      content: messageText,
-      sender: 'student',
-      timestamp: new Date(),
-      read: true,
-      attachments: attachments.length > 0 ? attachments.map(file => ({
-        name: file.name,
-        url: URL.createObjectURL(file),
-        type: file.type
-      })) : undefined
-    };
-    
+    // تحديث حالة القراءة للرسائل
     const updatedConversations = conversations.map(conv => {
-      if (conv.id === activeConversation.id) {
+      if (conv.id === conversation.id) {
         return {
           ...conv,
-          messages: [...conv.messages, newMsg],
-          contact: {
-            ...conv.contact,
-            lastMessage: messageText || 'تم إرسال مرفق',
-            lastMessageTime: new Date()
-          }
+          unreadCount: 0,
+          messages: conv.messages.map(msg => ({ ...msg, read: true }))
         };
       }
       return conv;
     });
     
     setConversations(updatedConversations);
-    
-    // Update the active conversation
-    setActiveConversation(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        messages: [...prev.messages, newMsg],
-        contact: {
-          ...prev.contact,
-          lastMessage: messageText || 'تم إرسال مرفق',
-          lastMessageTime: new Date()
-        }
-      };
-    });
-    
-    // Update contacts list
-    setContacts(prevContacts => 
-      prevContacts.map(c => 
-        c.id === activeConversation.contact.id 
-          ? { 
-              ...c, 
-              lastMessage: messageText || 'تم إرسال مرفق',
-              lastMessageTime: new Date()
-            } 
-          : c
-      )
-    );
-    
-    // Simulate reply after a delay
-    setTimeout(() => {
-      simulateReply(activeConversation.id);
-    }, 3000);
-  };
-  
-  // Simulate a reply from the contact
-  const simulateReply = (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId);
-    if (!conversation) return;
-    
-    const replies = [
-      'شكراً لتواصلك معنا، سنرد عليك في أقرب وقت.',
-      'تم استلام رسالتك، وسيتم معالجتها قريباً.',
-      'سنقوم بالرد على استفسارك خلال 24 ساعة.',
-      'شكراً لك، هل هناك أي شيء آخر يمكننا مساعدتك به؟',
-      'تم تسجيل طلبك، وسنتواصل معك قريباً.',
-    ];
-    
-    const replyText = replies[Math.floor(Math.random() * replies.length)];
-    
-    const newReply: Message = {
-      id: `reply-${Date.now()}`,
-      content: replyText,
-      sender: conversation.contact.role,
-      timestamp: new Date(),
-      read: false,
-    };
-    
-    // Update conversations
-    setConversations(prevConversations =>
-      prevConversations.map(conv => {
-        if (conv.id === conversationId) {
-          return {
-            ...conv,
-            messages: [...conv.messages, newReply],
-            contact: {
-              ...conv.contact,
-              lastMessage: replyText,
-              lastMessageTime: new Date(),
-              unreadCount: activeConversation?.id === conversationId ? 0 : conv.contact.unreadCount + 1
-            }
-          };
-        }
-        return conv;
-      })
-    );
-    
-    // Update contacts
-    setContacts(prevContacts => 
-      prevContacts.map(c => 
-        c.id === conversation.contact.id 
-          ? { 
-              ...c, 
-              lastMessage: replyText,
-              lastMessageTime: new Date(),
-              unreadCount: activeConversation?.id === conversationId ? 0 : c.unreadCount + 1
-            } 
-          : c
-      )
-    );
-    
-    // Update active conversation if it's the current one
-    if (activeConversation?.id === conversationId) {
-      setActiveConversation(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          messages: [...prev.messages, newReply],
-          contact: {
-            ...prev.contact,
-            lastMessage: replyText,
-            lastMessageTime: new Date()
-          }
-        };
-      });
-    } else {
-      // If it's not the active conversation, show a toast
-      toast({
-        title: "رسالة جديدة",
-        description: `${conversation.contact.name}: ${replyText}`,
-      });
-    }
   };
 
-  // Scroll to bottom of messages when active conversation changes or new messages arrive
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [activeConversation?.messages]);
-  
-  // Get the total unread count for all contacts
-  const totalUnreadCount = contacts.reduce((total, contact) => total + contact.unreadCount, 0);
+  // إرسال رسالة جديدة
+  const sendMessage = () => {
+    if (!newMessage.trim() || !selectedConversation) return;
+    
+    const newMsg: Message = {
+      id: `msg-${Date.now()}`,
+      content: newMessage.trim(),
+      sender: 'user',
+      type: 'text',
+      timestamp: new Date(),
+      read: true,
+    };
+    
+    const updatedConversations = conversations.map(conv => {
+      if (conv.id === selectedConversation.id) {
+        return {
+          ...conv,
+          lastMessage: newMessage.trim(),
+          updatedAt: new Date(),
+          messages: [...conv.messages, newMsg]
+        };
+      }
+      return conv;
+    });
+    
+    setConversations(updatedConversations);
+    setSelectedConversation({
+      ...selectedConversation,
+      lastMessage: newMessage.trim(),
+      updatedAt: new Date(),
+      messages: [...selectedConversation.messages, newMsg]
+    });
+    
+    setNewMessage('');
+    
+    // تمرير تلقائي للأسفل
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  const handleSendAttachment = (type: MessageType) => {
+    toast({
+      title: "إرسال مرفق",
+      description: `تم إرسال المرفق بنجاح`,
+    });
+    setIsAttachmentDialogOpen(false);
+  };
 
   return (
     <DashboardLayout>
       <div className="flex flex-col h-[calc(100vh-150px)]">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <h1 className="text-2xl font-bold text-unlimited-dark-blue">الرسائل</h1>
-            {totalUnreadCount > 0 && (
-              <Badge className="bg-unlimited-blue text-white mr-2">{totalUnreadCount} جديدة</Badge>
-            )}
-          </div>
-          
-          <Button>
-            <MessageSquare className="h-4 w-4 ml-2" />
-            بدء محادثة جديدة
-          </Button>
-        </div>
+        <div className="text-2xl font-bold text-unlimited-dark-blue mb-4">الرسائل</div>
         
         <div className="flex flex-1 border rounded-md overflow-hidden">
-          {/* Contacts sidebar */}
+          {/* قائمة المحادثات */}
           <div className="w-full md:w-1/3 lg:w-1/4 border-l bg-gray-50">
             <div className="p-3 border-b">
               <div className="relative">
@@ -424,106 +317,105 @@ const UserMessages = () => {
             </div>
             
             <ScrollArea className="h-[calc(100vh-270px)]">
-              {filteredContacts.map((contact) => (
-                <div
-                  key={contact.id}
-                  className={`p-3 cursor-pointer hover:bg-gray-100 border-b ${
-                    activeConversation?.contact.id === contact.id ? 'bg-gray-100' : ''
-                  }`}
-                  onClick={() => handleSelectConversation(contact.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div className={`h-10 w-10 rounded-full ${
-                        contact.role === 'admin' 
-                          ? 'bg-unlimited-dark-blue' 
-                          : contact.role === 'agent' 
-                            ? 'bg-unlimited-blue' 
-                            : 'bg-unlimited-gray'
-                      } flex items-center justify-center text-white`}>
-                        <User className="h-6 w-6" />
-                      </div>
-                      <div className="mr-3">
-                        <div className="font-medium">{contact.name}</div>
-                        <div className="text-sm text-unlimited-gray truncate max-w-[180px]">
-                          {contact.lastMessage}
+              {filteredConversations.length === 0 ? (
+                <div className="p-4 text-center text-unlimited-gray">
+                  لا توجد محادثات متطابقة مع البحث
+                </div>
+              ) : (
+                filteredConversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className={`p-3 cursor-pointer hover:bg-gray-100 border-b ${
+                      selectedConversation?.id === conversation.id ? 'bg-gray-100' : ''
+                    }`}
+                    onClick={() => handleSelectConversation(conversation)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-unlimited-blue flex items-center justify-center text-white">
+                          <User className="h-6 w-6" />
+                        </div>
+                        <div className="ml-3">
+                          <div className="font-medium">
+                            {conversation.participants.find(p => p.role !== 'user')?.name || 'المستخدم'}
+                          </div>
+                          <div className="text-sm text-unlimited-gray truncate max-w-[180px]">
+                            {conversation.lastMessage}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <div className="text-xs text-unlimited-gray">
-                        {formatDistanceToNow(contact.lastMessageTime, { addSuffix: true, locale: ar })}
+                      <div className="flex flex-col items-end">
+                        <div className="text-xs text-unlimited-gray">
+                          {formatDistanceToNow(conversation.updatedAt, { addSuffix: true, locale: ar })}
+                        </div>
+                        {conversation.unreadCount > 0 && (
+                          <Badge className="bg-unlimited-blue">{conversation.unreadCount}</Badge>
+                        )}
                       </div>
-                      {contact.unreadCount > 0 && (
-                        <Badge className="bg-unlimited-blue">{contact.unreadCount}</Badge>
-                      )}
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </ScrollArea>
           </div>
           
-          {/* Messages area */}
-          {activeConversation ? (
+          {/* نافذة المحادثة */}
+          {selectedConversation ? (
             <div className="hidden md:flex md:flex-col flex-1">
-              {/* Conversation header */}
+              {/* رأس المحادثة */}
               <div className="p-3 border-b flex items-center justify-between bg-gray-50">
                 <div className="flex items-center">
-                  <div className={`h-10 w-10 rounded-full ${
-                    activeConversation.contact.role === 'admin' 
-                      ? 'bg-unlimited-dark-blue' 
-                      : activeConversation.contact.role === 'agent' 
-                        ? 'bg-unlimited-blue' 
-                        : 'bg-unlimited-gray'
-                  } flex items-center justify-center text-white`}>
+                  <div className="h-10 w-10 rounded-full bg-unlimited-blue flex items-center justify-center text-white">
                     <User className="h-6 w-6" />
                   </div>
-                  <div className="mr-3">
-                    <div className="font-medium">{activeConversation.contact.name}</div>
+                  <div className="ml-3">
+                    <div className="font-medium">
+                      {selectedConversation.participants.find(p => p.role !== 'user')?.name || 'المستخدم'}
+                    </div>
+                    <div className="text-xs text-unlimited-gray">
+                      {selectedConversation.participants.find(p => p.role !== 'user')?.role === 'admin' 
+                        ? 'فريق الدعم' 
+                        : 'وكيل'}
+                    </div>
                   </div>
                 </div>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreVertical className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>تحديث المحادثة</DropdownMenuItem>
+                    <DropdownMenuItem>إعادة توجيه المحادثة</DropdownMenuItem>
+                    <DropdownMenuItem>تحميل المحادثة</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               
-              {/* Messages content */}
+              {/* محتوى المحادثة */}
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {activeConversation.messages.map((message) => (
+                  {selectedConversation.messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === 'student' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
                         className={`max-w-[70%] p-3 rounded-lg ${
-                          message.sender === 'student'
-                            ? 'bg-unlimited-blue text-white rounded-tl-none'
-                            : 'bg-gray-100 text-gray-800 rounded-tr-none'
+                          message.sender === 'user'
+                            ? 'bg-unlimited-blue text-white rounded-tr-none'
+                            : 'bg-gray-100 text-gray-800 rounded-tl-none'
                         }`}
                       >
                         <div className="text-sm">{message.content}</div>
-                        {message.attachments && message.attachments.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {message.attachments.map((attachment, index) => (
-                              <div key={index} className="flex items-center space-x-2 rtl:space-x-reverse">
-                                <Paperclip className="h-3 w-3" />
-                                <a
-                                  href={attachment.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-xs underline"
-                                >
-                                  {attachment.name}
-                                </a>
-                              </div>
-                            ))}
-                          </div>
-                        )}
                         <div
                           className={`text-xs mt-1 text-right ${
-                            message.sender === 'student' ? 'text-unlimited-light-blue' : 'text-unlimited-gray'
+                            message.sender === 'user' ? 'text-unlimited-light-blue' : 'text-unlimited-gray'
                           }`}
                         >
-                          {message.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(message.timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
@@ -532,66 +424,127 @@ const UserMessages = () => {
                 </div>
               </ScrollArea>
               
-              {/* Message input */}
+              {/* مربع إدخال الرسالة */}
               <div className="p-3 border-t">
-                <MessageInput 
-                  onSendMessage={handleSendMessage}
-                  placeholder="اكتب رسالة..."
-                />
+                <div className="flex items-end space-x-2 rtl:space-x-reverse">
+                  <Dialog open={isAttachmentDialogOpen} onOpenChange={setIsAttachmentDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-10 w-10">
+                        <Paperclip className="h-5 w-5" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>إرسال مرفق</DialogTitle>
+                      </DialogHeader>
+                      <div className="grid grid-cols-1 gap-6 py-4">
+                        <div
+                          className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => handleSendAttachment('image')}
+                        >
+                          <Image className="h-12 w-12 mx-auto text-unlimited-gray mb-2" />
+                          <p className="font-medium">إرسال صورة</p>
+                          <p className="text-sm text-unlimited-gray mt-1">PNG, JPG, GIF حتى 10MB</p>
+                        </div>
+                        
+                        <div
+                          className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+                          onClick={() => handleSendAttachment('file')}
+                        >
+                          <File className="h-12 w-12 mx-auto text-unlimited-gray mb-2" />
+                          <p className="font-medium">إرسال ملف</p>
+                          <p className="text-sm text-unlimited-gray mt-1">PDF, DOCX, XLSX حتى 20MB</p>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  
+                  <div className="flex-1">
+                    <Textarea
+                      placeholder="اكتب رسالتك هنا..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      className="resize-none"
+                      rows={2}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          sendMessage();
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim()}
+                    className="h-10"
+                  >
+                    <Send className="h-5 w-5 ml-1" />
+                    إرسال
+                  </Button>
+                </div>
               </div>
             </div>
           ) : (
             <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50">
               <div className="text-center">
-                <div className="bg-unlimited-blue/10 rounded-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+                <div className="bg-unlimited-light-blue rounded-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
                   <MessageSquare className="h-12 w-12 text-unlimited-blue" />
                 </div>
                 <h3 className="text-xl font-medium text-unlimited-dark-blue mb-2">اختر محادثة</h3>
                 <p className="text-unlimited-gray max-w-md">
-                  اختر محادثة من القائمة للبدء في التواصل مع فريق الدعم أو الوكلاء.
+                  اختر محادثة من القائمة للبدء في التواصل. يمكنك إرسال رسائل ومرفقات.
                 </p>
               </div>
             </div>
           )}
           
-          {/* Mobile conversation view */}
-          {activeConversation && (
+          {/* عرض المحادثة على الشاشات الصغيرة */}
+          {selectedConversation && (
             <div className="md:hidden flex flex-col flex-1">
-              {/* Mobile conversation header */}
-              <div className="p-3 border-b flex items-center bg-gray-50">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => setActiveConversation(null)}
-                  className="mr-2"
-                >
-                  <User className="h-5 w-5" />
-                </Button>
-                <div className="font-medium">{activeConversation.contact.name}</div>
+              <div className="p-3 border-b flex items-center justify-between bg-gray-50">
+                <div className="flex items-center">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="mr-2"
+                    onClick={() => setSelectedConversation(null)}
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                  <div className="h-8 w-8 rounded-full bg-unlimited-blue flex items-center justify-center text-white">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <div className="ml-2">
+                    <div className="font-medium text-sm">
+                      {selectedConversation.participants.find(p => p.role !== 'user')?.name || 'المستخدم'}
+                    </div>
+                  </div>
+                </div>
               </div>
               
-              {/* Mobile messages content */}
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {activeConversation.messages.map((message) => (
+                  {selectedConversation.messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === 'student' ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
                         className={`max-w-[80%] p-3 rounded-lg ${
-                          message.sender === 'student'
-                            ? 'bg-unlimited-blue text-white rounded-tl-none'
-                            : 'bg-gray-100 text-gray-800 rounded-tr-none'
+                          message.sender === 'user'
+                            ? 'bg-unlimited-blue text-white rounded-tr-none'
+                            : 'bg-gray-100 text-gray-800 rounded-tl-none'
                         }`}
                       >
                         <div className="text-sm">{message.content}</div>
                         <div
                           className={`text-xs mt-1 text-right ${
-                            message.sender === 'student' ? 'text-unlimited-light-blue' : 'text-unlimited-gray'
+                            message.sender === 'user' ? 'text-unlimited-light-blue' : 'text-unlimited-gray'
                           }`}
                         >
-                          {message.timestamp.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(message.timestamp).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
                         </div>
                       </div>
                     </div>
@@ -600,12 +553,34 @@ const UserMessages = () => {
                 </div>
               </ScrollArea>
               
-              {/* Mobile message input */}
               <div className="p-3 border-t">
-                <MessageInput 
-                  onSendMessage={handleSendMessage}
-                  placeholder="اكتب رسالة..."
-                />
+                <div className="flex items-end space-x-2 rtl:space-x-reverse">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10"
+                    onClick={() => setIsAttachmentDialogOpen(true)}
+                  >
+                    <Paperclip className="h-5 w-5" />
+                  </Button>
+                  
+                  <div className="flex-1">
+                    <Input
+                      placeholder="اكتب رسالتك هنا..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                    />
+                  </div>
+                  
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim()}
+                    size="icon"
+                    className="h-10 w-10"
+                  >
+                    <Send className="h-5 w-5" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
@@ -616,3 +591,4 @@ const UserMessages = () => {
 };
 
 export default UserMessages;
+

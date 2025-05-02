@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -30,10 +31,10 @@ const studentNavItems: NavItem[] = [
   { label: 'طلباتي', href: '/dashboard/applications', icon: <FileText className="h-5 w-5" /> },
   { label: 'البرامج الدراسية', href: '/programs', icon: <BookOpen className="h-5 w-5" /> },
   { label: 'الجامعات', href: '/universities', icon: <School className="h-5 w-5" /> },
-  { label: 'الرسائل', href: '/messages', icon: <MessageSquare className="h-5 w-5" />, notificationCount: 2 },
+  { label: 'الرسائل', href: '/student/messages', icon: <MessageSquare className="h-5 w-5" />, notificationCount: 2 },
   { label: 'الإشعارات', href: '/dashboard/notifications', icon: <Bell className="h-5 w-5" />, notificationCount: 3 },
   { label: 'الملف الشخصي', href: '/dashboard/profile', icon: <User className="h-5 w-5" /> },
-  { label: 'الإعدادات', href: '/dashboard/account-settings', icon: <Settings className="h-5 w-5" /> },
+  { label: 'الإعدادات', href: '/dashboard/settings', icon: <Settings className="h-5 w-5" /> },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -85,6 +86,7 @@ const Sidebar = ({ userRole = 'student' }: SidebarProps) => {
 
   return (
     <>
+      {/* Mobile toggle button */}
       <Button
         variant="outline"
         size="icon"
@@ -180,6 +182,7 @@ const Sidebar = ({ userRole = 'student' }: SidebarProps) => {
         </div>
       </aside>
 
+      {/* Overlay for mobile */}
       {mobileOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"

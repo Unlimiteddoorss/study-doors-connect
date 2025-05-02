@@ -12,11 +12,6 @@ const FeaturedPrograms = () => {
     .filter(program => program.isFeatured)
     .slice(0, 3);
 
-  // Ensure we have data for the featured programs
-  if (featuredPrograms.length === 0) {
-    console.warn("No featured programs found in dummyPrograms data");
-  }
-
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
@@ -35,7 +30,7 @@ const FeaturedPrograms = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
           {featuredPrograms.map((program) => (
-            <ProgramCard key={program.id} program={program as any} />
+            <ProgramCard key={program.id} program={program} />
           ))}
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -5,7 +6,7 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { dummyPrograms, Program } from '@/data/programsData';
+import { dummyPrograms } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -37,140 +38,76 @@ const countryTranslations: Record<string, string> = {
 // Create medical programs data
 const medicalPrograms = dummyPrograms
   .filter(program => 
-    (program.title || program.name || "").includes('طب') || 
-    (program.title || program.name || "").includes('صيدلة') || 
-    (program.title || program.name || "").includes('طبي') ||
-    (program.title || program.name || "").includes('تمريض')
+    program.title.includes('طب') || 
+    program.title.includes('صيدلة') || 
+    program.title.includes('طبي') ||
+    program.title.includes('تمريض')
   )
   .concat([
     {
       id: 101,
-      name: "MBBS",
-      nameAr: "بكالوريوس الطب والجراحة - MBBS",
       title: "بكالوريوس الطب والجراحة - MBBS",
       university: "جامعة إسطنبول",
-      universityAr: "جامعة إسطنبول",
-      universityId: 1,
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
-      languageAr: "إنجليزية",
-      degree: "Bachelor",
-      degreeAr: "بكالوريوس",
       duration: "6 سنوات",
       deadline: "15/08/2023",
-      tuitionFee: 8500,
-      tuitionPeriod: "سنوياً",
-      discountedFee: 8500,
       fee: "$8,500 / سنة",
       image: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      features: ["برنامج معتمد", "تدريب عملي"],
-      description: "برنامج طب متكامل يؤهل الخريجين للعمل في المستشفيات والمراكز الصحية العالمية",
-      rating: 4.8,
-      reviewsCount: 245
+      scholarshipAvailable: true,
+      badges: ["برنامج معتمد", "تدريب عملي"]
     },
     {
       id: 102,
-      name: "Dentistry",
-      nameAr: "بكالوريوس طب الأسنان",
       title: "بكالوريوس طب الأسنان",
       university: "جامعة أنقرة",
-      universityAr: "جامعة أنقرة",
-      universityId: 2,
       location: "Turkey، أنقرة",
       language: "تركية",
-      languageAr: "تركية",
-      degree: "Bachelor",
-      degreeAr: "بكالوريوس",
       duration: "5 سنوات",
       deadline: "30/07/2023",
-      tuitionFee: 7500,
-      tuitionPeriod: "سنوياً",
-      discountedFee: 6800,
       fee: "$7,500 / سنة",
-      discount: 10,
+      discount: "$6,800 / سنة",
       image: "https://images.unsplash.com/photo-1588776814546-daab30f0477e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      features: ["منهج حديث", "معامل متطورة"],
-      description: "برنامج طب أسنان متميز يشمل تدريبات عملية مكثفة في عيادات متخصصة",
-      rating: 4.7,
-      reviewsCount: 189
+      badges: ["منهج حديث", "معامل متطورة"]
     },
     {
       id: 103,
-      name: "Pharmacy",
-      nameAr: "بكالوريوس الصيدلة",
       title: "بكالوريوس الصيدلة",
       university: "جامعة إزمير",
-      universityAr: "جامعة إزمير",
-      universityId: 3,
       location: "Turkey، إزمير",
       language: "إنجليزية وتركية",
-      languageAr: "إنجليزية وتركية",
-      degree: "Bachelor",
-      degreeAr: "بكالوريوس",
       duration: "5 سنوات",
       deadline: "10/09/2023",
-      tuitionFee: 5200,
-      tuitionPeriod: "سنوياً",
-      discountedFee: 5200,
       fee: "$5,200 / سنة",
       image: "https://images.unsplash.com/photo-1585435557343-3b348b7a7cef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      features: ["تدريب مهني", "برنامج تبادل طلابي"],
-      description: "برنامج صيدلة متكامل يشمل تدريبات عملية ومهنية",
-      rating: 4.6,
-      reviewsCount: 150
+      badges: ["تدريب مهني", "برنامج تبادل طلابي"]
     },
     {
       id: 104,
-      name: "Nursing",
-      nameAr: "بكالوريوس العلاج الطبيعي",
       title: "بكالوريوس العلاج الطبيعي",
       university: "جامعة بورصة",
-      universityAr: "جامعة بورصة",
-      universityId: 4,
       location: "Turkey، بورصة",
       language: "إنجليزية",
-      languageAr: "إنجليزية",
-      degree: "Bachelor",
-      degreeAr: "بكالوريوس",
       duration: "4 سنوات",
       deadline: "20/08/2023",
-      tuitionFee: 4800,
-      tuitionPeriod: "سنوياً",
-      discountedFee: 4300,
       fee: "$4,800 / سنة",
-      discount: 10,
+      discount: "$4,300 / سنة",
       image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      features: ["تدريب ميداني", "فرص وظيفية"],
-      description: "برنامج العلاج الطبيعي يشمل تدريبات عملية ومهنية",
-      rating: 4.5,
-      reviewsCount: 120
+      badges: ["تدريب ميداني", "فرص وظيفية"]
     },
     {
       id: 105,
-      name: "Physiotherapy",
-      nameAr: "ماجستير الجراحة العامة",
       title: "ماجستير الجراحة العامة",
       university: "جامعة إسطنبول",
-      universityAr: "جامعة إسطنبول",
-      universityId: 5,
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
-      languageAr: "إنجليزية",
-      degree: "Master",
-      degreeAr: "ماجستير",
       duration: "3 سنوات",
       deadline: "05/08/2023",
-      tuitionFee: 10200,
-      tuitionPeriod: "سنوياً",
-      discountedFee: 10200,
       fee: "$10,200 / سنة",
       image: "https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      features: ["بحث متخصص", "تدريب في المستشفيات"],
-      description: "برنامج جراحة عامة متكامل يشمل تدريبات عملية ومهنية",
-      rating: 4.4,
-      reviewsCount: 90
+      badges: ["بحث متخصص", "تدريب في المستشفيات"]
     }
   ]);
 

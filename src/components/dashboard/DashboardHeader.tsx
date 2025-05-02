@@ -1,17 +1,17 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { 
   Bell, 
-  MessageSquare, 
-  User, 
   Settings, 
+  User, 
   LogOut, 
-  ChevronDown,
-  CircleUser
+  ChevronDown, 
+  Menu, 
+  Moon,
+  Sun,
+  Globe,
+  Check
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -20,129 +20,158 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslation } from 'react-i18next';
+import { changeLanguage, getCurrentLanguage, getLanguageName } from '@/i18n/config';
 
-type DashboardHeaderProps = {
+interface DashboardHeaderProps {
   userRole?: 'student' | 'admin' | 'agent';
-};
+  toggleSidebar?: () => void;
+}
 
-const DashboardHeader = ({ userRole = 'student' }: DashboardHeaderProps) => {
-  const { t } = useTranslation();
+const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeaderProps) => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { t, i18n } = useTranslation();
+  const currentLanguage = getCurrentLanguage();
   
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    // Implement actual theme toggling here
+    document.documentElement.classList.toggle('dark');
+  };
+
+  const handleLanguageChange = (lang: string) => {
+    if (lang !== currentLanguage) {
+      changeLanguage(lang);
+    }
+  };
+
   return (
-    <header className="bg-white border-b shadow-sm sticky top-0 z-30">
-      <div className="flex justify-between items-center p-4">
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
-          {/* Any header left side content */}
+    <header className="border-b sticky top-0 z-10 bg-white dark:bg-gray-900 dark:text-white">
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+            <Menu className="h-5 w-5" />
+          </Button>
+          
+          <div className="ml-4 md:ml-0">
+            <h1 className="text-lg font-medium text-unlimited-dark-blue dark:text-white">
+              {userRole === 'admin' ? t('admin.dashboard.title') : 
+               userRole === 'agent' ? t('agent.dashboard.title') : 
+               t('student.dashboard.title')}
+            </h1>
+          </div>
         </div>
+        
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
-          {/* Notifications */}
+          {/* Language Switcher - Enhanced */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="relative"
-              >
-                <Bell className="h-5 w-5" />
-                <Badge className="bg-unlimited-blue absolute -top-1 -right-1 px-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold">
-                  3
-                </Badge>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>الإشعارات</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-[300px] overflow-y-auto">
-                <DropdownMenuItem className="flex flex-col items-start cursor-pointer">
-                  <div className="font-medium">تم تحديث حالة طلبك</div>
-                  <div className="text-xs text-unlimited-gray">منذ ساعتين</div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start cursor-pointer">
-                  <div className="font-medium">مستندات مطلوبة</div>
-                  <div className="text-xs text-unlimited-gray">منذ 5 ساعات</div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start cursor-pointer">
-                  <div className="font-medium">رسالة جديدة</div>
-                  <div className="text-xs text-unlimited-gray">منذ يوم واحد</div>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to={userRole === 'admin' ? '/admin/notifications' : '/dashboard/notifications'} className="w-full text-center text-unlimited-blue cursor-pointer">
-                  {t('dashboard.viewAllNotifications')}
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          {/* Messages */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="relative"
-              >
-                <MessageSquare className="h-5 w-5" />
-                <Badge className="bg-unlimited-blue absolute -top-1 -right-1 px-1 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold">
-                  2
-                </Badge>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>الرسائل</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-[300px] overflow-y-auto">
-                <DropdownMenuItem className="flex flex-col items-start cursor-pointer">
-                  <div className="font-medium">فريق الدعم</div>
-                  <div className="text-xs text-unlimited-gray truncate w-full">شكراً لاستفسارك، يمكننا مساعدتك في ذلك</div>
-                  <div className="text-xs text-unlimited-gray">منذ 3 ساعات</div>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex flex-col items-start cursor-pointer">
-                  <div className="font-medium">مستشار القبول</div>
-                  <div className="text-xs text-unlimited-gray truncate w-full">تم تحديث حالة طلبك، يرجى مراجعة لوحة التحكم</div>
-                  <div className="text-xs text-unlimited-gray">منذ يوم واحد</div>
-                </DropdownMenuItem>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/messages" className="w-full text-center text-unlimited-blue cursor-pointer">
-                  {t('dashboard.viewAllMessages')}
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          {/* User Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <CircleUser className="h-5 w-5" />
-                <span className="hidden md:inline-block">محمد أحمد</span>
-                <ChevronDown className="h-4 w-4" />
+              <Button variant="outline" size="icon" className="relative">
+                <Globe className="h-4 w-4" />
+                <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full bg-unlimited-blue"></span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>حسابي</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('language.select')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/dashboard/profile" className="flex items-center cursor-pointer">
-                  <User className="ml-2 h-4 w-4" />
-                  <span>الملف الشخصي</span>
-                </Link>
+              <DropdownMenuRadioGroup value={currentLanguage} onValueChange={handleLanguageChange}>
+                <DropdownMenuRadioItem value="ar" className="flex items-center justify-between">
+                  <span>العربية</span>
+                  {currentLanguage === 'ar' && <Check className="h-4 w-4 ml-2" />}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="en" className="flex items-center justify-between">
+                  <span>English</span>
+                  {currentLanguage === 'en' && <Check className="h-4 w-4 ml-2" />}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="fr" className="flex items-center justify-between">
+                  <span>Français</span>
+                  {currentLanguage === 'fr' && <Check className="h-4 w-4 ml-2" />}
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="tr" className="flex items-center justify-between">
+                  <span>Türkçe</span>
+                  {currentLanguage === 'tr' && <Check className="h-4 w-4 ml-2" />}
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Theme Toggle - Enhanced */}
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={toggleTheme}
+            className="transition-colors duration-200"
+          >
+            {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          
+          {/* Notifications */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="relative">
+                <Bell className="h-4 w-4" />
+                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-unlimited-danger"></span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <DropdownMenuLabel>{t('notifications.title')}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <div className="max-h-80 overflow-auto">
+                {[1, 2, 3].map((i) => (
+                  <DropdownMenuItem key={i} className="flex flex-col items-start py-2">
+                    <p className="font-medium">{t('notifications.item', { number: i })}</p>
+                    <p className="text-sm text-unlimited-gray">{t('notifications.time', { number: i })}</p>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="justify-center">
+                <Button variant="ghost" className="w-full">
+                  {t('notifications.viewAll')}
+                </Button>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/dashboard/account-settings" className="flex items-center cursor-pointer">
-                  <Settings className="ml-2 h-4 w-4" />
-                  <span>الإعدادات</span>
-                </Link>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* User Menu - Enhanced */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center">
+                <Avatar className="h-8 w-8 mr-2">
+                  <AvatarImage src="/assets/avatar.png" />
+                  <AvatarFallback>
+                    <User className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden md:inline">
+                  {userRole === 'admin' ? 
+                    t('auth.userNames.admin') : 
+                    userRole === 'agent' ? 
+                    t('auth.userNames.agent') : 
+                    t('auth.userNames.student')}
+                </span>
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>{t('auth.profile')}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <User className="h-4 w-4 mr-2" />
+                {t('auth.viewProfile')}
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings className="h-4 w-4 mr-2" />
+                {t('auth.settings')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="flex items-center cursor-pointer">
-                <LogOut className="ml-2 h-4 w-4" />
-                <span>تسجيل الخروج</span>
+              <DropdownMenuItem className="text-unlimited-danger focus:text-unlimited-danger">
+                <LogOut className="h-4 w-4 mr-2" />
+                {t('auth.logout')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

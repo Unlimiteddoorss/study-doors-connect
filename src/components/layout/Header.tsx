@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Globe, Phone, Mail } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { 
   DropdownMenu,
@@ -20,11 +19,6 @@ const Header = () => {
   const { t, i18n } = useTranslation();
   const isLoggedIn = false;
   const isAdmin = true;
-
-  const contactInfo = {
-    phone: "+90 55 24 212 214",
-    email: "unlimiteddoorss@gmail.com"
-  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -47,40 +41,6 @@ const Header = () => {
 
   return (
     <header className="bg-unlimited-dark-blue text-white shadow-md">
-      {/* Top contact bar */}
-      <div className="bg-unlimited-blue py-2 text-sm">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4 rtl:space-x-reverse">
-            <a href={`mailto:${contactInfo.email}`} className="flex items-center hover:text-gray-200">
-              <Mail className="h-4 w-4 mr-1" />
-              <span dir="ltr">{contactInfo.email}</span>
-            </a>
-            <a href={`tel:${contactInfo.phone}`} className="flex items-center hover:text-gray-200">
-              <Phone className="h-4 w-4 mr-1" />
-              <span dir="ltr">{contactInfo.phone}</span>
-            </a>
-          </div>
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => changeLanguage('ar')}
-              className={`text-xs px-2 py-1 h-auto ${i18n.language === 'ar' ? 'bg-white/20' : ''}`}
-            >
-              العربية
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => changeLanguage('en')}
-              className={`text-xs px-2 py-1 h-auto ${i18n.language === 'en' ? 'bg-white/20' : ''}`}
-            >
-              English
-            </Button>
-          </div>
-        </div>
-      </div>
-
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <Logo />
@@ -100,8 +60,26 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Auth Buttons */}
+          {/* Language Switcher */}
           <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-white">
+                  <Globe className="h-4 w-4 mr-2" />
+                  {i18n.language === 'ar' ? 'العربية' : 'English'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => changeLanguage('ar')}>
+                  العربية
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => changeLanguage('en')}>
+                  English
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Auth Buttons */}
             {isLoggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -188,18 +166,18 @@ const Header = () => {
               </Link>
             ))}
             
-            {/* Contact Info (Mobile) */}
+            {/* Language Switcher (Mobile) */}
             <div className="py-2 border-t border-white/20">
-              <a href={`tel:${contactInfo.phone}`} className="block py-2 px-3 text-white hover:bg-blue-900/30">
-                <Phone className="h-4 w-4 inline mr-2" />
-                <span dir="ltr">{contactInfo.phone}</span>
-              </a>
-              <a href={`mailto:${contactInfo.email}`} className="block py-2 px-3 text-white hover:bg-blue-900/30">
-                <Mail className="h-4 w-4 inline mr-2" />
-                <span>{contactInfo.email}</span>
-              </a>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-white"
+                onClick={() => changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}
+              >
+                <Globe className="h-4 w-4 mr-2" />
+                {i18n.language === 'ar' ? 'English' : 'العربية'}
+              </Button>
             </div>
-            
+
             {!isLoggedIn && (
               <div className="pt-2 flex flex-col space-y-2">
                 <Button asChild variant="outline" className="border-white text-white">

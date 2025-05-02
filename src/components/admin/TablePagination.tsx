@@ -16,7 +16,7 @@ interface TablePaginationProps {
   onPageChange: (page: number) => void;
 }
 
-const TablePagination = ({
+export const TablePagination = ({
   currentPage,
   totalPages,
   onPageChange,
@@ -62,5 +62,3 @@ const TablePagination = ({
     </Pagination>
   );
 };
-
-export { TablePagination };
