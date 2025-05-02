@@ -12,6 +12,11 @@ const FeaturedPrograms = () => {
     .filter(program => program.isFeatured)
     .slice(0, 3);
 
+  // Ensure we have data for the featured programs
+  if (featuredPrograms.length === 0) {
+    console.warn("No featured programs found in dummyPrograms data");
+  }
+
   return (
     <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
