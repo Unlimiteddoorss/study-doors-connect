@@ -1,14 +1,40 @@
-
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Search, MapPin, Globe } from 'lucide-react';
-import { availableCountries } from '@/data/programsData';
 import WorldMap from '@/components/countries/WorldMap';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { availableCountries } from '@/data/programsData';
+
+// ترجمة أسماء الدول إلى العربية
+const countryTranslations: Record<string, string> = {
+  'Australia': 'أستراليا',
+  'Azerbaijan': 'أذربيجان',
+  'Bosnia and Herzegovina': 'البوسنة والهرسك',
+  'Czech Republic': 'جمهورية التشيك',
+  'Egypt': 'مصر',
+  'Georgia': 'جورجيا',
+  'Germany': 'ألمانيا',
+  'Hungary': 'المجر',
+  'Ireland': 'أيرلندا',
+  'Kosovo': 'كوسوفو',
+  'Macedonia': 'مقدونيا',
+  'Malaysia': 'ماليزيا',
+  'Malta': 'مالطا',
+  'Montenegro': 'الجبل الأسود',
+  'Northern Cyprus': 'شمال قبرص',
+  'Poland': 'بولندا',
+  'Scotland': 'اسكتلندا',
+  'Serbia': 'صربيا',
+  'Spain': 'إسبانيا',
+  'Turkey': 'تركيا',
+  'United Kingdom': 'المملكة المتحدة',
+  'United States': 'الولايات المتحدة الأمريكية',
+  'United Arab Emirates': 'الإمارات العربية المتحدة'
+};
 
 // صور للدول
 const countryImages: { [key: string]: string } = {
@@ -141,7 +167,7 @@ const Countries = () => {
                       <div className="p-4 text-white">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 ml-1" />
-                          <h3 className="font-bold text-xl">{country}</h3>
+                          <h3 className="font-bold text-xl">{countryTranslations[country]}</h3>
                         </div>
                       </div>
                     </div>
@@ -194,7 +220,7 @@ const Countries = () => {
                       <div className="w-10 h-10 bg-unlimited-blue/10 rounded-full flex items-center justify-center text-unlimited-blue">
                         <Globe className="h-5 w-5" />
                       </div>
-                      <h3 className="font-medium">{country}</h3>
+                      <h3 className="font-medium">{countryTranslations[country]}</h3>
                     </CardContent>
                   </Card>
                 </Link>

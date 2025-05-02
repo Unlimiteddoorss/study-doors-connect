@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -6,7 +5,7 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { dummyPrograms } from '@/data/programsData';
+import { dummyPrograms, Program } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -38,21 +37,34 @@ const countryTranslations: Record<string, string> = {
 // Create engineering programs data
 const engineeringPrograms = dummyPrograms
   .filter(program => 
-    program.title.includes('هندسة')
+    (program.title || program.name || "").includes('هندسة')
   )
   .concat([
     {
       id: 201,
+      name: "Civil Engineering",
+      nameAr: "بكالوريوس الهندسة المدنية",
       title: "بكالوريوس الهندسة المدنية",
       university: "جامعة اسطنبول التقنية",
+      universityAr: "جامعة اسطنبول التقنية",
+      universityId: 5,
       location: "Turkey، إسطنبول",
       language: "إنجليزية",
+      languageAr: "إنجليزية",
+      degree: "Bachelor",
+      degreeAr: "بكالوريوس",
       duration: "4 سنوات",
       deadline: "30/08/2023",
+      tuitionFee: 5200,
+      tuitionPeriod: "سنوياً",
+      discountedFee: 5200,
       fee: "$5,200 / سنة",
       image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
       isFeatured: true,
-      badges: ["معتمد دوليًا", "تدريب عملي"]
+      features: ["معتمد دولياً", "تدريب عملي"],
+      description: "برنامج هندسة مدنية شامل يغطي جميع جوانب التصميم والبناء والتحليل الهيكلي",
+      rating: 4.7,
+      reviewsCount: 156
     },
     {
       id: 202,
@@ -96,7 +108,7 @@ const engineeringPrograms = dummyPrograms
     {
       id: 205,
       title: "ماجستير هندسة الإلكترونيات",
-      university: "جامعة غازي",
+      university: "جامعة غazi",
       location: "Turkey، أنقرة",
       language: "إنجليزية",
       duration: "2 سنوات",
@@ -140,7 +152,7 @@ const EngineeringPrograms = () => {
     if (searchTerm) {
       result = result.filter(
         program =>
-          program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (program.title || program.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
           program.university.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -156,9 +168,9 @@ const EngineeringPrograms = () => {
     // Apply degree filter
     if (selectedDegree && selectedDegree !== "all") {
       result = result.filter(program => {
-        if (program.title.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
-        if (program.title.includes('ماجستير') && selectedDegree === 'Master') return true;
-        if (program.title.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
+        if ((program.title || program.name || "").includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
+        if ((program.title || program.name || "").includes('ماجستير') && selectedDegree === 'Master') return true;
+        if ((program.title || program.name || "").includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
         return false;
       });
     }
@@ -166,19 +178,20 @@ const EngineeringPrograms = () => {
     // Apply specialty filter
     if (selectedSpecialty && selectedSpecialty !== "all") {
       result = result.filter(program => {
+        const title = program.title || program.name || "";
         switch(selectedSpecialty) {
           case "Civil":
-            return program.title.includes('مدنية');
+            return title.includes('مدنية');
           case "Computer":
-            return program.title.includes('برمجيات') || program.title.includes('حاسوب');
+            return title.includes('برمجيات') || title.includes('حاسوب');
           case "Mechanical":
-            return program.title.includes('ميكانيكية');
+            return title.includes('ميكانيكية');
           case "Electrical":
-            return program.title.includes('كهربائية');
+            return title.includes('كهربائية');
           case "Electronics":
-            return program.title.includes('إلكترونيات');
+            return title.includes('إلكترونيات');
           case "Aerospace":
-            return program.title.includes('طيران');
+            return title.includes('طيران');
           default:
             return true;
         }
@@ -191,18 +204,10 @@ const EngineeringPrograms = () => {
         // In a real app, this would sort by date added
         break;
       case "priceAsc":
-        result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          return priceA - priceB;
-        });
+        result = [...result].sort((a, b) => a.discountedFee - b.discountedFee);
         break;
       case "priceDesc":
-        result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          return priceB - priceA;
-        });
+        result = [...result].sort((a, b) => b.discountedFee - a.discountedFee);
         break;
       case "relevance":
       default:

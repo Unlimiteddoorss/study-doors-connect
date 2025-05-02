@@ -1,7 +1,8 @@
 export interface Program {
   id: number;
-  name: string;
+  name?: string;
   nameAr?: string;
+  title?: string; // Keep for backward compatibility
   university: string;
   universityAr?: string;
   universityId: number;
@@ -23,7 +24,54 @@ export interface Program {
   rating: number;
   reviewsCount: number;
   discount?: number;
+  fee?: string; // Keep for backward compatibility
 }
+
+// Add available countries, degree types, and program specialties
+export const availableCountries = [
+  "Turkey",
+  "United Kingdom",
+  "United States",
+  "Malaysia",
+  "Australia",
+  "Germany",
+  "United Arab Emirates",
+  "Azerbaijan",
+  "Bosnia and Herzegovina",
+  "Czech Republic",
+  "Egypt",
+  "Georgia",
+  "Hungary",
+  "Ireland",
+  "Kosovo",
+  "Macedonia",
+  "Malta",
+  "Montenegro",
+  "Northern Cyprus",
+  "Poland",
+  "Scotland",
+  "Serbia",
+  "Spain"
+];
+
+export const degreeTypes = [
+  "Bachelor",
+  "Master",
+  "Doctorate",
+  "Associate",
+  "Diploma"
+];
+
+export const programSpecialties = [
+  "Business",
+  "Engineering",
+  "Medicine",
+  "Computer Science",
+  "Arts",
+  "Law",
+  "Education",
+  "Social Sciences"
+];
 
 // Update the dummy programs data
 export const dummyPrograms: Program[] = [
@@ -31,6 +79,7 @@ export const dummyPrograms: Program[] = [
     id: 1,
     name: "Software Engineering",
     nameAr: "هندسة البرمجيات",
+    title: "هندسة البرمجيات",
     university: "Istanbul Technical University",
     universityAr: "جامعة اسطنبول التقنية",
     universityId: 5,
@@ -50,12 +99,14 @@ export const dummyPrograms: Program[] = [
     isFeatured: true,
     image: "/lovable-uploads/021372d9-f6f5-4243-9671-e299e8bb342e.png",
     rating: 4.8,
-    reviewsCount: 245
+    reviewsCount: 245,
+    fee: "$5,500 / سنة"
   },
   {
     id: 2,
     name: "Software Engineering",
     nameAr: "هندسة البرمجيات",
+    title: "هندسة البرمجيات",
     university: "Istanbul Kultur University",
     universityAr: "جامعة اسطنبول كولتور",
     universityId: 7,
@@ -76,12 +127,14 @@ export const dummyPrograms: Program[] = [
     image: "/lovable-uploads/2be9319f-b77f-4bb2-9766-1d7f5383d723.png",
     rating: 4.6,
     reviewsCount: 180,
-    discount: 50
+    discount: 50,
+    fee: "$7,600 / سنة"
   },
   {
     id: 3,
     name: "Computer Engineering",
     nameAr: "هندسة الكومبيوتر",
+    title: "هندسة الكومبيوتر",
     university: "Bahcesehir University",
     universityAr: "جامعة باهتشه شهير",
     universityId: 8,
@@ -107,6 +160,7 @@ export const dummyPrograms: Program[] = [
     id: 4,
     name: "Medicine",
     nameAr: "طب",
+    title: "طب",
     university: "Hacettepe University",
     universityAr: "جامعة هاجيتيب",
     universityId: 9,
@@ -132,6 +186,7 @@ export const dummyPrograms: Program[] = [
     id: 5,
     name: "Law",
     nameAr: "قانون",
+    title: "قانون",
     university: "Istanbul University",
     universityAr: "جامعة اسطنبول",
     universityId: 1,
@@ -157,6 +212,7 @@ export const dummyPrograms: Program[] = [
     id: 6,
     name: "Architecture",
     nameAr: "هندسة معمارية",
+    title: "هندسة معمارية",
     university: "Middle East Technical University",
     universityAr: "جامعة الشرق الأوسط التقنية",
     universityId: 3,
@@ -182,8 +238,9 @@ export const dummyPrograms: Program[] = [
     id: 7,
     name: "Business Administration",
     nameAr: "إدارة الأعمال",
+    title: "إدارة الأعمال",
     university: "Bogazici University",
-    universityAr: "جامعة بوغازيتشي",
+    universityAr: "جامعة بوغaziتشي",
     universityId: 4,
     location: "Istanbul, Turkey",
     locationAr: "إسطنبول، تركيا",
@@ -197,7 +254,7 @@ export const dummyPrograms: Program[] = [
     tuitionPeriod: "سنوياً",
     discountedFee: 5200,
     features: ["دراسات حالة", "تدريب شركات"],
-    description: "برنامج إدارة الأعمال في جامعة بوغازيتشي يقدم دراسات حالة واقعية وتدريبًا في شركات رائدة.",
+    description: "برنامج إدارة الأعمال في جامعة بوغaziتشي يقدم دراسات حالة واقعية وتدريبًا في شركات رائدة.",
     isFeatured: false,
     image: "/lovable-uploads/business.jpg",
     rating: 4.6,
@@ -207,6 +264,7 @@ export const dummyPrograms: Program[] = [
     id: 8,
     name: "Electrical Engineering",
     nameAr: "هندسة كهربائية",
+    title: "هندسة كهربائية",
     university: "Yildiz Technical University",
     universityAr: "جامعة يلدز التقنية",
     universityId: 10,
@@ -232,6 +290,7 @@ export const dummyPrograms: Program[] = [
     id: 9,
     name: "Mechanical Engineering",
     nameAr: "هندسة ميكانيكية",
+    title: "هندسة ميكانيكية",
     university: "Gazi University",
     universityAr: "جامعة غازي",
     universityId: 11,
@@ -247,7 +306,7 @@ export const dummyPrograms: Program[] = [
     tuitionPeriod: "سنوياً",
     discountedFee: 4500,
     features: ["تصميم وتصنيع", "ديناميكا حرارية"],
-    description: "برنامج الهندسة الميكانيكية في جامعة غازي يغطي تصميم وتصنيع الأنظمة الميكانيكية والديناميكا الحرارية.",
+    description: "برنامج الهندسة الميكانيكية في جامعة غazi يغطي تصميم وتصنيع الأنظمة الميكانيكية والديناميكا الحرارية.",
     isFeatured: false,
     image: "/lovable-uploads/mechanical.jpg",
     rating: 4.6,
@@ -257,6 +316,7 @@ export const dummyPrograms: Program[] = [
     id: 10,
     name: "Civil Engineering",
     nameAr: "هندسة مدنية",
+    title: "هندسة مدنية",
     university: "Cukurova University",
     universityAr: "جامعة تشوكوروفا",
     universityId: 12,
@@ -316,7 +376,7 @@ export const turkishUniversities: University[] = [
     fees: "$500-1500",
     image: "/lovable-uploads/eb0c5633-c981-4a70-84a3-5274cb91e9e5.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK, ABET, EQUIS",
+    accreditations: ["YÖK", "ABET", "EQUIS"],
     isFeatured: true
   },
   {
@@ -334,7 +394,7 @@ export const turkishUniversities: University[] = [
     fees: "$400-1200",
     image: "/lovable-uploads/dbd3909c-00e0-4028-87b9-7c67c6beda53.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK"
+    accreditations: ["YÖK"]
   },
   {
     id: 3,
@@ -351,13 +411,13 @@ export const turkishUniversities: University[] = [
     fees: "$600-2000",
     image: "/lovable-uploads/cb9d586d-3538-4a35-9e99-b203ded72cf7.png",
     languages: ["English", "Turkish"],
-    accreditation: "YÖK, ABET, AACSB",
+    accreditations: ["YÖK", "ABET", "AACSB"],
     isFeatured: true
   },
   {
     id: 4,
     name: "Bogazici University",
-    nameAr: "جامعة بوغازيتشي",
+    nameAr: "جامعة بوغaziتشي",
     location: "Istanbul, Turkey",
     country: "Turkey",
     city: "Istanbul",
@@ -369,7 +429,7 @@ export const turkishUniversities: University[] = [
     fees: "$500-1500",
     image: "/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png",
     languages: ["English", "Turkish"],
-    accreditation: "YÖK, AACSB"
+    accreditations: ["YÖK", "AACSB"]
   },
   {
     id: 5,
@@ -386,7 +446,7 @@ export const turkishUniversities: University[] = [
     fees: "$500-2000",
     image: "/lovable-uploads/e82df0f6-f604-4cb3-86ba-54121ae30ce9.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK, ABET, NAAB",
+    accreditations: ["YÖK", "ABET", "NAAB"],
     isFeatured: true,
     website: "https://www.itu.edu.tr"
   },
@@ -405,7 +465,7 @@ export const turkishUniversities: University[] = [
     fees: "$7500-12000",
     image: "/lovable-uploads/c680345e-7ede-49f4-9539-2d79414c5e22.png",
     languages: ["English", "Turkish"],
-    accreditation: "YÖK, AACSB, ABET"
+    accreditations: ["YÖK", "AACSB", "ABET"]
   },
   {
     id: 7,
@@ -422,7 +482,7 @@ export const turkishUniversities: University[] = [
     fees: "$6000-9000",
     image: "/lovable-uploads/a0d3407c-db28-452b-9d6f-84824ac5096f.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK",
+    accreditations: ["YÖK"],
     website: "https://www.iku.edu.tr"
   },
   {
@@ -440,7 +500,7 @@ export const turkishUniversities: University[] = [
     fees: "$7000-11000",
     image: "/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png",
     languages: ["English", "Turkish"],
-    accreditation: "YÖK, AACSB, ABET",
+    accreditations: ["YÖK", "AACSB", "ABET"],
     isFeatured: true,
     website: "https://www.bahcesehir.edu.tr"
   },
@@ -459,7 +519,7 @@ export const turkishUniversities: University[] = [
     fees: "$800-2500",
     image: "/lovable-uploads/hacettepe.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK, ABET"
+    accreditations: ["YÖK", "ABET"]
   },
   {
     id: 10,
@@ -476,7 +536,7 @@ export const turkishUniversities: University[] = [
     fees: "$700-2200",
     image: "/lovable-uploads/yildiz.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK, ABET"
+    accreditations: ["YÖK", "ABET"]
   },
   {
     id: 11,
@@ -493,7 +553,7 @@ export const turkishUniversities: University[] = [
     fees: "$600-2000",
     image: "/lovable-uploads/gazi.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK"
+    accreditations: "YÖK"
   },
   {
     id: 12,
@@ -510,6 +570,6 @@ export const turkishUniversities: University[] = [
     fees: "$500-1800",
     image: "/lovable-uploads/cukurova.png",
     languages: ["Turkish", "English"],
-    accreditation: "YÖK"
+    accreditations: "YÖK"
   }
 ];
