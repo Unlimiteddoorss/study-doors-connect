@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Globe2, Send } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -5,7 +6,6 @@ import { changeLanguage } from '@/i18n/config';
 import Logo from '../shared/Logo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 const Footer = () => {

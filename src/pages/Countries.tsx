@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
-import WorldMap from '@/components/countries/WorldMap';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Search, Globe, MapPin, School, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MapPin } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { availableCountries } from '@/data/programsData';
+import WorldMap from '@/components/countries/WorldMap';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -61,7 +61,7 @@ const countryInfo: { [key: string]: { universities: number, programs: number, de
   'United Kingdom': {
     universities: 15,
     programs: 120,
-    description: 'تتمتع المملكة المتحدة بسمعة عالمية في مجال التعليم العالي، وتضم بعضاً من أقدم وأعرق الجامعات في العالم. توفر المملكة المتحدة بيئة أكاديمية متميزة وفرص تعليمية متنوعة.',
+    description: 'تتمتع المملكة المتحدة بسمعة عالمية في مجال التعليم العالي، وتضم بعضاً من ��قدم وأعرق الجامعات في العالم. توفر المملكة المتحدة بيئة أكاديمية متميزة وفرص تعليمية متنوعة.',
     languages: ['الإنجليزية']
   },
   'Germany': {
@@ -90,6 +90,7 @@ const popularCountries = ['Turkey', 'United Kingdom', 'Germany', 'United States'
 const Countries = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredCountries, setFilteredCountries] = useState(availableCountries);
+  const { countryParam } = useParams();
 
   useEffect(() => {
     if (searchTerm) {
@@ -102,7 +103,11 @@ const Countries = () => {
     } else {
       setFilteredCountries(availableCountries);
     }
-  }, [searchTerm]);
+  }, [searchTerm, countryParam]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
   const getCountryImage = (country: string) => {
     return countryImages[country] || 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=2033&auto=format&fit=crop&ixlib=rb-4.0.3';
@@ -117,14 +122,9 @@ const Countries = () => {
     };
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // البحث تم تنفيذه في useEffect أعلاه
-  };
-
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         <SectionTitle
           title="الدول الدراسية"
           subtitle="استكشف أفضل الوجهات الدراسية حول العالم واختر الدولة المناسبة لطموحاتك التعليمية"
@@ -132,16 +132,16 @@ const Countries = () => {
 
         {/* قسم البحث */}
         <div className="max-w-2xl mx-auto mb-10">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <div className="mb-8 flex items-center gap-3 bg-white p-4 rounded-lg shadow-sm">
+            <Search className="h-5 w-5 text-gray-500" />
             <Input
               type="text"
               placeholder="ابحث عن دولة..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4"
+              onChange={handleSearchChange}
+              className="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             />
-          </form>
+          </div>
         </div>
 
         {/* خريطة العالم التفاعلية */}
@@ -208,30 +208,69 @@ const Countries = () => {
           <h2 className="text-2xl font-bold mb-6">جميع الدول ({filteredCountries.length})</h2>
 
           {filteredCountries.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredCountries.map((country, index) => (
-                <Link 
-                  to={`/countries/${country.toLowerCase().replace(/\s+/g, '-')}`} 
-                  key={index}
-                  className="block"
-                >
-                  <Card className="overflow-hidden h-full hover:border-unlimited-blue hover:shadow-md transition-all">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-unlimited-blue/10 rounded-full flex items-center justify-center text-unlimited-blue">
-                        <Globe className="h-5 w-5" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+              {filteredCountries.map((country) => (
+                <Card key={country.code} className="overflow-hidden hover:shadow-md transition-shadow">
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={country.image}
+                      alt={country.nameAr || country.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                      <h3 className="text-white text-xl font-bold">{country.nameAr || country.name}</h3>
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2 text-gray-600 mb-3">
+                      <MapPin className="h-4 w-4" />
+                      <span>{country.capitalAr || country.capital}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <School className="h-4 w-4 text-unlimited-blue" />
+                        <span>{country.universities} جامعة</span>
                       </div>
-                      <h3 className="font-medium">{countryTranslations[country]}</h3>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      <div className="flex items-center gap-1">
+                        <Building className="h-4 w-4 text-unlimited-blue" />
+                        <span>{country.cities} مدينة</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {country.tags.map((tag, idx) => (
+                        <Badge key={idx} variant="outline" className="bg-gray-50">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Link to={`/countries/${country.code}`}>
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto text-unlimited-blue hover:text-unlimited-dark-blue"
+                        >
+                          عرض التفاصيل
+                          <span className="inline-block mr-1">→</span>
+                        </Button>
+                      </Link>
+                      <div className="flex items-center">
+                        <Globe className="h-4 w-4 text-unlimited-blue mr-1" />
+                        <span className="text-unlimited-gray text-sm">
+                          {country.languagesAr?.join('، ') || country.languages?.join(', ')}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على دول تطابق بحثك</p>
-              <Button onClick={() => setSearchTerm("")} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                إعادة ضبط البحث
-              </Button>
+            <div className="text-center py-10">
+              <Globe className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+              <h3 className="text-xl font-bold mb-2">لم يتم العثور على نتائج</h3>
+              <p className="text-unlimited-gray">
+                لم نتمكن من العثور على دول تطابق معايير البحث الخاصة بك
+              </p>
             </div>
           )}
         </div>
