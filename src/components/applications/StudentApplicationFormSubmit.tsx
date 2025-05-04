@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { validateApplicationStep } from '@/utils/applicationUtils';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Define window interface to support gtag
 declare global {
@@ -43,6 +45,19 @@ const StudentApplicationFormSubmit = ({
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const isRtl = i18n.language === 'ar';
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  // إضافة تأثيرات حركية للأزرار
+  const buttonVariants = {
+    hover: { 
+      scale: 1.03,
+      transition: { duration: 0.2 }
+    },
+    tap: { 
+      scale: 0.97,
+      transition: { duration: 0.1 } 
+    }
+  };
 
   // Check if user is authenticated
   const isAuthenticated = () => {
@@ -144,6 +159,14 @@ const StudentApplicationFormSubmit = ({
     }
   };
 
+  // حساب لون شريط التقدم بناءً على النسبة المئوية
+  const getProgressColor = () => {
+    if (progress >= 75) return 'bg-green-500';
+    if (progress >= 50) return 'bg-unlimited-blue';
+    if (progress >= 25) return 'bg-yellow-500';
+    return 'bg-red-400';
+  };
+
   return (
     <div className="mt-6">
       {/* Progress Bar */}
@@ -152,19 +175,23 @@ const StudentApplicationFormSubmit = ({
           <span className="font-medium">{t('application.progress', 'تقدم الطلب')}</span>
           <span>{progress}%</span>
         </div>
-        <Progress 
-          value={progress} 
-          className={`h-2 ${
-            progress >= 75 ? 'bg-green-500' : 
-            progress >= 50 ? 'bg-unlimited-blue' : 
-            progress >= 25 ? 'bg-yellow-500' : 'bg-red-400'
-          }`} 
-        />
+        <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+          <motion.div 
+            className={`h-full ${getProgressColor()}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.5 }}
+          />
+        </div>
       </div>
       
       {/* Validation errors display */}
       {validationErrors.length > 0 && (
-        <div className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-4 p-3 border border-red-200 bg-red-50 rounded-md"
+        >
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
             <div>
@@ -176,84 +203,110 @@ const StudentApplicationFormSubmit = ({
               </ul>
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
       
       {/* Buttons */}
       <div className="flex flex-wrap gap-3">
         {currentStep > 1 && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            disabled={isSubmitting}
-            className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+          <motion.div
+            whileHover="hover"
+            whileTap="tap"
+            variants={buttonVariants}
           >
-            {isRtl ? (
-              <>
-                {t('application.navigation.previous', "السابق")}
-                <ArrowRight className="h-4 w-4" />
-              </>
-            ) : (
-              <>
-                <ArrowLeft className="h-4 w-4" />
-                {t('application.navigation.previous', "السابق")}
-              </>
-            )}
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              disabled={isSubmitting}
+              className={`order-2 sm:order-1 flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+            >
+              {isRtl ? (
+                <>
+                  {t('application.navigation.previous', "السابق")}
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              ) : (
+                <>
+                  <ArrowLeft className="h-4 w-4" />
+                  {t('application.navigation.previous', "السابق")}
+                </>
+              )}
+            </Button>
+          </motion.div>
         )}
         
         {/* Save as draft button */}
         {onSaveAsDraft && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleSaveDraft}
-            className="order-3 sm:order-2 flex items-center gap-1"
+          <motion.div
+            whileHover="hover"
+            whileTap="tap"
+            variants={buttonVariants}
           >
-            <Save className="h-4 w-4 mr-1" />
-            {t('application.buttons.saveAsDraft', 'حفظ كمسودة')}
-          </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleSaveDraft}
+              className="order-3 sm:order-2 flex items-center gap-1"
+            >
+              <Save className="h-4 w-4 mr-1" />
+              {t('application.buttons.saveAsDraft', 'حفظ كمسودة')}
+            </Button>
+          </motion.div>
         )}
         
         {isLastStep ? (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="w-full sm:w-auto order-1 sm:order-3 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+          <motion.div
+            whileHover="hover"
+            whileTap="tap"
+            variants={buttonVariants}
+            className="w-full sm:w-auto order-1 sm:order-3"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> 
-                {t('application.buttons.submitting', "جاري التقديم...")}
-              </>
-            ) : (
-              <>
-                <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> 
-                {t('application.buttons.submit', "تقديم الطلب")}
-              </>
-            )}
-          </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4 animate-spin`} /> 
+                  {t('application.buttons.submitting', "جاري التقديم...")}
+                </>
+              ) : (
+                <>
+                  <Check className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> 
+                  {t('application.buttons.submit', "تقديم الطلب")}
+                </>
+              )}
+            </Button>
+          </motion.div>
         ) : (
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={`w-full sm:w-auto order-1 sm:order-3 bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+          <motion.div
+            whileHover="hover"
+            whileTap="tap"
+            variants={buttonVariants}
+            className="w-full sm:w-auto order-1 sm:order-3"
           >
-            {isRtl ? (
-              <>
-                <ArrowLeft className="h-4 w-4" />
-                {t('application.navigation.next', "التالي")}
-              </>
-            ) : (
-              <>
-                {t('application.navigation.next', "التالي")}
-                <ArrowRight className="h-4 w-4" />
-              </>
-            )}
-          </Button>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={`w-full bg-unlimited-blue hover:bg-unlimited-dark-blue flex items-center gap-1 ${isRtl ? 'flex-row-reverse' : ''}`}
+            >
+              {isRtl ? (
+                <>
+                  <ArrowLeft className="h-4 w-4" />
+                  {t('application.navigation.next', "التالي")}
+                </>
+              ) : (
+                <>
+                  {t('application.navigation.next', "التالي")}
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </motion.div>
         )}
       </div>
       
