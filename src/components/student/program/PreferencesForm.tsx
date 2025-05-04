@@ -47,6 +47,18 @@ const PreferencesForm = ({
             <Label htmlFor="french">{t('application.program.languages.french')}</Label>
           </div>
           <div className="flex items-center space-x-2">
+            <RadioGroupItem value="german" id="german" />
+            <Label htmlFor="german">{t('application.program.languages.german')}</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="spanish" id="spanish" />
+            <Label htmlFor="spanish">{t('application.program.languages.spanish')}</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="russian" id="russian" />
+            <Label htmlFor="russian">{t('application.program.languages.russian')}</Label>
+          </div>
+          <div className="flex items-center space-x-2">
             <RadioGroupItem value="other" id="other" />
             <Label htmlFor="other">{t('application.program.languages.other')}</Label>
           </div>
