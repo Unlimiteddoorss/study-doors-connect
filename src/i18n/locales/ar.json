@@ -1,4 +1,3 @@
-
 {
   "site": {
     "name": "أبواب غير محدودة",
@@ -227,7 +226,7 @@
     "documents": {
       "title": "تحميل المستندات",
       "description": "قم بتحميل المستندات المطلوبة أدناه. يجب أن تكون جميع الملفات بتنسيق PDF أو صور واضحة.",
-      "uploadFile": "تحميل ملف",
+      "uploadFile": "تحم��ل ملف",
       "dragDrop": "اسحب وأفلت أو انقر للتحميل",
       "required": "مطلوب",
       "approved": "معتمد",
@@ -236,7 +235,51 @@
       "imageFormat": "صورة (JPG، PNG)",
       "uploadedDescription": "تم تحميل المستند بنجاح",
       "removed": "تم إزالة المستند",
-      "removedDescription": "تمت إزالة المستند بنجاح"
+      "removedDescription": "تمت إزالة المستند بنجاح",
+      "uploadRequirements": "متطلبات التحميل",
+      "uploadRequirementsDescription": "جميع المستندات يجب أن تكون بالصيغ التالية وألا يتجاوز حجمها 5 ميجابايت",
+      "acceptedFormat": "صيغة مقبولة",
+      "maxSize": "الحد الأقصى 5 ميجابايت",
+      "uploadProgress": "تقدم التحميل",
+      "addDocument": "إضافة مستند آخر",
+      "addDocumentTitle": "إضافة مستند جديد",
+      "selectType": "اختر نوع المستند",
+      "selectDocumentType": "اختر نوع المستند",
+      "customName": "اسم المستند المخصص",
+      "enterCustomName": "أدخل اسم المستند المخصص",
+      "fileType": "نوع الملف",
+      "image": "صورة",
+      "anyFile": "أي ملف",
+      "dragDropFiles": "اسحب وأفلت الملفات هنا",
+      "or": "أو",
+      "browseFiles": "تصفح الملفات",
+      "uploading": "جاري التحميل...",
+      "uploadedOn": "تم التحميل في",
+      "pdfUploaded": "تم تحميل ملف PDF",
+      "rejectedMessage": "تم رفض هذا المستند. يرجى مراجعة المتطلبات وتحميله مرة أخرى.",
+      "approvedMessage": "تم اعتماد هذا المستند.",
+      "invalidType": "نوع ملف غير صالح",
+      "invalidTypeDescription": "يرجى تحميل الملف بالصيغة المطلوبة",
+      "fileTooLarge": "حجم الملف كبير جدًا",
+      "fileTooLargeDescription": "يرجى تحميل ملف لا يتجاوز 5 ميجابايت",
+      "error": "خطأ",
+      "tryAgain": "حاول مرة أخرى",
+      "documentRemoved": "تمت إزالة المستند",
+      "documentRemovedDescription": "تمت إزالة المستند بنجاح",
+      "documentAdded": "تمت إضافة المستند",
+      "documentAddedDescription": "تمت إضافة نوع مستند جديد بنجاح",
+      "enterDocumentName": "يرجى إدخال اسم المستند",
+      "selectDocumentType": "يرجى اختيار نوع المستند",
+      "statusRequired": "مطلوب",
+      "statusUploaded": "تم التحميل",
+      "statusApproved": "معتمد",
+      "statusRejected": "مرفوض",
+      "noDocuments": "لا توجد مستندات",
+      "download": "تحميل",
+      "upload": "رفع",
+      "view": "عرض",
+      "subtitle": "برنامج {{program}} في {{university}}",
+      "delete": "حذف"
     },
     "academic": {
       "title": "المعلومات الأكاديمية",
@@ -268,10 +311,43 @@
       "no": "لا"
     },
     "program": {
+      "title": "اختيار البرنامج",
+      "description": "اختر البرنامج الذي ترغب بالتقديم عليه",
       "name": "اسم البرنامج",
       "university": "الجامعة",
       "annualFees": "الرسوم السنوية",
-      "duration": "مدة البرنامج"
+      "duration": "مدة البرنامج",
+      "browseByLocation": "تصفح حسب الموقع",
+      "searchPrograms": "البحث عن البرامج",
+      "selectCountry": "اختر البلد",
+      "chooseCountry": "اختر البلد",
+      "degreeLevel": "المستوى الدراسي",
+      "chooseDegree": "اختر المستوى",
+      "selectUniversity": "اختر الجامعة",
+      "chooseUniversity": "اختر الجامعة",
+      "selectProgram": "اختر البرنامج",
+      "chooseProgram": "اختر البرنامج",
+      "additionalPreferences": "تفضيلات إضافية",
+      "preferredLanguage": "اللغة المفضلة",
+      "languages": {
+        "english": "الإنجليزية",
+        "turkish": "التركية",
+        "arabic": "العربية",
+        "french": "الفرنسية",
+        "german": "الألمانية",
+        "spanish": "الإسبانية",
+        "russian": "الروسية",
+        "other": "أخرى"
+      },
+      "additionalNotes": "ملاحظات إضافية",
+      "notesPlaceholder": "أي معلومات إضافية تود إضافتها حول تفضيلاتك للبرنامج الدراسي",
+      "searchByName": "البحث بالاسم",
+      "searchProgramsPlaceholder": "أدخل اسم البرنامج للبحث",
+      "searchResults": "نتائج البحث",
+      "selectFromResults": "اختر من نتائج البحث",
+      "noResultsFound": "لا توجد نتائج مطابقة للبحث",
+      "unknownUniversity": "جامعة غير معروفة",
+      "admissionRequirements": "متطلبات القبول"
     },
     "review": {
       "title": "مراجعة الطلب",
@@ -355,7 +431,27 @@
     "diploma": "الشهادة الدراسية",
     "photo": "صورة شخصية",
     "transcript": "كشف الدرجات",
-    "motivation": "رسالة التحفيز"
+    "motivation": "رسالة التحفيز",
+    "additional": {
+      "recommendation": "خطاب توصية",
+      "cv": "السيرة الذاتية",
+      "englishTest": "شهادة إتقان اللغة الإنجليزية",
+      "idCard": "بطاقة الهوية",
+      "birthCertificate": "شهادة الميلاد",
+      "medicalReport": "التقرير الطبي",
+      "financialStatement": "كشف حساب مالي",
+      "custom": "مستند آخر"
+    }
+  },
+  "common": {
+    "cancel": "إلغاء",
+    "add": "إضافة",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "loading": "جاري التحميل...",
+    "submit": "تقديم",
+    "close": "إغلاق"
   },
   "notifications": {
     "title": "الإشعارات",
@@ -398,7 +494,7 @@
       "backHome": "العودة للرئيسية",
       "dashboard": "الذهاب للوحة التحكم",
       "needHelp": "هل تحتاج للمساعدة؟",
-      "contactSupport": "يرجى التواصل مع الدعم الفني إذا كنت تعتقد أنه يجب أن يكون لديك صلاحية الوصول."
+      "contactSupport": "يرجى التواصل مع الدعم الفني إذا كنت تعتقد أنه يجب أن يكون لديك صل��حية الوصول."
     }
   },
   "footer": {

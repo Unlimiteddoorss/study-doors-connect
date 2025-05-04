@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
   Upload, Check, X, File, FilePlus, FileText, FileCheck, AlertCircle, 
-  DownloadCloud, Plus, Trash2, Edit
+  DownloadCloud, Plus, Trash2
 } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
 import {
@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Document {
   id: string;
@@ -39,11 +40,14 @@ export interface Document {
   error?: string;
   uploadDate?: string;
   isCustom?: boolean;
+  applicationId?: string;
+  filePath?: string;
 }
 
 interface DocumentsUploadFormProps {
   initialDocuments?: Document[];
   onSave: (documents: Document[]) => void;
+  applicationId?: string;
 }
 
 const DEFAULT_DOCUMENTS = [
@@ -65,7 +69,7 @@ const ADDITIONAL_DOCUMENT_TYPES = [
   { id: 'custom', label: 'Other Document', type: 'any' },
 ];
 
-const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormProps) => {
+const DocumentsUploadForm = ({ initialDocuments, onSave, applicationId }: DocumentsUploadFormProps) => {
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const isRtl = i18n.language === 'ar';
@@ -117,6 +121,121 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
       handleFile(id, file);
     }
   }, []);
+
+  const uploadFileToSupabase = async (id: string, file: File) => {
+    if (!applicationId) {
+      simulateUpload(id, file);
+      return;
+    }
+    
+    // Upload to Supabase storage
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `applications/${applicationId}/${id}.${fileExt}`;
+      
+      setDocuments(docs => docs.map(doc => 
+        doc.id === id ? { ...doc, file, progress: 0, status: 'required' } : doc
+      ));
+      
+      // Create a progress tracker
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 10;
+        if (progress <= 90) {
+          setDocuments(docs => docs.map(doc => 
+            doc.id === id ? { ...doc, progress } : doc
+          ));
+        }
+      }, 200);
+      
+      const { error: uploadError, data } = await supabase
+        .storage
+        .from('documents')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+      
+      clearInterval(interval);
+      
+      if (uploadError) {
+        setDocuments(docs => docs.map(doc => 
+          doc.id === id ? { ...doc, error: uploadError.message, progress: undefined } : doc
+        ));
+        
+        toast({
+          title: t('application.documents.error'),
+          description: uploadError.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      // Update document record in database
+      const { error: dbError } = await supabase
+        .from('documents')
+        .upsert({
+          application_id: applicationId,
+          name: documents.find(d => d.id === id)?.name || '',
+          file_type: file.type,
+          file_path: filePath,
+          status: 'uploaded',
+          uploaded_at: new Date().toISOString()
+        });
+      
+      if (dbError) {
+        toast({
+          title: t('application.documents.error'),
+          description: dbError.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      setDocuments(docs => docs.map(doc => 
+        doc.id === id ? { 
+          ...doc, 
+          file, 
+          status: 'uploaded', 
+          progress: 100,
+          uploadDate: new Date().toISOString(),
+          filePath
+        } : doc
+      ));
+      
+      setTimeout(() => {
+        setDocuments(docs => docs.map(doc => 
+          doc.id === id ? { ...doc, progress: undefined } : doc
+        ));
+        
+        // Save data after upload
+        const updatedDocs = documents.map(doc => 
+          doc.id === id ? { 
+            ...doc, 
+            file, 
+            status: 'uploaded' as const,
+            progress: undefined,
+            uploadDate: new Date().toISOString(),
+            filePath
+          } : doc
+        );
+        onSave(updatedDocs);
+        
+        // Show success message
+        toast({
+          title: t('application.documents.uploaded'),
+          description: t('application.documents.uploadedDescription'),
+        });
+      }, 500);
+      
+    } catch (err: any) {
+      toast({
+        title: t('application.documents.error'),
+        description: err.message || 'Error uploading file',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const simulateUpload = (id: string, file: File) => {
     // Simulate upload progress from 0 to 100%
@@ -215,12 +334,52 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
     ));
     
     // Start upload process
-    simulateUpload(id, file);
+    uploadFileToSupabase(id, file);
   };
 
-  const removeFile = (id: string) => {
+  const removeFile = async (id: string) => {
+    const doc = documents.find(d => d.id === id);
+    
+    // If connected to Supabase and we have a file path, delete from storage
+    if (applicationId && doc?.filePath) {
+      try {
+        const { error } = await supabase
+          .storage
+          .from('documents')
+          .remove([doc.filePath]);
+        
+        if (error) {
+          toast({
+            title: t('application.documents.error'),
+            description: error.message,
+            variant: 'destructive',
+          });
+          return;
+        }
+        
+        // Update document status in database
+        await supabase
+          .from('documents')
+          .update({
+            status: 'pending',
+            updated_at: new Date().toISOString()
+          })
+          .match({ 
+            application_id: applicationId,
+            name: doc.name 
+          });
+      } catch (err: any) {
+        toast({
+          title: t('application.documents.error'),
+          description: err.message || 'Error removing file',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    
     setDocuments(docs => docs.map(doc => 
-      doc.id === id ? { ...doc, file: undefined, status: 'required' as const, error: undefined } : doc
+      doc.id === id ? { ...doc, file: undefined, status: 'required' as const, error: undefined, filePath: undefined } : doc
     ));
     
     // Show message
@@ -231,12 +390,49 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
     
     // Save changes
     const updatedDocs = documents.map(doc => 
-      doc.id === id ? { ...doc, file: undefined, status: 'required' as const, error: undefined } : doc
+      doc.id === id ? { ...doc, file: undefined, status: 'required' as const, error: undefined, filePath: undefined } : doc
     );
     onSave(updatedDocs);
   };
 
-  const removeDocument = (id: string) => {
+  const removeDocument = async (id: string) => {
+    const doc = documents.find(d => d.id === id);
+    
+    // If connected to Supabase and we have a file path, delete from storage
+    if (applicationId && doc?.filePath) {
+      try {
+        const { error } = await supabase
+          .storage
+          .from('documents')
+          .remove([doc.filePath]);
+        
+        if (error) {
+          toast({
+            title: t('application.documents.error'),
+            description: error.message,
+            variant: 'destructive',
+          });
+          return;
+        }
+        
+        // Delete document record from database
+        await supabase
+          .from('documents')
+          .delete()
+          .match({ 
+            application_id: applicationId,
+            name: doc.name 
+          });
+      } catch (err: any) {
+        toast({
+          title: t('application.documents.error'),
+          description: err.message || 'Error removing document',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+    
     const updatedDocuments = documents.filter(doc => doc.id !== id);
     setDocuments(updatedDocuments);
     onSave(updatedDocuments);
@@ -247,7 +443,7 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
     });
   };
 
-  const handleAddDocument = () => {
+  const handleAddDocument = async () => {
     if (newDocumentType === "") {
       toast({
         title: t('application.documents.error'),
@@ -269,15 +465,48 @@ const DocumentsUploadForm = ({ initialDocuments, onSave }: DocumentsUploadFormPr
     const selectedType = ADDITIONAL_DOCUMENT_TYPES.find(type => type.id === newDocumentType);
     if (!selectedType) return;
 
+    const documentName = newDocumentType === 'custom' 
+      ? customDocumentName 
+      : t(`documents.additional.${newDocumentType}`, selectedType.label);
+
     const newDocument: Document = {
       id: `custom-${Date.now()}`,
-      name: newDocumentType === 'custom' 
-        ? customDocumentName 
-        : t(`documents.additional.${newDocumentType}`, selectedType.label),
+      name: documentName,
       type: newDocumentFileType,
       status: 'required',
       isCustom: true
     };
+
+    // If connected to Supabase, add document to the database
+    if (applicationId) {
+      try {
+        const { error } = await supabase
+          .from('documents')
+          .insert({
+            application_id: applicationId,
+            name: documentName,
+            file_type: newDocumentFileType === 'pdf' ? 'application/pdf' : 
+                      newDocumentFileType === 'image' ? 'image/*' : 'application/octet-stream',
+            status: 'pending'
+          });
+        
+        if (error) {
+          toast({
+            title: t('application.documents.error'),
+            description: error.message,
+            variant: 'destructive',
+          });
+          return;
+        }
+      } catch (err: any) {
+        toast({
+          title: t('application.documents.error'),
+          description: err.message || 'Error adding document',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
 
     const updatedDocuments = [...documents, newDocument];
     setDocuments(updatedDocuments);
