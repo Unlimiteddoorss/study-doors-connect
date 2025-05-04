@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 
 // Import university and program data
 import { turkishUniversities as universities } from '@/data/programsData';
-import { dummyPrograms as programs } from '@/data/programsData';
+import { dummyPrograms as programsData } from '@/data/programsData';
 
 // Define the country data
 const countries = [
@@ -55,28 +55,38 @@ const degreeLevels = [
   { value: 'diploma', label: 'Diploma' },
 ];
 
+// Updated Program interface to match the actual program data structure from programsData
 interface Program {
-  id: string;
-  name: string;
+  id: number;
+  title: string;
   nameAr?: string;
   university: string;
-  degreeLevel: string;
+  location: string;
+  language: string;
   duration: string;
+  deadline: string;
+  fee: string;
+  discount?: string;
+  image: string;
+  isFeatured?: boolean;
+  badges?: string[];
+  scholarshipAvailable?: boolean;
   description?: string;
-  language?: string;
-  tuitionFee?: number;
   admissionRequirements?: string[];
+  tuitionFee?: number | string;
 }
 
 interface University {
-  id: string;
+  id: number;
   name: string;
   nameAr?: string;
   country: string;
   city: string;
   description?: string;
   logo?: string;
-  programs?: string[];
+  programs?: number;
+  image?: string;
+  location?: string;
 }
 
 interface ProgramSelectionFormProps {
@@ -96,14 +106,22 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   const [selectedCountry, setSelectedCountry] = useState<string>(initialData?.program?.country || "");
   const [selectedDegreeLevel, setSelectedDegreeLevel] = useState<string>(initialData?.program?.degreeLevel || "");
   const [selectedUniversity, setSelectedUniversity] = useState<string>(initialData?.university || "");
-  const [selectedProgram, setSelectedProgram] = useState<string>(initialData?.program?.id || "");
+  const [selectedProgram, setSelectedProgram] = useState<string>(initialData?.program?.id ? initialData.program.id.toString() : "");
   const [programSearchQuery, setProgramSearchQuery] = useState<string>("");
   const [preferredLanguage, setPreferredLanguage] = useState<string>(initialData?.program?.language || "");
   const [additionalNotes, setAdditionalNotes] = useState<string>(initialData?.program?.notes || "");
+
+  // Format the programs data to match our requirements
+  const programs = programsData.map(program => ({
+    ...program,
+    id: program.id,
+    title: program.title,
+    nameAr: program.title, // Using title as nameAr for now since it's in Arabic
+  }));
   
   // Format universities for the autocomplete component
   const universityOptions = universities.map((university) => ({
-    value: university.id,
+    value: university.id.toString(),
     label: isRtl && university.nameAr ? university.nameAr : university.name,
     description: `${university.city}, ${countries.find(c => c.value === university.country)?.label || university.country}`,
     group: countries.find(c => c.value === university.country)?.label || university.country
@@ -115,7 +133,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     : universities;
   
   const filteredUniversityOptions = filteredUniversities.map(university => ({
-    value: university.id,
+    value: university.id.toString(),
     label: isRtl && university.nameAr ? university.nameAr : university.name,
     description: university.city
   }));
@@ -126,34 +144,44 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     : [];
   
   // Filter programs by degree level if selected
+  // Note: The dummy programs may not have a direct degreeLevel field, using associative logic
+  const getDegreeFromTitle = (title: string): string => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('بكالوريوس')) return 'bachelor';
+    if (lowerTitle.includes('ماجستير')) return 'master';
+    if (lowerTitle.includes('دكتوراه')) return 'phd';
+    if (lowerTitle.includes('دبلوم')) return 'diploma';
+    return 'bachelor'; // Default
+  };
+
   const filteredPrograms = selectedDegreeLevel
-    ? universityPrograms.filter(program => program.degreeLevel === selectedDegreeLevel)
+    ? universityPrograms.filter(program => getDegreeFromTitle(program.title) === selectedDegreeLevel)
     : universityPrograms;
 
   // Format programs for the autocomplete component
   const programOptions = filteredPrograms.map(program => ({
-    value: program.id,
-    label: isRtl && program.nameAr ? program.nameAr : program.name,
-    description: `${degreeLevels.find(d => d.value === program.degreeLevel)?.label}, ${program.duration}, ${program.language}`
+    value: program.id.toString(),
+    label: isRtl && program.nameAr ? program.nameAr : program.title,
+    description: `${program.duration}, ${program.language}`
   }));
 
   // Search all programs
   const allProgramsFiltered = programSearchQuery 
     ? programs.filter(program => 
-        program.name.toLowerCase().includes(programSearchQuery.toLowerCase()) ||
+        program.title.toLowerCase().includes(programSearchQuery.toLowerCase()) ||
         (program.nameAr && program.nameAr.includes(programSearchQuery))
       )
     : programs;
 
   // Format searched programs for display
   const searchedProgramOptions = allProgramsFiltered.map(program => {
-    const university = universities.find(uni => uni.id === program.university);
+    const university = universities.find(uni => uni.id.toString() === program.university);
     return {
-      value: program.id,
-      label: isRtl && program.nameAr ? program.nameAr : program.name,
+      value: program.id.toString(),
+      label: isRtl && program.nameAr ? program.nameAr : program.title,
       description: university 
-        ? `${isRtl && university.nameAr ? university.nameAr : university.name} - ${degreeLevels.find(d => d.value === program.degreeLevel)?.label}`
-        : degreeLevels.find(d => d.value === program.degreeLevel)?.label,
+        ? `${isRtl && university.nameAr ? university.nameAr : university.name} - ${getDegreeFromTitle(program.title)}`
+        : getDegreeFromTitle(program.title),
       group: university 
         ? isRtl && university.nameAr ? university.nameAr : university.name
         : t('application.program.unknownUniversity')
@@ -162,14 +190,14 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
 
   // Selected program details
   const selectedProgramDetails = selectedProgram
-    ? programs.find(program => program.id === selectedProgram)
+    ? programs.find(program => program.id.toString() === selectedProgram)
     : null;
 
   // Selected university details  
   const selectedUniversityDetails = selectedProgramDetails
-    ? universities.find(uni => uni.id === selectedProgramDetails.university)
+    ? universities.find(uni => uni.id.toString() === selectedProgramDetails.university)
     : selectedUniversity
-      ? universities.find(uni => uni.id === selectedUniversity)
+      ? universities.find(uni => uni.id.toString() === selectedUniversity)
       : null;
 
   // Handle form submission
@@ -186,9 +214,8 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     // Prepare data for saving
     const programData = {
       id: selectedProgramDetails.id,
-      name: selectedProgramDetails.name,
+      title: selectedProgramDetails.title,
       nameAr: selectedProgramDetails.nameAr,
-      degreeLevel: selectedProgramDetails.degreeLevel,
       duration: selectedProgramDetails.duration,
       language: selectedProgramDetails.language || preferredLanguage,
       notes: additionalNotes
@@ -196,7 +223,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
 
     onSave({
       program: programData,
-      university: selectedUniversityDetails.id
+      university: selectedUniversityDetails.id.toString()
     });
 
     toast({
@@ -208,15 +235,14 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   // Sync state when initialData changes
   useEffect(() => {
     if (initialData?.program?.id) {
-      setSelectedProgram(initialData.program.id);
+      setSelectedProgram(initialData.program.id.toString());
       
-      const program = programs.find(p => p.id === initialData.program.id);
+      const program = programs.find(p => p.id.toString() === initialData.program.id.toString());
       if (program) {
         setSelectedUniversity(program.university);
-        setSelectedDegreeLevel(program.degreeLevel);
         setPreferredLanguage(program.language || "");
         
-        const university = universities.find(u => u.id === program.university);
+        const university = universities.find(u => u.id.toString() === program.university);
         if (university) {
           setSelectedCountry(university.country);
         }
@@ -226,7 +252,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     if (initialData?.university) {
       setSelectedUniversity(initialData.university);
       
-      const university = universities.find(u => u.id === initialData.university);
+      const university = universities.find(u => u.id.toString() === initialData.university);
       if (university) {
         setSelectedCountry(university.country);
       }
@@ -244,7 +270,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   // Save data when program selection changes
   useEffect(() => {
     if (selectedProgram && selectedUniversityDetails) {
-      const programDetails = programs.find(program => program.id === selectedProgram);
+      const programDetails = programs.find(program => program.id.toString() === selectedProgram);
       if (programDetails) {
         handleSubmit();
       }
@@ -347,13 +373,12 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
               onChange={(value) => {
                 setSelectedProgram(value);
                 // Find the university for this program
-                const program = programs.find(p => p.id === value);
+                const program = programs.find(p => p.id.toString() === value);
                 if (program) {
                   setSelectedUniversity(program.university);
-                  setSelectedDegreeLevel(program.degreeLevel);
                   
                   // Find the university details to set country
-                  const university = universities.find(u => u.id === program.university);
+                  const university = universities.find(u => u.id.toString() === program.university);
                   if (university) {
                     setSelectedCountry(university.country);
                   }
@@ -377,7 +402,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
               <div className="flex items-center gap-2">
                 <School className="h-5 w-5 text-unlimited-blue" />
                 <h3 className="text-lg font-medium">
-                  {isRtl && selectedProgramDetails.nameAr ? selectedProgramDetails.nameAr : selectedProgramDetails.name}
+                  {isRtl && selectedProgramDetails.nameAr ? selectedProgramDetails.nameAr : selectedProgramDetails.title}
                 </h3>
               </div>
               
@@ -398,7 +423,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
                 
                 <div className="flex flex-wrap gap-2 mt-2">
                   <Badge variant="outline" className="bg-unlimited-blue/10">
-                    {degreeLevels.find(d => d.value === selectedProgramDetails.degreeLevel)?.label}
+                    {getDegreeFromTitle(selectedProgramDetails.title)}
                   </Badge>
                   {selectedProgramDetails.duration && (
                     <Badge variant="outline" className="bg-unlimited-blue/10">
@@ -410,11 +435,11 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
                       {selectedProgramDetails.language}
                     </Badge>
                   )}
-                  {selectedProgramDetails.tuitionFee && (
+                  {(selectedProgramDetails.tuitionFee || selectedProgramDetails.fee) && (
                     <Badge variant="outline" className="bg-unlimited-blue/10">
                       {typeof selectedProgramDetails.tuitionFee === 'number' 
                         ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(selectedProgramDetails.tuitionFee)
-                        : selectedProgramDetails.tuitionFee}
+                        : selectedProgramDetails.fee || selectedProgramDetails.tuitionFee}
                     </Badge>
                   )}
                 </div>
