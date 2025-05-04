@@ -13,8 +13,8 @@ import { School, BookOpen, GraduationCap, Globe, Building, Search } from "lucide
 import { useToast } from "@/hooks/use-toast";
 
 // Import university and program data
-import { universities } from '@/data/universityPrograms';
-import { programs } from '@/data/programsData';
+import { turkishUniversities as universities } from '@/data/programsData';
+import { dummyPrograms as programs } from '@/data/programsData';
 
 // Define the country data
 const countries = [
