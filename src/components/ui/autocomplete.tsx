@@ -74,7 +74,10 @@ export function Autocomplete({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} icon={Search} />
+          <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <CommandInput placeholder={searchPlaceholder} />
+          </div>
           <CommandList>
             <CommandEmpty>{emptyMessage}</CommandEmpty>
             <CommandGroup>
@@ -103,3 +106,4 @@ export function Autocomplete({
     </Popover>
   );
 }
+
