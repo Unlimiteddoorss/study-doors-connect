@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Check, Clock, Download, Eye } from 'lucide-react';
+import { Check, Clock, Download, Eye, X } from 'lucide-react'; // Added X import
 import { useTranslation } from 'react-i18next';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

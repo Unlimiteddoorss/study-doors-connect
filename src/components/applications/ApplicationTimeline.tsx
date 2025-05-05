@@ -8,7 +8,7 @@ import { CheckCircle2, Clock, AlertCircle, FileCheck2, FileSearch, FileWarning, 
 import { supabase } from '@/integrations/supabase/client';
 
 interface TimelineEvent {
-  id: string;
+  id: string; // Changed from number to string
   application_id: string;
   status: string;
   created_at: string;
@@ -43,7 +43,12 @@ const ApplicationTimeline = ({ applicationId }: ApplicationTimelineProps) => {
         }
         
         if (data && data.length > 0) {
-          setTimelineEvents(data);
+          // Convert id to string for type consistency
+          const formattedData: TimelineEvent[] = data.map(item => ({
+            ...item,
+            id: String(item.id) // Convert number id to string
+          }));
+          setTimelineEvents(formattedData);
         } else {
           // Use mock data for demonstration
           const application = JSON.parse(localStorage.getItem('studentApplications') || '[]')

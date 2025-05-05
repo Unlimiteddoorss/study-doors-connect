@@ -1,4 +1,3 @@
-
 import { v4 as uuidv4 } from 'uuid';
 import { TFunction } from 'i18next';
 
@@ -219,7 +218,7 @@ export const generateMockTimeline = (applicationId: string, status: string) => {
   
   // Add submission event
   timeline.push({
-    id: uuidv4(),
+    id: uuidv4(), // This is now a string from uuid
     application_id: applicationId,
     status: 'submitted',
     created_at: new Date(now.getTime() - 14 * dayInMillis).toISOString(),

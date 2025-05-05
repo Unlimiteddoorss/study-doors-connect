@@ -1,305 +1,123 @@
-
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
-import { formatDate } from '@/utils/dateUtils';
-import { 
-  User, Mail, Phone, Calendar, Globe, CreditCard, 
-  GraduationCap, School, BookOpen, Building, FileText 
-} from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 interface ApplicationDetailsSectionProps {
   application: any;
 }
 
 const ApplicationDetailsSection = ({ application }: ApplicationDetailsSectionProps) => {
-  const { t, i18n } = useTranslation();
-  const isRtl = i18n.language === 'ar';
+  const { t } = useTranslation();
   
-  const formData = application.formData || {};
-  
-  // Helper function to check if a section has data
-  const hasData = (section: string) => {
-    if (section === 'personal') {
-      return formData.personalInfo && Object.keys(formData.personalInfo).length > 0;
+  // Fix for line 296, ensuring we're passing a string, not an object
+  const getFormattedValue = (value: any) => {
+    if (value === undefined || value === null) {
+      return t('application.details.notProvided', 'غير محدد');
     }
-    if (section === 'academic') {
-      return formData.academicInfo && Object.keys(formData.academicInfo).length > 0;
+    
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
     }
-    if (section === 'program') {
-      return formData.program && Object.keys(formData.program).length > 0;
-    }
-    return false;
+    
+    return String(value);
   };
   
   return (
-    <div className="space-y-6">
-      {/* Personal Information */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <User className="h-5 w-5 text-unlimited-blue" />
-            <h3 className="font-medium text-lg">{t("application.details.personalInfo", "المعلومات الشخصية")}</h3>
-          </div>
-          
-          {hasData('personal') ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <User className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.personal.name", "الاسم")}</p>
-                    <p className="font-medium">
-                      {formData.personalInfo?.firstName} {formData.personalInfo?.lastName}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <Mail className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.personal.email", "البريد الإلكتروني")}</p>
-                    <p className="font-medium">
-                      {formData.personalInfo?.email || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.personal.phone", "رقم الهاتف")}</p>
-                    <p className="font-medium">
-                      {formData.personalInfo?.phone || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <Calendar className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.personal.birthDate", "تاريخ الميلاد")}</p>
-                    <p className="font-medium">
-                      {formData.personalInfo?.birthDate ? 
-                        formatDate(formData.personalInfo.birthDate) : 
-                        t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <Globe className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.personal.nationality", "الجنسية")}</p>
-                    <p className="font-medium">
-                      {formData.personalInfo?.nationality || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <CreditCard className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.personal.passportNumber", "رقم جواز السفر")}</p>
-                    <p className="font-medium">
-                      {formData.personalInfo?.passportNumber || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 text-center text-unlimited-gray">
-              {t("application.details.noPersonalInfo", "لا توجد معلومات شخصية متاحة")}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Academic Information */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <GraduationCap className="h-5 w-5 text-unlimited-blue" />
-            <h3 className="font-medium text-lg">{t("application.details.academicInfo", "المعلومات الأكاديمية")}</h3>
-          </div>
-          
-          {hasData('academic') ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <GraduationCap className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.academic.education", "المستوى التعليمي")}</p>
-                    <p className="font-medium">
-                      {formData.academicInfo?.education || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <School className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.academic.school", "المدرسة/الجامعة")}</p>
-                    <p className="font-medium">
-                      {formData.academicInfo?.school || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <Calendar className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.academic.graduationYear", "سنة التخرج")}</p>
-                    <p className="font-medium">
-                      {formData.academicInfo?.graduationYear || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <div className="flex items-start gap-2">
-                  <FileText className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.academic.gpa", "المعدل التراكمي")}</p>
-                    <p className="font-medium">
-                      {formData.academicInfo?.gpa || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <BookOpen className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.academic.englishLevel", "مستوى اللغة الإنجليزية")}</p>
-                    <p className="font-medium">
-                      {formData.academicInfo?.englishProficiency || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-2">
-                  <Globe className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.academic.otherLanguages", "لغات أخرى")}</p>
-                    <p className="font-medium">
-                      {formData.academicInfo?.otherLanguages || t("application.notProvided", "غير متوفر")}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-4 text-center text-unlimited-gray">
-              {t("application.details.noAcademicInfo", "لا توجد معلومات أكاديمية متاحة")}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Program Information */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Building className="h-5 w-5 text-unlimited-blue" />
-            <h3 className="font-medium text-lg">{t("application.details.programInfo", "معلومات البرنامج")}</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <Card>
+      <CardContent className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Personal Information */}
+          <div>
+            <h2 className="text-lg font-semibold text-unlimited-dark-blue mb-4">
+              {t("application.details.personalInfo", "معلومات شخصية")}
+            </h2>
             <div className="space-y-3">
-              <div className="flex items-start gap-2">
-                <BookOpen className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t("application.program.name", "البرنامج")}</p>
-                  <p className="font-medium">
-                    {formData.program?.name || application.program || t("application.notProvided", "غير متوفر")}
-                  </p>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.firstName", "الاسم الأول")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.firstName)}</span>
               </div>
-              
-              <div className="flex items-start gap-2">
-                <Building className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t("application.program.university", "الجامعة")}</p>
-                  <p className="font-medium">
-                    {formData.university || application.university || t("application.notProvided", "غير متوفر")}
-                  </p>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.lastName", "اسم العائلة")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.lastName)}</span>
               </div>
-              
-              {formData.program?.degree && (
-                <div className="flex items-start gap-2">
-                  <GraduationCap className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.program.degree", "الدرجة العلمية")}</p>
-                    <p className="font-medium">{formData.program.degree}</p>
-                  </div>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.gender", "الجنس")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.gender)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.email", "البريد الإلكتروني")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.email)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.phone", "رقم الهاتف")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.phone)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.birthDate", "تاريخ الميلاد")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.birthDate)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.nationality", "الجنسية")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.nationality)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.passportNumber", "رقم الجواز")}:</span>
+                <span>{getFormattedValue(application.formData?.personalInfo?.passportNumber)}</span>
+              </div>
             </div>
-            
+          </div>
+
+          {/* Academic Information */}
+          <div>
+            <h2 className="text-lg font-semibold text-unlimited-dark-blue mb-4">
+              {t("application.details.academicInfo", "معلومات أكاديمية")}
+            </h2>
             <div className="space-y-3">
-              {formData.program?.duration && (
-                <div className="flex items-start gap-2">
-                  <Calendar className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.program.duration", "مدة الدراسة")}</p>
-                    <p className="font-medium">{formData.program.duration}</p>
-                  </div>
-                </div>
-              )}
-              
-              {formData.program?.language && (
-                <div className="flex items-start gap-2">
-                  <Globe className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.program.language", "لغة الدراسة")}</p>
-                    <p className="font-medium">{formData.program.language}</p>
-                  </div>
-                </div>
-              )}
-              
-              {formData.program?.feesPerYear && (
-                <div className="flex items-start gap-2">
-                  <CreditCard className="h-4 w-4 text-unlimited-gray mt-0.5" />
-                  <div>
-                    <p className="text-sm text-unlimited-gray">{t("application.program.annualFees", "الرسوم السنوية")}</p>
-                    <p className="font-medium">${formData.program.feesPerYear}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Application Information */}
-          <div className="mt-6 pt-4 border-t">
-            <div className="flex items-center gap-2 mb-4">
-              <FileText className="h-5 w-5 text-unlimited-blue" />
-              <h3 className="font-medium text-lg">{t("application.details.applicationInfo", "معلومات الطلب")}</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-3 bg-gray-50 rounded-md border">
-                <p className="text-sm text-unlimited-gray">{t("application.details.applicationId", "رقم الطلب")}</p>
-                <p className="font-medium">{application.id}</p>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.education", "المستوى التعليمي")}:</span>
+                <span>{getFormattedValue(application.formData?.academicInfo?.education)}</span>
               </div>
-              
-              <div className="p-3 bg-gray-50 rounded-md border">
-                <p className="text-sm text-unlimited-gray">{t("application.details.applicationDate", "تاريخ التقديم")}</p>
-                <p className="font-medium">{formatDate(application.date)}</p>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.graduationYear", "سنة التخرج")}:</span>
+                <span>{getFormattedValue(application.formData?.academicInfo?.graduationYear)}</span>
               </div>
-              
-              <div className="p-3 bg-gray-50 rounded-md border">
-                <p className="text-sm text-unlimited-gray">{t("application.details.applicationStatus", "حالة الطلب")}</p>
-                <p className="font-medium">{t(`application.status.${application.status}`, application.status)}</p>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.gpa", "المعدل التراكمي")}:</span>
+                <span>{getFormattedValue(application.formData?.academicInfo?.gpa)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.school", "المدرسة/الجامعة")}:</span>
+                <span>{getFormattedValue(application.formData?.academicInfo?.school)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium w-32">{t("application.details.englishProficiency", "إتقان اللغة الإنجليزية")}:</span>
+                <span>{getFormattedValue(application.formData?.academicInfo?.englishProficiency)}</span>
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+
+        <Separator className="my-6" />
+
+        {/* Program and University Selection */}
+        <div>
+          <h2 className="text-lg font-semibold text-unlimited-dark-blue mb-4">
+            {t("application.details.programSelection", "اختيار البرنامج والجامعة")}
+          </h2>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="font-medium w-32">{t("application.details.program", "البرنامج")}:</span>
+              <span>{getFormattedValue(application.formData?.program?.name)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium w-32">{t("application.details.university", "الجامعة")}:</span>
+              <span>{getFormattedValue(application.formData?.university)}</span>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

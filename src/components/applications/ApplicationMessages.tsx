@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast';
 interface ApplicationMessagesProps {
   programName: string;
   universityName: string;
-  applicationId: number;
+  applicationId: string; // Changed from number to string
 }
 
 const ApplicationMessages = ({ programName, universityName, applicationId }: ApplicationMessagesProps) => {
