@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react';
 import MessagesContainer from './messages/MessagesContainer';
 import { useToast } from '@/components/ui/use-toast';
+import { markMessagesAsRead } from '@/services/messageService';
 
 interface ApplicationMessagesProps {
   programName: string;
   universityName: string;
-  applicationId: string; // Changed from number to string
+  applicationId: string;
 }
 
 const ApplicationMessages = ({ programName, universityName, applicationId }: ApplicationMessagesProps) => {
@@ -25,8 +26,18 @@ const ApplicationMessages = ({ programName, universityName, applicationId }: App
   
   useEffect(() => {
     // Mark messages as read when component mounts
-    console.log(`Marking messages as read for application ID: ${applicationId}`);
-    // This would be an API call in a real application
+    const markAsRead = async () => {
+      try {
+        // In a real app, you would get the current user ID
+        const userId = 'student-1'; // Placeholder for demo
+        await markMessagesAsRead(applicationId, userId);
+        console.log(`Marked messages as read for application ID: ${applicationId}`);
+      } catch (error) {
+        console.error('Error marking messages as read:', error);
+      }
+    };
+    
+    markAsRead();
   }, [applicationId]);
 
   return (

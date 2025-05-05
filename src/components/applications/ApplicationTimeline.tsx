@@ -8,7 +8,7 @@ import { CheckCircle2, Clock, AlertCircle, FileCheck2, FileSearch, FileWarning, 
 import { supabase } from '@/integrations/supabase/client';
 
 interface TimelineEvent {
-  id: string; // Changed from number to string
+  id: string;
   application_id: string;
   status: string;
   created_at: string;

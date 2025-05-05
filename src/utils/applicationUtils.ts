@@ -1,5 +1,6 @@
+
+import { formatDate } from '@/utils/dateUtils';
 import { v4 as uuidv4 } from 'uuid';
-import { TFunction } from 'i18next';
 
 export const saveApplicationToStorage = (applicationData: any) => {
   try {
@@ -214,11 +215,12 @@ export const getRandomApplicationStatus = () => {
 export const generateMockTimeline = (applicationId: string, status: string) => {
   const now = new Date();
   const dayInMillis = 24 * 60 * 60 * 1000;
+  
   const timeline = [];
   
   // Add submission event
   timeline.push({
-    id: uuidv4(), // This is now a string from uuid
+    id: uuidv4(),
     application_id: applicationId,
     status: 'submitted',
     created_at: new Date(now.getTime() - 14 * dayInMillis).toISOString(),
