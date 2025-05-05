@@ -479,6 +479,9 @@ const DocumentsUploadForm = ({ initialDocuments, onSave, applicationId }: Docume
     // If connected to Supabase, add document to the database
     if (applicationId) {
       try {
+        // Create a temporary file path for the pending document
+        const tempFilePath = `applications/${applicationId}/pending-${Date.now()}`;
+        
         const { error } = await supabase
           .from('documents')
           .insert({
@@ -486,7 +489,8 @@ const DocumentsUploadForm = ({ initialDocuments, onSave, applicationId }: Docume
             name: documentName,
             file_type: newDocumentFileType === 'pdf' ? 'application/pdf' : 
                       newDocumentFileType === 'image' ? 'image/*' : 'application/octet-stream',
-            status: 'pending'
+            status: 'pending',
+            file_path: tempFilePath
           });
         
         if (error) {

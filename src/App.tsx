@@ -1,5 +1,7 @@
 
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -41,8 +43,6 @@ import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 
 function App() {
   // FIXME: In production, this would come from auth context or user state
@@ -73,7 +73,6 @@ function App() {
   const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles: UserRole[] }) => {
     const isAuthenticated = localStorage.getItem('userRole') !== null; // Simple authentication check
     const hasPermission = allowedRoles.includes(userRole);
-    const location = useLocation();
     
     console.log(`Route check - User role: ${userRole}, Allowed roles: ${allowedRoles.join(', ')}, Has permission: ${hasPermission}, Is authenticated: ${isAuthenticated}`);
 
