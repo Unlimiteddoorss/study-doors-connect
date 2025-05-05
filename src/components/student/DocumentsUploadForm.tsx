@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
@@ -150,7 +149,7 @@ const DocumentsUploadForm = ({ initialDocuments, onSave, applicationId }: Docume
       
       const { error: uploadError, data } = await supabase
         .storage
-        .from('documents')
+        .from('application_documents')
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: true
@@ -345,7 +344,7 @@ const DocumentsUploadForm = ({ initialDocuments, onSave, applicationId }: Docume
       try {
         const { error } = await supabase
           .storage
-          .from('documents')
+          .from('application_documents')
           .remove([doc.filePath]);
         
         if (error) {
@@ -403,7 +402,7 @@ const DocumentsUploadForm = ({ initialDocuments, onSave, applicationId }: Docume
       try {
         const { error } = await supabase
           .storage
-          .from('documents')
+          .from('application_documents')
           .remove([doc.filePath]);
         
         if (error) {
