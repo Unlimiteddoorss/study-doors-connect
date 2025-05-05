@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import MessagesContainer from './messages/MessagesContainer';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { markMessagesAsRead } from '@/services/messageService';
 
 interface ApplicationMessagesProps {
@@ -13,16 +13,26 @@ interface ApplicationMessagesProps {
 const ApplicationMessages = ({ programName, universityName, applicationId }: ApplicationMessagesProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [hasNewMessages, setHasNewMessages] = useState(false);
   
   useEffect(() => {
     // Simulate loading messages
     setIsLoading(true);
     const timer = setTimeout(() => {
       setIsLoading(false);
+      
+      // Simulate new messages notification
+      if (Math.random() > 0.5) {
+        setHasNewMessages(true);
+        toast({
+          title: "رسائل جديدة",
+          description: "لديك رسائل جديدة متعلقة بهذا الطلب",
+        });
+      }
     }, 1000);
     
     return () => clearTimeout(timer);
-  }, [applicationId]);
+  }, [applicationId, toast]);
   
   useEffect(() => {
     // Mark messages as read when component mounts
@@ -32,13 +42,19 @@ const ApplicationMessages = ({ programName, universityName, applicationId }: App
         const userId = 'student-1'; // Placeholder for demo
         await markMessagesAsRead(applicationId, userId);
         console.log(`Marked messages as read for application ID: ${applicationId}`);
+        
+        if (hasNewMessages) {
+          setHasNewMessages(false);
+        }
       } catch (error) {
         console.error('Error marking messages as read:', error);
       }
     };
     
-    markAsRead();
-  }, [applicationId]);
+    if (!isLoading) {
+      markAsRead();
+    }
+  }, [applicationId, isLoading, hasNewMessages]);
 
   return (
     <div className="h-full">

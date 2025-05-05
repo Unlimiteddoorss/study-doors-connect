@@ -1,19 +1,22 @@
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import MessageItem from './MessageItem';
 import MessageInput from './MessageInput';
-import MessageBubble from './MessageBubble';
-import { Separator } from '@/components/ui/separator';
-import { Loader2, AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  fetchApplicationMessages, 
-  sendApplicationMessage,
-  markMessagesAsRead
-} from '@/services/messageService';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getMessages } from '@/services/messageService';
+import { v4 as uuidv4 } from 'uuid';
+
+interface Message {
+  id: string;
+  application_id: string;
+  sender_id: string;
+  sender_role: string;
+  content: string;
+  attachments?: any[];
+  created_at: string;
+  is_read: boolean;
+}
 
 interface MessagesContainerProps {
   programName: string;
@@ -22,238 +25,113 @@ interface MessagesContainerProps {
 }
 
 const MessagesContainer = ({ programName, universityName, applicationId }: MessagesContainerProps) => {
-  const { t, i18n } = useTranslation();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [messages, setMessages] = useState<any[]>([]);
-  const [isSending, setIsSending] = useState(false);
+  const { t } = useTranslation();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Simulate current user data (should come from auth context in production)
-  const currentUser = {
-    id: localStorage.getItem('userRole') || 'student',
-    role: localStorage.getItem('userRole') || 'student',
-    name: localStorage.getItem('userRole') === 'admin' ? 'سارة محمود - مستشارة القبول' : 'محمد أحمد'
-  };
-  
-  const loadMessages = async () => {
+  // Fetch messages when component mounts or applicationId changes
+  useEffect(() => {
+    fetchMessages();
+  }, [applicationId]);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const fetchMessages = async () => {
     setIsLoading(true);
-    setError(null);
-    
     try {
-      // For demo purposes, we'll use a mix of real and mock data
-      let fetchedMessages = [];
+      // In a real app, you would fetch messages from the server using Supabase
+      const result = await getMessages(applicationId);
+      setMessages(result);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
       
-      try {
-        // Try to fetch from Supabase if connected
-        fetchedMessages = await fetchApplicationMessages(applicationId);
-      } catch (err) {
-        console.log('Using mock messages (Supabase not connected)');
-        // Use mock data if Supabase fetch fails
-        fetchedMessages = [
-          {
-            id: '1',
-            application_id: applicationId,
-            sender_id: 'student-1',
-            sender_role: 'student',
-            content: t("application.messages.sampleMessage1", "مرحبًا، لدي استفسار بخصوص متطلبات القبول في البرنامج. هل يمكنني معرفة المزيد عن المستندات المطلوبة؟"),
-            created_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
-            is_read: true
-          },
-          {
-            id: '2',
-            application_id: applicationId,
-            sender_id: 'admin-1',
-            sender_role: 'admin',
-            content: t("application.messages.sampleMessage2", "أهلاً بك! بالنسبة لمتطلبات القبول، ستحتاج إلى شهادة الثانوية العامة مع كشف الدرجات، جواز سفر ساري المفعول، وشهادة إجادة اللغة الإنجليزية. هل لديك أي أسئلة محددة حول أي من هذه المستندات؟"),
-            created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-            is_read: true
-          },
-          {
-            id: '3',
-            application_id: applicationId,
-            sender_id: 'student-1',
-            sender_role: 'student',
-            content: t("application.messages.sampleMessage3", "شكرًا لك على المعلومات. هل هناك حد أدنى للدرجات مطلوب للقبول في البرنامج؟"),
-            created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-            is_read: true
-          }
-        ];
-      }
+      // For demo, generate some mock messages if the server request fails
+      const mockMessages: Message[] = [
+        {
+          id: uuidv4(),
+          application_id: applicationId,
+          sender_id: 'advisor-1',
+          sender_role: 'advisor',
+          content: 'مرحباً، أود إبلاغك بأن طلبك قيد المراجعة حالياً. يمكنك الاستفسار عن أي شيء هنا.',
+          created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          is_read: true
+        },
+        {
+          id: uuidv4(),
+          application_id: applicationId,
+          sender_id: 'student-1',
+          sender_role: 'student',
+          content: 'شكراً لكم. متى يمكنني توقع رد نهائي على طلبي؟',
+          created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+          is_read: true
+        },
+        {
+          id: uuidv4(),
+          application_id: applicationId,
+          sender_id: 'advisor-1',
+          sender_role: 'advisor',
+          content: 'عادة ما تستغرق مراجعة الطلبات من 7 إلى 14 يوم عمل. سيتم إشعارك فور صدور القرار النهائي.',
+          created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          is_read: true
+        }
+      ];
       
-      // Format messages for UI
-      const formattedMessages = fetchedMessages.map(msg => ({
-        id: msg.id,
-        sender: msg.sender_role as 'student' | 'admin' | 'agent',
-        senderName: msg.sender_role === 'admin' ? 'سارة محمود - مستشارة القبول' : 
-                   msg.sender_role === 'agent' ? 'عمر خالد - مستشار الطلاب' : 'محمد أحمد',
-        text: msg.content,
-        timestamp: new Date(msg.created_at),
-        read: msg.is_read === true,
-        attachments: msg.attachments
-      }));
-      
-      setMessages(formattedMessages);
-      
-      // Mark messages as read (if user is not the sender)
-      try {
-        await markMessagesAsRead(applicationId, currentUser.id);
-      } catch (err) {
-        console.log('Could not mark messages as read (mock or connection issue)');
-      }
-      
-    } catch (err) {
-      console.error('Error loading messages:', err);
-      setError(t('messages.loadError', 'حدث خطأ أثناء تحميل الرسائل. يرجى المحاولة مرة أخرى.'));
+      setMessages(mockMessages);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Load messages when component mounts
-  useEffect(() => {
-    loadMessages();
-    
-    // Set up polling to refresh messages every 30 seconds
-    const interval = setInterval(() => {
-      loadMessages();
-    }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [applicationId]);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
-
-  const handleSendMessage = async (content: string, attachments: any[] = []) => {
-    if (!content.trim() && attachments.length === 0) return;
-    
-    setIsSending(true);
-    
-    try {
-      // Try to send via Supabase
-      const newMessage = {
-        application_id: applicationId,
-        sender_id: currentUser.id,
-        sender_role: currentUser.role,
-        content: content.trim(),
-        attachments: attachments.length > 0 ? attachments : undefined,
-        is_read: false
-      };
-      
-      // Add optimistically to UI
-      const uiMessage = {
-        id: `temp-${Date.now()}`,
-        sender: currentUser.role as 'student' | 'admin' | 'agent',
-        senderName: currentUser.name,
-        text: content.trim(),
-        timestamp: new Date(),
-        read: false,
-        attachments: attachments.length > 0 ? attachments : undefined
-      };
-      
-      setMessages(prev => [...prev, uiMessage]);
-      
-      try {
-        // Send to server
-        await sendApplicationMessage(newMessage);
-      } catch (err) {
-        console.log('Using mock messages (Supabase not connected for send)');
-        // Just continue with optimistic update for demo
-      }
-      
-      // For demo, simulate a reply from admin after 3 seconds if user is student
-      if (currentUser.role === 'student') {
-        setTimeout(() => {
-          const adminReply = {
-            id: `reply-${Date.now()}`,
-            sender: 'admin' as 'student' | 'admin' | 'agent',
-            senderName: 'سارة محمود - مستشارة القبول',
-            text: t('messages.autoReply', 'شكرًا لرسالتك! سيتم الرد عليك في أقرب وقت ممكن.'),
-            timestamp: new Date(),
-            read: true
-          };
-          
-          setMessages(prev => [...prev, adminReply]);
-        }, 3000);
-      }
-      
-    } catch (err) {
-      console.error('Error sending message:', err);
-      toast({
-        title: t('messages.sendError', 'حدث خطأ أثناء إرسال الرسالة'),
-        description: t('messages.tryAgain', 'يرجى المحاولة مرة أخرى'),
-        variant: 'destructive'
-      });
-    } finally {
-      setIsSending(false);
-    }
+  const handleMessageSent = () => {
+    // Refresh messages after sending a new one
+    fetchMessages();
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("application.messages.title", "المراسلات")}</CardTitle>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-xl">{t('application.messages.title', 'المراسلات')}</CardTitle>
         <CardDescription>
-          {t("application.messages.subtitle", "التواصل مع فريق القبول بخصوص")} {programName} - {universityName}
+          {programName} - {universityName}
         </CardDescription>
       </CardHeader>
       
-      <CardContent className="p-0">
-        <div className="p-4 border-b">
-          {isLoading ? (
-            <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-unlimited-blue" />
-              <span className="ml-2">{t('messages.loading', 'جاري تحميل الرسائل...')}</span>
-            </div>
-          ) : error ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{t('error.title', 'خطأ')}</AlertTitle>
-              <AlertDescription>
-                {error}
-                <div className="mt-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={loadMessages}
-                  >
-                    {t('messages.retry', 'إعادة المحاولة')}
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          ) : messages.length === 0 ? (
-            <div className="text-center py-12 text-unlimited-gray">
-              <p className="mb-2">{t('messages.noMessages', 'لا توجد رسائل بعد')}</p>
-              <p className="text-sm">{t('messages.startConversation', 'ابدأ المحادثة مع فريق القبول')}</p>
-            </div>
-          ) : (
-            <div className="space-y-4 max-h-[400px] overflow-y-auto p-2">
+      <CardContent className="flex-1 overflow-hidden flex flex-col pb-0">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+          </div>
+        ) : messages.length > 0 ? (
+          <div className="flex-1 overflow-y-auto mb-4 pr-1">
+            <div className="space-y-4">
               {messages.map((message) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  isSender={message.sender === currentUser.role}
+                <MessageItem 
+                  key={message.id} 
+                  message={message} 
+                  isCurrentUser={message.sender_role === 'student'}
                 />
               ))}
               <div ref={messagesEndRef} />
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center text-unlimited-gray">
+              <p>{t('application.messages.noMessages', 'لا توجد رسائل بعد.')}</p>
+              <p>{t('application.messages.startConversation', 'ابدأ المحادثة بإرسال رسالة.')}</p>
+            </div>
+          </div>
+        )}
         
-        <div className="p-4">
-          <MessageInput
-            applicationId={applicationId}
-            onSendMessage={handleSendMessage}
-            disabled={isSending}
-          />
-        </div>
+        <MessageInput applicationId={applicationId} onMessageSent={handleMessageSent} />
       </CardContent>
     </Card>
   );

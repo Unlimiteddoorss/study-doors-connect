@@ -1,7 +1,8 @@
-import React from 'react';
+
 import { useTranslation } from 'react-i18next';
-import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDate } from '@/utils/dateUtils';
+import { CalendarIcon, GraduationCap, Book, MapPin, User, Mail, Phone, Globe, FileText } from 'lucide-react';
 
 interface ApplicationDetailsSectionProps {
   application: any;
@@ -10,114 +11,185 @@ interface ApplicationDetailsSectionProps {
 const ApplicationDetailsSection = ({ application }: ApplicationDetailsSectionProps) => {
   const { t } = useTranslation();
   
-  // Fix for line 296, ensuring we're passing a string, not an object
-  const getFormattedValue = (value: any) => {
-    if (value === undefined || value === null) {
-      return t('application.details.notProvided', 'غير محدد');
+  const getFieldValue = (fieldPath: string[], defaultValue = '-') => {
+    try {
+      let value = application;
+      for (const field of fieldPath) {
+        value = value[field];
+        if (value === null || value === undefined) return defaultValue;
+      }
+      return value;
+    } catch (e) {
+      return defaultValue;
     }
-    
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
-    }
-    
-    return String(value);
   };
   
+  const personalInfo = application.formData?.personalInfo || {};
+  const academicInfo = application.formData?.academicInfo || {};
+  
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Personal Information */}
-          <div>
-            <h2 className="text-lg font-semibold text-unlimited-dark-blue mb-4">
-              {t("application.details.personalInfo", "معلومات شخصية")}
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.firstName", "الاسم الأول")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.firstName)}</span>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t('application.details.applicationInfo', 'معلومات الطلب')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.program', 'البرنامج')}</div>
+              <div className="flex items-center">
+                <GraduationCap className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{application.program || '-'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.lastName", "اسم العائلة")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.lastName)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.university', 'الجامعة')}</div>
+              <div className="flex items-center">
+                <Book className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{application.university || '-'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.gender", "الجنس")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.gender)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.location', 'الموقع')}</div>
+              <div className="flex items-center">
+                <MapPin className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{getFieldValue(['location'], 'تركيا')}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.email", "البريد الإلكتروني")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.email)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.dateApplied', 'تاريخ التقديم')}</div>
+              <div className="flex items-center">
+                <CalendarIcon className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{formatDate(application.date || application.created_at)}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.phone", "رقم الهاتف")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.phone)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.birthDate", "تاريخ الميلاد")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.birthDate)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.nationality", "الجنسية")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.nationality)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.passportNumber", "رقم الجواز")}:</span>
-                <span>{getFormattedValue(application.formData?.personalInfo?.passportNumber)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.applicationId', 'رقم الطلب')}</div>
+              <div className="flex items-center">
+                <FileText className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{application.id || '-'}</span>
               </div>
             </div>
           </div>
-
-          {/* Academic Information */}
-          <div>
-            <h2 className="text-lg font-semibold text-unlimited-dark-blue mb-4">
-              {t("application.details.academicInfo", "معلومات أكاديمية")}
-            </h2>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.education", "المستوى التعليمي")}:</span>
-                <span>{getFormattedValue(application.formData?.academicInfo?.education)}</span>
+        </CardContent>
+      </Card>
+      
+      {/* Personal Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t('application.details.personalInfo', 'المعلومات الشخصية')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.fullName', 'الاسم الكامل')}</div>
+              <div className="flex items-center">
+                <User className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>
+                  {personalInfo.firstName && personalInfo.lastName 
+                    ? `${personalInfo.firstName} ${personalInfo.lastName}`
+                    : '-'}
+                </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.graduationYear", "سنة التخرج")}:</span>
-                <span>{getFormattedValue(application.formData?.academicInfo?.graduationYear)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.email', 'البريد الإلكتروني')}</div>
+              <div className="flex items-center">
+                <Mail className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{personalInfo.email || '-'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.gpa", "المعدل التراكمي")}:</span>
-                <span>{getFormattedValue(application.formData?.academicInfo?.gpa)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.phone', 'رقم الهاتف')}</div>
+              <div className="flex items-center">
+                <Phone className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{personalInfo.phone || '-'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.school", "المدرسة/الجامعة")}:</span>
-                <span>{getFormattedValue(application.formData?.academicInfo?.school)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.nationality', 'الجنسية')}</div>
+              <div className="flex items-center">
+                <Globe className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{personalInfo.nationality || '-'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="font-medium w-32">{t("application.details.englishProficiency", "إتقان اللغة الإنجليزية")}:</span>
-                <span>{getFormattedValue(application.formData?.academicInfo?.englishProficiency)}</span>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.gender', 'الجنس')}</div>
+              <div className="flex items-center">
+                <User className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{personalInfo.gender || '-'}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.birthDate', 'تاريخ الميلاد')}</div>
+              <div className="flex items-center">
+                <CalendarIcon className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{personalInfo.birthDate ? formatDate(personalInfo.birthDate) : '-'}</span>
               </div>
             </div>
           </div>
-        </div>
-
-        <Separator className="my-6" />
-
-        {/* Program and University Selection */}
-        <div>
-          <h2 className="text-lg font-semibold text-unlimited-dark-blue mb-4">
-            {t("application.details.programSelection", "اختيار البرنامج والجامعة")}
-          </h2>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="font-medium w-32">{t("application.details.program", "البرنامج")}:</span>
-              <span>{getFormattedValue(application.formData?.program?.name)}</span>
+        </CardContent>
+      </Card>
+      
+      {/* Academic Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t('application.details.academicInfo', 'المعلومات الأكاديمية')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.education', 'المستوى التعليمي')}</div>
+              <div className="flex items-center">
+                <GraduationCap className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{academicInfo.education || '-'}</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="font-medium w-32">{t("application.details.university", "الجامعة")}:</span>
-              <span>{getFormattedValue(application.formData?.university)}</span>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.school', 'المدرسة/الجامعة السابقة')}</div>
+              <div className="flex items-center">
+                <Book className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{academicInfo.school || '-'}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.graduationYear', 'سنة التخرج')}</div>
+              <div className="flex items-center">
+                <CalendarIcon className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{academicInfo.graduationYear || '-'}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.gpa', 'المعدل التراكمي')}</div>
+              <div className="flex items-center">
+                <FileText className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{academicInfo.gpa || '-'}</span>
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="text-sm text-unlimited-gray">{t('application.details.englishProficiency', 'إتقان اللغة الإنجليزية')}</div>
+              <div className="flex items-center">
+                <FileText className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span>{academicInfo.englishProficiency || '-'}</span>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

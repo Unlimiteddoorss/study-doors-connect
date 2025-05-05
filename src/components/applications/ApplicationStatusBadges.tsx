@@ -1,8 +1,16 @@
 
 import { useTranslation } from 'react-i18next';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Send, Clock, FileCheck2, FileSearch, CheckCircle2, FileWarning, FileX2, PenLine } from 'lucide-react';
+import { 
+  Clock, 
+  CheckCircle2,
+  FileCheck2, 
+  FileSearch, 
+  FileWarning, 
+  X, 
+  FileX2,
+  AlertCircle,
+} from 'lucide-react';
 
 interface ApplicationStatusBadgesProps {
   status: string;
@@ -11,125 +19,87 @@ interface ApplicationStatusBadgesProps {
 const ApplicationStatusBadges = ({ status }: ApplicationStatusBadgesProps) => {
   const { t } = useTranslation();
   
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return 'bg-gray-200 text-gray-800 hover:bg-gray-300';
+  const getStatusIcon = (currentStatus: string) => {
+    switch (currentStatus) {
       case 'submitted':
-      case 'pending':
-        return 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300';
+        return <Clock className="h-3.5 w-3.5" />;
       case 'documents':
-        return 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300';
+        return <FileCheck2 className="h-3.5 w-3.5" />;
+      case 'pending':
+        return <Clock className="h-3.5 w-3.5" />;
       case 'review':
-        return 'bg-unlimited-light-blue text-unlimited-dark-blue hover:bg-unlimited-blue/20';
+        return <FileSearch className="h-3.5 w-3.5" />;
       case 'conditional':
-        return 'bg-yellow-200 text-yellow-800 hover:bg-yellow-300';
+        return <FileWarning className="h-3.5 w-3.5" />;
       case 'approved':
-      case 'paid':
-      case 'registered':
-        return 'bg-green-200 text-green-800 hover:bg-green-300';
+        return <CheckCircle2 className="h-3.5 w-3.5" />;
       case 'rejected':
-        return 'bg-red-200 text-red-800 hover:bg-red-300';
+        return <FileX2 className="h-3.5 w-3.5" />;
+      case 'draft':
+        return <AlertCircle className="h-3.5 w-3.5" />;
       default:
-        return 'bg-gray-200 text-gray-800 hover:bg-gray-300';
+        return <Clock className="h-3.5 w-3.5" />;
     }
   };
   
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'draft':
-        return <PenLine className="h-3.5 w-3.5 mr-1" />;
-      case 'submitted':
-        return <Send className="h-3.5 w-3.5 mr-1" />;
-      case 'pending':
-        return <Clock className="h-3.5 w-3.5 mr-1" />;
-      case 'documents':
-        return <FileCheck2 className="h-3.5 w-3.5 mr-1" />;
-      case 'review':
-        return <FileSearch className="h-3.5 w-3.5 mr-1" />;
-      case 'conditional':
-        return <FileWarning className="h-3.5 w-3.5 mr-1" />;
-      case 'approved':
-      case 'paid':
-      case 'registered':
-        return <CheckCircle2 className="h-3.5 w-3.5 mr-1" />;
-      case 'rejected':
-        return <FileX2 className="h-3.5 w-3.5 mr-1" />;
-      default:
-        return null;
-    }
-  };
-  
-  const getStatusLabel = (status: string) => {
-    switch (status) {
+  const getStatusLabel = (currentStatus: string) => {
+    switch (currentStatus) {
       case 'draft':
         return t('application.status.draft', 'مسودة');
       case 'submitted':
-        return t('application.status.submitted', 'تم التقديم');
-      case 'pending':
-        return t('application.status.pending', 'قيد الانتظار');
+        return t('application.status.submitted', 'تم تقديم الطلب');
       case 'documents':
         return t('application.status.documents', 'مراجعة المستندات');
+      case 'pending':
+        return t('application.status.pending', 'قيد الانتظار');
       case 'review':
-        return t('application.status.review', 'قيد المراجعة');
+        return t('application.status.review', 'مراجعة الطلب');
       case 'conditional':
         return t('application.status.conditional', 'قبول مشروط');
       case 'approved':
         return t('application.status.approved', 'تم القبول');
+      case 'rejected':
+        return t('application.status.rejected', 'تم الرفض');
       case 'paid':
         return t('application.status.paid', 'تم الدفع');
       case 'registered':
-        return t('application.status.registered', 'تم التسجيل');
-      case 'rejected':
-        return t('application.status.rejected', 'مرفوض');
+        return t('application.status.registered', 'مسجل');
       default:
-        return t('application.status.unknown', 'غير معروف');
+        return status;
     }
   };
   
-  const getStatusTooltip = (status: string) => {
-    switch (status) {
+  const getStatusColor = (currentStatus: string) => {
+    switch (currentStatus) {
       case 'draft':
-        return t('application.status.draftTooltip', 'الطلب غير مكتمل ولم يتم تقديمه بعد');
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
       case 'submitted':
-        return t('application.status.submittedTooltip', 'تم تقديم الطلب وهو قيد المراجعة الأولية');
       case 'pending':
-        return t('application.status.pendingTooltip', 'الطلب في انتظار المراجعة من قبل فريق القبول');
+        return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
       case 'documents':
-        return t('application.status.documentsTooltip', 'يتم حاليًا مراجعة المستندات المقدمة');
+        return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
       case 'review':
-        return t('application.status.reviewTooltip', 'يتم حاليًا مراجعة طلبك من قبل لجنة القبول');
+        return 'bg-unlimited-light-blue text-unlimited-blue hover:bg-unlimited-light-blue/80';
       case 'conditional':
-        return t('application.status.conditionalTooltip', 'تم قبولك بشكل مشروط، يرجى مراجعة الشروط المطلوبة');
+        return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
       case 'approved':
-        return t('application.status.approvedTooltip', 'تهانينا! تم قبول طلبك في البرنامج');
       case 'paid':
-        return t('application.status.paidTooltip', 'تم استلام الرسوم الدراسية بنجاح');
       case 'registered':
-        return t('application.status.registeredTooltip', 'تم تسجيلك بنجاح في البرنامج');
+        return 'bg-green-100 text-green-800 hover:bg-green-200';
       case 'rejected':
-        return t('application.status.rejectedTooltip', 'للأسف، تم رفض طلبك. يمكنك التواصل مع فريق القبول لمزيد من المعلومات');
+        return 'bg-red-100 text-red-800 hover:bg-red-200';
       default:
-        return '';
+        return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
     }
   };
   
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Badge 
-            className={`${getStatusColor(status)} flex items-center px-3 py-1.5 text-sm font-medium`}
-          >
-            {getStatusIcon(status)}
-            {getStatusLabel(status)}
-          </Badge>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{getStatusTooltip(status)}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div>
+      <Badge className={`${getStatusColor(status)} gap-1 py-1.5 text-xs`} variant="outline">
+        {getStatusIcon(status)}
+        {getStatusLabel(status)}
+      </Badge>
+    </div>
   );
 };
 

@@ -1,123 +1,100 @@
 
-import { useState, useRef, ChangeEvent, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
+import { Send, Paperclip, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Paperclip, Send, X, FileText, Image, File } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useToast } from '@/hooks/use-toast';
-import { uploadMessageAttachment } from '@/services/messageService';
+import { useTranslation } from 'react-i18next';
+import { createMessage } from '@/services/messageService';
+import { v4 as uuidv4 } from 'uuid';
 
 interface MessageInputProps {
   applicationId: string;
-  onSendMessage: (content: string, attachments: any[]) => Promise<void>;
-  disabled?: boolean;
+  onMessageSent: () => void;
 }
 
-const MessageInput = ({ applicationId, onSendMessage, disabled = false }: MessageInputProps) => {
-  const { t, i18n } = useTranslation();
-  const isRtl = i18n.language === 'ar';
+const MessageInput = ({ applicationId, onMessageSent }: MessageInputProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [message, setMessage] = useState('');
-  const [attachments, setAttachments] = useState<any[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [attachments, setAttachments] = useState<File[]>([]);
 
-  const handleAttachFile = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const getFileIcon = (fileType: string) => {
-    if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
-    if (fileType.includes('pdf')) return <FileText className="h-4 w-4" />;
-    return <File className="h-4 w-4" />;
-  };
-
-  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setIsUploading(true);
-    const newAttachments = [...attachments];
-
-    try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        
-        // Check file size (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          toast({
-            title: t('error.fileTooLarge', 'الملف كبير جدًا'),
-            description: t('error.maxFileSize', 'الحد الأقصى لحجم الملف هو 5 ميجابايت'),
-            variant: 'destructive'
-          });
-          continue;
-        }
-
-        const fileData = await uploadMessageAttachment(applicationId, file);
-        newAttachments.push(fileData);
-      }
-
-      setAttachments(newAttachments);
-      
-      toast({
-        title: t('messages.attachmentsUploaded', 'تم رفع المرفقات'),
-        description: t('messages.attachmentsReady', 'المرفقات جاهزة للإرسال'),
-      });
-    } catch (error) {
-      console.error('Error uploading attachments:', error);
-      toast({
-        title: t('error.uploadFailed', 'فشل رفع الملفات'),
-        description: t('error.tryAgain', 'يرجى المحاولة مرة أخرى'),
-        variant: 'destructive'
-      });
-    } finally {
-      setIsUploading(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const removeAttachment = (index: number) => {
-    const newAttachments = [...attachments];
-    newAttachments.splice(index, 1);
-    setAttachments(newAttachments);
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!message.trim() && attachments.length === 0) return;
     
+    setIsLoading(true);
+    
     try {
-      await onSendMessage(message, attachments);
+      // In a real app, you would get the current user ID and role from auth context
+      const userId = 'student-1';
+      const userRole = 'student';
+      
+      // Create a message object
+      const newMessage = {
+        id: uuidv4(),
+        application_id: applicationId,
+        sender_id: userId,
+        sender_role: userRole,
+        content: message.trim(),
+        attachments: attachments.length > 0 ? attachments.map(file => ({
+          name: file.name,
+          size: file.size,
+          type: file.type
+        })) : null,
+        created_at: new Date().toISOString(),
+        is_read: false
+      };
+      
+      // Send message to server
+      await createMessage(newMessage);
+      
+      // Reset form
       setMessage('');
       setAttachments([]);
+      
+      // Notify parent component
+      onMessageSent();
+      
+      toast({
+        title: t('messages.sent', 'تم إرسال الرسالة'),
+        description: t('messages.sentDescription', 'تم إرسال رسالتك بنجاح'),
+      });
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: t('error.sendFailed', 'فشل إرسال الرسالة'),
-        description: t('error.tryAgain', 'يرجى المحاولة مرة أخرى'),
+        title: t('messages.error', 'خطأ في الإرسال'),
+        description: t('messages.errorDescription', 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.'),
         variant: 'destructive'
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
+  
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const fileArray = Array.from(e.target.files);
+      setAttachments(prev => [...prev, ...fileArray]);
+    }
+  };
+  
+  const removeAttachment = (index: number) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
-    <form onSubmit={handleSubmit} className="border-t pt-3">
-      {/* Attachments preview */}
+    <form onSubmit={handleSubmit} className="border-t pt-4">
       {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2">
-          {attachments.map((attachment, i) => (
-            <div key={i} className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-sm">
-              {getFileIcon(attachment.type)}
-              <span className="max-w-[150px] truncate">{attachment.name}</span>
+        <div className="mb-2 flex flex-wrap gap-2">
+          {attachments.map((file, index) => (
+            <div key={index} className="bg-gray-100 rounded-full px-3 py-1 flex items-center gap-1 text-sm">
+              <span className="truncate max-w-[150px]">{file.name}</span>
               <button 
                 type="button" 
-                onClick={() => removeAttachment(i)}
+                onClick={() => removeAttachment(index)}
                 className="text-gray-500 hover:text-red-500"
               >
                 <X className="h-3 w-3" />
@@ -127,52 +104,50 @@ const MessageInput = ({ applicationId, onSendMessage, disabled = false }: Messag
         </div>
       )}
       
-      <div className="flex items-end gap-2">
-        <div className="flex-1">
-          <Textarea
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder={t('messages.typeSomething', 'اكتب رسالتك هنا...')}
-            className={`min-h-[80px] resize-none ${isRtl ? 'text-right' : 'text-left'}`}
-            disabled={disabled || isUploading}
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Button 
-            type="button" 
-            size="icon" 
-            variant="outline" 
-            onClick={handleAttachFile}
-            disabled={disabled || isUploading}
-          >
-            <Paperclip className="h-4 w-4" />
-            <span className="sr-only">{t('messages.attach', 'إرفاق ملف')}</span>
-          </Button>
-          <Button 
-            type="submit" 
-            size="icon" 
-            disabled={(!message.trim() && attachments.length === 0) || disabled || isUploading}
-          >
-            <Send className="h-4 w-4" />
-            <span className="sr-only">{t('messages.send', 'إرسال')}</span>
-          </Button>
-        </div>
-      </div>
-      
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-        multiple
-        accept="image/*, application/pdf, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .txt"
+      <Textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder={t('messages.placeholder', 'اكتب رسالتك هنا...')}
+        className="resize-none mb-2"
+        rows={3}
       />
       
-      <p className="text-xs text-unlimited-gray mt-2">
-        {t('messages.supportedFileTypes', 'الملفات المدعومة: الصور, PDF, Word, Excel, PowerPoint, النصوص')}
-        {' • '}
-        {t('messages.maxFileSize', 'الحد الأقصى للملف: 5MB')}
-      </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <input
+            type="file"
+            id="file-upload"
+            multiple
+            className="hidden"
+            onChange={handleFileSelect}
+          />
+          <label htmlFor="file-upload">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="cursor-pointer"
+              onClick={() => document.getElementById('file-upload')?.click()}
+            >
+              <Paperclip className="h-4 w-4 mr-2" />
+              {t('messages.attachment', 'إرفاق ملف')}
+            </Button>
+          </label>
+        </div>
+        
+        <Button 
+          type="submit" 
+          disabled={isLoading || (!message.trim() && attachments.length === 0)}
+          className="gap-2"
+        >
+          {isLoading ? (
+            <div className="h-4 w-4 border-2 border-t-transparent border-white rounded-full animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
+          {t('messages.send', 'إرسال')}
+        </Button>
+      </div>
     </form>
   );
 };
