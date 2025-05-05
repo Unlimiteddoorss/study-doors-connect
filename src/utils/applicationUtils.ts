@@ -1,6 +1,7 @@
+
 import { formatDate } from '@/utils/dateUtils';
 import { v4 as uuidv4 } from 'uuid';
-import { TFunction } from 'react-i18next';
+import { type TFunction as I18NextTFunction } from 'i18next';
 
 export const saveApplicationToStorage = (applicationData: any) => {
   try {
@@ -120,7 +121,7 @@ export const getApplicationProgress = (formData: any) => {
 export const validateApplicationStep = (
   step: number, 
   formData: any, 
-  t: TFunction
+  t: I18NextTFunction
 ): { isValid: boolean; errors: string[] } => {
   const errors: string[] = [];
   
