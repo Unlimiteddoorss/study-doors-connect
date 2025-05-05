@@ -1,6 +1,6 @@
-
 import { formatDate } from '@/utils/dateUtils';
 import { v4 as uuidv4 } from 'uuid';
+import { TFunction } from 'react-i18next';
 
 export const saveApplicationToStorage = (applicationData: any) => {
   try {
