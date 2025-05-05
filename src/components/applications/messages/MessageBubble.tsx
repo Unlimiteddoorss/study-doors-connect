@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { Check, Clock, Download, Eye, X } from 'lucide-react'; // Added X import
 import { useTranslation } from 'react-i18next';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Download, Paperclip, FileText, Image, File, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { formatRelativeTime } from '@/utils/dateUtils';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-interface MessageBubbleProps {
+interface MessageProps {
   message: {
     id: string;
     sender: 'student' | 'admin' | 'agent';
@@ -15,196 +15,175 @@ interface MessageBubbleProps {
     text: string;
     timestamp: Date;
     read: boolean;
-    attachments?: {
-      id: string;
-      name: string;
-      url: string;
-      size?: number;
-      type?: string;
-    }[];
+    attachments?: any[];
   };
   isSender: boolean;
 }
 
-const MessageBubble = ({ message, isSender }: MessageBubbleProps) => {
+// Helper to get file icon based on file type
+const getFileIcon = (fileType: string) => {
+  if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
+  if (fileType.includes('pdf')) return <FileText className="h-4 w-4" />;
+  return <File className="h-4 w-4" />;
+};
+
+const MessageBubble = ({ message, isSender }: MessageProps) => {
   const { t, i18n } = useTranslation();
   const isRtl = i18n.language === 'ar';
-  const { toast } = useToast();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [showAttachments, setShowAttachments] = useState(true);
   
-  // Format the message timestamp
-  const formattedTime = formatRelativeTime(message.timestamp);
-
-  const getSenderInitials = () => {
-    return message.senderName
-      .split(' ')
-      .slice(0, 2)
-      .map(name => name[0])
-      .join('')
-      .toUpperCase();
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString(i18n.language, { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
   };
-
-  const getSenderAvatar = () => {
-    if (message.sender === 'admin') return '/images/admin-avatar.jpg';
-    if (message.sender === 'agent') return '/images/agent-avatar.jpg';
-    return '/images/student-avatar.jpg';
-  };
-
-  const getSenderColor = () => {
-    if (message.sender === 'admin') return 'bg-unlimited-blue text-white';
-    if (message.sender === 'agent') return 'bg-green-600 text-white';
-    return 'bg-gray-700 text-white';
-  };
-
-  const getAttachmentIcon = (type: string) => {
-    if (type.startsWith('image/')) return <Eye className="h-4 w-4" />;
-    return <Download className="h-4 w-4" />;
-  };
-
-  const handleDownload = (url: string, fileName: string) => {
-    try {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      toast({
-        title: t('messages.downloadStarted', 'بدأ التحميل'),
-        description: t('messages.downloadingFile', 'جاري تحميل الملف: {fileName}', { fileName }),
-      });
-    } catch (error) {
-      console.error('Download error:', error);
-      toast({
-        title: t('error.downloadFailed', 'فشل التحميل'),
-        description: t('error.tryAgainLater', 'يرجى المحاولة مرة أخرى لاحقًا'),
-        variant: 'destructive'
-      });
-    }
-  };
-
-  const handlePreview = (url: string) => {
-    if (previewUrl === url) {
-      setPreviewUrl(null);
-    } else {
-      setPreviewUrl(url);
-    }
-  };
-
-  const formatFileSize = (bytes?: number) => {
-    if (!bytes) return '';
+  
+  const formatDate = (date: Date) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
     
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / 1048576).toFixed(1)} MB`;
+    const isToday = date.toDateString() === today.toDateString();
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+    
+    if (isToday) {
+      return t('messages.today', 'اليوم');
+    } else if (isYesterday) {
+      return t('messages.yesterday', 'أمس');
+    } else {
+      return date.toLocaleDateString(i18n.language, { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric'
+      });
+    }
   };
-
+  
+  const getSenderInitials = () => {
+    if (!message.senderName) return '??';
+    
+    const nameParts = message.senderName.split(' ');
+    if (nameParts.length >= 2) {
+      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
+    }
+    return nameParts[0].substring(0, 2).toUpperCase();
+  };
+  
   return (
-    <div className={`flex gap-3 mb-6 ${isSender ? 'justify-end' : 'justify-start'}`}>
-      {/* Avatar (only shown for non-sender) */}
-      {!isSender && (
-        <Avatar className="h-8 w-8">
-          <AvatarImage src={getSenderAvatar()} alt={message.senderName} />
-          <AvatarFallback className={getSenderColor()}>{getSenderInitials()}</AvatarFallback>
-        </Avatar>
-      )}
-      
-      <div className={`max-w-[80%] ${isSender ? 'order-1' : 'order-2'}`}>
-        {/* Sender name & timestamp */}
-        <div className={`flex items-center gap-2 text-xs text-unlimited-gray mb-1 ${isSender ? 'justify-end' : 'justify-start'}`}>
-          {!isSender && <span className="font-medium">{message.senderName}</span>}
-          <span>{formattedTime}</span>
-          {isSender && (
-            <span className="flex items-center">
-              {message.read ? (
-                <Check className="h-3 w-3 text-green-500" />
-              ) : (
-                <Clock className="h-3 w-3" />
-              )}
-            </span>
+    <div className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
+      <div className={`max-w-[85%] ${isSender ? 'order-2' : 'order-1'}`}>
+        <div className="flex items-start gap-2">
+          {!isSender && (
+            <Avatar className="h-8 w-8 mt-1">
+              <AvatarImage src="" alt={message.senderName} />
+              <AvatarFallback className={`text-xs ${
+                message.sender === 'admin' ? 'bg-unlimited-blue text-white' :
+                message.sender === 'agent' ? 'bg-amber-500 text-white' :
+                'bg-green-500 text-white'
+              }`}>
+                {getSenderInitials()}
+              </AvatarFallback>
+            </Avatar>
           )}
-        </div>
-        
-        {/* Message bubble */}
-        <div 
-          className={`rounded-lg p-3 ${
-            isSender 
-              ? 'bg-unlimited-blue text-white rounded-tr-none' 
-              : 'bg-gray-100 text-unlimited-dark-blue rounded-tl-none'
-          } ${isRtl ? 'text-right' : 'text-left'}`}
-        >
-          {/* Message text */}
-          <p className="whitespace-pre-wrap">{message.text}</p>
           
-          {/* Attachments section */}
-          {message.attachments && message.attachments.length > 0 && (
-            <div className="mt-2 pt-2 border-t border-white/20">
-              {message.attachments.map((attachment, index) => (
-                <div key={index} className="mt-1">
-                  <div className={`flex items-center gap-2 ${
-                    isSender ? 'text-white/90' : 'text-unlimited-gray'
-                  }`}>
-                    <div className="flex-1 truncate text-sm">
-                      {attachment.name}
-                      {attachment.size && (
-                        <span className="text-xs opacity-70 ml-1">
-                          ({formatFileSize(attachment.size)})
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {attachment.type?.startsWith('image/') && (
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={`h-6 w-6 ${isSender ? 'hover:bg-white/20' : 'hover:bg-gray-200'}`}
-                          onClick={() => handlePreview(attachment.url)}
-                        >
-                          <Eye className="h-3.5 w-3.5" />
-                        </Button>
-                      )}
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className={`h-6 w-6 ${isSender ? 'hover:bg-white/20' : 'hover:bg-gray-200'}`}
-                        onClick={() => handleDownload(attachment.url, attachment.name)}
-                      >
-                        <Download className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+          <div>
+            {!isSender && (
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium">{message.senderName}</span>
+                <Badge variant="outline" className="text-xs px-2 py-0">
+                  {message.sender === 'admin' ? 
+                    t('messages.universityAdmin', 'مسؤول الجامعة') :
+                    message.sender === 'agent' ?
+                    t('messages.educationalAgent', 'وكيل تعليمي') :
+                    t('messages.student', 'طالب')
+                  }
+                </Badge>
+              </div>
+            )}
+            
+            <div className={`rounded-lg px-4 py-2 ${
+              isSender ? 
+                'bg-unlimited-blue text-white rounded-tr-none' : 
+                'bg-gray-100 rounded-tl-none'
+            }`}>
+              <p className="whitespace-pre-wrap break-words">
+                {message.text}
+              </p>
+              
+              {message.attachments && message.attachments.length > 0 && (
+                <div className="mt-2">
+                  <div 
+                    className="flex items-center gap-1 text-xs cursor-pointer"
+                    onClick={() => setShowAttachments(!showAttachments)}
+                  >
+                    <Paperclip className="h-3 w-3" />
+                    <span>
+                      {message.attachments.length} {t('messages.attachments', 'مرفقات')}
+                    </span>
+                    <Button variant="ghost" size="icon" className="h-4 w-4 p-0">
+                      {showAttachments ? 
+                        <X className="h-3 w-3" /> : 
+                        <span className="text-xs">+</span>
+                      }
+                    </Button>
                   </div>
+                  
+                  {showAttachments && (
+                    <div className="mt-1 space-y-1">
+                      {message.attachments.map((attachment, index) => (
+                        <div 
+                          key={index}
+                          className={`flex items-center gap-1 p-1 rounded text-xs ${
+                            isSender ? 'bg-unlimited-dark-blue/30' : 'bg-gray-200'
+                          }`}
+                        >
+                          {getFileIcon(attachment.type)}
+                          <span className="truncate max-w-[120px]">
+                            {attachment.name}
+                          </span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-4 w-4 ml-auto p-0"
+                                >
+                                  <Download className="h-3 w-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {t('messages.download', 'تحميل')}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ))}
+              )}
             </div>
-          )}
-        </div>
-        
-        {/* Image preview */}
-        {previewUrl && previewUrl.match(/\.(jpeg|jpg|gif|png)$/i) && (
-          <div className="mt-2 relative">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="absolute top-2 right-2 bg-black/50 hover:bg-black/70 text-white h-7 w-7 p-0 rounded-full"
-              onClick={() => setPreviewUrl(null)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <img 
-              src={previewUrl} 
-              alt="Preview" 
-              className="rounded-md max-h-[300px] object-contain"
-              onError={() => {
-                toast({
-                  title: t('error.previewFailed', 'فشل تحميل المعاينة'),
-                  variant: 'destructive'
-                });
-                setPreviewUrl(null);
-              }}
-            />
+            
+            <div className={`text-xs text-gray-500 mt-1 flex gap-2 ${
+              isSender ? 'justify-end' : 'justify-start'
+            }`}>
+              <span>{formatTime(message.timestamp)}</span>
+              <span>{formatDate(message.timestamp)}</span>
+              {isSender && (
+                <span>
+                  {message.read ? 
+                    t('messages.read', 'تم القراءة') : 
+                    t('messages.sent', 'تم الإرسال')
+                  }
+                </span>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
