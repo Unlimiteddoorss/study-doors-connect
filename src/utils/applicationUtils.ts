@@ -1,303 +1,285 @@
 
-import { toast } from "@/hooks/use-toast";
-import { i18n } from "i18next";
+import { v4 as uuidv4 } from 'uuid';
+import { TFunction } from 'i18next';
 
-export type ApplicationStatus = 
-  | 'draft'
-  | 'submitted'
-  | 'pending'
-  | 'documents' 
-  | 'review' 
-  | 'conditional' 
-  | 'approved' 
-  | 'paid' 
-  | 'registered' 
-  | 'rejected';
-
-export interface ApplicationStatusStep {
-  status: ApplicationStatus;
-  label: string;
-  description: string;
-  icon: string;
-}
-
-export const getApplicationStatusColor = (status: ApplicationStatus): string => {
-  switch (status) {
-    case 'draft':
-      return 'bg-slate-400';
-    case 'submitted':
-    case 'pending':
-      return 'bg-yellow-500';
-    case 'documents':
-      return 'bg-blue-400';
-    case 'review':
-      return 'bg-purple-500';
-    case 'conditional':
-      return 'bg-orange-500';
-    case 'approved':
-      return 'bg-green-500';
-    case 'paid':
-      return 'bg-emerald-600';
-    case 'registered':
-      return 'bg-teal-600';
-    case 'rejected':
-      return 'bg-red-500';
-    default:
-      return 'bg-slate-400';
-  }
-};
-
-export const getApplicationStatusSteps = (t: any): ApplicationStatusStep[] => [
-  {
-    status: 'draft',
-    label: t('application.status.draft', 'مسودة'),
-    description: t('application.status.draftDescription', 'الطلب قيد الإنشاء'),
-    icon: 'edit'
-  },
-  {
-    status: 'submitted',
-    label: t('application.status.submitted', 'تم التقديم'),
-    description: t('application.status.submittedDescription', 'تم استلام طلبك'),
-    icon: 'check'
-  },
-  {
-    status: 'documents',
-    label: t('application.status.documents', 'المستندات'),
-    description: t('application.status.documentsDescription', 'يتم مراجعة المستندات'),
-    icon: 'file-text'
-  },
-  {
-    status: 'review',
-    label: t('application.status.review', 'المراجعة'),
-    description: t('application.status.reviewDescription', 'الطلب قيد المراجعة'),
-    icon: 'search'
-  },
-  {
-    status: 'approved',
-    label: t('application.status.approved', 'تمت الموافقة'),
-    description: t('application.status.approvedDescription', 'تمت الموافقة على طلبك'),
-    icon: 'check-circle'
-  },
-  {
-    status: 'registered',
-    label: t('application.status.registered', 'تم التسجيل'),
-    description: t('application.status.registeredDescription', 'تم تسجيلك بنجاح'),
-    icon: 'user-check'
-  }
-];
-
-export const validateApplicationStep = (
-  step: number, 
-  formData: any, 
-  t: any
-): { isValid: boolean; errors: string[] } => {
-  const errors: string[] = [];
-  let isValid = true;
-
-  switch (step) {
-    case 1: // الخطوة الأولى: المعلومات الشخصية
-      if (!formData.personalInfo?.firstName?.trim()) {
-        errors.push(t('application.validation.firstNameRequired', 'الاسم الأول مطلوب'));
-        isValid = false;
-      }
-      
-      if (!formData.personalInfo?.lastName?.trim()) {
-        errors.push(t('application.validation.lastNameRequired', 'الاسم الأخير مطلوب'));
-        isValid = false;
-      }
-      
-      if (!formData.personalInfo?.email?.trim()) {
-        errors.push(t('application.validation.emailRequired', 'البريد الإلكتروني مطلوب'));
-        isValid = false;
-      } else if (!/\S+@\S+\.\S+/.test(formData.personalInfo.email)) {
-        errors.push(t('application.validation.emailInvalid', 'البريد الإلكتروني غير صالح'));
-        isValid = false;
-      }
-      
-      if (!formData.personalInfo?.phone?.trim()) {
-        errors.push(t('application.validation.phoneRequired', 'رقم الهاتف مطلوب'));
-        isValid = false;
-      }
-      
-      if (!formData.personalInfo?.nationality?.trim()) {
-        errors.push(t('application.validation.nationalityRequired', 'الجنسية مطلوبة'));
-        isValid = false;
-      }
-      
-      break;
-      
-    case 2: // الخطوة الثانية: المستندات
-      if (!formData.documents || !Array.isArray(formData.documents) || formData.documents.length === 0) {
-        errors.push(t('application.validation.documentsRequired', 'يجب تحميل المستندات المطلوبة'));
-        isValid = false;
-      } else {
-        const requiredDocs = formData.documents.filter((doc: any) => doc.required);
-        const uploadedRequiredDocs = requiredDocs.filter((doc: any) => doc.status === 'uploaded');
-        
-        if (uploadedRequiredDocs.length < requiredDocs.length) {
-          errors.push(t('application.validation.requiredDocumentsMissing', 'بعض المستندات المطلوبة غير موجودة'));
-          isValid = false;
-        }
-      }
-      
-      break;
-      
-    case 3: // الخطوة الثالثة: المعلومات الأكاديمية
-      if (!formData.academicInfo?.education?.trim()) {
-        errors.push(t('application.validation.educationRequired', 'المستوى التعليمي مطلوب'));
-        isValid = false;
-      }
-      
-      if (!formData.academicInfo?.graduationYear) {
-        errors.push(t('application.validation.graduationYearRequired', 'سنة التخرج مطلوبة'));
-        isValid = false;
-      }
-      
-      if (!formData.academicInfo?.gpa?.trim()) {
-        errors.push(t('application.validation.gpaRequired', 'المعدل التراكمي مطلوب'));
-        isValid = false;
-      }
-      
-      break;
-      
-    case 4: // الخطوة الرابعة: اختيار البرنامج
-      if (!formData.program?.name?.trim()) {
-        errors.push(t('application.validation.programRequired', 'اسم البرنامج مطلوب'));
-        isValid = false;
-      }
-      
-      if (!formData.university?.trim()) {
-        errors.push(t('application.validation.universityRequired', 'اسم الجامعة مطلوب'));
-        isValid = false;
-      }
-      
-      break;
-  }
-
-  return { isValid, errors };
-};
-
-export const getApplicationProgress = (formData: any): number => {
-  let completedSections = 0;
-  let totalSections = 4; // إجمالي عدد الأقسام
-  
-  // التحقق من اكتمال المعلومات الشخصية
-  if (
-    formData.personalInfo?.firstName?.trim() && 
-    formData.personalInfo?.lastName?.trim() && 
-    formData.personalInfo?.email?.trim()
-  ) {
-    completedSections++;
-  }
-  
-  // التحقق من اكتمال المستندات
-  if (formData.documents && Array.isArray(formData.documents) && formData.documents.some((doc: any) => doc.status === 'uploaded')) {
-    completedSections++;
-  }
-  
-  // التحقق من اكتمال المعلومات الأكاديمية
-  if (formData.academicInfo?.education?.trim() && formData.academicInfo?.graduationYear) {
-    completedSections++;
-  }
-  
-  // التحقق من اكتمال اختيار البرنامج
-  if (formData.program?.name?.trim() && formData.university?.trim()) {
-    completedSections++;
-  }
-  
-  return Math.round((completedSections / totalSections) * 100);
-};
-
-// دالة لحفظ الطلب في التخزين المحلي
 export const saveApplicationToStorage = (applicationData: any) => {
   try {
-    // الحصول على الطلبات المحفوظة سابقاً
-    const existingApplications = localStorage.getItem('studentApplications');
-    const applications = existingApplications ? JSON.parse(existingApplications) : [];
+    // Generate ID if not provided
+    if (!applicationData.id) {
+      applicationData.id = `APP-${Math.floor(1000 + Math.random() * 9000)}`;
+    }
     
-    // إذا كان هناك طلب بنفس المعرف، قم بتحديثه
+    // Get existing applications
+    const existingApplications = localStorage.getItem('studentApplications');
+    let applications = existingApplications ? JSON.parse(existingApplications) : [];
+    
+    // Check if application with this ID already exists
     const existingIndex = applications.findIndex((app: any) => app.id === applicationData.id);
     
-    if (existingIndex >= 0) {
+    if (existingIndex !== -1) {
+      // Update existing application
       applications[existingIndex] = {
         ...applications[existingIndex],
         ...applicationData,
-        lastUpdated: new Date().toISOString()
+        updated_at: new Date().toISOString()
       };
     } else {
-      // إضافة طلب جديد
+      // Add new application
       applications.push({
         ...applicationData,
-        id: `APP-${Math.floor(1000 + Math.random() * 9000)}`,
-        date: new Date().toISOString().split('T')[0],
-        status: applicationData.status || 'draft',
-        lastUpdated: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       });
     }
     
-    // حفظ البيانات المحدثة
+    // Save to localStorage
     localStorage.setItem('studentApplications', JSON.stringify(applications));
     
     return true;
   } catch (error) {
-    console.error('Error saving application to storage:', error);
+    console.error('Error saving application:', error);
     return false;
   }
 };
 
-// دالة لجلب طلب محدد من التخزين المحلي
-export const getApplicationFromStorage = (id: string) => {
+export const getApplicationFromStorage = (id?: string) => {
   try {
     const existingApplications = localStorage.getItem('studentApplications');
     if (!existingApplications) return null;
     
     const applications = JSON.parse(existingApplications);
-    return applications.find((app: any) => app.id === id) || null;
+    
+    if (id) {
+      return applications.find((app: any) => app.id === id) || null;
+    }
+    
+    return applications;
   } catch (error) {
-    console.error('Error retrieving application from storage:', error);
+    console.error('Error getting application:', error);
     return null;
   }
 };
 
-// دالة لجلب جميع طلبات الطالب من التخزين المحلي
-export const getAllApplicationsFromStorage = () => {
+export const deleteApplicationFromStorage = (id: string) => {
   try {
     const existingApplications = localStorage.getItem('studentApplications');
-    return existingApplications ? JSON.parse(existingApplications) : [];
-  } catch (error) {
-    console.error('Error retrieving applications from storage:', error);
-    return [];
-  }
-};
-
-export const updateApplicationStatus = (applicationId: string, newStatus: ApplicationStatus, t: any): boolean => {
-  try {
-    const applications = getAllApplicationsFromStorage();
-    const appIndex = applications.findIndex((app: any) => app.id === applicationId);
+    if (!existingApplications) return false;
     
-    if (appIndex < 0) return false;
+    const applications = JSON.parse(existingApplications);
+    const updatedApplications = applications.filter((app: any) => app.id !== id);
     
-    applications[appIndex].status = newStatus;
-    applications[appIndex].statusUpdatedAt = new Date().toISOString();
-    
-    // إضافة حدث جديد في الجدول الزمني للطلب
-    if (!applications[appIndex].timeline) {
-      applications[appIndex].timeline = [];
-    }
-    
-    applications[appIndex].timeline.push({
-      id: Date.now(),
-      status: newStatus,
-      date: new Date().toISOString(),
-      title: t(`application.status.${newStatus}`, newStatus),
-      description: t(`application.status.${newStatus}Description`, `تم تغيير حالة الطلب إلى ${newStatus}`),
-    });
-    
-    localStorage.setItem('studentApplications', JSON.stringify(applications));
+    localStorage.setItem('studentApplications', JSON.stringify(updatedApplications));
     
     return true;
   } catch (error) {
-    console.error('Error updating application status:', error);
+    console.error('Error deleting application:', error);
     return false;
   }
+};
+
+export const getApplicationProgress = (formData: any) => {
+  let progress = 0;
+  
+  // Personal Info (25%)
+  if (formData.personalInfo) {
+    const personalInfoFields = [
+      'firstName', 'lastName', 'gender', 'email', 
+      'phone', 'birthDate', 'nationality', 'passportNumber'
+    ];
+    
+    const filledFields = personalInfoFields.filter(field => formData.personalInfo[field]);
+    progress += (filledFields.length / personalInfoFields.length) * 25;
+  }
+  
+  // Documents (25%)
+  if (formData.documents && formData.documents.length > 0) {
+    const requiredDocs = formData.documents.filter((doc: any) => doc.required).length || 1;
+    const uploadedDocs = formData.documents.filter((doc: any) => doc.status === 'uploaded').length;
+    progress += (uploadedDocs / requiredDocs) * 25;
+  }
+  
+  // Academic Info (25%)
+  if (formData.academicInfo) {
+    const academicInfoFields = [
+      'education', 'graduationYear', 'gpa', 'school', 
+      'englishProficiency'
+    ];
+    
+    const filledFields = academicInfoFields.filter(field => formData.academicInfo[field]);
+    progress += (filledFields.length / academicInfoFields.length) * 25;
+  }
+  
+  // Program Selection (25%)
+  if (formData.program && formData.university) {
+    progress += 25;
+  }
+  
+  return Math.min(Math.round(progress), 100);
+};
+
+export const validateApplicationStep = (
+  step: number, 
+  formData: any, 
+  t: TFunction
+): { isValid: boolean; errors: string[] } => {
+  const errors: string[] = [];
+  
+  switch (step) {
+    case 1:
+      // Personal Info
+      if (!formData.personalInfo?.firstName) {
+        errors.push(t('validation.firstName', 'الاسم الأول مطلوب'));
+      }
+      
+      if (!formData.personalInfo?.lastName) {
+        errors.push(t('validation.lastName', 'الاسم الأخير مطلوب'));
+      }
+      
+      if (!formData.personalInfo?.email) {
+        errors.push(t('validation.email', 'البريد الإلكتروني مطلوب'));
+      } else if (!/\S+@\S+\.\S+/.test(formData.personalInfo.email)) {
+        errors.push(t('validation.validEmail', 'يرجى إدخال بريد إلكتروني صالح'));
+      }
+      
+      if (!formData.personalInfo?.phone) {
+        errors.push(t('validation.phone', 'رقم الهاتف مطلوب'));
+      }
+      
+      if (!formData.personalInfo?.nationality) {
+        errors.push(t('validation.nationality', 'الجنسية مطلوبة'));
+      }
+      break;
+      
+    case 2:
+      // Documents - just check if any required documents are missing
+      if (formData.documents) {
+        const requiredDocs = formData.documents.filter((doc: any) => doc.required);
+        const missingDocs = requiredDocs.filter((doc: any) => doc.status !== 'uploaded');
+        
+        if (missingDocs.length > 0) {
+          errors.push(
+            t(
+              'validation.requiredDocuments', 
+              'المستندات التالية مطلوبة: {{docNames}}', 
+              { docNames: missingDocs.map((doc: any) => doc.name).join(', ') }
+            )
+          );
+        }
+      }
+      break;
+      
+    case 3:
+      // Academic Info
+      if (!formData.academicInfo?.education) {
+        errors.push(t('validation.education', 'المستوى التعليمي مطلوب'));
+      }
+      
+      if (!formData.academicInfo?.graduationYear) {
+        errors.push(t('validation.graduationYear', 'سنة التخرج مطلوبة'));
+      }
+      
+      if (!formData.academicInfo?.gpa) {
+        errors.push(t('validation.gpa', 'المعدل التراكمي مطلوب'));
+      }
+      break;
+      
+    case 4:
+      // Program Selection
+      if (!formData.program?.name) {
+        errors.push(t('validation.program', 'يرجى اختيار البرنامج'));
+      }
+      
+      if (!formData.university) {
+        errors.push(t('validation.university', 'يرجى اختيار الجامعة'));
+      }
+      break;
+      
+    default:
+      break;
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+// Function to generate a realistic application status
+export const getRandomApplicationStatus = () => {
+  const statuses = ['draft', 'submitted', 'pending', 'documents', 'review', 'conditional', 'approved', 'rejected'];
+  const randomIndex = Math.floor(Math.random() * statuses.length);
+  return statuses[randomIndex];
+};
+
+// Generate mock timeline events for an application
+export const generateMockTimeline = (applicationId: string, status: string) => {
+  const now = new Date();
+  const dayInMillis = 24 * 60 * 60 * 1000;
+  const timeline = [];
+  
+  // Add submission event
+  timeline.push({
+    id: uuidv4(),
+    application_id: applicationId,
+    status: 'submitted',
+    created_at: new Date(now.getTime() - 14 * dayInMillis).toISOString(),
+    note: 'تم استلام طلبك وسيتم مراجعته قريبًا'
+  });
+  
+  // Add document verification event if status is beyond submitted
+  if (['pending', 'documents', 'review', 'conditional', 'approved', 'rejected'].includes(status)) {
+    timeline.push({
+      id: uuidv4(),
+      application_id: applicationId,
+      status: 'documents',
+      created_at: new Date(now.getTime() - 10 * dayInMillis).toISOString(),
+      note: 'تم التحقق من المستندات المقدمة'
+    });
+  }
+  
+  // Add review event if status is beyond documents
+  if (['review', 'conditional', 'approved', 'rejected'].includes(status)) {
+    timeline.push({
+      id: uuidv4(),
+      application_id: applicationId,
+      status: 'review',
+      created_at: new Date(now.getTime() - 7 * dayInMillis).toISOString(),
+      note: 'الطلب قيد المراجعة من قبل لجنة القبول'
+    });
+  }
+  
+  // Add conditional event if status is conditional
+  if (['conditional', 'approved'].includes(status)) {
+    timeline.push({
+      id: uuidv4(),
+      application_id: applicationId,
+      status: 'conditional',
+      created_at: new Date(now.getTime() - 3 * dayInMillis).toISOString(),
+      note: 'تم منحك قبول مشروط. يرجى استكمال المتطلبات المذكورة في الرسالة المرفقة'
+    });
+  }
+  
+  // Add approval event if status is approved
+  if (status === 'approved') {
+    timeline.push({
+      id: uuidv4(),
+      application_id: applicationId,
+      status: 'approved',
+      created_at: new Date(now.getTime() - 1 * dayInMillis).toISOString(),
+      note: 'تهانينا! تم قبول طلبك. سيتم إرسال خطاب القبول الرسمي قريبًا'
+    });
+  }
+  
+  // Add rejection event if status is rejected
+  if (status === 'rejected') {
+    timeline.push({
+      id: uuidv4(),
+      application_id: applicationId,
+      status: 'rejected',
+      created_at: new Date(now.getTime() - 1 * dayInMillis).toISOString(),
+      note: 'نأسف لإبلاغك بأنه تم رفض طلبك. يمكنك التواصل مع فريق القبول للحصول على مزيد من المعلومات'
+    });
+  }
+  
+  return timeline;
 };
