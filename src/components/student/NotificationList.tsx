@@ -1,4 +1,3 @@
-
 import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { format, subDays } from 'date-fns';
@@ -216,7 +215,7 @@ const NotificationList = ({ initialNotifications }: NotificationListProps) => {
   const getCategoryIcon = (category?: string) => {
     switch (category) {
       case 'application': return <FileText className="h-4 w-4 text-unlimited-blue" />;
-      case 'academic': return <Calendar className="h-4 w-4 text-green-500" />;
+      case 'academic': return <CalendarIcon className="h-4 w-4 text-green-500" />;
       case 'financial': return <FileText className="h-4 w-4 text-teal-500" />;
       case 'system': return <Info className="h-4 w-4 text-purple-500" />;
       default: return <Bell className="h-4 w-4 text-unlimited-gray" />;
@@ -406,6 +405,10 @@ const NotificationList = ({ initialNotifications }: NotificationListProps) => {
     }, 1500);
   };
 
+  const handleDateSelect = (date: Date | undefined) => {
+    setDateFilter(date);
+  };
+
   const handleResetFilters = () => {
     setDateFilter(undefined);
     setSelectedCategory('all');
@@ -524,7 +527,7 @@ const NotificationList = ({ initialNotifications }: NotificationListProps) => {
                   <Calendar
                     mode="single"
                     selected={dateFilter}
-                    onSelect={setDateFilter}
+                    onSelect={handleDateSelect}
                     className="p-3 pointer-events-auto"
                   />
                 </PopoverContent>
@@ -552,7 +555,7 @@ const NotificationList = ({ initialNotifications }: NotificationListProps) => {
                     طلبات القبول
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSelectedCategory('academic')}>
-                    <Calendar className="h-4 w-4 ml-2 text-green-500" />
+                    <CalendarIcon className="h-4 w-4 ml-2 text-green-500" />
                     شؤون أكاديمية
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setSelectedCategory('financial')}>
