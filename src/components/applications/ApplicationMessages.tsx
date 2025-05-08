@@ -6,9 +6,11 @@ import { markMessagesAsRead } from '@/services/messageService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AI, MessageSquare, User, X, PaperclipIcon, SendHorizontal, MoreVertical, Calendar, Settings } from 'lucide-react';
+import { MessageSquare, User, X, PaperclipIcon, SendHorizontal, MoreVertical, Calendar, Settings, Info, CheckCircle } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,

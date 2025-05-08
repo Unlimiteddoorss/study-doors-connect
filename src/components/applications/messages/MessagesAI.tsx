@@ -1,8 +1,7 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { AI, Bot, Book, Search, ArrowRight, User, Sparkles, SendHorizontal, RefreshCw } from 'lucide-react';
+import { MessageSquare, Bot, Book, Search, ArrowRight, User, Sparkles, SendHorizontal, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
@@ -181,7 +180,7 @@ const MessagesAI = ({ applicationId }: MessagesAIProps) => {
     <div className="flex flex-col h-full">
       {isLoading ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <AI className="h-12 w-12 text-unlimited-blue mb-4" />
+          <MessageSquare className="h-12 w-12 text-unlimited-blue mb-4" />
           <h3 className="text-lg font-medium mb-2">جاري تحميل المساعد الذكي...</h3>
           <Progress value={65} className="w-[250px] mb-6" />
           <p className="text-unlimited-gray text-center max-w-md">
@@ -203,7 +202,7 @@ const MessagesAI = ({ applicationId }: MessagesAIProps) => {
                   {message.role !== "user" && (
                     <div className="w-8 h-8 rounded-full bg-unlimited-light-blue flex items-center justify-center ml-2">
                       {message.role === "ai" ? (
-                        <AI className="h-4 w-4 text-unlimited-blue" />
+                        <MessageSquare className="h-4 w-4 text-unlimited-blue" />
                       ) : (
                         <Bot className="h-4 w-4 text-unlimited-gray" />
                       )}

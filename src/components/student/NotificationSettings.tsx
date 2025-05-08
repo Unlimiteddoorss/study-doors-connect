@@ -37,18 +37,26 @@ import {
 } from "@/components/ui/select";
 
 interface NotificationSettingsProps {
-  // Define any props here
+  initialSettings?: {
+    emailNotifications: boolean;
+    applicationUpdates: boolean;
+    messageNotifications: boolean;
+    marketingEmails: boolean;
+  };
 }
 
-const NotificationSettings: React.FC<NotificationSettingsProps> = () => {
+const NotificationSettings: React.FC<NotificationSettingsProps> = ({ initialSettings }) => {
   const { t } = useTranslation();
   const { toast } = useToast();
-  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(initialSettings?.emailNotifications ?? true);
   const [pushNotifications, setPushNotifications] = useState(false);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [notificationSound, setNotificationSound] = useState("default");
   const [showSnoozeOptions, setShowSnoozeOptions] = useState(false);
   const [snoozeDuration, setSnoozeDuration] = useState("30");
+  const [applicationUpdates, setApplicationUpdates] = useState(initialSettings?.applicationUpdates ?? true);
+  const [messageNotifications, setMessageNotifications] = useState(initialSettings?.messageNotifications ?? true);
+  const [marketingEmails, setMarketingEmails] = useState(initialSettings?.marketingEmails ?? false);
 
   const handleSaveSettings = () => {
     toast({
@@ -126,6 +134,48 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = () => {
             checked={smsNotifications}
             onCheckedChange={(checked) => setSmsNotifications(checked)}
           />
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="text-sm font-medium mb-3">أنواع الإشعارات</h3>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="app-updates">
+                <FileText className="mr-2 h-4 w-4 inline-block" />
+                تحديثات طلبات القبول
+              </Label>
+              <Switch
+                id="app-updates"
+                checked={applicationUpdates}
+                onCheckedChange={(checked) => setApplicationUpdates(checked)}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="message-notif">
+                <MessageSquare className="mr-2 h-4 w-4 inline-block" />
+                إشعارات الرسائل
+              </Label>
+              <Switch
+                id="message-notif"
+                checked={messageNotifications}
+                onCheckedChange={(checked) => setMessageNotifications(checked)}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="marketing">
+                <Bell className="mr-2 h-4 w-4 inline-block" />
+                رسائل تسويقية وعروض
+              </Label>
+              <Switch
+                id="marketing"
+                checked={marketingEmails}
+                onCheckedChange={(checked) => setMarketingEmails(checked)}
+              />
+            </div>
+          </div>
         </div>
 
         <div>
