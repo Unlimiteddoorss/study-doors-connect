@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Mail, Bell, Calendar, FileText, AlertCircle, Smartphone, Globe, Info, Settings, Save } from 'lucide-react';
+import { Mail, Bell, Calendar, FileText, AlertCircle, Smartphone, Globe, Info, Settings, Save, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
