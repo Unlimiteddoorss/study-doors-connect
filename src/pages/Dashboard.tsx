@@ -1,13 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import DashboardStats from '@/components/dashboard/DashboardStats';
 import { UniversityAnnouncements } from '@/components/dashboard/UniversityAnnouncements';
 import { ProgramQuotas } from '@/components/dashboard/ProgramQuotas';
+import StudentDashboardWelcome from '@/components/dashboard/StudentDashboardWelcome';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye } from 'lucide-react';
+import { FileText, ArrowRight, Bell, MessageSquare, ExternalLink, Eye, CalendarClock, Calendar, Presentation, GraduationCap } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 interface Application {
   id: string | number;
@@ -21,6 +25,7 @@ interface Application {
 const Dashboard = () => {
   const [recentApplications, setRecentApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentDate] = useState(new Date());
 
   // Load applications from localStorage
   useEffect(() => {
@@ -88,77 +93,287 @@ const Dashboard = () => {
     return statusMap[status] || status;
   };
 
+  // Upcoming events
+  const upcomingEvents = [
+    {
+      id: 1,
+      title: 'موعد مقابلة جامعة إسطنبول التقنية',
+      date: '2025-05-15',
+      time: '14:00',
+      type: 'interview',
+      location: 'عبر الإنترنت - زوم'
+    },
+    {
+      id: 2,
+      title: 'آخر موعد لتقديم المستندات',
+      date: '2025-05-20',
+      time: '23:59',
+      type: 'deadline',
+      program: 'بكالوريوس هندسة البرمجيات'
+    },
+    {
+      id: 3,
+      title: 'بدء التسجيل للفصل الدراسي القادم',
+      date: '2025-06-01',
+      time: '10:00',
+      type: 'registration',
+    },
+    {
+      id: 4,
+      title: 'ندوة تعريفية عن الدراسة في تركيا',
+      date: '2025-05-12',
+      time: '18:00',
+      type: 'seminar',
+      location: 'عبر الإنترنت - يوتيوب'
+    }
+  ];
+
+  // Featured programs
+  const featuredPrograms = [
+    {
+      id: 1,
+      title: 'بكالوريوس الطب البشري',
+      university: 'جامعة إسطنبول',
+      location: 'تركيا، إسطنبول',
+      tuition: '15,000',
+      image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070',
+      deadline: '2025-06-30',
+      language: 'إنجليزي',
+      duration: '6 سنوات',
+      matching: 95,
+    },
+    {
+      id: 2,
+      title: 'ماجستير إدارة الأعمال',
+      university: 'جامعة البسفور',
+      location: 'تركيا، إسطنبول',
+      tuition: '8,500',
+      image: 'https://images.unsplash.com/photo-1568992687947-868a62a9f521?q=80&w=2532',
+      deadline: '2025-07-15',
+      language: 'إنجليزي - تركي',
+      duration: '2 سنوات',
+      matching: 88,
+    },
+    {
+      id: 3,
+      title: 'بكالوريوس هندسة الحاسوب',
+      university: 'جامعة أنقرة',
+      location: 'تركيا، أنقرة',
+      tuition: '9,200',
+      image: 'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?q=80&w=2070',
+      deadline: '2025-06-15',
+      language: 'إنجليزي',
+      duration: '4 سنوات',
+      matching: 90,
+    },
+  ];
+
+  const sortEventsByDate = (events: typeof upcomingEvents) => {
+    return [...events].sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time}`);
+      const dateB = new Date(`${b.date}T${b.time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+  };
+
+  const sortedEvents = sortEventsByDate(upcomingEvents);
+
+  const getEventTypeIcon = (type: string) => {
+    switch(type) {
+      case 'interview': return <Presentation className="h-4 w-4" />;
+      case 'deadline': return <CalendarClock className="h-4 w-4" />;
+      case 'registration': return <FileText className="h-4 w-4" />;
+      case 'seminar': return <GraduationCap className="h-4 w-4" />;
+      default: return <Calendar className="h-4 w-4" />;
+    }
+  };
+
+  const getEventTypeBadgeClass = (type: string) => {
+    switch(type) {
+      case 'interview': return 'bg-purple-100 text-purple-800';
+      case 'deadline': return 'bg-red-100 text-red-800';
+      case 'registration': return 'bg-blue-100 text-blue-800';
+      case 'seminar': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (date.getTime() === today.getTime()) {
+      return 'اليوم';
+    } else if (date.getTime() === tomorrow.getTime()) {
+      return 'غداً';
+    } else {
+      // Format as 15 مايو
+      const day = date.getDate();
+      const month = date.toLocaleDateString('ar-EG', { month: 'long' });
+      return `${day} ${month}`;
+    }
+  };
+
+  const isDayWithinWeek = (dateString: string) => {
+    const eventDate = new Date(dateString);
+    const currentDate = new Date();
+    const oneWeekFromNow = new Date();
+    oneWeekFromNow.setDate(currentDate.getDate() + 7);
+    
+    return eventDate <= oneWeekFromNow;
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <StudentDashboardWelcome />
+        
         <DashboardStats />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <UniversityAnnouncements />
-          <ProgramQuotas />
-        </div>
-
-        {/* Recent Applications Section */}
-        <Card className="col-span-full">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
-              <CardTitle className="text-xl">طلباتي الحالية</CardTitle>
-              <CardDescription>آخر الطلبات المقدمة</CardDescription>
-            </div>
-            <Link to="/dashboard/applications">
-              <Button variant="outline" size="sm" className="text-sm">
-                عرض الكل
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center items-center h-40">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Applications */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <div>
+                <CardTitle className="text-xl">طلباتي الحالية</CardTitle>
+                <CardDescription>آخر الطلبات المقدمة</CardDescription>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {recentApplications.length > 0 ? (
-                  recentApplications.map((app) => (
-                    <Link 
-                      key={app.id}
-                      to={`/dashboard/applications`}
-                      className="block"
+              <Link to="/dashboard/applications">
+                <Button variant="outline" size="sm" className="text-sm">
+                  عرض الكل
+                </Button>
+              </Link>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-40">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {recentApplications.length > 0 ? (
+                    recentApplications.map((app) => (
+                      <Link 
+                        key={app.id}
+                        to={`/dashboard/applications`}
+                        className="block"
+                      >
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                          <div className="flex items-start gap-3">
+                            <div className="bg-unlimited-blue/10 p-2 rounded-full">
+                              <FileText className="h-5 w-5 text-unlimited-blue" />
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{app.program}</h4>
+                              <p className="text-sm text-unlimited-gray">{app.university}</p>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(app.status)}`}>
+                              {getStatusLabel(app.status)}
+                            </span>
+                            <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
+                      <Link to="/programs">
+                        <Button>
+                          استكشف البرامج
+                          <ArrowRight className="mr-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Events */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="text-xl">المواعيد القادمة</CardTitle>
+                  <CardDescription>أحداث ومواعيد هامة</CardDescription>
+                </div>
+                <Link to="/dashboard/calendar">
+                  <Button variant="ghost" size="sm" className="text-sm">
+                    <Calendar className="h-4 w-4 ml-1" />
+                    التقويم
+                  </Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 mt-1">
+                {sortedEvents.length > 0 ? (
+                  sortedEvents.map((event) => (
+                    <div 
+                      key={event.id} 
+                      className={cn(
+                        "p-3 rounded-lg border flex items-start gap-3",
+                        isDayWithinWeek(event.date) ? "border-unlimited-blue bg-unlimited-light-blue/10" : "border-gray-200"
+                      )}
                     >
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="flex items-start gap-3">
-                          <div className="bg-unlimited-blue/10 p-2 rounded-full">
-                            <FileText className="h-5 w-5 text-unlimited-blue" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium">{app.program}</h4>
-                            <p className="text-sm text-unlimited-gray">{app.university}</p>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(app.status)}`}>
-                            {getStatusLabel(app.status)}
-                          </span>
-                          <span className="text-xs text-unlimited-gray mt-1">{app.date}</span>
-                        </div>
+                      <div className={cn(
+                        "p-2 rounded-full",
+                        isDayWithinWeek(event.date) ? "bg-unlimited-blue/10" : "bg-gray-50"
+                      )}>
+                        {getEventTypeIcon(event.type)}
                       </div>
-                    </Link>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-sm">{event.title}</h4>
+                        <div className="flex items-center gap-2 mt-1 text-unlimited-gray text-xs">
+                          <Badge variant="outline" className="text-xs">
+                            {formatEventDate(event.date)} - {event.time}
+                          </Badge>
+                          <Badge 
+                            className={cn(
+                              "text-xs font-normal",
+                              getEventTypeBadgeClass(event.type)
+                            )}
+                          >
+                            {event.type === 'interview' ? 'مقابلة' : 
+                             event.type === 'deadline' ? 'موعد نهائي' : 
+                             event.type === 'registration' ? 'تسجيل' : 'ندوة'}
+                          </Badge>
+                        </div>
+                        {event.location && (
+                          <p className="text-xs text-unlimited-gray mt-1">{event.location}</p>
+                        )}
+                      </div>
+                    </div>
                   ))
                 ) : (
                   <div className="text-center py-8">
-                    <p className="text-unlimited-gray mb-3">لم تقدم أي طلبات حتى الآن</p>
-                    <Link to="/programs">
-                      <Button>
-                        استكشف البرامج
-                        <ArrowRight className="mr-2 h-4 w-4" />
-                      </Button>
-                    </Link>
+                    <Calendar className="h-8 w-8 mx-auto text-unlimited-gray opacity-50 mb-2" />
+                    <p className="text-unlimited-gray">لا توجد مواعيد قادمة</p>
                   </div>
                 )}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+            <CardFooter className="pt-0">
+              <Button variant="outline" className="w-full" size="sm">
+                <CalendarClock className="h-4 w-4 ml-1" />
+                إضافة موعد جديد
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <UniversityAnnouncements />
+          <ProgramQuotas />
+        </div>
 
         {/* Profile & Messages Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -168,14 +383,14 @@ const Dashboard = () => {
               <CardDescription>معلوماتك الشخصية</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
-              <div className="flex flex-col items-center justify-center py-4">
-                <div className="w-24 h-24 rounded-full bg-unlimited-blue/10 flex items-center justify-center mb-3">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-unlimited-blue" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
-                <h3 className="font-medium text-lg">محمد أحمد</h3>
+              <div className="flex flex-col items-center justify-center py-2">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src="/assets/avatar.jpg" alt="صورة المستخدم" />
+                  <AvatarFallback className="bg-unlimited-blue/10 text-unlimited-blue text-xl">
+                    م أ
+                  </AvatarFallback>
+                </Avatar>
+                <h3 className="font-medium text-lg mt-3">محمد أحمد</h3>
                 <p className="text-unlimited-gray text-sm">طالب</p>
               </div>
               <div className="flex flex-col gap-1 mt-4">
@@ -190,6 +405,16 @@ const Dashboard = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-unlimited-gray">البلد:</span>
                   <span className="font-medium">تركيا</span>
+                </div>
+
+                <div className="bg-unlimited-light-blue/10 rounded-lg p-3 mt-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-unlimited-blue border-unlimited-blue">60%</Badge>
+                    <span className="text-sm">اكتمال الملف الشخصي</span>
+                  </div>
+                  <Button variant="link" size="sm" className="text-unlimited-blue p-0 h-auto">
+                    أكمل ملفك
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -211,24 +436,37 @@ const Dashboard = () => {
             <CardContent className="pt-4">
               <div className="space-y-4">
                 <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
-                    <MessageSquare className="h-4 w-4 text-unlimited-blue" />
-                  </div>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="/assets/team/advisor1.jpg" alt="صورة المستشار" />
+                    <AvatarFallback className="bg-green-100 text-green-800">أ م</AvatarFallback>
+                  </Avatar>
                   <div>
                     <h4 className="font-medium">استفسار حول برنامج الطب</h4>
                     <p className="text-sm text-unlimited-gray">تم الرد بواسطة: أحمد المستشار</p>
-                    <span className="text-xs text-unlimited-gray mt-1">منذ 3 أيام</span>
+                    <span className="text-xs text-unlimited-gray mt-1 block">منذ 3 أيام</span>
                   </div>
                 </div>
                 
                 <div className="flex gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="bg-unlimited-blue/10 p-2 h-min rounded-full">
-                    <MessageSquare className="h-4 w-4 text-unlimited-blue" />
-                  </div>
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src="/assets/team/advisor2.jpg" alt="صورة المستشار" />
+                    <AvatarFallback className="bg-purple-100 text-purple-800">س م</AvatarFallback>
+                  </Avatar>
                   <div>
                     <h4 className="font-medium">تأكيد موعد المقابلة</h4>
                     <p className="text-sm text-unlimited-gray">تم الرد بواسطة: سارة المستشارة</p>
-                    <span className="text-xs text-unlimited-gray mt-1">منذ أسبوع</span>
+                    <span className="text-xs text-unlimited-gray mt-1 block">منذ أسبوع</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-center p-3 bg-unlimited-light-blue/10 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-unlimited-blue mb-1">بحاجة لمساعدة؟</p>
+                    <p className="text-sm text-unlimited-gray mb-2">فريق الدعم متاح للإجابة عن استفساراتك</p>
+                    <Button size="sm">
+                      <MessageSquare className="h-4 w-4 ml-1" />
+                      بدء محادثة جديدة
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -259,22 +497,39 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((_, idx) => (
-                <Link key={idx} to={`/programs/${idx + 1}`}>
+              {featuredPrograms.map((program) => (
+                <Link key={program.id} to={`/programs/${program.id}`}>
                   <div className="border rounded-lg overflow-hidden hover:shadow-md transition-all">
-                    <div className="h-40 bg-gray-200">
+                    <div className="h-40 bg-gray-200 relative">
                       <img 
-                        src={`https://images.unsplash.com/photo-152305085405${idx}-8df90110c9f1?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3`}
-                        alt="Program cover"
+                        src={program.image}
+                        alt={`صورة برنامج ${program.title}`}
                         className="w-full h-full object-cover"
                       />
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-unlimited-blue">
+                          تناسب {program.matching}%
+                        </Badge>
+                      </div>
                     </div>
                     <div className="p-4">
-                      <p className="text-unlimited-blue text-sm font-medium">جامعة أوزيجين</p>
-                      <h4 className="font-bold my-1">بكالوريوس إدارة الأعمال</h4>
-                      <div className="flex items-center justify-between">
-                        <span className="text-unlimited-gray text-sm">تركيا، إسطنبول</span>
-                        <span className="text-green-600 text-sm font-medium">$12,350/سنة</span>
+                      <p className="text-unlimited-blue text-sm font-medium">{program.university}</p>
+                      <h4 className="font-bold my-1">{program.title}</h4>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-unlimited-gray text-sm">{program.location}</span>
+                        <span className="text-green-600 text-sm font-medium">${program.tuition}/سنة</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Badge variant="outline" className="text-xs">
+                          {program.language}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {program.duration}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs text-orange-600 border-orange-200 bg-orange-50">
+                          <CalendarClock className="h-3 w-3 ml-1" />
+                          ينتهي: {program.deadline.split('-').reverse().join('/')}
+                        </Badge>
                       </div>
                     </div>
                   </div>
