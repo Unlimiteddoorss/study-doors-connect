@@ -1,22 +1,44 @@
 
 import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { Paperclip, Download, Check, CheckCheck, MoreVertical, Copy, Reply, Trash2, Forward } from 'lucide-react';
+import { 
+  MoreVertical, 
+  Download, 
+  Copy, 
+  Reply, 
+  Flag, 
+  Trash2,
+  Share2,
+  ClipboardCopy,
+  PaperclipIcon,
+  CheckCircle,
+  FileText,
+  Image as ImageIcon
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Attachment {
   name: string;
@@ -28,179 +50,302 @@ interface Attachment {
 interface MessageItemProps {
   message: {
     id: string;
-    content: string;
-    created_at: string;
+    application_id: string;
+    sender_id: string;
     sender_role: string;
+    content: string;
     attachments?: Attachment[];
+    created_at: string;
+    is_read: boolean;
   };
   isCurrentUser: boolean;
 }
 
 const MessageItem = ({ message, isCurrentUser }: MessageItemProps) => {
   const { toast } = useToast();
-  const [showImagePreview, setShowImagePreview] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string>('');
+  const [showAttachmentPreview, setShowAttachmentPreview] = useState<Attachment | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
+  
+  const senderName = isCurrentUser ? 'أنت' : 
+    message.sender_role === 'advisor' ? 'المستشار التعليمي' : 
+    message.sender_role === 'university' ? 'ممثل الجامعة' : 'مستخدم';
+  
+  const avatarFallback = isCurrentUser ? 'أ' : 
+    message.sender_role === 'advisor' ? 'م' : 'ج';
+    
+  const avatarColor = isCurrentUser ? 'bg-unlimited-blue text-white' : 
+    message.sender_role === 'advisor' ? 'bg-green-500 text-white' : 
+    'bg-purple-500 text-white';
+  
+  const avatarImage = isCurrentUser ? '/assets/user-avatar.png' : 
+    message.sender_role === 'advisor' ? '/assets/advisor-avatar.png' : 
+    '/assets/university-avatar.png';
 
-  // Format date
-  const formatMessageDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return format(date, 'dd MMM yyyy, HH:mm', { locale: ar });
-    } catch (error) {
-      return dateString;
-    }
-  };
-
-  // Get sender name based on role
-  const getSenderName = (role: string) => {
-    switch (role) {
-      case 'student':
-        return 'أنت';
-      case 'admin':
-        return 'مدير النظام';
-      case 'advisor':
-        return 'المستشار التعليمي';
-      case 'university':
-        return 'ممثل الجامعة';
-      default:
-        return role;
-    }
-  };
-
-  // Format file size
-  const formatFileSize = (sizeInBytes: number) => {
-    if (sizeInBytes < 1024) {
-      return `${sizeInBytes} B`;
-    } else if (sizeInBytes < 1024 * 1024) {
-      return `${Math.round(sizeInBytes / 1024 * 10) / 10} KB`;
+  const getFileIcon = (type: string) => {
+    if (type.startsWith('image/')) {
+      return <ImageIcon className="h-4 w-4 text-unlimited-blue" />;
+    } else if (type.includes('pdf')) {
+      return <FileText className="h-4 w-4 text-red-500" />;
     } else {
-      return `${Math.round(sizeInBytes / (1024 * 1024) * 10) / 10} MB`;
+      return <PaperclipIcon className="h-4 w-4 text-unlimited-gray" />;
     }
   };
 
-  // Preview image attachment
-  const handleImagePreview = (attachment: Attachment) => {
-    // In a real app, this would use the actual URL
-    const previewUrl = attachment.url || `https://placekitten.com/800/600?image=${Math.floor(Math.random() * 16)}`;
-    setPreviewImage(previewUrl);
-    setShowImagePreview(true);
+  const formatFileSize = (size: number) => {
+    if (size < 1024) {
+      return `${size} B`;
+    } else if (size < 1024 * 1024) {
+      return `${(size / 1024).toFixed(1)} KB`;
+    } else {
+      return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    }
   };
 
-  // Download attachment
-  const handleDownload = (attachment: Attachment) => {
+  const handleCopyMessage = () => {
+    navigator.clipboard.writeText(message.content);
+    toast({
+      title: "تم النسخ",
+      description: "تم نسخ محتوى الرسالة"
+    });
+  };
+
+  const handleTranslateMessage = () => {
+    setIsTranslating(true);
+    
+    // Simulate translation delay
+    setTimeout(() => {
+      setIsTranslating(false);
+      setShowTranslation(true);
+      toast({
+        title: "تمت الترجمة",
+        description: "تمت ترجمة الرسالة"
+      });
+    }, 1000);
+  };
+
+  const handleDownloadAttachment = (attachment: Attachment) => {
     toast({
       title: "جاري التحميل",
-      description: `جاري تحميل ${attachment.name}...`,
+      description: `جاري تحميل ${attachment.name}`
     });
     
+    // In a real app, this would trigger a download
     setTimeout(() => {
       toast({
-        title: "تم التحميل",
-        description: `تم تحميل ${attachment.name} بنجاح`,
+        title: "اكتمل التحميل",
+        description: `تم تحميل ${attachment.name} بنجاح`
       });
     }, 1500);
   };
 
-  // Copy message content
-  const copyMessageContent = () => {
-    navigator.clipboard.writeText(message.content);
+  const handleReportMessage = () => {
     toast({
-      title: "تم النسخ",
-      description: "تم نسخ محتوى الرسالة إلى الحافظة",
+      title: "تم الإبلاغ",
+      description: "شكراً لإبلاغك. سيتم مراجعة الرسالة من قبل فريقنا."
     });
   };
 
-  // Reply to message
-  const replyToMessage = () => {
-    toast({
-      title: "الرد على الرسالة",
-      description: "تم تحديد هذه الرسالة للرد عليها",
-    });
-  };
-
-  // Forward message
-  const forwardMessage = () => {
-    toast({
-      title: "إعادة توجيه الرسالة",
-      description: "تمت إعادة توجيه الرسالة",
-    });
-  };
-
-  // Delete message
-  const deleteMessage = () => {
-    toast({
-      title: "حذف الرسالة",
-      description: "تم حذف الرسالة",
-      variant: "destructive"
-    });
-  };
-
-  // Check if attachment is an image
-  const isImageAttachment = (attachment: Attachment) => {
-    return attachment.type.startsWith('image/');
-  };
-
-  // Get avatar for message
-  const getAvatar = () => {
-    switch (message.sender_role) {
-      case 'student':
-        return (
-          <div className="bg-unlimited-blue text-white w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm">
-            ط
-          </div>
-        );
-      case 'advisor':
-        return (
-          <div className="bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm">
-            م
-          </div>
-        );
-      case 'university':
-        return (
-          <div className="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm">
-            ج
-          </div>
-        );
-      default:
-        return (
-          <div className="bg-unlimited-gray text-white w-8 h-8 rounded-full flex items-center justify-center font-medium text-sm">
-            ؟
-          </div>
-        );
+  const getAttachmentThumbnail = (attachment: Attachment) => {
+    if (attachment.type.startsWith('image/')) {
+      // In a real app, this would be the actual image URL
+      return "/assets/image-placeholder.jpg";
     }
+    return null;
   };
+
+  // Create a simulated translation of the message (for demo purposes)
+  const translatedContent = "This is a simulated translation of the message content. In a real application, this would be an actual translation from Arabic to English using a translation service.";
 
   return (
-    <div className={`flex gap-2 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
       {!isCurrentUser && (
-        <div className="flex-shrink-0 pt-1">
-          {getAvatar()}
-        </div>
+        <Avatar className="h-8 w-8 mr-2">
+          <AvatarImage src={avatarImage} alt={senderName} />
+          <AvatarFallback className={avatarColor}>{avatarFallback}</AvatarFallback>
+        </Avatar>
       )}
       
-      <div className={`group max-w-[85%] md:max-w-[70%] ${isCurrentUser ? 'bg-unlimited-blue text-white' : 'bg-gray-100 text-gray-800'} rounded-lg px-4 py-3 relative`}>
-        <div className="absolute bottom-1 left-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className={`max-w-[80%] flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+        <div className={`px-4 py-2.5 rounded-lg ${
+          isCurrentUser ? 'bg-unlimited-blue text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'
+        }`}>
+          <div className="flex justify-between items-start mb-1">
+            <span className={`text-xs ${isCurrentUser ? 'text-unlimited-light-blue' : 'text-unlimited-gray'}`}>
+              {senderName}
+            </span>
+            <div className="flex items-center">
+              {message.sender_role === 'university' && (
+                <Badge variant="outline" className="ml-1 text-[10px] h-4 bg-purple-50 text-purple-700 border-purple-200">
+                  رسمي
+                </Badge>
+              )}
+            </div>
+          </div>
+          
+          <p className="mb-1 whitespace-pre-wrap">{message.content}</p>
+          
+          {showTranslation && (
+            <div className="mt-2 p-2 border-t border-white/20 text-sm">
+              <div className="flex items-center mb-1">
+                <Badge variant="outline" className={isCurrentUser ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"}>
+                  الترجمة (EN)
+                </Badge>
+              </div>
+              <p className="italic text-sm">{translatedContent}</p>
+            </div>
+          )}
+          
+          {message.attachments && message.attachments.length > 0 && (
+            <div className="mt-3 space-y-2">
+              {message.attachments.map((attachment, index) => (
+                <div 
+                  key={index}
+                  className={`flex items-center p-2 rounded ${
+                    isCurrentUser ? 'bg-unlimited-dark-blue/30' : 'bg-gray-200'
+                  }`}
+                >
+                  {getFileIcon(attachment.type)}
+                  <div className="ml-2 flex-1 min-w-0">
+                    <div className="truncate text-sm">{attachment.name}</div>
+                    <div className="text-xs opacity-70">{formatFileSize(attachment.size)}</div>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => setShowAttachmentPreview(attachment)}
+                          >
+                            <FileText className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>معاينة</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => handleDownloadAttachment(attachment)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>تحميل</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <div className={`flex justify-between items-center mt-1.5 text-xs ${
+            isCurrentUser ? 'text-unlimited-light-blue' : 'text-unlimited-gray'
+          }`}>
+            <span>
+              {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+            </span>
+            {isCurrentUser && (
+              <div className="flex items-center">
+                <CheckCircle className={`h-3 w-3 ml-1 ${message.is_read ? 'text-green-400' : 'text-unlimited-light-blue/50'}`} />
+                {message.is_read ? 'تمت القراءة' : 'تم الإرسال'}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex mt-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`h-7 px-2 text-xs ${isCurrentUser ? 'text-unlimited-light-blue' : 'text-unlimited-gray'}`}
+            onClick={handleCopyMessage}
+          >
+            <Copy className="h-3 w-3 mr-1" />
+            نسخ
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className={`h-7 px-2 text-xs ${isCurrentUser ? 'text-unlimited-light-blue' : 'text-unlimited-gray'}`}
+            onClick={handleTranslateMessage}
+            disabled={isTranslating || showTranslation}
+          >
+            {isTranslating ? (
+              <>
+                <span className="loading loading-spinner loading-xs mr-1"></span>
+                جاري الترجمة...
+              </>
+            ) : showTranslation ? (
+              <>
+                <ClipboardCopy className="h-3 w-3 mr-1" />
+                تمت الترجمة
+              </>
+            ) : (
+              <>
+                <ClipboardCopy className="h-3 w-3 mr-1" />
+                ترجمة
+              </>
+            )}
+          </Button>
+          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className={`p-1 rounded-full ${isCurrentUser ? 'text-unlimited-light-blue hover:bg-unlimited-dark-blue' : 'text-unlimited-gray hover:bg-gray-200'}`}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className={`h-7 px-2 text-xs ${isCurrentUser ? 'text-unlimited-light-blue' : 'text-unlimited-gray'}`}
+              >
                 <MoreVertical className="h-3 w-3" />
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align={isCurrentUser ? "end" : "start"}>
-              <DropdownMenuItem onClick={copyMessageContent}>
-                <Copy className="h-4 w-4 ml-2" />
-                نسخ النص
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={replyToMessage}>
+              <DropdownMenuItem onClick={() => {
+                toast({
+                  title: "جاري الرد",
+                  description: "تم فتح محرر الرد"
+                });
+              }}>
                 <Reply className="h-4 w-4 ml-2" />
                 رد
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={forwardMessage}>
-                <Forward className="h-4 w-4 ml-2" />
-                إعادة توجيه
+              <DropdownMenuItem onClick={() => {
+                toast({
+                  title: "تمت المشاركة",
+                  description: "تم نسخ رابط الرسالة"
+                });
+              }}>
+                <Share2 className="h-4 w-4 ml-2" />
+                مشاركة
               </DropdownMenuItem>
+              {!isCurrentUser && (
+                <DropdownMenuItem onClick={handleReportMessage}>
+                  <Flag className="h-4 w-4 ml-2" />
+                  إبلاغ
+                </DropdownMenuItem>
+              )}
               {isCurrentUser && (
-                <DropdownMenuItem onClick={deleteMessage} className="text-red-500 hover:text-red-600">
+                <DropdownMenuItem onClick={() => {
+                  toast({
+                    title: "تم الحذف",
+                    description: "تم حذف الرسالة"
+                  });
+                }}>
                   <Trash2 className="h-4 w-4 ml-2" />
                   حذف
                 </DropdownMenuItem>
@@ -208,97 +353,70 @@ const MessageItem = ({ message, isCurrentUser }: MessageItemProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        
-        {!isCurrentUser && (
-          <div className="text-xs font-medium mb-1">{getSenderName(message.sender_role)}</div>
-        )}
-        
-        <div className="text-sm whitespace-pre-wrap">{message.content}</div>
-        
-        {message.attachments && message.attachments.length > 0 && (
-          <div className="mt-2 space-y-1">
-            {message.attachments.map((attachment, index) => (
-              <div 
-                key={index} 
-                className={`flex items-center p-2 rounded ${isCurrentUser ? 'bg-unlimited-dark-blue/30' : 'bg-gray-200'} text-xs`}
-              >
-                <div className="flex-1 overflow-hidden">
-                  <div className="flex items-center">
-                    <Paperclip className="h-3 w-3 ml-2 flex-shrink-0" />
-                    <div className="truncate flex-1">{attachment.name}</div>
-                  </div>
-                  <div className="flex justify-between items-center mt-1">
-                    <div className="text-xs opacity-80">{formatFileSize(attachment.size)}</div>
-                    <div className="flex gap-1">
-                      {isImageAttachment(attachment) && (
-                        <button 
-                          onClick={() => handleImagePreview(attachment)}
-                          className={`p-1 rounded-full ${isCurrentUser ? 'hover:bg-unlimited-dark-blue' : 'hover:bg-gray-300'} transition-colors`}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8v8a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4V8a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4z" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <polyline points="21 15 16 10 5 21" />
-                          </svg>
-                        </button>
-                      )}
-                      
-                      <button 
-                        onClick={() => handleDownload(attachment)}
-                        className={`p-1 rounded-full ${isCurrentUser ? 'hover:bg-unlimited-dark-blue' : 'hover:bg-gray-300'} transition-colors`}
-                      >
-                        <Download className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-        
-        <div className={`text-xs mt-2 ${isCurrentUser ? 'text-unlimited-light-blue' : 'text-gray-500'} flex justify-between items-center`}>
-          <span>{formatMessageDate(message.created_at)}</span>
-          {isCurrentUser && (
-            <span className="flex items-center">
-              <CheckCheck className="h-3 w-3 text-unlimited-light-blue" />
-            </span>
-          )}
-        </div>
       </div>
       
       {isCurrentUser && (
-        <div className="flex-shrink-0 pt-1">
-          {getAvatar()}
-        </div>
+        <Avatar className="h-8 w-8 ml-2">
+          <AvatarImage src={avatarImage} alt={senderName} />
+          <AvatarFallback className={avatarColor}>{avatarFallback}</AvatarFallback>
+        </Avatar>
       )}
       
-      <Dialog open={showImagePreview} onOpenChange={setShowImagePreview}>
+      {/* Attachment Preview Dialog */}
+      <Dialog open={!!showAttachmentPreview} onOpenChange={() => setShowAttachmentPreview(null)}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>معاينة الصورة</DialogTitle>
+            <DialogTitle className="flex items-center">
+              {showAttachmentPreview && getFileIcon(showAttachmentPreview.type)}
+              <span className="mr-2">{showAttachmentPreview?.name}</span>
+            </DialogTitle>
           </DialogHeader>
-          <div className="flex justify-center">
-            <img src={previewImage} alt="معاينة" className="max-h-[500px] w-auto object-contain rounded-md" />
+          
+          <div className="flex flex-col items-center justify-center p-6 border rounded-lg">
+            {showAttachmentPreview?.type.startsWith('image/') ? (
+              <div className="relative w-full h-[400px] bg-gray-100 rounded flex items-center justify-center">
+                <img 
+                  src={getAttachmentThumbnail(showAttachmentPreview) || ''} 
+                  alt="معاينة المرفق" 
+                  className="max-h-full max-w-full object-contain" 
+                />
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <FileText className="h-20 w-20 mx-auto mb-4 text-unlimited-gray opacity-50" />
+                <p className="text-unlimited-gray">المعاينة غير متاحة لهذا النوع من الملفات</p>
+                <Button 
+                  className="mt-4" 
+                  onClick={() => handleDownloadAttachment(showAttachmentPreview)}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  تحميل الملف
+                </Button>
+              </div>
+            )}
+            
+            <div className="mt-4 w-full text-sm">
+              <div className="flex justify-between border-b pb-2 mb-2">
+                <span className="text-unlimited-gray">نوع الملف:</span>
+                <span>{showAttachmentPreview?.type}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-unlimited-gray">حجم الملف:</span>
+                <span>{showAttachmentPreview ? formatFileSize(showAttachmentPreview.size) : ''}</span>
+              </div>
+            </div>
           </div>
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={() => setShowImagePreview(false)}>إغلاق</Button>
-            <Button className="mr-2" onClick={() => {
-              toast({
-                title: "جاري التحميل",
-                description: "جاري تحميل الصورة...",
-              });
-              
-              setTimeout(() => {
-                toast({
-                  title: "تم التحميل",
-                  description: "تم تحميل الصورة بنجاح",
-                });
-              }, 1500);
-            }}>
-              <Download className="h-4 w-4 ml-1" />
-              تحميل
+          
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowAttachmentPreview(null)}>
+              إغلاق
             </Button>
+            {showAttachmentPreview && (
+              <Button onClick={() => handleDownloadAttachment(showAttachmentPreview)}>
+                <Download className="h-4 w-4 ml-1" />
+                تحميل
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

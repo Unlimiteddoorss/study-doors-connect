@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Mail, FileText, Calendar, Info, AlertCircle, Bell, X, Star, Bookmark, MessageSquare, Download, Trash2, MoreVertical, Filter, BarChart2, Clock, Calendar as CalendarIcon, ChevronDown, ChevronUp, Share2, Eye } from 'lucide-react';
+import { Check, Mail, FileText, Info, AlertCircle, Bell, X, Star, Bookmark, MessageSquare, Download, Trash2, MoreVertical, Filter, BarChart2, Clock, Calendar as CalendarIcon, ChevronDown, ChevronUp, Share2, Eye } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
