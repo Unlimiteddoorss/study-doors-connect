@@ -16,6 +16,15 @@ interface Message {
     type: string;
     url?: string;
   }[];
+  voice_message?: {
+    duration: number;
+    url: string;
+  };
+  reactions?: {
+    emoji: string;
+    user_id: string;
+    username: string;
+  }[];
   created_at: string;
   is_read: boolean;
 }
@@ -28,7 +37,10 @@ const mockMessages: Message[] = [
     sender_role: 'advisor',
     content: 'مرحباً، نحن نراجع طلبك حاليًا. هل يمكنك تقديم النسخة الأصلية من جواز سفرك في أقرب وقت ممكن؟',
     created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    is_read: true
+    is_read: true,
+    reactions: [
+      { emoji: '👍', user_id: 'student-1', username: 'أنت' }
+    ]
   },
   {
     id: uuidv4(),
@@ -46,7 +58,10 @@ const mockMessages: Message[] = [
     sender_role: 'advisor',
     content: 'شكرًا لك. أيضًا، نحتاج إلى نسخة مصدقة من شهادة الثانوية العامة.',
     created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    is_read: true
+    is_read: true,
+    reactions: [
+      { emoji: '✅', user_id: 'student-1', username: 'أنت' }
+    ]
   },
   {
     id: uuidv4(),
@@ -102,9 +117,13 @@ const mockMessages: Message[] = [
     application_id: 'app-123',
     sender_id: 'advisor-1',
     sender_role: 'advisor',
-    content: 'أهلاً! هل استطعت الاطلاع على المستندات المطلوبة؟ يمكنني مساعدتك في تجهيز خطابات التوصية إذا لزم الأمر.',
+    content: '',
     created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-    is_read: false
+    is_read: false,
+    voice_message: {
+      duration: 28,
+      url: '#'
+    }
   },
   {
     id: uuidv4(),
@@ -133,7 +152,7 @@ export const getMessages = async (applicationId: string): Promise<Message[]> => 
   return mockMessages.filter(message => message.application_id === applicationId);
 };
 
-export const sendMessage = async (applicationId: string, senderId: string, content: string, attachments?: any[]): Promise<Message> => {
+export const sendMessage = async (applicationId: string, senderId: string, content: string, attachments?: any[], voiceMessage?: {duration: number, url: string}): Promise<Message> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
@@ -145,8 +164,10 @@ export const sendMessage = async (applicationId: string, senderId: string, conte
     sender_role: 'student', // Assuming sender is student
     content: content,
     attachments: attachments,
+    voice_message: voiceMessage,
     created_at: new Date().toISOString(),
-    is_read: true
+    is_read: true,
+    reactions: []
   };
   
   // Add to mock database (in a real app, this would be a POST request to an API)
@@ -177,3 +198,66 @@ export const getUnreadMessageCount = async (userId: string): Promise<number> => 
   // Count unread messages not sent by the user
   return mockMessages.filter(message => !message.is_read && message.sender_id !== userId).length;
 };
+
+export const addReaction = async (messageId: string, userId: string, emoji: string, username: string): Promise<boolean> => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const messageIndex = mockMessages.findIndex(msg => msg.id === messageId);
+  
+  if (messageIndex === -1) {
+    return false;
+  }
+  
+  // Initialize reactions array if it doesn't exist
+  if (!mockMessages[messageIndex].reactions) {
+    mockMessages[messageIndex].reactions = [];
+  }
+  
+  // Check if user has already reacted with this emoji
+  const existingReactionIndex = mockMessages[messageIndex].reactions?.findIndex(
+    reaction => reaction.user_id === userId && reaction.emoji === emoji
+  );
+  
+  if (existingReactionIndex !== -1 && existingReactionIndex !== undefined) {
+    // Remove reaction if it already exists
+    mockMessages[messageIndex].reactions?.splice(existingReactionIndex, 1);
+  } else {
+    // Add new reaction
+    mockMessages[messageIndex].reactions?.push({
+      emoji,
+      user_id: userId,
+      username
+    });
+  }
+  
+  return true;
+};
+
+export const removeReaction = async (messageId: string, userId: string, emoji: string): Promise<boolean> => {
+  // Simulate API call delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const messageIndex = mockMessages.findIndex(msg => msg.id === messageId);
+  
+  if (messageIndex === -1 || !mockMessages[messageIndex].reactions) {
+    return false;
+  }
+  
+  const reactionIndex = mockMessages[messageIndex].reactions!.findIndex(
+    reaction => reaction.user_id === userId && reaction.emoji === emoji
+  );
+  
+  if (reactionIndex === -1) {
+    return false;
+  }
+  
+  mockMessages[messageIndex].reactions!.splice(reactionIndex, 1);
+  return true;
+};
+
+// Function to get commonly used emojis for reactions
+export const getCommonReactions = (): string[] => {
+  return ['👍', '👏', '❤️', '🎉', '😊', '✅', '🔥', '🙏'];
+};
+
