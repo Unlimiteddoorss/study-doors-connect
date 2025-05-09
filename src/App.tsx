@@ -38,6 +38,7 @@ import StudentNotifications from "./pages/dashboard/StudentNotifications";
 import LoginActivity from "./pages/dashboard/LoginActivity";
 import AccountSettings from "./pages/dashboard/AccountSettings";
 import UserMessages from "./pages/messaging/UserMessages";
+import StudentMessages from "./pages/students/StudentMessages"; // إضافة صفحة الرسائل الجديدة
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
@@ -186,9 +187,15 @@ function App() {
             <AccountSettings />
           </ProtectedRoute>
         } />
+        {/* إضافة مسارات الرسائل الجديدة */}
         <Route path="/messages" element={
           <ProtectedRoute allowedRoles={['student', 'agent']}>
             <UserMessages />
+          </ProtectedRoute>
+        } />
+        <Route path="/student/messages" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentMessages />
           </ProtectedRoute>
         } />
 

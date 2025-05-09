@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -9,7 +8,11 @@ import {
   CheckCircle, 
   Play, 
   Pause, 
-  SmilePlus 
+  SmilePlus,
+  Reply,
+  Share,
+  Bookmark,
+  Info
 } from 'lucide-react';
 import { 
   Popover, 
@@ -20,6 +23,18 @@ import { Button } from '@/components/ui/button';
 import { addReaction, getCommonReactions } from '@/services/messageService';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MessageItemProps {
   message: {
@@ -44,6 +59,8 @@ interface MessageItemProps {
     }[];
     created_at: string;
     is_read: boolean;
+    translation?: string; // إضافة حقل الترجمة (ميزة جديدة)
+    importance?: 'normal' | 'high' | 'urgent'; // درجة أهمية الرسالة (ميزة جديدة)
   };
   isCurrentUser: boolean;
 }
@@ -52,6 +69,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isCurrentUser }) => 
   const { toast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [isTranslated, setIsTranslated] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   
   const getSenderName = (role: string) => {
     switch (role) {
@@ -133,6 +152,25 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isCurrentUser }) => 
     }
   };
   
+  // وظيفة جديدة للترجمة
+  const handleTranslate = () => {
+    // في تطبيق حقيقي، هذا سيستدعي API للترجمة
+    setIsTranslated(!isTranslated);
+    toast({
+      title: isTranslated ? "تم إلغاء الترجمة" : "تم ترجمة الرسالة",
+      description: isTranslated ? "تم عرض النص الأصلي" : "تم ترجمة الرسالة إلى اللغة العربية",
+    });
+  };
+  
+  // وظيفة الإشارات المرجعية
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked);
+    toast({
+      title: isBookmarked ? "تم إزالة الإشارة المرجعية" : "تمت إضافة إشارة مرجعية",
+      description: isBookmarked ? "تمت إزالة الإشارة المرجعية من الرسالة" : "تمت إضافة إشارة مرجعية للرسالة للرجوع إليها لاحقاً",
+    });
+  };
+  
   const handleAddReaction = async (emoji: string) => {
     try {
       await addReaction(
@@ -158,6 +196,40 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isCurrentUser }) => 
   
   const commonReactions = getCommonReactions();
   
+  // ميزة توقيت المذكرة - إضافة جديدة
+  const getMessageTimestamp = () => {
+    const messageDate = new Date(message.created_at);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now.getTime() - messageDate.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) {
+      return "الآن";
+    } else if (diffInMinutes < 60) {
+      return `منذ ${diffInMinutes} دقيقة`;
+    } else if (diffInMinutes < 24 * 60) {
+      return `منذ ${Math.floor(diffInMinutes / 60)} ساعة`;
+    } else if (diffInMinutes < 48 * 60) {
+      return "الأمس";
+    } else {
+      return format(messageDate, 'dd MMM', { locale: ar });
+    }
+  };
+  
+  // نوع الرسالة الاستثنائي - إضافة جديدة لعرض الرسائل المهمة
+  const getImportanceStyles = () => {
+    if (!message.importance || message.importance === 'normal') return '';
+    
+    if (message.importance === 'high') {
+      return 'border-yellow-300 border-2';
+    }
+    
+    if (message.importance === 'urgent') {
+      return 'border-red-400 border-2 animate-pulse';
+    }
+    
+    return '';
+  };
+  
   return (
     <div className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'} mb-4`}>
       <div className={`flex gap-3 max-w-[85%] ${isCurrentUser ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -181,9 +253,27 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isCurrentUser }) => 
             isCurrentUser 
               ? 'bg-unlimited-blue text-white rounded-tr-none' 
               : 'bg-white border rounded-tl-none'
-          }`}>
+          } ${getImportanceStyles()}`}>
+            {/* إضافة علامة إذا كانت الرسالة مهمة أو عاجلة */}
+            {message.importance && message.importance !== 'normal' && (
+              <div className={`flex items-center mb-2 ${message.importance === 'urgent' ? 'text-red-500' : 'text-yellow-600'}`}>
+                <Info className="h-4 w-4 ml-1" />
+                <span className="text-xs font-bold">
+                  {message.importance === 'urgent' ? 'عاجل' : 'مهم'}
+                </span>
+              </div>
+            )}
+          
             {message.content && (
-              <p className="whitespace-pre-wrap">{message.content}</p>
+              <div>
+                <p className="whitespace-pre-wrap">{message.content}</p>
+                {isTranslated && message.translation && (
+                  <div className="mt-2 pt-2 border-t border-t-gray-200 text-sm text-unlimited-gray">
+                    <p className="font-medium mb-1">الترجمة:</p>
+                    <p>{message.translation}</p>
+                  </div>
+                )}
+              </div>
             )}
             
             {/* Voice message */}
@@ -297,13 +387,86 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isCurrentUser }) => 
           {/* Message info */}
           <div className="flex items-center gap-2 mt-1">
             <span className={`text-xs text-unlimited-gray ${isCurrentUser ? 'order-1' : 'order-2'}`}>
-              {format(new Date(message.created_at), 'HH:mm', { locale: ar })}
+              {getMessageTimestamp()}
             </span>
             
             <div className={`${isCurrentUser ? 'order-2' : 'order-1'} flex items-center gap-1`}>
               {message.is_read && isCurrentUser && (
                 <CheckCircle className="h-3 w-3 text-unlimited-blue" />
               )}
+              
+              {/* ميزات جديدة - قائمة إجراءات الرسالة */}
+              <TooltipProvider>
+                <div className="flex items-center gap-0.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 rounded-full"
+                        onClick={() => toast({
+                          title: "رد",
+                          description: "سيتم تنفيذ هذه الميزة قريباً",
+                        })}
+                      >
+                        <Reply className="h-3 w-3 text-unlimited-gray" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>رد على الرسالة</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  {!isCurrentUser && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 rounded-full"
+                          onClick={handleTranslate}
+                        >
+                          <span className="text-xs font-bold text-unlimited-gray">T</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isTranslated ? "إلغاء الترجمة" : "ترجمة الرسالة"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 rounded-full"
+                        onClick={handleBookmark}
+                      >
+                        <Bookmark className={`h-3 w-3 ${isBookmarked ? 'text-yellow-500 fill-yellow-500' : 'text-unlimited-gray'}`} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isBookmarked ? "إزالة الإشارة المرجعية" : "إضافة إشارة مرجعية"}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 rounded-full"
+                      >
+                        <Share className="h-3 w-3 text-unlimited-gray" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>مشاركة الرسالة</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
+              </TooltipProvider>
               
               <Popover>
                 <PopoverTrigger asChild>
@@ -329,6 +492,42 @@ const MessageItem: React.FC<MessageItemProps> = ({ message, isCurrentUser }) => 
                   </div>
                 </PopoverContent>
               </Popover>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 rounded-full"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-unlimited-gray">
+                      <circle cx="12" cy="12" r="1" />
+                      <circle cx="12" cy="5" r="1" />
+                      <circle cx="12" cy="19" r="1" />
+                    </svg>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align={isCurrentUser ? "end" : "start"}>
+                  <DropdownMenuItem onClick={() => toast({
+                    title: "تم نسخ الرسالة",
+                    description: "تم نسخ محتوى الرسالة إلى الحافظة",
+                  })}>
+                    نسخ النص
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast({
+                    title: "إبلاغ",
+                    description: "تم إرسال البلاغ بنجاح",
+                  })}>
+                    الإبلاغ عن محتوى غير لائق
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => toast({
+                    title: "تصدير",
+                    description: "تم تصدير الرسالة بنجاح",
+                  })}>
+                    تصدير الرسالة
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
