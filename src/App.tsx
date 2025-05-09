@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -38,7 +37,7 @@ import StudentNotifications from "./pages/dashboard/StudentNotifications";
 import LoginActivity from "./pages/dashboard/LoginActivity";
 import AccountSettings from "./pages/dashboard/AccountSettings";
 import UserMessages from "./pages/messaging/UserMessages";
-import StudentMessages from "./pages/students/StudentMessages"; // إضافة صفحة الرسائل الجديدة
+import StudentMessages from "./pages/students/StudentMessages";
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
@@ -182,9 +181,14 @@ function App() {
             <LoginActivity />
           </ProtectedRoute>
         } />
-        <Route path="/dashboard/account-settings" element={
+        <Route path="/dashboard/settings" element={
           <ProtectedRoute allowedRoles={['student']}>
             <AccountSettings />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/account-settings" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Navigate to="/dashboard/settings" replace />
           </ProtectedRoute>
         } />
         {/* إضافة مسارات الرسائل الجديدة */}
