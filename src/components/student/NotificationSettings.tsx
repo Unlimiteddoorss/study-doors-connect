@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Bell, CheckCircle, X, Settings, MessageSquare, Mail, CalendarClock, FileText, 
-  Info, AlertCircle, ChevronDown, ArrowRight, DeviceMobile, Share2, BarChart3,
-  Vibrate, VolumeX, Volume2
+  Info, AlertCircle, ChevronDown, ArrowRight, Smartphone, Share2, BarChart3,
+  Vibrate, VolumeX, Volume2, PlusCircle
 } from 'lucide-react';
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -160,7 +160,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ initialSett
     { id: 'email', name: t('auth.notifications.channels.email'), icon: <Mail className="h-5 w-5" />, enabled: emailNotifications },
     { id: 'push', name: t('auth.notifications.channels.push'), icon: <Bell className="h-5 w-5" />, enabled: pushNotifications },
     { id: 'sms', name: t('auth.notifications.channels.sms'), icon: <MessageSquare className="h-5 w-5" />, enabled: smsNotifications },
-    { id: 'app', name: t('auth.notifications.channels.app'), icon: <DeviceMobile className="h-5 w-5" />, enabled: true },
+    { id: 'app', name: t('auth.notifications.channels.app'), icon: <Smartphone className="h-5 w-5" />, enabled: true },
   ];
   
   return (
@@ -420,7 +420,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ initialSett
                 <Dialog open={isDeviceDialogOpen} onOpenChange={setIsDeviceDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full justify-start">
-                      <DeviceMobile className="mr-2 h-4 w-4" />
+                      <Smartphone className="mr-2 h-4 w-4" />
                       {t('auth.notifications.manageDevices')}
                     </Button>
                   </DialogTrigger>
@@ -587,7 +587,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ initialSett
               <p className="text-unlimited-gray mb-4">{t('auth.notifications.channels.customChannelsDesc')}</p>
               
               <Button>
-                <Plus className="mr-2 h-4 w-4" />
+                <PlusCircle className="mr-2 h-4 w-4" />
                 {t('auth.notifications.channels.addChannel')}
               </Button>
             </div>
