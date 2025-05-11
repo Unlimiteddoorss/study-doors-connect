@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { X, Check, Calendar, Smartphone, Link as LinkIcon, WhatsApp } from 'lucide-react';
+import { X, Check, Calendar, Smartphone, Link as LinkIcon, Phone } from 'lucide-react';
 
 interface AnnouncementProps {
   onClose?: () => void;
@@ -92,7 +92,7 @@ const TurkishUniversitiesAnnouncement = ({ onClose }: AnnouncementProps) => {
               rel="noopener noreferrer"
               className="flex items-center hover:bg-white/20 py-1 px-2 rounded transition-colors"
             >
-              <WhatsApp className="h-3.5 w-3.5 mr-1" />
+              <Phone className="h-3.5 w-3.5 mr-1" />
               <span>واتساب</span>
             </a>
           </div>
