@@ -7,10 +7,15 @@ import FeaturedPrograms from '@/components/home/FeaturedPrograms';
 import Testimonials from '@/components/home/Testimonials';
 import Partners from '@/components/home/Partners';
 import CTASection from '@/components/home/CTASection';
+import { Helmet } from 'react-helmet-async';
 
 const Index = () => {
   return (
     <MainLayout>
+      <Helmet>
+        <title>أبواب بلا حدود التعليمية | الصفحة الرئيسية</title>
+        <meta name="description" content="أبواب بلا حدود التعليمية - خدمات التسجيل في الجامعات التركية ومتابعة الطلبات" />
+      </Helmet>
       <main className="min-h-screen">
         <Hero />
         <Stats />

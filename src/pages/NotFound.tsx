@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
 import { Home, ArrowLeft, Search, HelpCircle, FileText, School } from "lucide-react";
+import TurkishUniversitiesAnnouncement from "../components/announcements/TurkishUniversitiesAnnouncement";
 
 const NotFound = () => {
   const location = useLocation();
@@ -63,16 +64,7 @@ const NotFound = () => {
           </div>
 
           <div className="mt-4 border border-dashed border-unlimited-light-blue p-4 rounded-md bg-unlimited-light-blue/10">
-            <h3 className="font-medium mb-2 text-unlimited-blue">{t('registration.announcement') || 'إعلان التسجيل'}</h3>
-            <p className="text-sm mb-2">
-              {t('registration.turkishUniversities') || 'بدأ التسجيل على الجامعات الحكومية التركية للعام 2025'}
-            </p>
-            <Button variant="default" size="sm" asChild>
-              <Link to="/apply">
-                <FileText className="h-4 w-4 mr-1" />
-                {t('registration.applyNow') || 'قدم طلبك الآن'}
-              </Link>
-            </Button>
+            <TurkishUniversitiesAnnouncement />
           </div>
           
           <p className="text-sm mt-4">

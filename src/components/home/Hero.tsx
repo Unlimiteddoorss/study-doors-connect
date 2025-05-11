@@ -1,9 +1,11 @@
+
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Search, GraduationCap, School, FileText, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
+import TurkishUniversitiesAnnouncement from '../announcements/TurkishUniversitiesAnnouncement';
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -38,6 +40,9 @@ const Hero = () => {
   return (
     <section className="bg-gradient-to-r from-unlimited-dark-blue to-unlimited-blue text-white py-16 md:py-24">
       <div className="container mx-auto px-4">
+        {/* Add the announcement at the top */}
+        <TurkishUniversitiesAnnouncement />
+        
         <div className="flex flex-col md:flex-row items-center">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}

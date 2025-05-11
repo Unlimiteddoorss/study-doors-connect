@@ -1,6 +1,5 @@
-
 import { ReactNode, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
 import { ArrowUp, Bell, Globe, MessageCircle, X } from 'lucide-react';
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/sheet";
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import TurkishUniversitiesAnnouncement from '../announcements/TurkishUniversitiesAnnouncement';
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -44,10 +44,16 @@ interface Notification {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState('ar');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
+  
+  // Don't show the floating announcement on these pages where it's already shown
+  const hideAnnouncementOnPages = ['/turkish-applications', '/'];
+  const shouldShowFloatingAnnouncement = !hideAnnouncementOnPages.includes(location.pathname);
   
   // Sample notifications for demo purposes
   const [notifications, setNotifications] = useState<Notification[]>([
@@ -167,6 +173,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
+      {shouldShowFloatingAnnouncement && showAnnouncement && (
+        <div className="container mx-auto px-4 pt-4">
+          <TurkishUniversitiesAnnouncement onClose={() => setShowAnnouncement(false)} />
+        </div>
+      )}
       <main className="flex-grow">{children}</main>
       <Footer />
       
