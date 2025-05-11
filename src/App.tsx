@@ -1,3 +1,4 @@
+
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -43,6 +44,7 @@ import { Toaster } from "@/components/ui/toaster";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
+import TurkishUniversityApplication from "./pages/TurkishUniversityApplication";
 
 function App() {
   // FIXME: In production, this would come from auth context or user state
@@ -136,6 +138,7 @@ function App() {
         <Route path="/scholarships" element={<Scholarships />} />
         <Route path="/universities" element={<Universities />} />
         <Route path="/turkish-universities" element={<TurkishUniversities />} />
+        <Route path="/turkish-applications" element={<TurkishUniversityApplication />} />
         <Route path="/universities/:id" element={<UniversityDetails />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<Register />} />
