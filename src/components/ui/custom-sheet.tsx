@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Dialog, DialogContent, DialogPortal, DialogOverlay, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogPortal, DialogOverlay, DialogClose, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 
@@ -50,7 +50,7 @@ export function CustomSheet({
 
 // Export components with Sheet naming to maintain compatibility
 export const Sheet = CustomSheet;
-export const SheetTrigger = Dialog.Trigger;
+export const SheetTrigger = DialogTrigger;
 export const SheetClose = DialogClose;
 export const SheetContent = DialogContent;
 export const SheetHeader = ({

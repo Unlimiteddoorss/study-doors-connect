@@ -43,7 +43,7 @@
 
 @layer base {
   body {
-    @apply bg-white dark:bg-unlimited-background text-unlimited-text dark:text-unlimited-text transition-colors duration-200;
+    @apply bg-white dark:bg-[#0f172a] text-unlimited-text transition-colors duration-200;
   }
 
   /* إضافة خط Tajawal */
@@ -65,7 +65,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-bold font-['Almarai'];
+    @apply font-bold font-almarai;
   }
 }
 
@@ -83,11 +83,11 @@
   }
 
   .card {
-    @apply bg-unlimited-card-bg dark:bg-unlimited-card-bg border border-unlimited-border dark:border-unlimited-border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4;
+    @apply bg-unlimited-card-bg border border-unlimited-border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 dark:bg-[#1e293b] dark:border-[#1e293b];
   }
 
   .input {
-    @apply bg-unlimited-input-bg dark:bg-unlimited-input-bg border border-unlimited-border dark:border-unlimited-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-unlimited-blue dark:focus:ring-unlimited-blue transition-all;
+    @apply bg-unlimited-input-bg border border-unlimited-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-unlimited-blue transition-all dark:bg-[#0f172a] dark:border-[#1e293b] dark:focus:ring-[#3b82f6];
   }
   
   /* Animation Utilities */
@@ -141,21 +141,21 @@
 }
 
 .dark .bg-white {
-  @apply bg-unlimited-card-bg;
+  @apply bg-[#1e293b];
 }
 
 /* تحسين قابلية القراءة في الوضع الليلي */
 .dark p, .dark span, .dark div {
-  @apply text-unlimited-text;
+  @apply text-[#f8fafc];
 }
 
 .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  @apply text-unlimited-text;
+  @apply text-[#f8fafc];
 }
 
 /* تحسين عرض الروابط في الوضع الليلي */
 .dark a:not(.btn-primary):not(.btn-secondary):not(.btn-outline) {
-  @apply text-unlimited-blue hover:text-unlimited-light-blue;
+  @apply text-[#3b82f6] hover:text-[#60a5fa];
 }
 
 /* إضافة تأثيرات لزيادة جاذبية الموقع */

@@ -73,6 +73,26 @@ export default {
 				"unlimited-warning": "#F59E0B",
 				"unlimited-danger": "#EF4444",
 				"unlimited-info": "#3B82F6",
+				"unlimited-background": {
+					DEFAULT: "#ffffff",
+					dark: "#0f172a"
+				},
+				"unlimited-text": {
+					DEFAULT: "#0f172a",
+					dark: "#f8fafc" 
+				},
+				"unlimited-card-bg": {
+					DEFAULT: "#ffffff",
+					dark: "#1e293b"
+				},
+				"unlimited-input-bg": {
+					DEFAULT: "#ffffff",
+					dark: "#0f172a"
+				},
+				"unlimited-border": {
+					DEFAULT: "#e2e8f0",
+					dark: "#1e293b"
+				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -123,7 +143,9 @@ export default {
 			},
 			fontFamily: {
 				montserrat: ['Montserrat', 'sans-serif'],
-				roboto: ['Roboto', 'sans-serif']
+				roboto: ['Roboto', 'sans-serif'],
+				tajawal: ['Tajawal', 'sans-serif'],
+				almarai: ['Almarai', 'sans-serif']
 			}
 		}
 	},
