@@ -1,187 +1,202 @@
 
 import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Download, Paperclip, FileText, Image, File, AlertCircle, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Button } from '@/components/ui/button';
+import { MoreHorizontal, Reply, Download } from 'lucide-react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from '@/lib/utils';
+import MessageReactions from './MessageReactions';
+import AttachmentPreview from './AttachmentPreview';
+import { AudioPlayer } from '@/components/ui/audio-player';
 
-interface MessageProps {
-  message: {
-    id: string;
-    sender: 'student' | 'admin' | 'agent';
-    senderName: string;
-    text: string;
-    timestamp: Date;
-    read: boolean;
-    attachments?: any[];
-  };
-  isSender: boolean;
+interface MessageAttachment {
+  id: string;
+  type: 'image' | 'document' | 'audio' | 'video' | 'other';
+  fileName: string;
+  fileSize?: string;
+  url: string;
+  thumbnail?: string;
 }
 
-// Helper to get file icon based on file type
-const getFileIcon = (fileType: string) => {
-  if (fileType.startsWith('image/')) return <Image className="h-4 w-4" />;
-  if (fileType.includes('pdf')) return <FileText className="h-4 w-4" />;
-  return <File className="h-4 w-4" />;
-};
+export interface MessageBubbleProps {
+  id: string;
+  sender: {
+    name: string;
+    avatar?: string;
+    initials?: string;
+  };
+  content: string;
+  timestamp: string;
+  isUser: boolean;
+  isRead?: boolean;
+  attachments?: MessageAttachment[];
+  onReply?: (id: string) => void;
+  className?: string;
+}
 
-const MessageBubble = ({ message, isSender }: MessageProps) => {
-  const { t, i18n } = useTranslation();
-  const isRtl = i18n.language === 'ar';
-  const [showAttachments, setShowAttachments] = useState(true);
+const MessageBubble = ({
+  id,
+  sender,
+  content,
+  timestamp,
+  isUser,
+  isRead = false,
+  attachments = [],
+  onReply,
+  className,
+}: MessageBubbleProps) => {
+  const [showActions, setShowActions] = useState(false);
+
+  const messageColorClass = isUser 
+    ? 'bg-unlimited-light-blue text-unlimited-dark-blue' 
+    : 'bg-gray-100 dark:bg-gray-800 text-unlimited-gray-900 dark:text-unlimited-gray-100';
+
+  const messageAlignClass = isUser ? 'ml-auto' : 'mr-auto';
   
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString(i18n.language, { 
-      hour: '2-digit', 
-      minute: '2-digit'
-    });
-  };
+  const hasAttachments = attachments.length > 0;
   
-  const formatDate = (date: Date) => {
-    const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-    
-    const isToday = date.toDateString() === today.toDateString();
-    const isYesterday = date.toDateString() === yesterday.toDateString();
-    
-    if (isToday) {
-      return t('messages.today', 'اليوم');
-    } else if (isYesterday) {
-      return t('messages.yesterday', 'أمس');
-    } else {
-      return date.toLocaleDateString(i18n.language, { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric'
-      });
-    }
-  };
-  
-  const getSenderInitials = () => {
-    if (!message.senderName) return '??';
-    
-    const nameParts = message.senderName.split(' ');
-    if (nameParts.length >= 2) {
-      return `${nameParts[0][0]}${nameParts[1][0]}`.toUpperCase();
-    }
-    return nameParts[0].substring(0, 2).toUpperCase();
-  };
-  
+  // Format text content with line breaks
+  const formattedContent = content.split('\n').map((line, i) => (
+    <span key={i} className="block">
+      {line || ' '}
+    </span>
+  ));
+
   return (
-    <div className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[85%] ${isSender ? 'order-2' : 'order-1'}`}>
-        <div className="flex items-start gap-2">
-          {!isSender && (
-            <Avatar className="h-8 w-8 mt-1">
-              <AvatarImage src="" alt={message.senderName} />
-              <AvatarFallback className={`text-xs ${
-                message.sender === 'admin' ? 'bg-unlimited-blue text-white' :
-                message.sender === 'agent' ? 'bg-amber-500 text-white' :
-                'bg-green-500 text-white'
-              }`}>
-                {getSenderInitials()}
-              </AvatarFallback>
-            </Avatar>
-          )}
+    <div className={cn(
+      "group flex w-full mb-4 max-w-[85%]",
+      isUser ? 'justify-end' : 'justify-start',
+      className
+    )}>
+      <div className={cn("flex", isUser ? 'flex-row-reverse' : 'flex-row')}>
+        {/* Avatar for non-user messages */}
+        {!isUser && (
+          <Avatar className={cn("h-8 w-8", isUser ? 'ml-2' : 'mr-2')}>
+            <AvatarImage src={sender.avatar} alt={sender.name} />
+            <AvatarFallback>{sender.initials || sender.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+        )}
+        
+        <div className={cn("flex flex-col", isUser ? 'items-end' : 'items-start')}>
+          {/* Message metadata */}
+          <div className={cn(
+            "flex items-center text-xs text-unlimited-gray mb-1",
+            isUser ? 'flex-row' : 'flex-row-reverse'
+          )}>
+            {!isUser && <span className="font-medium">{sender.name}</span>}
+            <span className={cn(isUser ? 'ml-1' : 'mr-1')}>⦁</span>
+            <span className="text-unlimited-gray/70">{timestamp}</span>
+            {isUser && isRead && (
+              <span className="text-unlimited-blue ml-1">✓</span>
+            )}
+          </div>
           
-          <div>
-            {!isSender && (
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium">{message.senderName}</span>
-                <Badge variant="outline" className="text-xs px-2 py-0">
-                  {message.sender === 'admin' ? 
-                    t('messages.universityAdmin', 'مسؤول الجامعة') :
-                    message.sender === 'agent' ?
-                    t('messages.educationalAgent', 'وكيل تعليمي') :
-                    t('messages.student', 'طالب')
-                  }
-                </Badge>
+          {/* Message content */}
+          <div 
+            className={cn(
+              "relative rounded-lg py-2 px-3 mb-1 max-w-md",
+              messageColorClass,
+              messageAlignClass,
+              hasAttachments && 'space-y-2'
+            )}
+            onMouseEnter={() => setShowActions(true)}
+            onMouseLeave={() => setShowActions(false)}
+          >
+            {/* Show attachments */}
+            {hasAttachments && (
+              <div className="space-y-2 mb-2">
+                {attachments.map((attachment) => (
+                  <AttachmentPreview
+                    key={attachment.id}
+                    type={attachment.type}
+                    fileName={attachment.fileName}
+                    fileSize={attachment.fileSize}
+                    url={attachment.url}
+                    thumbnail={attachment.thumbnail}
+                  />
+                ))}
               </div>
             )}
             
-            <div className={`rounded-lg px-4 py-2 ${
-              isSender ? 
-                'bg-unlimited-blue text-white rounded-tr-none' : 
-                'bg-gray-100 rounded-tl-none'
-            }`}>
-              <p className="whitespace-pre-wrap break-words">
-                {message.text}
-              </p>
-              
-              {message.attachments && message.attachments.length > 0 && (
-                <div className="mt-2">
-                  <div 
-                    className="flex items-center gap-1 text-xs cursor-pointer"
-                    onClick={() => setShowAttachments(!showAttachments)}
-                  >
-                    <Paperclip className="h-3 w-3" />
-                    <span>
-                      {message.attachments.length} {t('messages.attachments', 'مرفقات')}
-                    </span>
-                    <Button variant="ghost" size="icon" className="h-4 w-4 p-0">
-                      {showAttachments ? 
-                        <X className="h-3 w-3" /> : 
-                        <span className="text-xs">+</span>
-                      }
-                    </Button>
-                  </div>
-                  
-                  {showAttachments && (
-                    <div className="mt-1 space-y-1">
-                      {message.attachments.map((attachment, index) => (
-                        <div 
-                          key={index}
-                          className={`flex items-center gap-1 p-1 rounded text-xs ${
-                            isSender ? 'bg-unlimited-dark-blue/30' : 'bg-gray-200'
-                          }`}
-                        >
-                          {getFileIcon(attachment.type)}
-                          <span className="truncate max-w-[120px]">
-                            {attachment.name}
-                          </span>
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-4 w-4 ml-auto p-0"
-                                >
-                                  <Download className="h-3 w-3" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>
-                                  {t('messages.download', 'تحميل')}
-                                </p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Text content */}
+            {content && <div className="text-sm leading-relaxed">{formattedContent}</div>}
             
-            <div className={`text-xs text-gray-500 mt-1 flex gap-2 ${
-              isSender ? 'justify-end' : 'justify-start'
-            }`}>
-              <span>{formatTime(message.timestamp)}</span>
-              <span>{formatDate(message.timestamp)}</span>
-              {isSender && (
-                <span>
-                  {message.read ? 
-                    t('messages.read', 'تم القراءة') : 
-                    t('messages.sent', 'تم الإرسال')
-                  }
-                </span>
+            {/* Message actions that appear on hover */}
+            <div 
+              className={cn(
+                "absolute top-1 flex opacity-0 group-hover:opacity-100 transition-opacity",
+                isUser ? '-left-12' : '-right-12'
+              )}
+            >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-7 w-7 rounded-full bg-gray-100 dark:bg-gray-800"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align={isUser ? "end" : "start"} className="w-40">
+                  {onReply && (
+                    <DropdownMenuItem onClick={() => onReply(id)}>
+                      <Reply className="mr-2 h-4 w-4" />
+                      <span>رد</span>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem onClick={() => navigator.clipboard.writeText(content)}>
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-4 w-4 mr-2" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                    >
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
+                    </svg>
+                    <span>نسخ النص</span>
+                  </DropdownMenuItem>
+                  {hasAttachments && (
+                    <DropdownMenuItem>
+                      <Download className="mr-2 h-4 w-4" />
+                      <span>تحميل المرفقات</span>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              {onReply && (
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-7 w-7 rounded-full bg-gray-100 dark:bg-gray-800 ml-1"
+                  onClick={() => onReply(id)}
+                >
+                  <Reply className="h-4 w-4" />
+                </Button>
               )}
             </div>
+          </div>
+          
+          {/* Message reactions */}
+          <div className={cn(
+            "h-6",
+            isUser ? 'pr-2' : 'pl-2'
+          )}>
+            <MessageReactions 
+              messageId={id} 
+              align={isUser ? "end" : "start"} 
+            />
           </div>
         </div>
       </div>

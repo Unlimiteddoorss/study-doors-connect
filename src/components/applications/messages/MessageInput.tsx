@@ -1,433 +1,375 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { 
+  Send, 
+  PaperclipIcon, 
+  Smile, 
+  X, 
+  Mic, 
+  Image as ImageIcon, 
+  FileText,
+  Plus,
+  ChevronUp
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
 import { useToast } from '@/hooks/use-toast';
-import { sendMessage } from '@/services/messageService';
+import VoiceRecorder from './VoiceRecorder';
+import AttachmentPreview from './AttachmentPreview';
 import { 
-  PaperclipIcon, 
-  X, 
-  Send, 
-  Image, 
-  FileText, 
-  Smile,
-  Mic,
-  MicOff, 
-  MessageSquare
-} from 'lucide-react';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
-interface MessageInputProps {
-  applicationId: string;
-  onMessageSent: () => void;
+interface Attachment {
+  id: string;
+  type: 'image' | 'document' | 'audio' | 'video' | 'other';
+  fileName: string;
+  fileSize: string;
+  url: string;
+  thumbnail?: string;
+  file: File;
 }
 
-const MessageInput: React.FC<MessageInputProps> = ({ applicationId, onMessageSent }) => {
-  const { t } = useTranslation();
+interface MessageInputProps {
+  onSendMessage: (message: string, attachments?: Attachment[]) => void;
+  onTypingChange?: (isTyping: boolean) => void;
+  placeholder?: string;
+  disabled?: boolean;
+}
+
+const MessageInput = ({ 
+  onSendMessage, 
+  onTypingChange,
+  placeholder = "اكتب رسالتك هنا...", 
+  disabled = false 
+}: MessageInputProps) => {
   const { toast } = useToast();
   const [message, setMessage] = useState('');
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingDuration, setRecordingDuration] = useState(0);
-  const [recordingTimer, setRecordingTimer] = useState<NodeJS.Timeout | null>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [showVoiceRecorder, setShowVoiceRecorder] = useState(false);
+  const [expandAttachOptions, setExpandAttachOptions] = useState(false);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
-  const commonEmojis = ['😊', '👍', '❤️', '🎉', '👏', '🙏', '👋', '🤔', '😂', '✅', '🔥'];
-  
-  // Clean up recording timer when component unmounts
-  useEffect(() => {
-    return () => {
-      if (recordingTimer) {
-        clearInterval(recordingTimer);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle text input changes
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessage(e.target.value);
+    
+    // Signal typing state
+    if (onTypingChange) {
+      onTypingChange(true);
+      
+      // Clear previous timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
       }
-    };
-  }, [recordingTimer]);
-  
-  const handleSendMessage = async () => {
-    if ((!message.trim() && attachments.length === 0) || isSubmitting) return;
-    
-    setIsSubmitting(true);
-    
-    try {
-      // In a real app, you would handle file uploads here
-      // For simplicity, we'll just simulate it
-      const attachmentData = attachments.map(file => ({
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        url: URL.createObjectURL(file) // This is just for demo purposes
-      }));
       
-      // Send message to server (in this case, our mock service)
-      await sendMessage(
-        applicationId,
-        'student-1', // Hardcoded for demo
-        message,
-        attachmentData
-      );
-      
-      // Clear form and notify parent
-      setMessage('');
-      setAttachments([]);
-      onMessageSent();
-      
-      // Show success toast
-      toast({
-        title: t('messages.sent', 'تم إرسال الرسالة'),
-        description: t('messages.sentSuccess', 'تم إرسال رسالتك بنجاح'),
-      });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      
-      toast({
-        title: t('messages.error', 'خطأ'),
-        description: t('messages.sendError', 'حدث خطأ أثناء إرسال الرسالة. يرجى المحاولة مرة أخرى.'),
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
+      // Set new timeout to indicate when user stops typing
+      typingTimeoutRef.current = setTimeout(() => {
+        if (onTypingChange) onTypingChange(false);
+      }, 1000);
     }
   };
-  
-  const handleStartRecording = () => {
-    // In a real application, this would activate the microphone and start recording
-    setIsRecording(true);
-    
-    // Start a timer to track recording duration
-    const timer = setInterval(() => {
-      setRecordingDuration(prev => prev + 1);
-    }, 1000);
-    
-    setRecordingTimer(timer);
-    
-    toast({
-      title: "بدء التسجيل",
-      description: "جاري تسجيل الرسالة الصوتية...",
-    });
-  };
-  
-  const handleStopRecording = async () => {
-    // In a real application, this would stop the recording and process the audio file
-    if (recordingTimer) {
-      clearInterval(recordingTimer);
-    }
-    
-    setIsRecording(false);
-    
-    // Only save if recording lasted more than 1 second
-    if (recordingDuration > 1) {
-      try {
-        setIsSubmitting(true);
-        
-        // Simulate sending a voice message
-        await sendMessage(
-          applicationId,
-          'student-1',
-          '',
-          [],
-          { duration: recordingDuration, url: '#' }
-        );
-        
-        onMessageSent();
-        
-        toast({
-          title: "تم التسجيل",
-          description: `تم إرسال رسالة صوتية مدتها ${recordingDuration} ثانية`,
-        });
-      } catch (error) {
-        console.error('Error sending voice message:', error);
-        
-        toast({
-          title: "خطأ",
-          description: "حدث خطأ أثناء إرسال الرسالة الصوتية",
-          variant: "destructive"
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
-    } else {
-      toast({
-        title: "تم إلغاء التسجيل",
-        description: "التسجيل قصير جداً، تم الإلغاء",
-      });
-    }
-    
-    setRecordingDuration(0);
-  };
-  
-  const handleCancelRecording = () => {
-    if (recordingTimer) {
-      clearInterval(recordingTimer);
-    }
-    
-    setIsRecording(false);
-    setRecordingDuration(0);
-    
-    toast({
-      title: "تم الإلغاء",
-      description: "تم إلغاء التسجيل الصوتي",
-    });
-  };
-  
-  const formatRecordingTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-  
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setAttachments(prev => [...prev, ...newFiles]);
-      
-      // Clear the input so the same file can be selected again
-      e.target.value = '';
-    }
-  };
-  
-  const handleRemoveAttachment = (index: number) => {
-    setAttachments(prev => prev.filter((_, i) => i !== index));
-  };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-  
-  const handleAddEmoji = (emoji: string) => {
-    setMessage(prev => prev + emoji);
-    
-    // Focus on textarea after adding emoji
+
+  // Add emoji to message
+  const handleEmojiSelect = (emoji: string) => {
+    setMessage((prev) => prev + emoji);
+    setShowEmojiPicker(false);
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
   };
-  
-  // Automatically resize textarea based on content
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
+
+  // Handle file selection
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
-    textarea.style.height = 'auto';
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 150)}px`;
+    Array.from(files).forEach(file => {
+      // Validate file size (max 20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        toast({
+          title: "حجم الملف كبير جداً",
+          description: "الحد الأقصى لحجم الملف هو 20 ميجابايت",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      const id = `file-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const url = URL.createObjectURL(file);
+      
+      let type: Attachment['type'] = 'other';
+      let thumbnail: string | undefined = undefined;
+      
+      if (file.type.startsWith('image/')) {
+        type = 'image';
+        thumbnail = url;
+      } else if (file.type.startsWith('audio/')) {
+        type = 'audio';
+      } else if (file.type.startsWith('video/')) {
+        type = 'video';
+      } else if (file.type.includes('pdf') || file.type.includes('document') || file.type.includes('sheet')) {
+        type = 'document';
+      }
+      
+      const fileSize = formatFileSize(file.size);
+      
+      setAttachments(prev => [
+        ...prev,
+        { id, type, fileName: file.name, fileSize, url, thumbnail, file }
+      ]);
+    });
+    
+    // Reset file input
+    e.target.value = '';
+  };
+
+  // Format file size for display (e.g. 2.5 MB)
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B';
+    const kb = bytes / 1024;
+    if (kb < 1024) return kb.toFixed(1) + ' KB';
+    const mb = kb / 1024;
+    return mb.toFixed(1) + ' MB';
+  };
+
+  // Remove attachment
+  const removeAttachment = (id: string) => {
+    setAttachments(prev => {
+      const updated = prev.filter(attachment => attachment.id !== id);
+      const removed = prev.find(attachment => attachment.id === id);
+      
+      if (removed) {
+        URL.revokeObjectURL(removed.url);
+      }
+      
+      return updated;
+    });
+  };
+
+  // Handle voice recording completion
+  const handleVoiceRecordingComplete = (blob: Blob, audioUrl: string) => {
+    const id = `audio-${Date.now()}`;
+    const fileName = `تسجيل صوتي ${new Date().toLocaleTimeString()}.wav`;
+    const fileSize = formatFileSize(blob.size);
+    
+    // Convert blob to File
+    const audioFile = new File([blob], fileName, { type: 'audio/wav' });
+    
+    setAttachments(prev => [
+      ...prev,
+      { id, type: 'audio', fileName, fileSize, url: audioUrl, file: audioFile }
+    ]);
+    
+    setShowVoiceRecorder(false);
+  };
+
+  // Send message function
+  const sendMessage = () => {
+    if ((message.trim() || attachments.length > 0) && !disabled) {
+      onSendMessage(message, attachments.length > 0 ? attachments : undefined);
+      setMessage('');
+      
+      // Cleanup attachment URLs
+      attachments.forEach(attachment => {
+        URL.revokeObjectURL(attachment.url);
+      });
+      
+      setAttachments([]);
+      setShowVoiceRecorder(false);
+      
+      // Reset typing state
+      if (onTypingChange && typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+        onTypingChange(false);
+      }
+    }
+  };
+
+  // Attach specific file types
+  const handleAttachImage = () => {
+    fileInputRef.current?.setAttribute('accept', 'image/*');
+    fileInputRef.current?.click();
+    setExpandAttachOptions(false);
+  };
+
+  const handleAttachDocument = () => {
+    fileInputRef.current?.setAttribute('accept', '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt');
+    fileInputRef.current?.click();
+    setExpandAttachOptions(false);
+  };
+
+  const handleAttachAudio = () => {
+    fileInputRef.current?.setAttribute('accept', 'audio/*');
+    fileInputRef.current?.click();
+    setExpandAttachOptions(false);
+  };
+
+  // Auto-resize the textarea height based on content
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '0px';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      textareaRef.current.style.height = scrollHeight + 'px';
+    }
   }, [message]);
-  
+
+  // Send message on Enter, but allow Shift+Enter for new lines
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      attachments.forEach(attachment => {
+        URL.revokeObjectURL(attachment.url);
+      });
+      
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [attachments]);
+
   return (
-    <div className="w-full">
-      {/* Attachments preview */}
+    <div className="border-t bg-white dark:bg-[#1e293b] p-3">
+      {/* Attachments previews */}
       {attachments.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2 max-h-24 overflow-y-auto p-2 bg-gray-50 rounded-md">
-          {attachments.map((file, index) => (
-            <div 
-              key={index}
-              className="bg-white border rounded-md px-2 py-1 flex items-center gap-2 text-sm shadow-sm"
-            >
-              {file.type.includes('image') ? (
-                <Image className="h-4 w-4 text-unlimited-gray" />
-              ) : (
-                <FileText className="h-4 w-4 text-unlimited-gray" />
-              )}
-              <span className="truncate max-w-[100px]">{file.name}</span>
-              <span className="text-xs text-unlimited-gray">
-                {file.size < 1024 * 1024
-                  ? `${Math.round(file.size / 1024)} KB`
-                  : `${(file.size / (1024 * 1024)).toFixed(1)} MB`}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 w-5 p-0 rounded-full"
-                onClick={() => handleRemoveAttachment(index)}
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </div>
+        <div className="mb-3 space-y-2">
+          {attachments.map((attachment) => (
+            <AttachmentPreview
+              key={attachment.id}
+              type={attachment.type}
+              fileName={attachment.fileName}
+              fileSize={attachment.fileSize}
+              url={attachment.url}
+              thumbnail={attachment.thumbnail}
+              removable
+              onRemove={() => removeAttachment(attachment.id)}
+            />
           ))}
         </div>
       )}
       
-      {/* Voice recording UI */}
-      {isRecording ? (
-        <div className="flex items-center gap-2 p-3 border rounded-lg bg-red-50 mb-2">
-          <div className="animate-pulse">
-            <Mic className="h-5 w-5 text-red-500" />
-          </div>
-          <div className="flex-grow">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-red-700">
-                جاري التسجيل...
-              </span>
-              <span className="text-sm text-red-700">
-                {formatRecordingTime(recordingDuration)}
-              </span>
-            </div>
-            <Progress 
-              value={(recordingDuration % 5) * 20} 
-              className="h-1 mt-1"
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleCancelRecording}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleStopRecording}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Voice recorder */}
+      {showVoiceRecorder && (
+        <div className="mb-3">
+          <VoiceRecorder
+            onRecordingComplete={handleVoiceRecordingComplete}
+            onCancel={() => setShowVoiceRecorder(false)}
+          />
         </div>
-      ) : (
-        <div className="flex items-end gap-2">
-          {/* Attachment options */}
-          <div className="flex-shrink-0">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="icon" type="button">
-                  <PaperclipIcon className="h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <div className="flex gap-2 p-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1"
-                    onClick={() => imageInputRef.current?.click()}
-                  >
-                    <Image className="h-4 w-4" />
-                    صورة
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-1"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <FileText className="h-4 w-4" />
-                    ملف
-                  </Button>
-                </div>
-              </PopoverContent>
-            </Popover>
-            
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileSelect}
-              accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
-              className="hidden"
-            />
-            <input
-              type="file"
-              ref={imageInputRef}
-              onChange={handleFileSelect}
-              accept="image/*"
-              className="hidden"
-            />
-          </div>
+      )}
+      
+      <div className="flex items-end gap-2">
+        {/* Message textarea */}
+        <div className="relative flex-1">
+          <Textarea
+            ref={textareaRef}
+            value={message}
+            onChange={handleMessageChange}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            disabled={disabled}
+            className="min-h-10 max-h-32 py-2 pl-10 resize-none overflow-y-auto"
+            rows={1}
+          />
           
-          {/* Voice recorder button */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
+          {/* Emoji picker */}
+          <div className="absolute left-2 bottom-2">
+            <DropdownMenu open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+              <DropdownMenuTrigger asChild>
                 <Button 
-                  variant="outline" 
+                  variant="ghost" 
                   size="icon" 
-                  className="flex-shrink-0"
-                  onClick={handleStartRecording}
+                  className="h-6 w-6 rounded-full"
                 >
-                  <Mic className="h-4 w-4" />
+                  <Smile className="h-4 w-4" />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>تسجيل رسالة صوتية</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          {/* Message input */}
-          <div className="flex-grow relative">
-            <Textarea
-              ref={textareaRef}
-              placeholder={t('messages.typePlaceholder', 'اكتب رسالتك هنا...')}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isSubmitting}
-              className="resize-none min-h-[60px] pr-8"
-              rows={1}
-            />
-            <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-2 bottom-2 h-6 w-6 p-0 rounded-full"
-                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                >
-                  <Smile className="h-4 w-4 text-unlimited-gray" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-2" align="end">
-                <div className="grid grid-cols-6 gap-1">
-                  {commonEmojis.map((emoji) => (
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="p-2">
+                <div className="grid grid-cols-7 gap-1">
+                  {['😊', '😂', '❤️', '👍', '🙏', '🎉', '😍', '😎', '🤔', '😢', '😡', '🤯', '👏', '💯', '🔥', '✅', '⭐', '💪', '🤝', '🙌', '👌'
+                  ].map((emoji, index) => (
                     <button
-                      key={emoji}
-                      className="p-1.5 text-lg hover:bg-gray-100 rounded"
-                      onClick={() => handleAddEmoji(emoji)}
+                      key={index}
+                      onClick={() => handleEmojiSelect(emoji)}
+                      className="hover:bg-unlimited-light-blue/10 rounded p-1 text-lg"
                     >
                       {emoji}
                     </button>
                   ))}
                 </div>
-              </PopoverContent>
-            </Popover>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-          
-          {/* Send button */}
-          <Button
-            type="button"
-            disabled={(!message.trim() && attachments.length === 0) || isSubmitting}
-            onClick={handleSendMessage}
-            className="flex-shrink-0"
-          >
-            {isSubmitting ? (
-              <span className="animate-spin h-4 w-4 border-2 border-t-transparent rounded-full" />
-            ) : (
-              <Send className="h-4 w-4 ml-1" />
-            )}
-            {t('messages.send', 'إرسال')}
-          </Button>
         </div>
-      )}
+        
+        {/* Attachment button */}
+        <DropdownMenu open={expandAttachOptions} onOpenChange={setExpandAttachOptions}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={disabled}
+              aria-label="إرفاق ملف"
+            >
+              {expandAttachOptions ? <ChevronUp className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-32">
+            <DropdownMenuItem onClick={handleAttachImage} className="cursor-pointer">
+              <ImageIcon className="mr-2 h-4 w-4" />
+              <span>صورة</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleAttachDocument} className="cursor-pointer">
+              <FileText className="mr-2 h-4 w-4" />
+              <span>مستند</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleAttachAudio} className="cursor-pointer">
+              <PaperclipIcon className="mr-2 h-4 w-4" />
+              <span>ملف آخر</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => {
+                setShowVoiceRecorder(prev => !prev);
+                setExpandAttachOptions(false);
+              }} 
+              className="cursor-pointer"
+            >
+              <Mic className="mr-2 h-4 w-4" />
+              <span>تسجيل صوتي</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+          multiple
+        />
+        
+        {/* Send button */}
+        <Button
+          onClick={sendMessage}
+          disabled={disabled || (!message.trim() && attachments.length === 0)}
+          size="icon"
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
