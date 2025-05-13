@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { FormDialog } from '@/components/admin/FormDialog';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import { AdminPageActions } from '@/components/admin/AdminPageActions';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,10 +53,11 @@ import { TablePagination } from '@/components/admin/TablePagination';
 import { TableSkeleton } from '@/components/admin/TableSkeleton';
 import { useAdminActions } from '@/hooks/admin/useAdminActions';
 
-// استيراد المكونات الجديدة
+// Import our components
 import { UniversityQuickView } from '@/components/admin/universities/UniversityQuickView';
 import { UniversitiesGridView } from '@/components/admin/universities/UniversitiesGridView';
 import { UniversityStatsCard } from '@/components/admin/universities/UniversityStatsCard';
+import AddUniversityDialog from '@/components/admin/universities/AddUniversityDialog';
 
 interface University {
   id: string;
@@ -226,7 +227,22 @@ const ManageUniversities = () => {
       async () => {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 800));
-        // Add university logic would go here
+        
+        // Generate a new university with mock data
+        const newUniversity: University = {
+          id: `UNI${(universities.length + 1).toString().padStart(3, '0')}`,
+          nameAr: "جامعة جديدة",
+          nameEn: "New University",
+          country: "المملكة العربية السعودية",
+          city: "الرياض",
+          type: "Public",
+          programsCount: 0,
+          studentsCount: 0,
+          ranking: 1000,
+          status: "active"
+        };
+        
+        setUniversities([...universities, newUniversity]);
       },
       {
         successMessage: t('admin.toasts.addSuccess'),
@@ -335,10 +351,35 @@ const ManageUniversities = () => {
   const selectedUniversity = selectedUniversityId ? 
     universities.find(university => university.id === selectedUniversityId) : null;
 
+  // Animation variants
+  const pageVariants = {
+    initial: { opacity: 0 },
+    animate: { 
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        when: "beforeChildren" 
+      }
+    }
+  };
+
+  const itemVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 }
+  };
+
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <motion.div 
+        className="space-y-6"
+        initial="initial"
+        animate="animate"
+        variants={pageVariants}
+      >
+        <motion.div 
+          variants={itemVariants}
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        >
           <h2 className="text-2xl font-bold text-unlimited-dark-blue">{t('admin.universitiesPage.title')}</h2>
           
           <AdminPageActions 
@@ -350,20 +391,25 @@ const ManageUniversities = () => {
             exportLabel={t('admin.universitiesPage.exportUniversities')}
             isLoading={isActionLoading}
           />
-        </div>
+        </motion.div>
         
         {/* بطاقات الإحصائيات */}
-        <UniversityStatsCard 
-          totalUniversities={totalUniversities}
-          activeUniversities={activeUniversities}
-          publicUniversities={publicUniversities}
-          privateUniversities={privateUniversities}
-          totalStudents={totalStudents}
-          totalPrograms={totalPrograms}
-        />
+        <motion.div variants={itemVariants}>
+          <UniversityStatsCard 
+            totalUniversities={totalUniversities}
+            activeUniversities={activeUniversities}
+            publicUniversities={publicUniversities}
+            privateUniversities={privateUniversities}
+            totalStudents={totalStudents}
+            totalPrograms={totalPrograms}
+          />
+        </motion.div>
         
         {/* مرشحات البحث */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <motion.div 
+          variants={itemVariants}
+          className="flex flex-col md:flex-row gap-4 items-center justify-between"
+        >
           <div className="relative w-full md:w-auto">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
             <Input
@@ -374,7 +420,7 @@ const ManageUniversities = () => {
             />
           </div>
           
-          <div className="flex flex-row gap-2 items-center">
+          <div className="flex flex-wrap gap-2 items-center">
             <Select value={filters.type} onValueChange={(value) => setFilters({...filters, type: value})}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="نوع الجامعة" />
@@ -428,186 +474,153 @@ const ManageUniversities = () => {
               </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
         
         {/* التبديل بين وضعي العرض: قائمة أو شبكة */}
-        <Tabs defaultValue="grid" value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'grid')} className="w-full">
-          <TabsContent value="grid" className="mt-0">
-            <UniversitiesGridView
-              universities={currentItems}
-              isLoading={isLoading}
-              onViewDetails={handleViewUniversity}
-              onEdit={handleEditUniversity}
-            />
-          </TabsContent>
-          
-          <TabsContent value="list" className="mt-0">
-            <div className="rounded-md border shadow-sm">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">{t('admin.universitiesPage.tableHeaders.id')}</TableHead>
-                    <TableHead>{t('admin.universitiesPage.tableHeaders.name')}</TableHead>
-                    <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.country')}</TableHead>
-                    <TableHead className="hidden lg:table-cell">{t('admin.universitiesPage.tableHeaders.city')}</TableHead>
-                    <TableHead className="hidden lg:table-cell">{t('admin.universitiesPage.tableHeaders.programsCount')}</TableHead>
-                    <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.studentsCount')}</TableHead>
-                    <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.ranking')}</TableHead>
-                    <TableHead>{t('admin.universitiesPage.tableHeaders.status')}</TableHead>
-                    <TableHead className="text-left">{t('admin.universitiesPage.tableHeaders.actions')}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {isLoading ? (
-                    <TableSkeleton columns={9} rows={itemsPerPage} />
-                  ) : currentItems.length === 0 ? (
+        <motion.div variants={itemVariants}>
+          <Tabs defaultValue="grid" value={viewMode} onValueChange={(value) => setViewMode(value as 'list' | 'grid')} className="w-full">
+            <TabsContent value="grid" className="mt-0">
+              <UniversitiesGridView
+                universities={currentItems}
+                isLoading={isLoading}
+                onViewDetails={handleViewUniversity}
+                onEdit={handleEditUniversity}
+              />
+            </TabsContent>
+            
+            <TabsContent value="list" className="mt-0">
+              <div className="rounded-md border shadow-sm">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
-                        {t('admin.universitiesPage.noData')}
-                      </TableCell>
+                      <TableHead className="w-[100px]">{t('admin.universitiesPage.tableHeaders.id')}</TableHead>
+                      <TableHead>{t('admin.universitiesPage.tableHeaders.name')}</TableHead>
+                      <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.country')}</TableHead>
+                      <TableHead className="hidden lg:table-cell">{t('admin.universitiesPage.tableHeaders.city')}</TableHead>
+                      <TableHead className="hidden lg:table-cell">{t('admin.universitiesPage.tableHeaders.programsCount')}</TableHead>
+                      <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.studentsCount')}</TableHead>
+                      <TableHead className="hidden md:table-cell">{t('admin.universitiesPage.tableHeaders.ranking')}</TableHead>
+                      <TableHead>{t('admin.universitiesPage.tableHeaders.status')}</TableHead>
+                      <TableHead className="text-left">{t('admin.universitiesPage.tableHeaders.actions')}</TableHead>
                     </TableRow>
-                  ) : (
-                    currentItems.map((university) => (
-                      <TableRow key={university.id}>
-                        <TableCell className="font-medium">{university.id}</TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{university.nameAr}</p>
-                            <p className="text-xs text-unlimited-gray">{university.nameEn}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">{university.country}</TableCell>
-                        <TableCell className="hidden lg:table-cell">{university.city}</TableCell>
-                        <TableCell className="hidden lg:table-cell">
-                          <div className="flex items-center">
-                            <BookOpen className="h-4 w-4 mr-1.5 text-unlimited-blue" />
-                            {university.programsCount}
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center">
-                            <Users className="h-4 w-4 mr-1.5 text-unlimited-blue" />
-                            {university.studentsCount}
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">#{university.ranking}</TableCell>
-                        <TableCell>
-                          <Badge className={statusConfig[university.status].color}>
-                            {statusConfig[university.status].label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8"
-                              onClick={() => handleViewUniversity(university.id)}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="h-8 w-8"
-                              onClick={() => handleEditUniversity(university.id)}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>{t('admin.universitiesPage.universityOptions')}</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => toggleUniversityStatus(university.id)}>
-                                  {university.status === 'active' ? 
-                                    t('admin.universitiesPage.disableUniversity') : 
-                                    t('admin.universitiesPage.enableUniversity')
-                                  }
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>{t('admin.universitiesPage.viewPrograms')}</DropdownMenuItem>
-                                <DropdownMenuItem>{t('admin.universitiesPage.viewStudents')}</DropdownMenuItem>
-                                <DropdownMenuItem>{t('admin.universitiesPage.visitWebsite')}</DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="text-unlimited-danger focus:text-unlimited-danger"
-                                  onClick={() => handleDeleteUniversity(university.id)}
-                                >
-                                  <Trash className="h-4 w-4 mr-2" />
-                                  {t('admin.actions.delete')}
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
+                  </TableHeader>
+                  <TableBody>
+                    {isLoading ? (
+                      <TableSkeleton columns={9} rows={itemsPerPage} />
+                    ) : currentItems.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
+                          {t('admin.universitiesPage.noData')}
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </TabsContent>
-        </Tabs>
+                    ) : (
+                      currentItems.map((university) => (
+                        <TableRow key={university.id}>
+                          <TableCell className="font-medium">{university.id}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{university.nameAr}</p>
+                              <p className="text-xs text-unlimited-gray">{university.nameEn}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">{university.country}</TableCell>
+                          <TableCell className="hidden lg:table-cell">{university.city}</TableCell>
+                          <TableCell className="hidden lg:table-cell">
+                            <div className="flex items-center">
+                              <BookOpen className="h-4 w-4 mr-1.5 text-unlimited-blue" />
+                              {university.programsCount}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="flex items-center">
+                              <Users className="h-4 w-4 mr-1.5 text-unlimited-blue" />
+                              {university.studentsCount}
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">#{university.ranking}</TableCell>
+                          <TableCell>
+                            <Badge className={statusConfig[university.status].color}>
+                              {statusConfig[university.status].label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleViewUniversity(university.id)}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8"
+                                onClick={() => handleEditUniversity(university.id)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>{t('admin.universitiesPage.universityOptions')}</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => toggleUniversityStatus(university.id)}>
+                                    {university.status === 'active' ? 
+                                      t('admin.universitiesPage.disableUniversity') : 
+                                      t('admin.universitiesPage.enableUniversity')
+                                    }
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>{t('admin.universitiesPage.viewPrograms')}</DropdownMenuItem>
+                                  <DropdownMenuItem>{t('admin.universitiesPage.viewStudents')}</DropdownMenuItem>
+                                  <DropdownMenuItem>{t('admin.universitiesPage.visitWebsite')}</DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-unlimited-danger focus:text-unlimited-danger"
+                                    onClick={() => handleDeleteUniversity(university.id)}
+                                  >
+                                    <Trash className="h-4 w-4 mr-2" />
+                                    {t('admin.actions.delete')}
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </motion.div>
         
         {filteredUniversities.length > itemsPerPage && (
-          <div className="py-4 flex justify-center">
+          <motion.div 
+            variants={itemVariants}
+            className="py-4 flex justify-center"
+          >
             <TablePagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />
-          </div>
+          </motion.div>
         )}
 
-        <FormDialog
+        {/* Use our new AddUniversityDialog component */}
+        <AddUniversityDialog
           open={isAddDialogOpen}
           onOpenChange={setIsAddDialogOpen}
-          title={t('admin.universitiesPage.addNewUniversity')}
-          description={t('admin.universitiesPage.addNewUniversityDesc')}
           onSubmit={handleAddUniversity}
-          submitLabel={t('admin.studentsPage.save')}
           isLoading={isActionLoading}
-        >
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.nameEn')}</label>
-            <Input className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.nameAr')}</label>
-            <Input className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.country')}</label>
-            <Input className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.city')}</label>
-            <Input className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.website')}</label>
-            <Input type="url" className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.ranking')}</label>
-            <Input type="number" className="col-span-3" />
-          </div>
-           <div className="grid grid-cols-4 items-center gap-4">
-            <label className="text-right col-span-1">{t('admin.universitiesPage.universityLogo')}</label>
-            <div className="col-span-3">
-              <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
-                <Button variant="outline" className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('admin.studentsPage.chooseFile')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </FormDialog>
+        />
 
         <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
@@ -741,7 +754,7 @@ const ManageUniversities = () => {
           cancelLabel={t('admin.actions.cancel')}
           isLoading={isActionLoading}
         />
-      </div>
+      </motion.div>
     </DashboardLayout>
   );
 };

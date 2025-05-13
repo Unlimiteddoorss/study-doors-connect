@@ -11,7 +11,6 @@ type ToasterToastProps = UIToastProps & {
   title?: React.ReactNode;
   description?: React.ReactNode;
   action?: ToastActionElement;
-  variant?: "default" | "destructive" | "success" | "warning" | "info";
 };
 
 const actionTypes = {
@@ -24,7 +23,7 @@ const actionTypes = {
 let count = 0;
 
 function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER;
+  count = (count + 1) % Number.MAX_VALUE;
   return count.toString();
 }
 
@@ -134,9 +133,9 @@ function dispatch(action: Action) {
   });
 }
 
-interface ToastOptions extends Omit<ToasterToastProps, "id"> {}
+interface Toast extends Partial<ToasterToastProps> {}
 
-function toast(props: ToastOptions) {
+function toast(props: Toast) {
   const id = genId();
 
   const update = (props: ToasterToastProps) =>
@@ -144,6 +143,7 @@ function toast(props: ToastOptions) {
       type: "UPDATE_TOAST",
       toast: { ...props, id },
     });
+
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
 
   dispatch({
@@ -159,7 +159,7 @@ function toast(props: ToastOptions) {
   });
 
   return {
-    id: id,
+    id,
     dismiss,
     update,
   };

@@ -27,6 +27,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from 'react-i18next';
 import { changeLanguage, getCurrentLanguage, getLanguageName } from '@/i18n/config';
 
+// Import our notification center component
+import NotificationCenter from '@/components/admin/NotificationCenter';
+
 interface DashboardHeaderProps {
   userRole?: 'student' | 'admin' | 'agent';
   toggleSidebar?: () => void;
@@ -109,33 +112,8 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           
-          {/* Notifications */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
-                <Bell className="h-4 w-4" />
-                <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-unlimited-danger"></span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80">
-              <DropdownMenuLabel>{t('notifications.title')}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <div className="max-h-80 overflow-auto">
-                {[1, 2, 3].map((i) => (
-                  <DropdownMenuItem key={i} className="flex flex-col items-start py-2">
-                    <p className="font-medium">{t('notifications.item', { number: i })}</p>
-                    <p className="text-sm text-unlimited-gray">{t('notifications.time', { number: i })}</p>
-                  </DropdownMenuItem>
-                ))}
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="justify-center">
-                <Button variant="ghost" className="w-full">
-                  {t('notifications.viewAll')}
-                </Button>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Notifications - Use the new NotificationCenter component */}
+          <NotificationCenter />
           
           {/* User Menu - Enhanced */}
           <DropdownMenu>
