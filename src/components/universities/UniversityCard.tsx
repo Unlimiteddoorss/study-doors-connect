@@ -22,6 +22,8 @@ export interface University {
   languages?: string[];
   accreditations?: string[];
   isFeatured?: boolean;
+  website?: string;
+  accreditation?: string;
 }
 
 interface UniversityCardProps {

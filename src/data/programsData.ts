@@ -2,7 +2,7 @@ import { Program } from '../components/programs/ProgramCard';
 import { University } from '../components/universities/UniversityCard';
 
 // Turkish universities data with accurate program counts
-export const turkishUniversities = [
+export const turkishUniversities: University[] = [
   {
     id: 11,
     name: 'Istanbul Okan University',
