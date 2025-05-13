@@ -7,7 +7,18 @@ import { AreaChart, BarChart, LineChart, PieChart } from "@/components/ui/chart"
 import { RecentApplications } from "@/components/admin/RecentApplications";
 import { PendingTasks } from "@/components/admin/PendingTasks";
 import { useTranslation } from 'react-i18next';
-import { Building, BookOpen, Users, FileText, School, Bookmark, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { 
+  Building, 
+  BookOpen, 
+  Users, 
+  FileText, 
+  School, 
+  Bookmark, 
+  ChevronLeft, 
+  ChevronRight, 
+  Loader2,
+  RefreshCw 
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
