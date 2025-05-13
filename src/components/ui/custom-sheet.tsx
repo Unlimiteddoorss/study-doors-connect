@@ -48,11 +48,12 @@ export function CustomSheet({
   );
 }
 
-// Fixed: Using Dialog as trigger instead of non-existent Dialog.Trigger
-export const CustomSheetTrigger = Dialog;
-export const CustomSheetClose = DialogClose;
-export const CustomSheetContent = DialogContent;
-export const CustomSheetHeader = ({
+// Export components with Sheet naming to maintain compatibility
+export const Sheet = CustomSheet;
+export const SheetTrigger = Dialog.Trigger;
+export const SheetClose = DialogClose;
+export const SheetContent = DialogContent;
+export const SheetHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -64,7 +65,7 @@ export const CustomSheetHeader = ({
     {...props}
   />
 );
-export const CustomSheetFooter = ({
+export const SheetFooter = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
@@ -76,7 +77,7 @@ export const CustomSheetFooter = ({
     {...props}
   />
 );
-export const CustomSheetTitle = React.forwardRef<
+export const SheetTitle = React.forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
 >(({ className, ...props }, ref) => (
@@ -86,9 +87,9 @@ export const CustomSheetTitle = React.forwardRef<
     {...props}
   />
 ));
-CustomSheetTitle.displayName = "CustomSheetTitle";
+SheetTitle.displayName = "SheetTitle";
 
-export const CustomSheetDescription = React.forwardRef<
+export const SheetDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
@@ -98,4 +99,4 @@ export const CustomSheetDescription = React.forwardRef<
     {...props}
   />
 ));
-CustomSheetDescription.displayName = "CustomSheetDescription";
+SheetDescription.displayName = "SheetDescription";

@@ -13,7 +13,7 @@ import { toast } from "@/hooks/use-toast";
 export default function DarkModeToggle() {
   const { theme, setTheme } = useTheme();
   
-  const handleThemeChange = (newTheme: string) => {
+  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
     
     const themeLabels = {
