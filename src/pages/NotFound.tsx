@@ -1,78 +1,122 @@
 
-import { useLocation, Link } from "react-router-dom";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { useTranslation } from "react-i18next";
-import { Home, ArrowLeft, Search, HelpCircle, FileText, School } from "lucide-react";
-import TurkishUniversitiesAnnouncement from "../components/announcements/TurkishUniversitiesAnnouncement";
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
+import { Button } from '@/components/ui/button';
+import { Search, Home, Clock, ChevronLeft } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import TurkishUniversitiesAnnouncement from '@/components/announcements/TurkishUniversitiesAnnouncement';
+
+const suggestedPages = [
+  { title: "الصفحة الرئيسية", url: "/" },
+  { title: "استكشف الجامعات", url: "/universities" },
+  { title: "التخصصات المتاحة", url: "/programs" },
+  { title: "التقديم للجامعات التركية", url: "/turkish-applications" },
+  { title: "المنح الدراسية", url: "/scholarships" },
+  { title: "تواصل معنا", url: "/contact" },
+];
 
 const NotFound = () => {
-  const location = useLocation();
-  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [countdown, setCountdown] = useState(15);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
+    const timer = setInterval(() => {
+      setCountdown((prevCount) => {
+        if (prevCount <= 1) {
+          clearInterval(timer);
+          navigate("/");
+          return 0;
+        }
+        return prevCount - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [navigate]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      // في الواقع هنا سنذهب إلى صفحة البحث، لكن لأغراض العرض نذهب للبرامج
+      navigate(`/programs?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center p-6 max-w-md">
-        <div className="mb-6">
-          <div className="w-24 h-24 bg-unlimited-light-blue rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-4xl font-bold text-unlimited-blue">404</span>
-          </div>
-          <h1 className="text-2xl font-bold mb-2">{t('errors.notFound.title') || 'الصفحة غير موجودة'}</h1>
-          <p className="text-unlimited-gray mb-6">{t('errors.notFound.description') || 'عذراً، لم نتمكن من العثور على الصفحة التي تبحث عنها.'}</p>
+    <MainLayout>
+      <Helmet>
+        <title>404 - الصفحة غير موجودة | أبواب بلا حدود التعليمية</title>
+        <meta name="description" content="عذراً، الصفحة التي تبحث عنها غير موجودة" />
+      </Helmet>
+      <div className="container mx-auto px-4 py-16 max-w-4xl">
+        <TurkishUniversitiesAnnouncement />
+        
+        <div className="text-center mb-12">
+          <h1 className="text-8xl font-bold text-unlimited-dark-blue dark:text-unlimited-light-blue mb-4">404</h1>
+          <h2 className="text-2xl font-semibold mb-4">عذراً، الصفحة التي تبحث عنها غير موجودة</h2>
+          <p className="text-unlimited-gray mb-6">
+            ربما تم نقل الصفحة أو تغيير عنوانها أو حذفها
+          </p>
           
-          <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 text-left">
-            <h2 className="text-sm font-medium mb-2">{t('errors.notFound.requested') || 'رابط URL المطلوب'}:</h2>
-            <div className="bg-gray-50 p-2 rounded border border-gray-200 font-mono text-sm overflow-x-auto">
-              {location.pathname}
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button asChild className="flex items-center gap-2">
+          <div className="flex flex-col md:flex-row justify-center gap-4 mb-8">
+            <Button asChild size="lg" className="flex gap-2">
               <Link to="/">
-                <Home className="h-4 w-4" />
-                {t('errors.notFound.returnHome') || 'العودة إلى الصفحة الرئيسية'}
+                <Home className="h-5 w-5" />
+                <span>الرئيسية</span>
               </Link>
             </Button>
             
-            <Button variant="outline" asChild className="flex items-center gap-2">
-              <Link to="#" onClick={() => window.history.back()}>
-                <ArrowLeft className="h-4 w-4" />
-                {t('errors.notFound.goBack') || 'الرجوع للخلف'}
+            <Button asChild size="lg" variant="outline">
+              <Link to="/contact">
+                تواصل معنا
               </Link>
             </Button>
           </div>
+          
+          <div className="flex items-center justify-center gap-2 text-unlimited-gray">
+            <Clock className="h-4 w-4" />
+            <span>سيتم توجيهك تلقائياً إلى الصفحة الرئيسية خلال</span>
+            <span className="text-unlimited-blue font-bold">{countdown}</span>
+            <span>ثانية</span>
+          </div>
         </div>
         
-        <div className="border-t pt-6 flex flex-col gap-4 text-unlimited-gray">
-          <div className="flex justify-center gap-6">
-            <Link to="/contact" className="flex items-center gap-1 hover:text-unlimited-blue transition-colors">
-              <HelpCircle className="h-4 w-4" />
-              <span>{t('errors.notFound.getHelp') || 'الحصول على المساعدة'}</span>
-            </Link>
-            <Link to="/universities" className="flex items-center gap-1 hover:text-unlimited-blue transition-colors">
-              <School className="h-4 w-4" />
-              <span>{t('errors.notFound.findUniversity') || 'البحث عن جامعة'}</span>
-            </Link>
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-10">
+          <h3 className="font-semibold text-lg mb-4">البحث في الموقع</h3>
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="ابحث عن الصفحة أو المحتوى..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-grow px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue dark:bg-gray-700 dark:text-white"
+            />
+            <Button type="submit">
+              <Search className="h-4 w-4 mr-1" />
+              <span>بحث</span>
+            </Button>
+          </form>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+          <h3 className="font-semibold text-lg mb-4">صفحات قد تهمك</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {suggestedPages.map((page, index) => (
+              <Link 
+                key={index} 
+                to={page.url}
+                className="flex items-center gap-2 p-3 rounded-md hover:bg-unlimited-light-blue dark:hover:bg-gray-700 transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4 text-unlimited-blue" />
+                <span>{page.title}</span>
+              </Link>
+            ))}
           </div>
-
-          <div className="mt-4 border border-dashed border-unlimited-light-blue p-4 rounded-md bg-unlimited-light-blue/10">
-            <TurkishUniversitiesAnnouncement />
-          </div>
-          
-          <p className="text-sm mt-4">
-            {t('errors.notFound.contactSupport') || 'إذا كنت تعتقد أن هناك خطأ ما، يرجى الاتصال بالدعم.'}
-          </p>
         </div>
       </div>
-    </div>
+    </MainLayout>
   );
 };
 

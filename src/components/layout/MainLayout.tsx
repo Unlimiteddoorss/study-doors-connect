@@ -4,6 +4,7 @@ import Header from './Header';
 import Footer from './Footer';
 import { ArrowUp, Bell, Globe, MessageCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -171,7 +172,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-950 dark:text-white transition-colors duration-300">
       <Header />
       {shouldShowFloatingAnnouncement && showAnnouncement && (
         <div className="container mx-auto px-4 pt-4">
@@ -348,6 +349,20 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             </div>
           </SheetContent>
         </Sheet>
+        
+        {/* إضافة زر تبديل المظهر */}
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="bg-unlimited-blue rounded-full shadow-lg hover:bg-unlimited-dark-blue transition-all">
+                <ThemeToggle />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="left">
+              <p>تبديل المظهر</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
         
         {/* زر تغيير اللغة */}
         <DropdownMenu>
