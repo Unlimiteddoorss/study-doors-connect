@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import Logo from '../shared/Logo';
+import DarkModeToggle from '@/components/shared/DarkModeToggle';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -59,6 +60,11 @@ const Header = () => {
               </Link>
             ))}
           </nav>
+
+          {/* Add the dark mode toggle before the language selection or other header controls */}
+          <div className="hidden md:flex items-center gap-4">
+            <DarkModeToggle />
+          </div>
 
           {/* Language Switcher */}
           <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">

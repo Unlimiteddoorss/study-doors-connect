@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, School, Users, Award, Globe, Book } from 'lucide-react';
+import ShareUniversity from './ShareUniversity';
 
 export interface University {
   id: number;
@@ -38,7 +39,7 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
   };
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue">
+    <Card className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue dark:border-gray-700 dark:bg-gray-800">
       <div className="relative h-48 overflow-hidden">
         <img 
           src={university.image}
@@ -51,7 +52,7 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
           <Badge className="absolute top-2 right-2 bg-unlimited-blue">جامعة مميزة</Badge>
         )}
         
-        {/* Programs badge - new! */}
+        {/* Programs badge */}
         <Badge className="absolute top-2 left-2 bg-green-600">
           <Book className="w-3 h-3 mr-1" />
           {university.programs} برنامج
@@ -131,11 +132,16 @@ const UniversityCard: React.FC<UniversityCardProps> = ({ university, countryTran
         )}
       </CardContent>
       
-      <CardFooter className="flex flex-col sm:flex-row gap-2">
-        <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
+      <CardFooter className="grid grid-cols-3 gap-2">
+        <Button asChild className="col-span-2 bg-unlimited-blue hover:bg-unlimited-dark-blue">
           <Link to={`/universities/${university.id}`}>عرض التفاصيل</Link>
         </Button>
-        <Button asChild variant="outline" className="w-full">
+        <ShareUniversity 
+          universityName={university.nameAr || university.name} 
+          universityId={university.id}
+          className="w-full"
+        />
+        <Button asChild variant="outline" className="col-span-3">
           <Link to={`/apply?university=${university.id}`}>تقدم الآن</Link>
         </Button>
       </CardFooter>

@@ -1,13 +1,14 @@
 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>منصة دراسة ابورز</title>
     <meta name="description" content="منصة متكاملة للطلاب الراغبين بالدراسة في تركيا والعالم - دليلك الشامل لاختيار الجامعة والبرنامج المناسب" />
     <meta name="author" content="Study Doors" />
-    <meta name="theme-color" content="#1e40af" />
+    <meta name="theme-color" content="#1e40af" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
 
     <meta property="og:title" content="منصة دراسة ابورز - دليلك للدراسة في تركيا" />
     <meta property="og:description" content="منصة متكاملة للطلاب الراغبين بالدراسة في تركيا والعالم - دليلك الشامل لاختيار الجامعة والبرنامج المناسب" />
@@ -23,6 +24,10 @@
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     
+    <!-- إضافة خطوط جديدة للتطبيق -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&display=swap" rel="stylesheet">
+    
     <!-- Add manifest.json for PWA -->
     <link rel="manifest" href="/manifest.json" />
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
@@ -31,6 +36,26 @@
     <!-- Add preload for critical resources -->
     <link rel="preload" href="/src/index.css" as="style" />
     <link rel="preload" href="/src/main.tsx" as="script" />
+    
+    <!-- تحسين SEO باستخدام canonical URL -->
+    <link rel="canonical" href="https://studydoors.com/" />
+    
+    <!-- Add structured data for better SEO -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "EducationalOrganization",
+        "name": "منصة دراسة ابورز",
+        "url": "https://studydoors.com",
+        "logo": "https://studydoors.com/logo.png",
+        "description": "منصة متكاملة للطلاب الراغبين بالدراسة في تركيا والعالم",
+        "sameAs": [
+          "https://facebook.com/studydoors",
+          "https://twitter.com/studydoors",
+          "https://instagram.com/studydoors"
+        ]
+      }
+    </script>
   </head>
 
   <body>
@@ -38,12 +63,27 @@
     <!-- Loading indicator -->
     <div id="loading-screen" style="position: fixed; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; background: white; z-index: 9999; transition: opacity 0.3s ease;">
       <img src="/placeholder.svg" alt="Loading" style="width: 80px; height: 80px; animation: pulse 1.5s infinite;" />
-      <p style="margin-top: 16px; font-family: sans-serif; color: #333;">جاري التحميل...</p>
+      <p style="margin-top: 16px; font-family: 'Tajawal', sans-serif; color: #333;">جاري التحميل...</p>
     </div>
     <script>
+      // إضافة كود لتطبيق وضع الألوان المفضل للمستخدم
+      const userTheme = localStorage.getItem('theme');
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(userTheme || systemTheme);
+      
+      // تحديث لون الخلفية للشاشة المؤقتة بناءً على الوضع الليلي/النهاري
+      const loadingScreen = document.getElementById('loading-screen');
+      if (loadingScreen) {
+        if ((userTheme || systemTheme) === 'dark') {
+          loadingScreen.style.background = '#0f172a';
+          loadingScreen.querySelector('p').style.color = '#f8fafc';
+        }
+      }
+      
       // Remove loading screen when app is ready
       window.addEventListener('load', function() {
-        const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
           loadingScreen.style.opacity = '0';
           setTimeout(() => {

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -16,6 +17,8 @@ import UniversityAdvancedFilters, { FiltersState } from '@/components/universiti
 import UniversitySEO from '@/components/seo/UniversitySEO';
 import ScrollToTop from '@/components/shared/ScrollToTop';
 import CountUp from '@/components/shared/CountUp';
+import DarkModeToggle from '@/components/shared/DarkModeToggle';
+import SavedFilters from '@/components/universities/SavedFilters';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -266,6 +269,11 @@ const Universities = () => {
     programs: turkishUniversities.reduce((sum, uni) => sum + uni.programs, 0),
   };
 
+  // تطبيق مجموعة فلتر محفوظة
+  const applySavedFilter = (filters: FiltersState) => {
+    setAdvancedFilters(filters);
+  };
+
   return (
     <MainLayout>
       {/* Add SEO Component */}
@@ -276,42 +284,45 @@ const Universities = () => {
       />
       
       <div className="container mx-auto px-4 py-12">
-        <SectionTitle
-          title="الجامعات التركية"
-          subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
-        />
+        <div className="flex justify-between items-center">
+          <SectionTitle
+            title="الجامعات التركية"
+            subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
+          />
+          <DarkModeToggle />
+        </div>
 
         {/* University Stats Section */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12 mt-6">
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue dark:text-unlimited-blue">
               <CountUp end={stats.total} duration={1500} />
             </div>
-            <div className="text-unlimited-gray mt-2">جامعة</div>
+            <div className="text-unlimited-gray dark:text-gray-300 mt-2">جامعة</div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue dark:text-unlimited-blue">
               <CountUp end={stats.public} duration={1500} />
             </div>
-            <div className="text-unlimited-gray mt-2">جامعة حكومية</div>
+            <div className="text-unlimited-gray dark:text-gray-300 mt-2">جامعة حكومية</div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue dark:text-unlimited-blue">
               <CountUp end={stats.private} duration={1500} />
             </div>
-            <div className="text-unlimited-gray mt-2">جامعة خاصة</div>
+            <div className="text-unlimited-gray dark:text-gray-300 mt-2">جامعة خاصة</div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue dark:text-unlimited-blue">
               <CountUp end={stats.cities} duration={1500} />
             </div>
-            <div className="text-unlimited-gray mt-2">مدينة</div>
+            <div className="text-unlimited-gray dark:text-gray-300 mt-2">مدينة</div>
           </div>
-          <div className="bg-white shadow-md rounded-lg p-4 text-center">
-            <div className="text-4xl font-bold text-unlimited-blue">
+          <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue dark:text-unlimited-blue">
               <CountUp end={stats.programs} duration={1500} />+
             </div>
-            <div className="text-unlimited-gray mt-2">برنامج دراسي</div>
+            <div className="text-unlimited-gray dark:text-gray-300 mt-2">برنامج دراسي</div>
           </div>
         </div>
 
@@ -335,7 +346,7 @@ const Universities = () => {
               placeholder="ابحث عن جامعة..."
               value={searchTerm}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 pr-4"
+              className="pl-10 pr-4 dark:bg-gray-900 dark:border-gray-700"
             />
           </div>
         </div>
@@ -354,9 +365,15 @@ const Universities = () => {
         {/* Results info and View Toggle */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
-            <p className="text-unlimited-gray">
+            <p className="text-unlimited-gray dark:text-gray-300">
               تم العثور على <span className="font-semibold text-unlimited-blue">{filteredUniversities.length}</span> جامعة
             </p>
+            
+            {/* Add Saved Filters Component */}
+            <SavedFilters
+              currentFilters={advancedFilters}
+              onApplyFilter={applySavedFilter}
+            />
           </div>
           
           <div className="flex items-center gap-3">
@@ -364,7 +381,7 @@ const Universities = () => {
               variant="outline" 
               size="sm" 
               onClick={toggleMap}
-              className="border-unlimited-blue text-unlimited-blue"
+              className="border-unlimited-blue text-unlimited-blue dark:border-blue-400 dark:text-blue-400"
             >
               <MapPin className="h-4 w-4 ml-2" />
               {showMap ? 'إخفاء الخريطة' : 'عرض الخريطة'}

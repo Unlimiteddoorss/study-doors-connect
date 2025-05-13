@@ -1,160 +1,186 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: 'Cairo', sans-serif;
+  font-family: 'Tajawal', sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Light Mode Variables */
+  --unlimited-blue: #1e40af;
+  --unlimited-dark-blue: #1e3a8a;
+  --unlimited-light-blue: #3b82f6;
+  --unlimited-gray: #64748b;
+  --unlimited-light-gray: #f1f5f9;
+  --unlimited-dark-gray: #334155;
+  --unlimited-yellow: #facc15;
+  --unlimited-background: #ffffff;
+  --unlimited-text: #0f172a;
+  --unlimited-border: #e2e8f0;
+  --unlimited-card-bg: #ffffff;
+  --unlimited-input-bg: #ffffff;
 }
 
-/* RTL Support - Enhanced */
-[dir="rtl"] {
-  text-align: right;
-}
-
-[dir="ltr"] {
-  text-align: left;
-}
-
-html.rtl button svg, 
-html.rtl .btn svg,
-html.rtl .icon {
-  transform: scaleX(-1);
-}
-
-/* Don't flip specific icons */
-html.rtl .no-flip svg {
-  transform: none;
-}
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 210 100% 44%; /* Unlimited Doors blue */
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 222 47% 20%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 222 47% 30%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 100% 44%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 222 47% 25%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 100% 44%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
+.dark {
+  /* Dark Mode Variables */
+  --unlimited-blue: #3b82f6;
+  --unlimited-dark-blue: #1d4ed8;
+  --unlimited-light-blue: #60a5fa;
+  --unlimited-gray: #94a3b8;
+  --unlimited-light-gray: #334155;
+  --unlimited-dark-gray: #cbd5e1;
+  --unlimited-yellow: #facc15;
+  --unlimited-background: #0f172a;
+  --unlimited-text: #f8fafc;
+  --unlimited-border: #1e293b;
+  --unlimited-card-bg: #1e293b;
+  --unlimited-input-bg: #0f172a;
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
   body {
-    @apply bg-background text-foreground font-roboto;
+    @apply bg-white dark:bg-unlimited-background text-unlimited-text dark:text-unlimited-text transition-colors duration-200;
+  }
+
+  /* إضافة خط Tajawal */
+  @font-face {
+    font-family: 'Tajawal';
+    font-style: normal;
+    font-weight: 400;
+    src: url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+    font-display: swap;
+  }
+
+  /* إضافة خط للعناوين إن كان مختلفًا */
+  @font-face {
+    font-family: 'Almarai';
+    font-style: normal;
+    font-weight: 700;
+    src: url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&display=swap');
+    font-display: swap;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-montserrat;
+    @apply font-bold font-['Almarai'];
   }
 }
 
-/* Utility Classes */
-.stats-card {
-  @apply bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md transition-all hover:shadow-lg;
+@layer components {
+  .btn-primary {
+    @apply bg-unlimited-blue hover:bg-unlimited-dark-blue text-white py-2 px-4 rounded-md transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-unlimited-light-gray hover:bg-unlimited-gray text-unlimited-dark-gray py-2 px-4 rounded-md transition-colors dark:bg-unlimited-light-gray dark:hover:bg-unlimited-gray dark:text-unlimited-dark-gray;
+  }
+
+  .btn-outline {
+    @apply border border-unlimited-blue text-unlimited-blue hover:bg-unlimited-blue hover:text-white py-2 px-4 rounded-md transition-colors dark:border-unlimited-blue dark:text-unlimited-blue dark:hover:bg-unlimited-blue dark:hover:text-white;
+  }
+
+  .card {
+    @apply bg-unlimited-card-bg dark:bg-unlimited-card-bg border border-unlimited-border dark:border-unlimited-border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4;
+  }
+
+  .input {
+    @apply bg-unlimited-input-bg dark:bg-unlimited-input-bg border border-unlimited-border dark:border-unlimited-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-unlimited-blue dark:focus:ring-unlimited-blue transition-all;
+  }
+  
+  /* Animation Utilities */
+  .fade-in {
+    @apply animate-[fadeIn_0.5s_ease-in-out];
+  }
+  
+  .slide-in {
+    @apply animate-[slideIn_0.3s_ease-in-out];
+  }
+  
+  .pulse {
+    @apply animate-[pulse_2s_infinite];
+  }
 }
 
-.stats-value {
-  @apply text-2xl font-bold text-unlimited-blue dark:text-blue-400;
-}
-
-.stats-label {
-  @apply text-sm text-unlimited-gray dark:text-gray-400;
-}
-
-/* Animation classes */
-.fade-in {
-  animation: fadeIn 0.3s ease-in-out;
-}
-
+/* Custom Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Custom CSS Classes */
+.rtl {
+  direction: rtl;
+}
+
+.ltr {
+  direction: ltr;
+}
+
+/* إضافة CSS للتعامل مع النص العربي */
+.arabic-text {
+  font-family: 'Tajawal', sans-serif;
+  line-height: 1.8;
+}
+
+/* تحسين عرض العناصر في الوضع الليلي */
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+.dark .bg-white {
+  @apply bg-unlimited-card-bg;
+}
+
+/* تحسين قابلية القراءة في الوضع الليلي */
+.dark p, .dark span, .dark div {
+  @apply text-unlimited-text;
+}
+
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  @apply text-unlimited-text;
+}
+
+/* تحسين عرض الروابط في الوضع الليلي */
+.dark a:not(.btn-primary):not(.btn-secondary):not(.btn-outline) {
+  @apply text-unlimited-blue hover:text-unlimited-light-blue;
+}
+
+/* إضافة تأثيرات لزيادة جاذبية الموقع */
+.hover-scale {
+  @apply transition-transform duration-300 hover:scale-105;
+}
+
+.hover-shadow {
+  @apply transition-shadow duration-300 hover:shadow-lg;
+}
+
+/* تحسين عرض الصور في الوضع الليلي */
+.dark img {
+  filter: brightness(0.9);
+}
+
+/* دعم وضع الطباعة */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+    print-color-adjust: exact;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .no-print {
+    display: none !important;
   }
-}
-
-/* Language transition effect */
-.lang-transition {
-  transition: all 0.3s ease;
-}
-
-/* Improved RTL spacing utilities */
-.rtl-space-reverse {
-  @apply rtl:space-x-reverse;
-}
-
-.rtl-rotate-180 {
-  @apply rtl:rotate-180;
 }
