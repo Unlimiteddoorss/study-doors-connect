@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Building } from 'lucide-react';
 import { UniversityCard } from './UniversityCard';
 import { Skeleton } from '@/components/ui/skeleton';
 
