@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { File, Image, FileText, File3d, X, Download, Eye, ExternalLink } from 'lucide-react';
+import { File, Image, FileText, X, Download, Eye, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
@@ -36,9 +36,9 @@ const AttachmentPreview = ({
       case 'document':
         return <FileText className="h-5 w-5 text-unlimited-blue" />;
       case 'audio':
-        return <File3d className="h-5 w-5 text-unlimited-blue" />;
+        return <File className="h-5 w-5 text-unlimited-blue" />;
       case 'video':
-        return <File3d className="h-5 w-5 text-unlimited-blue" />;
+        return <File className="h-5 w-5 text-unlimited-blue" />;
       default:
         return <File className="h-5 w-5 text-unlimited-blue" />;
     }
