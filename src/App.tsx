@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -42,6 +41,9 @@ import StudentMessages from "./pages/students/StudentMessages";
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
 import OfflineSupport from "@/components/shared/OfflineSupport";
+import PWAInstaller from "@/components/shared/PWAInstaller";
+import ArabicFontOptimizer from "@/components/shared/ArabicFontOptimizer";
+import ConnectionStatus from "@/components/shared/ConnectionStatus";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
@@ -121,8 +123,20 @@ function App() {
     );
   };
 
+  // Check if the app is being loaded from installed PWA
+  const [isPWA, setIsPWA] = useState(false);
+  
+  useEffect(() => {
+    // Check if the app is running as a PWA
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true) {
+      setIsPWA(true);
+    }
+  }, []);
+
   return (
     <>
+      <ArabicFontOptimizer />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/about" element={<About />} />
@@ -295,6 +309,8 @@ function App() {
       </Routes>
       <Toaster />
       <OfflineSupport />
+      <ConnectionStatus />
+      {!isPWA && <PWAInstaller />}
       <RoleSwitcher />
     </>
   );

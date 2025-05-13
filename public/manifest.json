@@ -1,28 +1,54 @@
 
 {
-  "name": "منصة دراسة ابورز",
-  "short_name": "Study Doors",
-  "theme_color": "#1e40af",
-  "background_color": "#ffffff",
-  "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/",
+  "name": "أبواب بلا حدود - الدليل الشامل للدراسة في الخارج",
+  "short_name": "أبواب بلا حدود",
+  "description": "دليلك الشامل للدراسة في الخارج: جامعات، برامج، منح دراسية، وخدمات استشارية",
   "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a56db",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "ar",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "logo192.png",
+      "src": "/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "الصفحة الرئيسية للتطبيق"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "البحث عن الجامعات",
+      "short_name": "الجامعات",
+      "description": "البحث عن الجامعات",
+      "url": "/universities",
+      "icons": [{ "src": "/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "البحث عن البرامج",
+      "short_name": "البرامج",
+      "description": "استعراض البرامج الدراسية",
+      "url": "/programs",
+      "icons": [{ "src": "/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png", "sizes": "192x192" }]
+    }
+  ],
+  "prefer_related_applications": false
 }

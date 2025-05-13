@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Bookmark, BookmarkCheck, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
-  Sheet, 
+  CustomSheet as Sheet, 
   SheetContent, 
   SheetHeader, 
   SheetTitle, 
@@ -124,7 +124,7 @@ const SavedFilters = ({ currentFilters, onApplyFilter }: SavedFiltersProps) => {
           الفلاتر المحفوظة
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle>الفلاتر المحفوظة</SheetTitle>
         </SheetHeader>
