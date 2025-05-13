@@ -1,11 +1,12 @@
 
 import * as React from "react";
-import { ToastActionElement, ToastProps } from "@/components/ui/toast";
+import type { ToastActionElement } from "@/components/ui/toast";
+import { type ToastProps as UIToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 5;
 const TOAST_REMOVE_DELAY = 1000000;
 
-type ToasterToastProps = ToastProps & {
+type ToasterToastProps = UIToastProps & {
   id: string;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -133,9 +134,9 @@ function dispatch(action: Action) {
   });
 }
 
-type ToastProps = Omit<ToasterToastProps, "id">;
+interface ToastOptions extends Omit<ToasterToastProps, "id"> {}
 
-function toast({ ...props }: ToastProps) {
+function toast(props: ToastOptions) {
   const id = genId();
 
   const update = (props: ToasterToastProps) =>
