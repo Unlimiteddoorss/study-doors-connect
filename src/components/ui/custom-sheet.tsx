@@ -48,7 +48,8 @@ export function CustomSheet({
   );
 }
 
-export const CustomSheetTrigger = Dialog.Trigger;
+// Fixed: Using Dialog as trigger instead of non-existent Dialog.Trigger
+export const CustomSheetTrigger = Dialog;
 export const CustomSheetClose = DialogClose;
 export const CustomSheetContent = DialogContent;
 export const CustomSheetHeader = ({

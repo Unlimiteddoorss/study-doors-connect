@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -14,6 +13,9 @@ import UniversitiesMap from '@/components/universities/UniversitiesMap';
 import ViewToggle from '@/components/universities/ViewToggle';
 import UniversityComparison from '@/components/universities/UniversityComparison';
 import UniversityAdvancedFilters, { FiltersState } from '@/components/universities/UniversityAdvancedFilters';
+import UniversitySEO from '@/components/seo/UniversitySEO';
+import ScrollToTop from '@/components/shared/ScrollToTop';
+import CountUp from '@/components/shared/CountUp';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -255,13 +257,63 @@ const Universities = () => {
     setSearchTerm('');
   };
 
+  // حساب إحصائيات الجامعات
+  const stats = {
+    total: turkishUniversities.length,
+    public: turkishUniversities.filter(uni => uni.type === 'Public').length,
+    private: turkishUniversities.filter(uni => uni.type === 'Private').length,
+    cities: Array.from(new Set(turkishUniversities.map(uni => uni.city))).length,
+    programs: turkishUniversities.reduce((sum, uni) => sum + uni.programs, 0),
+  };
+
   return (
     <MainLayout>
+      {/* Add SEO Component */}
+      <UniversitySEO 
+        title="الجامعات التركية - أفضل الخيارات للدراسة في تركيا"
+        description="استكشف أفضل الجامعات التركية الحكومية والخاصة، مع برامج دراسية متنوعة ومنح دراسية متاحة. تعرف على التكاليف والمواقع والتخصصات المتاحة."
+        keywords={["جامعات تركيا", "دراسة في تركيا", "منح دراسية", "جامعات خاصة", "جامعات حكومية", "برامج دراسية"]}
+      />
+      
       <div className="container mx-auto px-4 py-12">
         <SectionTitle
           title="الجامعات التركية"
           subtitle="استكشف أفضل الجامعات التركية وتعرف على برامجها وميزاتها"
         />
+
+        {/* University Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12 mt-6">
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">
+              <CountUp end={stats.total} duration={1500} />
+            </div>
+            <div className="text-unlimited-gray mt-2">جامعة</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">
+              <CountUp end={stats.public} duration={1500} />
+            </div>
+            <div className="text-unlimited-gray mt-2">جامعة حكومية</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">
+              <CountUp end={stats.private} duration={1500} />
+            </div>
+            <div className="text-unlimited-gray mt-2">جامعة خاصة</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">
+              <CountUp end={stats.cities} duration={1500} />
+            </div>
+            <div className="text-unlimited-gray mt-2">مدينة</div>
+          </div>
+          <div className="bg-white shadow-md rounded-lg p-4 text-center">
+            <div className="text-4xl font-bold text-unlimited-blue">
+              <CountUp end={stats.programs} duration={1500} />+
+            </div>
+            <div className="text-unlimited-gray mt-2">برنامج دراسي</div>
+          </div>
+        </div>
 
         {/* Map Section */}
         {showMap && (
@@ -356,6 +408,9 @@ const Universities = () => {
           onClose={() => setShowComparison(false)}
           countryTranslations={countryTranslations}
         />
+        
+        {/* Scroll To Top Button */}
+        <ScrollToTop />
       </div>
     </MainLayout>
   );

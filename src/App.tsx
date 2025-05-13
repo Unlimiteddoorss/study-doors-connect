@@ -41,6 +41,7 @@ import UserMessages from "./pages/messaging/UserMessages";
 import StudentMessages from "./pages/students/StudentMessages";
 import Reports from "./pages/admin/Reports";
 import { Toaster } from "@/components/ui/toaster";
+import OfflineSupport from "@/components/shared/OfflineSupport";
 import "./App.css";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ApplicationDetails from "./pages/dashboard/ApplicationDetails";
@@ -293,6 +294,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
+      <OfflineSupport />
       <RoleSwitcher />
     </>
   );
