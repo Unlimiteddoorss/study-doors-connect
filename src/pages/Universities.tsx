@@ -13,6 +13,7 @@ import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import UniversitiesMap from '@/components/universities/UniversitiesMap';
 import ViewToggle from '@/components/universities/ViewToggle';
 import UniversityComparison from '@/components/universities/UniversityComparison';
+import UniversityAdvancedFilters, { FiltersState } from '@/components/universities/UniversityAdvancedFilters';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -46,21 +47,123 @@ const Universities = () => {
   const [showMap, setShowMap] = useState(true);
   const { toast } = useToast();
   
+  // إضافة حالة للفلترة المتقدمة
+  const [advancedFilters, setAdvancedFilters] = useState<FiltersState>({
+    search: '',
+    types: [],
+    locations: [],
+    languages: [],
+    minRanking: undefined,
+    maxRanking: undefined,
+    minStudents: undefined,
+    maxStudents: undefined,
+    featured: false
+  });
+  
   const universitiesPerPage = 12;
 
+  // إنشاء خيارات القوائم المنسدلة
+  const locationOptions = Array.from(new Set(
+    turkishUniversities.map(uni => uni.city)
+  )).map(city => ({ value: city, label: countryTranslations[city] || city }));
+
+  const typeOptions = [
+    { value: 'Public', label: 'حكومية' },
+    { value: 'Private', label: 'خاصة' }
+  ];
+
+  const languageOptions = [
+    { value: 'English', label: 'الإنجليزية' },
+    { value: 'Turkish', label: 'التركية' },
+    { value: 'Arabic', label: 'العربية' }
+  ];
+  
+  // تطبيق جميع الفلاتر
   useEffect(() => {
-    if (searchTerm) {
-      setFilteredUniversities(
-        turkishUniversities.filter(
-          university =>
-            university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            university.location.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredUniversities(turkishUniversities);
+    // تحديث قيمة البحث النصي من الفلتر المتقدم
+    if (searchTerm !== advancedFilters.search) {
+      setSearchTerm(advancedFilters.search);
     }
-  }, [searchTerm]);
+
+    let results = [...turkishUniversities];
+    
+    // فلترة بالنص
+    if (searchTerm) {
+      results = results.filter(
+        university =>
+          university.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (university.nameAr && university.nameAr.includes(searchTerm)) ||
+          university.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          university.city.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // فلترة بنوع الجامعة
+    if (advancedFilters.types.length > 0) {
+      results = results.filter(
+        university => advancedFilters.types.includes(university.type)
+      );
+    }
+    
+    // فلترة بالموقع
+    if (advancedFilters.locations.length > 0) {
+      results = results.filter(
+        university => advancedFilters.locations.includes(university.city)
+      );
+    }
+    
+    // فلترة باللغة
+    if (advancedFilters.languages.length > 0) {
+      results = results.filter(
+        university => {
+          if (!university.languages) return false;
+          return advancedFilters.languages.some(
+            lang => university.languages?.includes(lang)
+          );
+        }
+      );
+    }
+    
+    // فلترة بالتصنيف
+    if (advancedFilters.minRanking !== undefined) {
+      results = results.filter(
+        university => university.ranking !== undefined && university.ranking >= (advancedFilters.minRanking || 0)
+      );
+    }
+    
+    if (advancedFilters.maxRanking !== undefined) {
+      results = results.filter(
+        university => university.ranking !== undefined && university.ranking <= (advancedFilters.maxRanking || Infinity)
+      );
+    }
+    
+    // فلترة بعدد الطلاب
+    if (advancedFilters.minStudents !== undefined) {
+      results = results.filter(
+        university => university.students >= (advancedFilters.minStudents || 0)
+      );
+    }
+    
+    if (advancedFilters.maxStudents !== undefined) {
+      results = results.filter(
+        university => university.students <= (advancedFilters.maxStudents || Infinity)
+      );
+    }
+    
+    // فلترة بالجامعات المميزة
+    if (advancedFilters.featured) {
+      results = results.filter(university => university.isFeatured);
+    }
+    
+    setFilteredUniversities(results);
+    setCurrentPage(1); // إعادة تعيين الصفحة الحالية عند تغيير الفلاتر
+  }, [searchTerm, advancedFilters]);
+  
+  // تحديث حالة البحث النصي
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setAdvancedFilters(prev => ({ ...prev, search: value }));
+  };
 
   // حساب صفحة العرض الحالية
   const indexOfLastUniversity = currentPage * universitiesPerPage;
@@ -136,6 +239,22 @@ const Universities = () => {
     }
   };
 
+  // إعادة تعيين جميع الفلاتر
+  const resetAllFilters = () => {
+    setAdvancedFilters({
+      search: '',
+      types: [],
+      locations: [],
+      languages: [],
+      minRanking: undefined,
+      maxRanking: undefined,
+      minStudents: undefined,
+      maxStudents: undefined,
+      featured: false
+    });
+    setSearchTerm('');
+  };
+
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
@@ -156,18 +275,29 @@ const Universities = () => {
         )}
 
         {/* Search Component */}
-        <div className="max-w-2xl mx-auto mb-10">
+        <div className="max-w-2xl mx-auto mb-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
               placeholder="ابحث عن جامعة..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 pr-4"
             />
           </div>
         </div>
+
+        {/* Advanced Filters */}
+        <UniversityAdvancedFilters 
+          filters={advancedFilters}
+          onChange={setAdvancedFilters}
+          onReset={resetAllFilters}
+          locations={locationOptions}
+          types={typeOptions}
+          languages={languageOptions}
+          countryTranslations={countryTranslations}
+        />
 
         {/* Results info and View Toggle */}
         <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -211,7 +341,7 @@ const Universities = () => {
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={paginate}
-          onResetFilters={() => setSearchTerm("")}
+          onResetFilters={resetAllFilters}
           countryTranslations={countryTranslations}
           viewMode={viewMode}
           compareIds={compareIds}
