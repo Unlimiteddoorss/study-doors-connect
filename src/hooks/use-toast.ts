@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { type ToastActionElement, type ToastProps } from "@/components/ui/toast"
 
@@ -130,7 +129,8 @@ export function useToast() {
   }
 }
 
-export const toast = {
-  ...createToast,
-  dismiss: dismissToast,
-}
+// Fixed: Export a callable toast function instead of an object
+export const toast = (options: ToastOptions) => createToast(options);
+
+// Keep the dismiss function separately if needed
+toast.dismiss = dismissToast;

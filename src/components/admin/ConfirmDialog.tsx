@@ -22,6 +22,7 @@ interface ConfirmDialogProps {
   cancelLabel?: string;
   isLoading?: boolean;
   destructive?: boolean;
+  variant?: string; // Added variant prop
 }
 
 export function ConfirmDialog({
@@ -34,7 +35,16 @@ export function ConfirmDialog({
   cancelLabel = "إلغاء",
   isLoading = false,
   destructive = true,
+  variant = "destructive", // Default to destructive
 }: ConfirmDialogProps) {
+  // Determine the button class based on variant or destructive prop
+  const getButtonClass = () => {
+    if (variant === "destructive" || destructive) {
+      return "bg-unlimited-danger hover:bg-unlimited-danger/90";
+    }
+    return ""; // Default button style
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
@@ -48,7 +58,7 @@ export function ConfirmDialog({
           <AlertDialogCancel disabled={isLoading}>{cancelLabel}</AlertDialogCancel>
           <Button
             onClick={onConfirm}
-            className={destructive ? "bg-unlimited-danger hover:bg-unlimited-danger/90" : ""}
+            className={getButtonClass()}
             disabled={isLoading}
           >
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

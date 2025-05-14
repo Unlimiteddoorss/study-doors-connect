@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Share2, Check, Copy, Twitter, Facebook, Linkedin, Link2 } from 'lucide-react';
+import { Share2, Check, Copy, Twitter, Facebook, Linkedin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { 
   Popover, 

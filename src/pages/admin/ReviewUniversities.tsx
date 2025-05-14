@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -211,6 +210,7 @@ const ReviewUniversities = () => {
     });
   };
   
+  // getConfirmationText function
   const getConfirmationText = () => {
     const university = universities.find(uni => uni.id === selectedUniversityId);
     
@@ -366,7 +366,7 @@ const ReviewUniversities = () => {
               {filteredUniversities.length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center py-12 text-unlimited-gray">
                   <School className="h-12 w-12 mb-2 opacity-50" />
-                  <h3 className="text-lg font-medium">لا توجد جامعات قيد المراجعة</h3>
+                  <h3 className="text-lg font-medium">لا ��وجد جامعات قيد المراجعة</h3>
                   <p className="text-sm">لم يتم العثور على جامعات تنتظر المراجعة</p>
                 </div>
               ) : (
@@ -440,7 +440,7 @@ const ReviewUniversities = () => {
           confirmLabel={actionType === 'approve' ? "موافقة" : "رفض"}
           cancelLabel="إلغاء"
           isLoading={isLoading}
-          variant={actionType === 'approve' ? "default" : "destructive"}
+          destructive={actionType !== 'approve'}
         />
       </motion.div>
     </DashboardLayout>
