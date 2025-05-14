@@ -1,17 +1,21 @@
 
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Bell } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Check, X, Info, AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface Notification {
-  id: number;
+  id: string;
   title: string;
   message: string;
   time: string;
@@ -19,165 +23,234 @@ interface Notification {
   type: 'info' | 'warning' | 'success' | 'error';
 }
 
-interface NotificationCenterProps {
-  className?: string;
-}
-
-const NotificationCenter = ({ className = '' }: NotificationCenterProps) => {
+const NotificationCenter = () => {
+  const { t } = useTranslation();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 1,
-      title: 'طلب جديد',
-      message: 'تم تقديم طلب جديد من قبل الطالب أحمد محمد',
-      time: 'منذ 5 دقائق',
-      read: false,
-      type: 'info'
-    },
-    {
-      id: 2,
-      title: 'تحديث حالة الطلب',
-      message: 'تم قبول الطالب مريم أحمد في جامعة الملك سعود',
-      time: 'منذ 30 دقيقة',
-      read: false,
-      type: 'success'
-    },
-    {
-      id: 3,
-      title: 'تنبيه: وثائق ناقصة',
-      message: 'الطالب خالد عبدالله لديه وثائق ناقصة تحتاج إلى تحديث',
-      time: 'منذ 2 ساعة',
-      read: false,
-      type: 'warning'
-    },
-    {
-      id: 4,
-      title: 'فشل عملية الدفع',
-      message: 'فشلت عملية دفع الرسوم للطالب سارة علي',
-      time: 'منذ 3 ساعات',
-      read: true,
-      type: 'error'
-    }
-  ]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: number) => {
-    setNotifications(notifications.map(notification =>
-      notification.id === id ? { ...notification, read: true } : notification
-    ));
-  };
+  // Mock data for notifications - in a real app, this would come from an API
+  useEffect(() => {
+    const mockNotifications: Notification[] = [
+      {
+        id: '1',
+        title: t('notifications.application.new'),
+        message: t('notifications.application.newDesc'),
+        time: '5 ' + t('time.minutesAgo'),
+        read: false,
+        type: 'info'
+      },
+      {
+        id: '2',
+        title: t('notifications.document.uploaded'),
+        message: t('notifications.document.uploadedDesc'),
+        time: '30 ' + t('time.minutesAgo'),
+        read: false,
+        type: 'success'
+      },
+      {
+        id: '3',
+        title: t('notifications.student.accepted'),
+        message: t('notifications.student.acceptedDesc'),
+        time: '2 ' + t('time.hoursAgo'),
+        read: false,
+        type: 'success'
+      },
+      {
+        id: '4',
+        title: t('notifications.system.maintenance'),
+        message: t('notifications.system.maintenanceDesc'),
+        time: '1 ' + t('time.dayAgo'),
+        read: true,
+        type: 'warning'
+      },
+      {
+        id: '5',
+        title: t('notifications.deadline.approaching'),
+        message: t('notifications.deadline.approachingDesc'),
+        time: '2 ' + t('time.daysAgo'),
+        read: true,
+        type: 'warning'
+      }
+    ];
+    
+    setNotifications(mockNotifications);
+    setUnreadCount(mockNotifications.filter(n => !n.read).length);
+  }, [t]);
 
   const markAllAsRead = () => {
-    setNotifications(notifications.map(notification => ({ ...notification, read: true })));
+    setNotifications(prev => prev.map(notification => ({ ...notification, read: true })));
+    setUnreadCount(0);
   };
 
-  const removeNotification = (id: number) => {
-    setNotifications(notifications.filter(notification => notification.id !== id));
+  const markAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === id ? { ...notification, read: true } : notification
+      )
+    );
+    setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
-  const getIconByType = (type: string) => {
-    switch (type) {
-      case 'info':
-        return <Info className="h-5 w-5 text-unlimited-blue" />;
-      case 'warning':
-        return <AlertTriangle className="h-5 w-5 text-unlimited-warning" />;
-      case 'success':
-        return <CheckCircle className="h-5 w-5 text-unlimited-success" />;
-      case 'error':
-        return <AlertCircle className="h-5 w-5 text-unlimited-danger" />;
-      default:
-        return <Info className="h-5 w-5 text-unlimited-blue" />;
+  const deleteNotification = (id: string) => {
+    const notificationToDelete = notifications.find(n => n.id === id);
+    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    
+    if (notificationToDelete && !notificationToDelete.read) {
+      setUnreadCount(prev => Math.max(0, prev - 1));
     }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'info': return 'bg-blue-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'success': return 'bg-green-500';
+      case 'error': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const bellAnimation = {
+    initial: { rotate: 0 },
+    animate: isOpen ? { rotate: [0, 15, -15, 10, -10, 5, -5, 0] } : {},
+    transition: { duration: 0.5 }
   };
 
   return (
-    <div className={`relative ${className}`}>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <motion.div 
+            initial={bellAnimation.initial} 
+            animate={bellAnimation.animate} 
+            transition={bellAnimation.transition}
+          >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center bg-unlimited-danger text-white">
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
                 {unreadCount}
               </Badge>
             )}
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="absolute z-50 mt-2 top-full right-0 w-80 bg-white shadow-lg rounded-md border border-gray-200">
-          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="font-medium">الإشعارات</h3>
-            {unreadCount > 0 && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs text-unlimited-blue hover:text-unlimited-dark-blue"
-                onClick={markAllAsRead}
-              >
-                تعيين الكل كمقروء
-              </Button>
-            )}
-          </div>
-          <div className="max-h-80 overflow-y-auto">
-            <AnimatePresence>
-              {notifications.length > 0 ? (
-                notifications.map((notification) => (
-                  <motion.div
-                    key={notification.id}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className={`p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? 'bg-unlimited-blue/5' : ''}`}
-                  >
-                    <div className="flex gap-3">
-                      <div className="shrink-0 mt-1">
-                        {getIconByType(notification.type)}
-                      </div>
-                      <div className="flex-grow">
-                        <div className="flex justify-between">
-                          <h4 className="font-medium text-unlimited-dark-blue">{notification.title}</h4>
-                          <div className="flex gap-1">
-                            {!notification.read && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-5 w-5"
-                                onClick={() => markAsRead(notification.id)}
-                              >
-                                <Check className="h-3 w-3" />
-                              </Button>
-                            )}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-5 w-5 text-unlimited-gray"
-                              onClick={() => removeNotification(notification.id)}
-                            >
-                              <X className="h-3 w-3" />
-                            </Button>
+          </motion.div>
+        </Button>
+      </DropdownMenuTrigger>
+      
+      <DropdownMenuContent align="end" className="w-80">
+        <DropdownMenuLabel className="flex justify-between items-center">
+          <span>{t('notifications.title')}</span>
+          {unreadCount > 0 && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-xs h-auto py-1" 
+              onClick={markAllAsRead}
+            >
+              {t('notifications.markAllRead')}
+            </Button>
+          )}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        
+        <div className="max-h-80 overflow-y-auto">
+          <AnimatePresence>
+            {notifications.length > 0 ? (
+              notifications.map((notification) => (
+                <motion.div 
+                  key={notification.id}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <DropdownMenuItem className="flex flex-col items-start p-0">
+                    <div className="w-full p-3 cursor-default">
+                      <div className="flex justify-between items-start">
+                        <div className="flex gap-2 items-start">
+                          <div className={`h-2 w-2 ${getTypeColor(notification.type)} rounded-full mt-1.5 flex-shrink-0`} />
+                          <div>
+                            <div className="font-medium flex items-center gap-2">
+                              {notification.title}
+                              {!notification.read && (
+                                <span className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5 rounded">
+                                  {t('notifications.new')}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground">
+                              {notification.message}
+                            </p>
+                            <span className="text-xs text-unlimited-gray mt-1 block">
+                              {notification.time}
+                            </span>
                           </div>
                         </div>
-                        <p className="text-sm text-unlimited-gray mt-1">{notification.message}</p>
-                        <span className="text-xs text-unlimited-gray mt-2 block">{notification.time}</span>
+                        
+                        <div className="flex space-x-1">
+                          {!notification.read && (
+                            <Button
+                              variant="ghost" 
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                markAsRead(notification.id);
+                              }}
+                            >
+                              <span className="sr-only">{t('notifications.markRead')}</span>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13.3334 4L6.00008 11.3333L2.66675 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </Button>
+                          )}
+                          
+                          <Button
+                            variant="ghost" 
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              deleteNotification(notification.id);
+                            }}
+                          >
+                            <span className="sr-only">{t('notifications.delete')}</span>
+                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M2 4H3.33333H14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M5.33325 4.00001V2.66668C5.33325 2.31305 5.47373 1.97392 5.72378 1.72387C5.97383 1.47382 6.31296 1.33334 6.66659 1.33334H9.33325C9.68687 1.33334 10.026 1.47382 10.2761 1.72387C10.5261 1.97392 10.6666 2.31305 10.6666 2.66668V4.00001" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              <path d="M12.6666 4V13.3333C12.6666 13.687 12.5261 14.0261 12.2761 14.2761C12.026 14.5262 11.6869 14.6667 11.3333 14.6667H4.66659C4.31296 14.6667 3.97383 14.5262 3.72378 14.2761C3.47373 14.0261 3.33325 13.687 3.33325 13.3333V4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="p-4 text-center text-unlimited-gray">
-                  <p>لا توجد إشعارات</p>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </motion.div>
+              ))
+            ) : (
+              <div className="py-6 text-center text-unlimited-gray">
+                <div className="mx-auto w-12 h-12 rounded-full bg-unlimited-gray/10 flex items-center justify-center mb-2">
+                  <Bell className="h-6 w-6 text-unlimited-gray" />
                 </div>
-              )}
-            </AnimatePresence>
-          </div>
-          <div className="p-2 border-t border-gray-200">
-            <Button variant="ghost" className="w-full text-sm text-unlimited-blue">
-              عرض جميع الإشعارات
-            </Button>
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+                <p>{t('notifications.noNotifications')}</p>
+              </div>
+            )}
+          </AnimatePresence>
+        </div>
+        
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="justify-center cursor-pointer">
+          <Button variant="ghost" className="w-full" size="sm">
+            {t('notifications.viewAll')}
+          </Button>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
