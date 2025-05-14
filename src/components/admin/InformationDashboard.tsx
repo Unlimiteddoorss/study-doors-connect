@@ -1,228 +1,275 @@
 
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { LineChart } from '@/components/ui/chart';
 import { DonutChart } from '@/components/ui/donut-chart';
-import { LineChart, BarChart } from '@/components/ui/chart';
-import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Download, Share2, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ArrowUpRight, Download, Calendar, Filter, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 
-interface InformationDashboardProps {
-  className?: string;
-}
-
-const InformationDashboard: React.FC<InformationDashboardProps> = ({ className = '' }) => {
+const InformationDashboard = () => {
   const { t } = useTranslation();
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [dateRange, setDateRange] = React.useState<{ from?: Date; to?: Date }>({});
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
 
-  const statusData = [
-    { name: t('dashboard.stats.pending'), value: 35 },
-    { name: t('dashboard.stats.inProgress'), value: 25 },
-    { name: t('dashboard.stats.completed'), value: 30 },
-    { name: t('dashboard.stats.rejected'), value: 10 },
-  ];
-
+  // بيانات مثال للرسوم البيانية
   const performanceData = [
-    { month: 'Jan', applications: 10, acceptances: 5 },
-    { month: 'Feb', applications: 15, acceptances: 8 },
-    { month: 'Mar', applications: 20, acceptances: 12 },
-    { month: 'Apr', applications: 25, acceptances: 15 },
-    { month: 'May', applications: 30, acceptances: 22 },
-    { month: 'Jun', applications: 35, acceptances: 25 },
+    { month: "Jan", applications: 340, accepted: 120 },
+    { month: "Feb", applications: 385, accepted: 148 },
+    { month: "Mar", applications: 450, accepted: 190 },
+    { month: "Apr", applications: 410, accepted: 210 },
+    { month: "May", applications: 480, accepted: 250 },
+    { month: "Jun", applications: 520, accepted: 290 },
+    { month: "Jul", applications: 490, accepted: 270 },
+    { month: "Aug", applications: 550, accepted: 310 },
+    { month: "Sep", applications: 600, accepted: 350 },
   ];
 
-  const universityData = [
-    { name: 'Istanbul University', students: 120 },
-    { name: 'Ankara University', students: 90 },
-    { name: 'Izmir University', students: 70 },
-    { name: 'Bursa University', students: 50 },
-    { name: 'Antalya University', students: 40 },
+  const applicationsStatusData = [
+    { name: 'قيد المراجعة', value: 45 },
+    { name: 'مقبول', value: 30 },
+    { name: 'مكتمل', value: 20 },
+    { name: 'مرفوض', value: 5 },
   ];
+
+  const universityPopularityData = [
+    { name: 'جامعة إسطنبول', value: 42 },
+    { name: 'جامعة أنقرة', value: 28 },
+    { name: 'جامعة البوسفور', value: 18 },
+    { name: 'جامعة بهتشه شهير', value: 12 },
+  ];
+
+  const formatValue = (value: number) => `${value}`;
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     setTimeout(() => setIsRefreshing(false), 1500);
   };
 
-  const cardVariants = {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.5 }
-    },
+      transition: { duration: 0.3 }
+    }
   };
 
   return (
-    <div className={className}>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">{t('admin.dashboard.analyticsOverview')}</h2>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {t('refresh')}
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">{t('admin.dashboard.informationCenter')}</h2>
+          <p className="text-muted-foreground">{t('admin.dashboard.systemPerformance')}</p>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <DatePickerWithRange 
+            onChange={range => setDateRange(range as { from?: Date; to?: Date })}
+            className="w-auto"
+          />
+          
+          <Button variant="outline" size="icon" onClick={handleRefresh}>
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
           </Button>
-          <Button variant="outline" size="sm">
-            <Share2 className="h-4 w-4 mr-1" />
-            {t('share')}
+          
+          <Button variant="outline">
+            <Filter className="h-4 w-4 mr-2" />
+            {t('admin.filters')}
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-1" />
-            {t('export')}
+          
+          <Button variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            {t('admin.exportData')}
           </Button>
         </div>
-      </div>
-      
-      <Tabs defaultValue="performance" className="w-full">
-        <TabsList className="grid grid-cols-4 mb-4">
-          <TabsTrigger value="performance">{t('admin.dashboard.tabs.performance')}</TabsTrigger>
-          <TabsTrigger value="universities">{t('admin.dashboard.tabs.universities')}</TabsTrigger>
-          <TabsTrigger value="students">{t('admin.dashboard.tabs.students')}</TabsTrigger>
-          <TabsTrigger value="calendar">{t('admin.dashboard.tabs.calendar')}</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="performance" className="space-y-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <motion.div 
-              className="lg:col-span-2"
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('admin.dashboard.applicationPerformance')}</CardTitle>
-                  <CardDescription>{t('admin.dashboard.applicationPerformanceDesc')}</CardDescription>
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-6">
+            <TabsTrigger value="overview">{t('admin.dashboard.overview')}</TabsTrigger>
+            <TabsTrigger value="applications">{t('admin.dashboard.applications')}</TabsTrigger>
+            <TabsTrigger value="universities">{t('admin.dashboard.universities')}</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="md:col-span-2">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>{t('admin.dashboard.systemPerformance')}</CardTitle>
+                    <CardDescription>{t('admin.dashboard.lastNineMonths')}</CardDescription>
+                  </div>
+                  <Badge variant="outline" className="bg-unlimited-light-blue/10 text-unlimited-blue">
+                    +24% {t('admin.dashboard.fromLastYear')}
+                  </Badge>
                 </CardHeader>
                 <CardContent>
                   <div className="h-80">
                     <LineChart
                       data={performanceData}
                       index="month"
-                      categories={["applications", "acceptances"]}
+                      categories={["applications", "accepted"]}
                       colors={["#3498db", "#2ecc71"]}
-                      valueFormatter={(value: number) => `${value}`}
+                      valueFormatter={formatValue}
                       className="h-72"
                     />
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between text-sm text-unlimited-gray border-t pt-4">
-                  <div>
-                    {t('admin.dashboard.totalApplications')}: <span className="font-bold text-unlimited-dark-blue">135</span>
-                  </div>
-                  <div>
-                    {t('admin.dashboard.acceptanceRate')}: <span className="font-bold text-unlimited-success">64%</span>
-                  </div>
-                </CardFooter>
               </Card>
-            </motion.div>
-            
-            <motion.div
-              variants={cardVariants}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: 0.2 }}
-            >
-              <Card className="h-full">
+              
+              <Card>
                 <CardHeader>
                   <CardTitle>{t('admin.dashboard.applicationStatus')}</CardTitle>
-                  <CardDescription>{t('admin.dashboard.applicationStatusDesc')}</CardDescription>
+                  <CardDescription>{t('admin.dashboard.currentDistribution')}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <DonutChart 
-                    data={statusData} 
-                    colors={["#3498db", "#f1c40f", "#2ecc71", "#e74c3c"]}
-                    label={
-                      <div className="text-center">
-                        <p className="text-3xl font-bold">100</p>
-                        <p className="text-sm text-unlimited-gray">{t('admin.dashboard.total')}</p>
-                      </div>
-                    }
-                  />
-                </CardContent>
-                <CardFooter className="flex justify-between text-sm text-unlimited-gray border-t pt-4">
-                  <div>
-                    {t('admin.dashboard.updated')}: <span className="font-semibold">1 {t('time.hourAgo')}</span>
+                  <div className="h-64">
+                    <DonutChart
+                      data={applicationsStatusData}
+                      animationEnabled={true}
+                      showLabel={true}
+                      colors={["#3498db", "#2ecc71", "#f1c40f", "#e74c3c"]}
+                      label={
+                        <div className="text-center">
+                          <p className="text-3xl font-bold">100</p>
+                          <p className="text-sm text-unlimited-gray">{t('admin.dashboard.totalApplications')}</p>
+                        </div>
+                      }
+                    />
                   </div>
-                </CardFooter>
+                </CardContent>
               </Card>
-            </motion.div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="universities">
-          <motion.div 
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('admin.dashboard.topUniversities')}</CardTitle>
-                <CardDescription>{t('admin.dashboard.topUniversitiesDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <BarChart
-                    data={universityData}
-                    index="name"
-                    categories={["students"]}
-                    colors={["#9b59b6"]}
-                    valueFormatter={(value: number) => `${value}`}
-                    className="h-72"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-        
-        <TabsContent value="students">
-          <motion.div 
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('admin.dashboard.studentStats')}</CardTitle>
-                <CardDescription>{t('admin.dashboard.studentStatsDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-unlimited-gray">{t('admin.dashboard.studentStatsContent')}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-        
-        <TabsContent value="calendar">
-          <motion.div 
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>{t('admin.dashboard.eventCalendar')}</CardTitle>
-                <CardDescription>{t('admin.dashboard.eventCalendarDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md border"
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-      </Tabs>
-    </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('admin.dashboard.universityPopularity')}</CardTitle>
+                  <CardDescription>{t('admin.dashboard.mostRequestedUniversities')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-64">
+                    <DonutChart
+                      data={universityPopularityData}
+                      animationEnabled={true}
+                      showLabel={true}
+                      colors={["#9b59b6", "#3498db", "#2ecc71", "#f1c40f"]}
+                      label={
+                        <div className="text-center">
+                          <p className="text-3xl font-bold">100</p>
+                          <p className="text-sm text-unlimited-gray">{t('admin.dashboard.totalRequests')}</p>
+                        </div>
+                      }
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>{t('admin.dashboard.recentActivities')}</CardTitle>
+                    <CardDescription>{t('admin.dashboard.lastActions')}</CardDescription>
+                  </div>
+                  <Button variant="ghost" size="sm" className="gap-1">
+                    {t('admin.viewAll')}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          i % 4 === 0 ? 'bg-red-100 text-red-600' :
+                          i % 3 === 0 ? 'bg-purple-100 text-purple-600' :
+                          i % 2 === 0 ? 'bg-green-100 text-green-600' :
+                          'bg-blue-100 text-blue-600'
+                        }`}>
+                          <span className="font-bold">{i}</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm">
+                            {i % 4 === 0 ? t('admin.dashboard.applicationRejected') :
+                            i % 3 === 0 ? t('admin.dashboard.newStudentRegistered') :
+                            i % 2 === 0 ? t('admin.dashboard.documentVerified') :
+                            t('admin.dashboard.paymentReceived')}
+                          </h4>
+                          <p className="text-sm text-unlimited-gray">{t('admin.dashboard.minutesAgo', { minutes: i * 5 })}</p>
+                        </div>
+                        <Badge 
+                          variant="outline" 
+                          className={`
+                            ${i % 4 === 0 ? 'bg-red-50 border-red-200 text-red-600' :
+                              i % 3 === 0 ? 'bg-purple-50 border-purple-200 text-purple-600' :
+                              i % 2 === 0 ? 'bg-green-50 border-green-200 text-green-600' :
+                              'bg-blue-50 border-blue-200 text-blue-600'}
+                          `}
+                        >
+                          {i % 4 === 0 ? t('admin.dashboard.critical') :
+                          i % 3 === 0 ? t('admin.dashboard.info') :
+                          i % 2 === 0 ? t('admin.dashboard.success') :
+                          t('admin.dashboard.pending')}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="applications">
+            <div className="flex flex-col space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('admin.dashboard.applicationDetails')}</CardTitle>
+                  <CardDescription>{t('admin.dashboard.applicationStatsDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-unlimited-gray">{t('admin.dashboard.applicationContentPlaceholder')}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="universities">
+            <div className="flex flex-col space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('admin.dashboard.universityDetails')}</CardTitle>
+                  <CardDescription>{t('admin.dashboard.universityStatsDescription')}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-unlimited-gray">{t('admin.dashboard.universityContentPlaceholder')}</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </motion.div>
+    </motion.div>
   );
 };
 

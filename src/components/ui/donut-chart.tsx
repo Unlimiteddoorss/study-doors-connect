@@ -1,4 +1,5 @@
 
+
 import * as React from "react";
 import { PieChart } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,10 @@ export const DonutChart = ({
   label,
 }: DonutChartProps) => {
   const total = React.useMemo(
-    () => data.reduce((acc, item) => acc + item[category as keyof typeof item] as number, 0),
+    () => data.reduce((acc, item) => {
+      const value = Number(item[category as keyof typeof item] || 0);
+      return acc + value;
+    }, 0),
     [data, category]
   );
 
@@ -61,3 +65,4 @@ export const DonutChart = ({
     </div>
   );
 };
+
