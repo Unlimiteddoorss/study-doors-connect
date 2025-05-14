@@ -1,272 +1,446 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LineChart } from '@/components/ui/chart';
-import { DonutChart } from '@/components/ui/donut-chart';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  AreaChart, 
+  BarChart, 
+  LineChart 
+} from '@/components/ui/chart';
+import { 
+  Tabs, 
+  TabsList, 
+  TabsTrigger, 
+  TabsContent 
+} from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { ArrowUpRight, Download, Calendar, Filter, RefreshCw } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  Calendar, 
+  RefreshCw, 
+  Upload, 
+  Download,
+  BarChart3,
+  PieChart
+} from 'lucide-react';
+import { format, addDays, subDays } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
-const InformationDashboard = () => {
-  const { t } = useTranslation();
-  const [dateRange, setDateRange] = React.useState<{ from?: Date; to?: Date }>({});
-  const [isRefreshing, setIsRefreshing] = React.useState(false);
+interface InformationDashboardProps {
+  title?: string;
+  subtitle?: string;
+  className?: string;
+}
 
-  // بيانات مثال للرسوم البيانية
-  const performanceData = [
-    { month: "Jan", applications: 340, accepted: 120 },
-    { month: "Feb", applications: 385, accepted: 148 },
-    { month: "Mar", applications: 450, accepted: 190 },
-    { month: "Apr", applications: 410, accepted: 210 },
-    { month: "May", applications: 480, accepted: 250 },
-    { month: "Jun", applications: 520, accepted: 290 },
-    { month: "Jul", applications: 490, accepted: 270 },
-    { month: "Aug", applications: 550, accepted: 310 },
-    { month: "Sep", applications: 600, accepted: 350 },
-  ];
-
-  const applicationsStatusData = [
-    { name: 'قيد المراجعة', value: 45 },
-    { name: 'مقبول', value: 30 },
-    { name: 'مكتمل', value: 20 },
-    { name: 'مرفوض', value: 5 },
-  ];
-
-  const universityPopularityData = [
-    { name: 'جامعة إسطنبول', value: 42 },
-    { name: 'جامعة أنقرة', value: 28 },
-    { name: 'جامعة البوسفور', value: 18 },
-    { name: 'جامعة بهتشه شهير', value: 12 },
-  ];
-
-  const formatValue = (value: number) => `${value}`;
-
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 1500);
+const InformationDashboard: React.FC<InformationDashboardProps> = ({ 
+  title = 'لوحة المعلومات',
+  subtitle = 'تابع أحدث الإحصائيات والبيانات',
+  className = ''
+}) => {
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
+  const locale = isRtl ? ar : enUS;
+  
+  const [activeTimeframe, setActiveTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('week');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Sample data
+  const performanceData = {
+    day: [
+      { hour: '00:00', value: 10 },
+      { hour: '03:00', value: 5 },
+      { hour: '06:00', value: 8 },
+      { hour: '09:00', value: 25 },
+      { hour: '12:00', value: 35 },
+      { hour: '15:00', value: 40 },
+      { hour: '18:00', value: 30 },
+      { hour: '21:00', value: 20 },
+    ],
+    week: [
+      { day: isRtl ? 'الأحد' : 'Sun', value: 45 },
+      { day: isRtl ? 'الاثنين' : 'Mon', value: 52 },
+      { day: isRtl ? 'الثلاثاء' : 'Tue', value: 48 },
+      { day: isRtl ? 'الأربعاء' : 'Wed', value: 61 },
+      { day: isRtl ? 'الخميس' : 'Thu', value: 55 },
+      { day: isRtl ? 'الجمعة' : 'Fri', value: 32 },
+      { day: isRtl ? 'السبت' : 'Sat', value: 40 },
+    ],
+    month: Array.from({ length: 30 }, (_, i) => ({
+      date: i + 1,
+      value: Math.floor(Math.random() * 80) + 20,
+    })),
+    year: [
+      { month: isRtl ? 'يناير' : 'Jan', value: 420 },
+      { month: isRtl ? 'فبراير' : 'Feb', value: 380 },
+      { month: isRtl ? 'مارس' : 'Mar', value: 450 },
+      { month: isRtl ? 'أبريل' : 'Apr', value: 520 },
+      { month: isRtl ? 'مايو' : 'May', value: 480 },
+      { month: isRtl ? 'يونيو' : 'Jun', value: 570 },
+      { month: isRtl ? 'يوليو' : 'Jul', value: 610 },
+      { month: isRtl ? 'أغسطس' : 'Aug', value: 590 },
+      { month: isRtl ? 'سبتمبر' : 'Sep', value: 620 },
+      { month: isRtl ? 'أكتوبر' : 'Oct', value: 670 },
+      { month: isRtl ? 'نوفمبر' : 'Nov', value: 650 },
+      { month: isRtl ? 'ديسمبر' : 'Dec', value: 630 },
+    ],
   };
-
+  
+  const conversionData = {
+    week: [
+      { day: isRtl ? 'الأحد' : 'Sun', visits: 120, conversions: 22 },
+      { day: isRtl ? 'الاثنين' : 'Mon', visits: 140, conversions: 25 },
+      { day: isRtl ? 'الثلاثاء' : 'Tue', visits: 130, conversions: 28 },
+      { day: isRtl ? 'الأربعاء' : 'Wed', visits: 160, conversions: 35 },
+      { day: isRtl ? 'الخميس' : 'Thu', visits: 150, conversions: 32 },
+      { day: isRtl ? 'الجمعة' : 'Fri', visits: 90, conversions: 15 },
+      { day: isRtl ? 'السبت' : 'Sat', visits: 110, conversions: 20 },
+    ],
+  };
+  
+  const getTimeframeLabel = () => {
+    switch (activeTimeframe) {
+      case 'day':
+        return format(currentDate, 'eeee, d MMMM yyyy', { locale });
+      case 'week':
+        const weekStart = format(currentDate, 'd MMM', { locale });
+        const weekEnd = format(addDays(currentDate, 6), 'd MMM', { locale });
+        return `${weekStart} - ${weekEnd}`;
+      case 'month':
+        return format(currentDate, 'MMMM yyyy', { locale });
+      case 'year':
+        return format(currentDate, 'yyyy', { locale });
+      default:
+        return '';
+    }
+  };
+  
+  const handlePrevious = () => {
+    switch (activeTimeframe) {
+      case 'day':
+        setCurrentDate(subDays(currentDate, 1));
+        break;
+      case 'week':
+        setCurrentDate(subDays(currentDate, 7));
+        break;
+      case 'month':
+        const prevMonth = new Date(currentDate);
+        prevMonth.setMonth(currentDate.getMonth() - 1);
+        setCurrentDate(prevMonth);
+        break;
+      case 'year':
+        const prevYear = new Date(currentDate);
+        prevYear.setFullYear(currentDate.getFullYear() - 1);
+        setCurrentDate(prevYear);
+        break;
+    }
+  };
+  
+  const handleNext = () => {
+    switch (activeTimeframe) {
+      case 'day':
+        setCurrentDate(addDays(currentDate, 1));
+        break;
+      case 'week':
+        setCurrentDate(addDays(currentDate, 7));
+        break;
+      case 'month':
+        const nextMonth = new Date(currentDate);
+        nextMonth.setMonth(currentDate.getMonth() + 1);
+        setCurrentDate(nextMonth);
+        break;
+      case 'year':
+        const nextYear = new Date(currentDate);
+        nextYear.setFullYear(currentDate.getFullYear() + 1);
+        setCurrentDate(nextYear);
+        break;
+    }
+  };
+  
+  const refreshData = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  };
+  
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
+    visible: { 
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+      transition: { staggerChildren: 0.1 }
     }
   };
   
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.3 }
-    }
+    visible: { opacity: 1, y: 0 }
   };
 
   return (
     <motion.div 
+      className={`space-y-4 ${className}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6"
     >
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-center gap-4">
+      <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{t('admin.dashboard.informationCenter')}</h2>
-          <p className="text-muted-foreground">{t('admin.dashboard.systemPerformance')}</p>
+          <h2 className="text-xl font-bold text-unlimited-dark-blue">{title}</h2>
+          <p className="text-unlimited-gray text-sm">{subtitle}</p>
         </div>
         
-        <div className="flex flex-wrap items-center gap-3">
-          <DatePickerWithRange 
-            onChange={range => setDateRange(range as { from?: Date; to?: Date })}
-            className="w-auto"
-          />
+        <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+          <div className="flex items-center bg-gray-100 rounded-md">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-unlimited-gray h-8"
+              onClick={handlePrevious}
+            >
+              {isRtl ? <ArrowRight className="h-4 w-4" /> : <ArrowLeft className="h-4 w-4" />}
+            </Button>
+            <span className="px-3 flex items-center text-sm">
+              <Calendar className="h-3.5 w-3.5 mr-2 text-unlimited-gray" />
+              {getTimeframeLabel()}
+            </span>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-unlimited-gray h-8"
+              onClick={handleNext}
+            >
+              {isRtl ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+            </Button>
+          </div>
           
-          <Button variant="outline" size="icon" onClick={handleRefresh}>
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </Button>
-          
-          <Button variant="outline">
-            <Filter className="h-4 w-4 mr-2" />
-            {t('admin.filters')}
-          </Button>
-          
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            {t('admin.exportData')}
-          </Button>
+          <div className="flex items-center space-x-2 rtl:space-x-reverse">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={refreshData}
+              disabled={isLoading}
+              className="h-8"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${isLoading ? 'animate-spin' : ''}`} />
+              {t('dashboard.refresh')}
+            </Button>
+            <div className="flex items-center space-x-1 rtl:space-x-reverse">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Upload className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
         </div>
       </motion.div>
-
+      
       <motion.div variants={itemVariants}>
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
-            <TabsTrigger value="overview">{t('admin.dashboard.overview')}</TabsTrigger>
-            <TabsTrigger value="applications">{t('admin.dashboard.applications')}</TabsTrigger>
-            <TabsTrigger value="universities">{t('admin.dashboard.universities')}</TabsTrigger>
+        <Tabs defaultValue="performance" className="space-y-4">
+          <TabsList className="grid grid-cols-3 md:w-[400px]">
+            <TabsTrigger value="performance">{t('dashboard.performance')}</TabsTrigger>
+            <TabsTrigger value="conversions">{t('dashboard.conversions')}</TabsTrigger>
+            <TabsTrigger value="trends">{t('dashboard.trends')}</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="overview">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="md:col-span-2">
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t('admin.dashboard.systemPerformance')}</CardTitle>
-                    <CardDescription>{t('admin.dashboard.lastNineMonths')}</CardDescription>
-                  </div>
-                  <Badge variant="outline" className="bg-unlimited-light-blue/10 text-unlimited-blue">
-                    +24% {t('admin.dashboard.fromLastYear')}
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-80">
-                    <LineChart
-                      data={performanceData}
-                      index="month"
-                      categories={["applications", "accepted"]}
-                      colors={["#3498db", "#2ecc71"]}
-                      valueFormatter={formatValue}
-                      className="h-72"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+          <div className="bg-white rounded-lg border p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-unlimited-dark-blue font-medium">
+                {t('dashboard.timeframeView')}
+              </h3>
+              <div className="flex space-x-2 rtl:space-x-reverse">
+                <Button 
+                  variant={activeTimeframe === 'day' ? 'unlimited' : 'ghost'} 
+                  size="sm" 
+                  onClick={() => setActiveTimeframe('day')}
+                  className="text-xs h-8"
+                >
+                  {t('dashboard.daily')}
+                </Button>
+                <Button 
+                  variant={activeTimeframe === 'week' ? 'unlimited' : 'ghost'} 
+                  size="sm" 
+                  onClick={() => setActiveTimeframe('week')}
+                  className="text-xs h-8"
+                >
+                  {t('dashboard.weekly')}
+                </Button>
+                <Button 
+                  variant={activeTimeframe === 'month' ? 'unlimited' : 'ghost'} 
+                  size="sm" 
+                  onClick={() => setActiveTimeframe('month')}
+                  className="text-xs h-8"
+                >
+                  {t('dashboard.monthly')}
+                </Button>
+                <Button 
+                  variant={activeTimeframe === 'year' ? 'unlimited' : 'ghost'} 
+                  size="sm" 
+                  onClick={() => setActiveTimeframe('year')}
+                  className="text-xs h-8"
+                >
+                  {t('dashboard.yearly')}
+                </Button>
+              </div>
+            </div>
+            
+            <TabsContent value="performance" className="mt-0">
+              <div className="p-2">
+                <AreaChart
+                  data={performanceData[activeTimeframe]}
+                  index={activeTimeframe === 'day' ? 'hour' : activeTimeframe === 'week' ? 'day' : activeTimeframe === 'month' ? 'date' : 'month'}
+                  categories={['value']}
+                  colors={['blue']}
+                  valueFormatter={(value) => `${value}`}
+                  className="aspect-[4/2] w-full"
+                />
+              </div>
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('admin.dashboard.applicationStatus')}</CardTitle>
-                  <CardDescription>{t('admin.dashboard.currentDistribution')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <DonutChart
-                      data={applicationsStatusData}
-                      animationEnabled={true}
-                      showLabel={true}
-                      colors={["#3498db", "#2ecc71", "#f1c40f", "#e74c3c"]}
-                      label={
-                        <div className="text-center">
-                          <p className="text-3xl font-bold">100</p>
-                          <p className="text-sm text-unlimited-gray">{t('admin.dashboard.totalApplications')}</p>
-                        </div>
-                      }
-                    />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-unlimited-gray text-sm mb-1.5">{t('dashboard.totalVisits')}</div>
+                  <div className="text-2xl font-bold text-unlimited-dark-blue">1,245</div>
+                  <div className="flex items-center mt-1 text-xs">
+                    <span className="text-unlimited-success">+12.5%</span>
+                    <span className="text-unlimited-gray ml-2">{t('dashboard.vsLastPeriod')}</span>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('admin.dashboard.universityPopularity')}</CardTitle>
-                  <CardDescription>{t('admin.dashboard.mostRequestedUniversities')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-64">
-                    <DonutChart
-                      data={universityPopularityData}
-                      animationEnabled={true}
-                      showLabel={true}
-                      colors={["#9b59b6", "#3498db", "#2ecc71", "#f1c40f"]}
-                      label={
-                        <div className="text-center">
-                          <p className="text-3xl font-bold">100</p>
-                          <p className="text-sm text-unlimited-gray">{t('admin.dashboard.totalRequests')}</p>
-                        </div>
-                      }
-                    />
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-unlimited-gray text-sm mb-1.5">{t('dashboard.conversions')}</div>
+                  <div className="text-2xl font-bold text-unlimited-dark-blue">245</div>
+                  <div className="flex items-center mt-1 text-xs">
+                    <span className="text-unlimited-success">+8.2%</span>
+                    <span className="text-unlimited-gray ml-2">{t('dashboard.vsLastPeriod')}</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-unlimited-gray text-sm mb-1.5">{t('dashboard.conversionRate')}</div>
+                  <div className="text-2xl font-bold text-unlimited-dark-blue">19.7%</div>
+                  <div className="flex items-center mt-1 text-xs">
+                    <span className="text-unlimited-danger">-2.1%</span>
+                    <span className="text-unlimited-gray ml-2">{t('dashboard.vsLastPeriod')}</span>
+                  </div>
+                </div>
+                
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="text-unlimited-gray text-sm mb-1.5">{t('dashboard.avgValue')}</div>
+                  <div className="text-2xl font-bold text-unlimited-dark-blue">$128</div>
+                  <div className="flex items-center mt-1 text-xs">
+                    <span className="text-unlimited-success">+5.3%</span>
+                    <span className="text-unlimited-gray ml-2">{t('dashboard.vsLastPeriod')}</span>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="conversions" className="mt-0">
+              <div className="p-2">
+                <BarChart
+                  data={conversionData.week}
+                  index="day"
+                  categories={['visits', 'conversions']}
+                  colors={['blue', 'green']}
+                  valueFormatter={(value) => `${value}`}
+                  className="aspect-[4/2] w-full"
+                />
+              </div>
               
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{t('admin.dashboard.recentActivities')}</CardTitle>
-                    <CardDescription>{t('admin.dashboard.lastActions')}</CardDescription>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                <Card className="bg-blue-50 border-none">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-blue-600">{t('dashboard.conversionRate')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-unlimited-dark-blue">19.7%</div>
+                    <div className="flex items-center mt-1 text-xs">
+                      <span className="text-unlimited-success">+2.5%</span>
+                      <span className="text-unlimited-gray ml-2">{t('dashboard.vsLastWeek')}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-green-50 border-none">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-green-600">{t('dashboard.avgTimeToConvert')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-unlimited-dark-blue">2.5 {t('dashboard.days')}</div>
+                    <div className="flex items-center mt-1 text-xs">
+                      <span className="text-unlimited-success">-0.5 {t('dashboard.days')}</span>
+                      <span className="text-unlimited-gray ml-2">{t('dashboard.vsLastWeek')}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card className="bg-purple-50 border-none">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm text-purple-600">{t('dashboard.topChannel')}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-unlimited-dark-blue">{t('dashboard.direct')}</div>
+                    <div className="flex items-center mt-1 text-xs">
+                      <span className="text-unlimited-gray">42% {t('dashboard.ofConversions')}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="trends" className="mt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-medium text-unlimited-dark-blue">
+                      {t('dashboard.conversionTrend')}
+                    </h3>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs">
+                      <BarChart3 className="h-3 w-3 mr-1" />
+                      {t('dashboard.viewReport')}
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="sm" className="gap-1">
-                    {t('admin.viewAll')}
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                          i % 4 === 0 ? 'bg-red-100 text-red-600' :
-                          i % 3 === 0 ? 'bg-purple-100 text-purple-600' :
-                          i % 2 === 0 ? 'bg-green-100 text-green-600' :
-                          'bg-blue-100 text-blue-600'
-                        }`}>
-                          <span className="font-bold">{i}</span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">
-                            {i % 4 === 0 ? t('admin.dashboard.applicationRejected') :
-                            i % 3 === 0 ? t('admin.dashboard.newStudentRegistered') :
-                            i % 2 === 0 ? t('admin.dashboard.documentVerified') :
-                            t('admin.dashboard.paymentReceived')}
-                          </h4>
-                          <p className="text-sm text-unlimited-gray">{t('admin.dashboard.minutesAgo', { minutes: i * 5 })}</p>
-                        </div>
-                        <Badge 
-                          variant="outline" 
-                          className={`
-                            ${i % 4 === 0 ? 'bg-red-50 border-red-200 text-red-600' :
-                              i % 3 === 0 ? 'bg-purple-50 border-purple-200 text-purple-600' :
-                              i % 2 === 0 ? 'bg-green-50 border-green-200 text-green-600' :
-                              'bg-blue-50 border-blue-200 text-blue-600'}
-                          `}
-                        >
-                          {i % 4 === 0 ? t('admin.dashboard.critical') :
-                          i % 3 === 0 ? t('admin.dashboard.info') :
-                          i % 2 === 0 ? t('admin.dashboard.success') :
-                          t('admin.dashboard.pending')}
-                        </Badge>
-                      </div>
-                    ))}
+                  <LineChart
+                    data={[
+                      { month: 'Jan', conversion: 65 },
+                      { month: 'Feb', conversion: 72 },
+                      { month: 'Mar', conversion: 68 },
+                      { month: 'Apr', conversion: 78 },
+                      { month: 'May', conversion: 82 },
+                      { month: 'Jun', conversion: 75 }
+                    ]}
+                    index="month"
+                    categories={['conversion']}
+                    colors={['blue']}
+                    valueFormatter={(value) => `${value}`}
+                    showAnimation={true}
+                    className="aspect-[4/3]"
+                  />
+                </div>
+                
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-medium text-unlimited-dark-blue">
+                      {t('dashboard.channelDistribution')}
+                    </h3>
+                    <Button variant="ghost" size="sm" className="h-7 text-xs">
+                      <PieChart className="h-3 w-3 mr-1" />
+                      {t('dashboard.viewDetails')}
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="applications">
-            <div className="flex flex-col space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('admin.dashboard.applicationDetails')}</CardTitle>
-                  <CardDescription>{t('admin.dashboard.applicationStatsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-unlimited-gray">{t('admin.dashboard.applicationContentPlaceholder')}</p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="universities">
-            <div className="flex flex-col space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('admin.dashboard.universityDetails')}</CardTitle>
-                  <CardDescription>{t('admin.dashboard.universityStatsDescription')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-unlimited-gray">{t('admin.dashboard.universityContentPlaceholder')}</p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                  <div className="aspect-[4/3] flex items-center justify-center">
+                    <div className="text-center text-unlimited-gray">
+                      {t('dashboard.chartPlaceholder')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </div>
         </Tabs>
       </motion.div>
     </motion.div>
