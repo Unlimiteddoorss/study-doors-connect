@@ -100,15 +100,7 @@ const KPIMetricsCard = ({
             categories={["value"]}
             colors={[isPositive ? "green" : "red"]}
             valueFormatter={(value: number) => `${valuePrefix}${value}${valueSuffix}`}
-            showYAxis={false}
-            showLegend={false}
-            showAnimation={true}
             className="h-36"
-            showXAxis={true}
-            showTooltip={true}
-            showGridLines={false}
-            startEndOnly={true}
-            curveType="natural"
           />
         </div>
         

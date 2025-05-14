@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { Wifi, WifiOff } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ConnectionStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Function to update online status
@@ -42,7 +43,7 @@ export default function ConnectionStatus() {
       window.removeEventListener('online', updateOnlineStatus);
       window.removeEventListener('offline', updateOnlineStatus);
     };
-  }, [isOnline]);
+  }, [isOnline, toast]);
 
   if (isOnline) return null;
 

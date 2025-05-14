@@ -6,7 +6,6 @@ import {
   AreaChart, 
   BarChart, 
   LineChart, 
-  DonutChart 
 } from '@/components/ui/chart';
 import { 
   ArrowUpRight, 
@@ -38,7 +37,7 @@ interface InteractiveChartProps {
   description?: string;
   chartData: ChartData;
   periods: string[];
-  chartTypes?: ('line' | 'bar' | 'area' | 'donut')[];
+  chartTypes?: ('line' | 'bar' | 'area')[];
   categories: string[];
   colors?: string[];
   valueFormatter?: (value: number) => string;
@@ -69,7 +68,7 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
   badgeText = 'تحديث',
 }) => {
   const [selectedPeriod, setSelectedPeriod] = useState(periods[0]);
-  const [chartType, setChartType] = useState<'line' | 'bar' | 'area' | 'donut'>(chartTypes[0]);
+  const [chartType, setChartType] = useState<'line' | 'bar' | 'area'>(chartTypes[0]);
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportChart = () => {
@@ -85,7 +84,6 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
     'line': <LineChartIcon className="h-4 w-4" />,
     'bar': <BarChart3 className="h-4 w-4" />,
     'area': <AreaChartIcon className="h-4 w-4" />,
-    'donut': <PieChartIcon className="h-4 w-4" />
   };
 
   const renderChartComponent = () => {
@@ -110,10 +108,6 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
             colors={colors}
             valueFormatter={valueFormatter}
             className="h-64"
-            showLegend
-            showAnimation
-            startEndOnly
-            curveType="natural"
           />
         );
       case 'bar':
@@ -125,21 +119,6 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
             colors={colors}
             valueFormatter={valueFormatter}
             className="h-64"
-            showLegend
-            showAnimation
-          />
-        );
-      case 'donut':
-        return (
-          <DonutChart
-            data={currentData}
-            category="value"
-            index={index}
-            valueFormatter={valueFormatter}
-            className="h-64"
-            showLabel
-            showAnimation
-            colors={colors}
           />
         );
       case 'line':
@@ -152,10 +131,6 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
             colors={colors}
             valueFormatter={valueFormatter}
             className="h-64"
-            showLegend
-            showAnimation
-            startEndOnly
-            curveType="natural"
           />
         );
     }
@@ -174,7 +149,7 @@ const InteractiveChart: React.FC<InteractiveChartProps> = ({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Badge variant="unlimited-outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs">
                     <ArrowUpRight className="ml-1 h-3 w-3" /> {badgeText}
                   </Badge>
                 </motion.div>

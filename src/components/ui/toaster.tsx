@@ -6,8 +6,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-  type ToastActionElement, 
-  type ToastProps
+  type ToastActionElement
 } from "@/components/ui/toast";
 
 import { useToast } from "@/hooks/use-toast";

@@ -8,12 +8,13 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 type ThemeOption = "light" | "dark" | "system";
 
 export default function DarkModeToggle() {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   
   const handleThemeChange = (newTheme: ThemeOption) => {
     setTheme(newTheme);

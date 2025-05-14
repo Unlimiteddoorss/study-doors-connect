@@ -1,6 +1,6 @@
 
 import * as React from "react"
-import { ToastActionElement, type ToastProps as RadixToastProps } from "@/components/ui/toast"
+import { type ToastActionElement, type ToastProps } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
@@ -45,7 +45,7 @@ export interface ToastOptions {
   action?: ToastActionElement
 }
 
-function addToast(options: ToastOptions) {
+function createToast(options: ToastOptions) {
   const id = genId()
 
   const update = (props: ToasterToast) =>
@@ -124,13 +124,13 @@ export function useToast() {
   }, [])
 
   return {
-    toast: addToast,
+    toast: createToast,
     dismiss: dismissToast,
     toasts: Array.from(state.values()),
   }
 }
 
 export const toast = {
-  ...addToast,
+  ...createToast,
   dismiss: dismissToast,
 }

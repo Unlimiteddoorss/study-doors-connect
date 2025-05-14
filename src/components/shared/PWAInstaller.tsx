@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -12,6 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 export default function PWAInstaller() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAppInstalled, setIsAppInstalled] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if app is already installed
@@ -44,7 +45,7 @@ export default function PWAInstaller() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', () => {});
     };
-  }, []);
+  }, [toast]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;

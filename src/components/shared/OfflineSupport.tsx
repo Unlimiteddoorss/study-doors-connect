@@ -1,10 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { WifiOff, Wifi } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 const OfflineSupport = () => {
   const [isOnline, setIsOnline] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     // Check if we're online when the component mounts
@@ -37,7 +38,7 @@ const OfflineSupport = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [toast]);
 
   if (isOnline) return null;
 
