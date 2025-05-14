@@ -21,14 +21,22 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary>
-    <BrowserRouter>
-      <HelmetProvider>
-        <ThemeProvider defaultTheme="light">
-          <App />
-        </ThemeProvider>
-      </HelmetProvider>
-    </BrowserRouter>
-  </ErrorBoundary>
-);
+// Get the root element
+const rootElement = document.getElementById("root");
+
+// Create a root for React to render into
+if (rootElement) {
+  createRoot(rootElement).render(
+    <ErrorBoundary>
+      <BrowserRouter>
+        <HelmetProvider>
+          <ThemeProvider defaultTheme="light">
+            <App />
+          </ThemeProvider>
+        </HelmetProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+} else {
+  console.error("Root element not found");
+}

@@ -1,4 +1,5 @@
 
+// Ensure React is imported correctly
 import * as React from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -22,6 +23,7 @@ export function ThemeProvider({
   defaultTheme = "system",
   ...props
 }: ThemeProviderProps) {
+  // Explicitly use React.useState instead of destructuring
   const [theme, setTheme] = React.useState<Theme>(
     () => (localStorage.getItem("theme") as Theme) || defaultTheme
   );
