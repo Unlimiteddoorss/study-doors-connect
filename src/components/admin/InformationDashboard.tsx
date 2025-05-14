@@ -417,7 +417,6 @@ const InformationDashboard: React.FC<InformationDashboardProps> = ({
                     categories={['conversion']}
                     colors={['blue']}
                     valueFormatter={(value) => `${value}`}
-                    showAnimation={true}
                     className="aspect-[4/3]"
                   />
                 </div>
