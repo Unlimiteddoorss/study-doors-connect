@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -70,7 +69,10 @@ const Universities = () => {
   // إنشاء خيارات القوائم المنسدلة
   const locationOptions = Array.from(new Set(
     turkishUniversities.map(uni => uni.city)
-  )).map(city => ({ value: city, label: countryTranslations[city] || city }));
+  )).map(city => ({ 
+    value: city as string, 
+    label: countryTranslations[city as string] || city 
+  }));
 
   const typeOptions = [
     { value: 'Public', label: 'حكومية' },
@@ -204,7 +206,7 @@ const Universities = () => {
     });
   };
   
-  // إزالة جميع الجامعات من المقارنة
+  // إزالة جميع الجامعات من المق��رنة
   const clearCompareSelection = () => {
     setCompareIds([]);
     toast({

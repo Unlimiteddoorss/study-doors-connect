@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import SectionTitle from '../shared/SectionTitle';
 import ProgramCard from '../programs/ProgramCard';
-import { dummyPrograms } from '@/data/programsData';
+import { dummyPrograms, convertToProgramInfo } from '@/data/programsData';
 
 const FeaturedPrograms = () => {
   // Filter featured programs
@@ -30,7 +30,7 @@ const FeaturedPrograms = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
           {featuredPrograms.map((program) => (
-            <ProgramCard key={program.id} program={program} />
+            <ProgramCard key={program.id} program={convertToProgramInfo(program)} />
           ))}
         </div>
       </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -7,6 +6,7 @@ import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { dummyPrograms } from '@/data/programsData';
+import { convertToProgramInfo } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -122,6 +122,10 @@ const MedicalPrograms = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const programsPerPage = 9;
   
+  // Convert Legacy Program type to ProgramInfo type for rendering
+  const programsToDisplay: ProgramInfo[] = filteredPrograms
+    .map(program => convertToProgramInfo(program));
+
   // Update filtered programs when search term or filters change
   useEffect(() => {
     let result = medicalPrograms;
@@ -305,7 +309,7 @@ const MedicalPrograms = () => {
 
         {/* Programs Grid */}
         <ProgramsGrid 
-          programs={currentPrograms}
+          programs={programsToDisplay}
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={paginate}

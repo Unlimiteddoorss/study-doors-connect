@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -7,6 +6,7 @@ import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { dummyPrograms } from '@/data/programsData';
+import { convertToProgramInfo } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -96,7 +96,7 @@ const engineeringPrograms = dummyPrograms
     {
       id: 205,
       title: "ماجستير هندسة الإلكترونيات",
-      university: "جامعة غازي",
+      university: "جامعة غazi",
       location: "Turkey، أنقرة",
       language: "إنجليزية",
       duration: "2 سنوات",
@@ -132,6 +132,10 @@ const EngineeringPrograms = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const programsPerPage = 9;
   
+  // Convert Legacy Program type to ProgramInfo type for rendering
+  const programsToDisplay: ProgramInfo[] = filteredPrograms
+    .map(program => convertToProgramInfo(program));
+
   // Update filtered programs when search term or filters change
   useEffect(() => {
     let result = engineeringPrograms;
@@ -318,7 +322,7 @@ const EngineeringPrograms = () => {
 
         {/* Programs Grid */}
         <ProgramsGrid 
-          programs={currentPrograms}
+          programs={programsToDisplay}
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={paginate}

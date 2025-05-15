@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
@@ -16,8 +15,7 @@ import ProgramDetails from '@/components/student/program/ProgramDetails';
 import PreferencesForm from '@/components/student/program/PreferencesForm';
 
 // Import university and program data
-import { turkishUniversities as universities } from '@/data/programsData';
-import { dummyPrograms as programsData } from '@/data/programsData';
+import { turkishUniversities, dummyPrograms } from '@/data/programsData';
 
 // Define the country data
 const countries = [
@@ -117,13 +115,14 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   const [preferredLanguage, setPreferredLanguage] = useState<string>(initialData?.program?.language || "");
   const [additionalNotes, setAdditionalNotes] = useState<string>(initialData?.program?.notes || "");
 
-  // Format the programs data to match our requirements
-  const programs = programsData.map(program => ({
+  // Format the programs data to match our requirements - make sure deadline is required
+  const programs = dummyPrograms.map(program => ({
     ...program,
     id: program.id,
     title: program.title,
     nameAr: program.title, // Using title as nameAr for now since it's in Arabic
-  }));
+    deadline: program.deadline || 'N/A', // Ensure deadline is always provided
+  })) as Program[];
 
   // Get selected program and university details
   const selectedProgramDetails = selectedProgram

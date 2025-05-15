@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -53,6 +52,9 @@ const adaptedUniversities = turkishUniversities.map(uni => ({
   accreditations: [uni.accreditation],
   isFeatured: Math.random() > 0.7 // Randomly set some universities as featured
 }));
+
+// Fix the cities array to ensure it's a string array
+const cities: string[] = Array.from(new Set(adaptedUniversities.map(uni => uni.city)));
 
 const TurkishUniversities = () => {
   const { toast } = useToast();
@@ -262,7 +264,7 @@ const TurkishUniversities = () => {
               تتميز الجامعات الخاصة في تركيا بجودة التعليم العالية، والمرافق الحديثة، وفرص التدريب العملي، بالإضافة إلى إمكانية الحصول على منح دراسية للطلاب المتميزين.
             </p>
             <p>
-              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مما يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
+              جميع الجامعات المدرجة معترف بها من مجلس التعليم العالي التركي (YÖK) وتقدم شهادات معترف بها دولياً، مم�� يتيح للخريجين فرص عمل واسعة في مختلف أنحاء العالم.
             </p>
           </div>
 

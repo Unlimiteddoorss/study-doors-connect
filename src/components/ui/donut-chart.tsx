@@ -1,66 +1,79 @@
 
-import * as React from "react";
-import { PieChart } from "@/components/ui/chart";
+import React from "react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
 
-export interface DonutChartProps {
+interface DonutChartProps {
   data: { name: string; value: number }[];
-  index?: string;
-  category?: string;
+  index: string;
+  category: string; // Changed from categories to category to match expected prop
   colors?: string[];
   valueFormatter?: (value: number) => string;
   className?: string;
-  animationEnabled?: boolean;
-  showLabel?: boolean;
-  label?: React.ReactNode;
 }
 
-export const DonutChart = ({
+export function DonutChart({
   data,
-  index = "name",
-  category = "value",
-  colors = ["#3498db", "#2ecc71", "#f1c40f", "#e74c3c", "#9b59b6", "#1abc9c", "#34495e", "#e67e22"],
-  valueFormatter = (value: number) => value.toString(),
+  index,
+  category,
+  colors = ["#1E40AF", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE"],
+  valueFormatter = (value: number) => `${value}`,
   className,
-  animationEnabled = true,
-  showLabel = true,
-  label,
-}: DonutChartProps) => {
-  const total = React.useMemo(
-    () => data.reduce((acc, item) => {
-      const value = Number(item[category as keyof typeof item] || 0);
-      return acc + value;
-    }, 0),
-    [data, category]
-  );
+  ...props
+}: DonutChartProps) {
+  // Generate additional colors if needed
+  const extendedColors = [...colors];
+  if (data.length > colors.length) {
+    const additionalColors = Array.from({ length: data.length - colors.length }, (_, i) => {
+      const hue = (360 / data.length) * (i + colors.length);
+      return `hsl(${hue}, 70%, 60%)`;
+    });
+    extendedColors.push(...additionalColors);
+  }
+
+  const renderColorfulLegendText = (value: string) => {
+    return <span className="text-sm">{value}</span>;
+  };
+
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-3 shadow-md rounded border">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-unlimited-blue">{valueFormatter(payload[0].value)}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className={cn("relative", className)}>
-      <PieChart
-        data={data}
-        index={index}
-        categories={[category]}
-        colors={colors}
-        valueFormatter={valueFormatter}
-        className="mx-auto"
-      />
-      
-      {showLabel && (
-        <motion.div
-          initial={animationEnabled ? { opacity: 0, scale: 0.8 } : false}
-          animate={animationEnabled ? { opacity: 1, scale: 1 } : false}
-          transition={{ delay: 0.3, duration: 0.5 }}
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
-        >
-          {label || (
-            <>
-              <p className="text-3xl font-bold">{valueFormatter(total)}</p>
-              <p className="text-sm text-unlimited-gray">Total</p>
-            </>
-          )}
-        </motion.div>
-      )}
+    <div className={cn("w-full h-full", className)} {...props}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            outerRadius="80%"
+            innerRadius="60%"
+            dataKey="value"
+            nameKey={index}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={extendedColors[index % extendedColors.length]} />
+            ))}
+          </Pie>
+          <Tooltip content={<CustomTooltip />} />
+          <Legend
+            formatter={renderColorfulLegendText}
+            layout="vertical"
+            verticalAlign="middle"
+            align="right"
+          />
+        </PieChart>
+      </ResponsiveContainer>
     </div>
   );
-};
+}
