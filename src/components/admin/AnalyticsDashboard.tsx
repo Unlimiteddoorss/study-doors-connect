@@ -17,7 +17,8 @@ import {
   Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { BarChart, LineChart, DonutChart } from '@/components/ui/chart';
+import { BarChart, LineChart } from '@/components/ui/chart';
+import { DonutChart } from '@/components/ui/donut-chart';
 import { 
   Select,
   SelectContent,
@@ -161,6 +162,12 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     });
   };
 
+  // Handler for date range changes
+  const handleDateRangeChange = (range: { from: Date; to: Date }) => {
+    console.log('Date range changed:', range);
+    // Here you would typically update the data based on the new date range
+  };
+
   return (
     <motion.div 
       className="space-y-6"
@@ -223,7 +230,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             {t('admin.analytics.downloadReport', 'تنزيل التقرير')}
           </Button>
           
-          <DateRangeSelector />
+          <DateRangeSelector onRangeChange={handleDateRangeChange} />
         </div>
       </motion.div>
       
@@ -257,7 +264,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <BarChart
               data={programData}
               index="program"
-              category="value"
+              categories={["value"]}
               colors={["blue"]}
               valueFormatter={(value) => `${value}`}
               className="h-[250px]"
@@ -274,6 +281,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
               data={countryData}
               index="country"
               category="students"
+              colors={["#3498db", "#2ecc71", "#f1c40f", "#e74c3c", "#9b59b6", "#1abc9c"]}
               valueFormatter={(value) => `${value} ${t('admin.analytics.students', 'طالب')}`}
               className="h-[250px]"
             />
@@ -290,7 +298,7 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
             <BarChart
               data={conversionData}
               index="stage"
-              category="value"
+              categories={["value"]}
               colors={["blue"]}
               valueFormatter={(value) => `${value}`}
               className="h-[250px]"

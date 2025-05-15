@@ -1,5 +1,4 @@
 
-
 import * as React from "react";
 import { PieChart } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
@@ -41,7 +40,7 @@ export const DonutChart = ({
       <PieChart
         data={data}
         index={index}
-        category={category}
+        categories={[category]}
         colors={colors}
         valueFormatter={valueFormatter}
         className="mx-auto"
@@ -65,4 +64,3 @@ export const DonutChart = ({
     </div>
   );
 };
-

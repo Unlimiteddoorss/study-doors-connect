@@ -179,17 +179,19 @@ const Testimonials = () => {
                   </SelectContent>
                 </Select>
                 
-                <Select value={programFilter} onValueChange={setProgramFilter} className="ml-2">
-                  <SelectTrigger className="w-[160px]">
-                    <SelectValue placeholder={t('testimonials.allPrograms', 'كل البرامج')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">{t('testimonials.allPrograms', 'كل البرامج')}</SelectItem>
-                    {programs.map(program => (
-                      <SelectItem key={program} value={program}>{program}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="ml-2">
+                  <Select value={programFilter} onValueChange={setProgramFilter}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder={t('testimonials.allPrograms', 'كل البرامج')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t('testimonials.allPrograms', 'كل البرامج')}</SelectItem>
+                      {programs.map(program => (
+                        <SelectItem key={program} value={program}>{program}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
               {(searchQuery || countryFilter !== 'all' || programFilter !== 'all') && (

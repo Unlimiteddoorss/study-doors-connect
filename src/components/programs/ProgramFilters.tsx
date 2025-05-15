@@ -1,32 +1,12 @@
-
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { 
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Search, SlidersHorizontal, RotateCcw } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import { Search, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface ProgramFiltersValues {
   search: string;
@@ -41,290 +21,290 @@ export interface ProgramFiltersValues {
 
 interface ProgramFiltersProps {
   onApplyFilters: (filters: ProgramFiltersValues) => void;
-  className?: string;
   countries: string[];
   languages: string[];
-  initialFilters?: Partial<ProgramFiltersValues>;
+  initialFilters: ProgramFiltersValues;
   isMobileFilterOpen?: boolean;
   onCloseMobileFilter?: () => void;
+  className?: string;
 }
 
 const ProgramFilters: React.FC<ProgramFiltersProps> = ({
   onApplyFilters,
-  className,
   countries,
   languages,
-  initialFilters = {},
-  isMobileFilterOpen = false,
-  onCloseMobileFilter
+  initialFilters,
+  isMobileFilterOpen,
+  onCloseMobileFilter,
+  className = ""
 }) => {
-  const { t } = useTranslation();
-  const [filters, setFilters] = useState<ProgramFiltersValues>({
-    search: initialFilters.search || '',
-    country: initialFilters.country || [],
-    degreeType: initialFilters.degreeType || [],
-    language: initialFilters.language || [],
-    duration: initialFilters.duration || [1, 6],
-    tuitionRange: initialFilters.tuitionRange || [0, 50000],
-    hasScholarship: initialFilters.hasScholarship || false,
-    isPopular: initialFilters.isPopular || false
-  });
-  
-  const degreeTypes = [
-    { value: 'bachelor', label: t('programs.bachelor', 'بكالوريوس') },
-    { value: 'master', label: t('programs.master', 'ماجستير') },
-    { value: 'phd', label: t('programs.phd', 'دكتوراه') },
-    { value: 'diploma', label: t('programs.diploma', 'دبلوم') },
-  ];
-  
-  const handleCheckboxChange = (field: 'degreeType' | 'country' | 'language', value: string) => {
-    setFilters(prev => {
-      const currentValues = [...prev[field]];
-      const index = currentValues.indexOf(value);
-      
-      if (index === -1) {
-        currentValues.push(value);
-      } else {
-        currentValues.splice(index, 1);
-      }
-      
-      return { ...prev, [field]: currentValues };
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.language === 'ar';
+
+  const [search, setSearch] = useState(initialFilters.search);
+  const [country, setCountry] = useState(initialFilters.country);
+  const [degreeType, setDegreeType] = useState(initialFilters.degreeType);
+  const [language, setLanguage] = useState(initialFilters.language);
+  const [duration, setDuration] = useState(initialFilters.duration);
+  const [tuitionRange, setTuitionRange] = useState(initialFilters.tuitionRange);
+  const [hasScholarship, setHasScholarship] = useState(initialFilters.hasScholarship);
+  const [isPopular, setIsPopular] = useState(initialFilters.isPopular);
+
+  const toggleCountryFilter = (countryCode: string) => {
+    if (country.includes(countryCode)) {
+      setCountry(country.filter(c => c !== countryCode));
+    } else {
+      setCountry([...country, countryCode]);
+    }
+  };
+
+  const toggleDegreeTypeFilter = (degree: string) => {
+    if (degreeType.includes(degree)) {
+      setDegreeType(degreeType.filter(d => d !== degree));
+    } else {
+      setDegreeType([...degreeType, degree]);
+    }
+  };
+
+  const toggleLanguageFilter = (lang: string) => {
+    if (language.includes(lang)) {
+      setLanguage(language.filter(l => l !== lang));
+    } else {
+      setLanguage([...language, lang]);
+    }
+  };
+
+  const handleDurationChange = (value: number[]) => {
+    setDuration([value[0], value[1]] as [number, number]);
+  };
+
+  const handleTuitionRangeChange = (value: number[]) => {
+    setTuitionRange([value[0], value[1]] as [number, number]);
+  };
+
+  const resetFilters = () => {
+    setSearch('');
+    setCountry([]);
+    setDegreeType([]);
+    setLanguage([]);
+    setDuration([1, 6]);
+    setTuitionRange([0, 50000]);
+    setHasScholarship(false);
+    setIsPopular(false);
+  };
+
+  const applyFilters = () => {
+    onApplyFilters({
+      search,
+      country,
+      degreeType,
+      language,
+      duration,
+      tuitionRange,
+      hasScholarship,
+      isPopular
     });
-  };
-  
-  const handleToggleChange = (field: 'hasScholarship' | 'isPopular') => {
-    setFilters(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-  
-  const handleReset = () => {
-    setFilters({
-      search: '',
-      country: [],
-      degreeType: [],
-      language: [],
-      duration: [1, 6],
-      tuitionRange: [0, 50000],
-      hasScholarship: false,
-      isPopular: false
-    });
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onApplyFilters(filters);
-    
-    if (onCloseMobileFilter && isMobileFilterOpen) {
+    if (isMobileFilterOpen && onCloseMobileFilter) {
       onCloseMobileFilter();
     }
   };
-  
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(value);
-  };
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardHeader className="bg-unlimited-blue/5 border-b py-3 px-4">
-        <CardTitle className="text-md flex items-center">
-          <SlidersHorizontal className="h-4 w-4 mr-2" />
-          {t('programs.filters', 'تصفية البرامج')}
-        </CardTitle>
-      </CardHeader>
-      
-      <CardContent className="p-4">
-        <form onSubmit={handleSubmit} className="space-y-5">
+    <Card className={`border-0 shadow-none ${className}`}>
+      <CardContent className="p-6">
+        <div className="mb-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-unlimited-gray" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-unlimited-gray" />
             <Input
               type="text"
-              placeholder={t('programs.searchPlaceholder', 'ابحث عن برنامج...') as string}
+              placeholder={t('programs.searchPlaceholder', 'ابحث عن برنامج...')}
               className="pl-10"
-              value={filters.search}
-              onChange={e => setFilters(prev => ({ ...prev, search: e.target.value }))}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          
-          <Accordion type="multiple" defaultValue={["degree", "country", "language", "tuition"]}>
-            <AccordionItem value="degree" className="border-b">
-              <AccordionTrigger className="py-3">
-                {t('programs.degreeType', 'نوع الدرجة')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2">
-                  {degreeTypes.map(degree => (
-                    <div key={degree.value} className="flex items-center space-x-2 rtl:space-x-reverse">
-                      <Checkbox
-                        id={`degree-${degree.value}`}
-                        checked={filters.degreeType.includes(degree.value)}
-                        onCheckedChange={() => handleCheckboxChange('degreeType', degree.value)}
-                      />
-                      <label
-                        htmlFor={`degree-${degree.value}`}
-                        className="text-sm leading-none text-unlimited-dark-blue cursor-pointer"
-                      >
-                        {degree.label}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="country" className="border-b">
-              <AccordionTrigger className="py-3">
-                {t('programs.country', 'الدولة')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {countries.map(country => (
-                    <div key={country} className="flex items-center space-x-2 rtl:space-x-reverse">
-                      <Checkbox
-                        id={`country-${country}`}
-                        checked={filters.country.includes(country)}
-                        onCheckedChange={() => handleCheckboxChange('country', country)}
-                      />
-                      <label
-                        htmlFor={`country-${country}`}
-                        className="text-sm leading-none text-unlimited-dark-blue cursor-pointer"
-                      >
-                        {country}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="language" className="border-b">
-              <AccordionTrigger className="py-3">
-                {t('programs.language', 'لغة الدراسة')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-2">
-                  {languages.map(language => (
-                    <div key={language} className="flex items-center space-x-2 rtl:space-x-reverse">
-                      <Checkbox
-                        id={`language-${language}`}
-                        checked={filters.language.includes(language)}
-                        onCheckedChange={() => handleCheckboxChange('language', language)}
-                      />
-                      <label
-                        htmlFor={`language-${language}`}
-                        className="text-sm leading-none text-unlimited-dark-blue cursor-pointer"
-                      >
-                        {language}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="duration" className="border-b">
-              <AccordionTrigger className="py-3">
-                {t('programs.duration', 'مدة الدراسة')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 px-2">
-                  <Slider
-                    value={filters.duration}
-                    min={1}
-                    max={6}
-                    step={1}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, duration: value as [number, number] }))}
-                  />
-                  <div className="flex justify-between text-sm text-unlimited-gray">
-                    <span>{filters.duration[0]} {t('programs.years', 'سنة')}</span>
-                    <span>{t('programs.to', 'إلى')}</span>
-                    <span>{filters.duration[1]} {t('programs.years', 'سنوات')}</span>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="tuition" className="border-b">
-              <AccordionTrigger className="py-3">
-                {t('programs.tuition', 'الرسوم الدراسية')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-4 px-2">
-                  <Slider
-                    value={filters.tuitionRange}
-                    min={0}
-                    max={50000}
-                    step={1000}
-                    onValueChange={(value) => setFilters(prev => ({ ...prev, tuitionRange: value as [number, number] }))}
-                  />
-                  <div className="flex justify-between text-sm text-unlimited-gray">
-                    <span>{formatCurrency(filters.tuitionRange[0])}</span>
-                    <span>{t('programs.to', 'إلى')}</span>
-                    <span>{formatCurrency(filters.tuitionRange[1])}</span>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-            
-            <AccordionItem value="other" className="border-b">
-              <AccordionTrigger className="py-3">
-                {t('programs.otherOptions', 'خيارات أخرى')}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Checkbox
-                      id="scholarship"
-                      checked={filters.hasScholarship}
-                      onCheckedChange={() => handleToggleChange('hasScholarship')}
-                    />
-                    <label
-                      htmlFor="scholarship"
-                      className="text-sm leading-none text-unlimited-dark-blue cursor-pointer"
-                    >
-                      {t('programs.showScholarship', 'برامج تقدم منح دراسية')}
-                    </label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                    <Checkbox
-                      id="popular"
-                      checked={filters.isPopular}
-                      onCheckedChange={() => handleToggleChange('isPopular')}
-                    />
-                    <label
-                      htmlFor="popular"
-                      className="text-sm leading-none text-unlimited-dark-blue cursor-pointer"
-                    >
-                      {t('programs.showPopular', 'البرامج الأكثر شعبية')}
-                    </label>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-          
-          <div className="flex flex-col gap-2 pt-2">
-            <Button
-              type="submit"
-              className="bg-unlimited-blue hover:bg-unlimited-dark-blue w-full"
-            >
-              {t('programs.applyFilters', 'تطبيق الفلاتر')}
-            </Button>
-            
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              onClick={handleReset}
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              {t('programs.resetFilters', 'إعادة تعيين الفلاتر')}
-            </Button>
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="mb-4">
+          <h4 className="font-semibold text-unlimited-dark-blue mb-2">{t('programs.country', 'الدولة')}</h4>
+          {countries.map(c => (
+            <div key={c} className="flex items-center mb-2">
+              <Checkbox
+                id={`country-${c}`}
+                checked={country.includes(c)}
+                onCheckedChange={() => toggleCountryFilter(c)}
+              />
+              <label
+                htmlFor={`country-${c}`}
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {c}
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="mb-4">
+          <h4 className="font-semibold text-unlimited-dark-blue mb-2">{t('programs.degreeType', 'نوع الدرجة')}</h4>
+          <div>
+            <div className="flex items-center mb-2">
+              <Checkbox
+                id="degree-bachelor"
+                checked={degreeType.includes('bachelor')}
+                onCheckedChange={() => toggleDegreeTypeFilter('bachelor')}
+              />
+              <label
+                htmlFor="degree-bachelor"
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t('programs.bachelor', 'بكالوريوس')}
+              </label>
+            </div>
+            <div className="flex items-center mb-2">
+              <Checkbox
+                id="degree-master"
+                checked={degreeType.includes('master')}
+                onCheckedChange={() => toggleDegreeTypeFilter('master')}
+              />
+              <label
+                htmlFor="degree-master"
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t('programs.master', 'ماجستير')}
+              </label>
+            </div>
+            <div className="flex items-center mb-2">
+              <Checkbox
+                id="degree-phd"
+                checked={degreeType.includes('phd')}
+                onCheckedChange={() => toggleDegreeTypeFilter('phd')}
+              />
+              <label
+                htmlFor="degree-phd"
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t('programs.phd', 'دكتوراه')}
+              </label>
+            </div>
+            <div className="flex items-center mb-2">
+              <Checkbox
+                id="degree-diploma"
+                checked={degreeType.includes('diploma')}
+                onCheckedChange={() => toggleDegreeTypeFilter('diploma')}
+              />
+              <label
+                htmlFor="degree-diploma"
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t('programs.diploma', 'دبلوم')}
+              </label>
+            </div>
           </div>
-        </form>
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="mb-4">
+          <h4 className="font-semibold text-unlimited-dark-blue mb-2">{t('programs.language', 'اللغة')}</h4>
+          {languages.map(l => (
+            <div key={l} className="flex items-center mb-2">
+              <Checkbox
+                id={`language-${l}`}
+                checked={language.includes(l)}
+                onCheckedChange={() => toggleLanguageFilter(l)}
+              />
+              <label
+                htmlFor={`language-${l}`}
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {l}
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="mb-4">
+          <h4 className="font-semibold text-unlimited-dark-blue mb-2">{t('programs.duration', 'المدة')}</h4>
+          <div className="flex items-center justify-between text-sm text-unlimited-gray mb-2">
+            <span>{duration[0]} {t('programs.years', 'سنوات')}</span>
+            <span>{duration[1]} {t('programs.years', 'سنوات')}</span>
+          </div>
+          <Slider
+            defaultValue={duration}
+            min={1}
+            max={6}
+            step={1}
+            onValueChange={handleDurationChange}
+          />
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="mb-4">
+          <h4 className="font-semibold text-unlimited-dark-blue mb-2">{t('programs.tuitionFees', 'الرسوم الدراسية')}</h4>
+          <div className="flex items-center justify-between text-sm text-unlimited-gray mb-2">
+            <span>{tuitionRange[0]} USD</span>
+            <span>{tuitionRange[1]} USD</span>
+          </div>
+          <Slider
+            defaultValue={tuitionRange}
+            min={0}
+            max={50000}
+            step={1000}
+            onValueChange={handleTuitionRangeChange}
+          />
+        </div>
+
+        <Separator className="my-4" />
+
+        <div className="mb-4">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-unlimited-dark-blue">{t('programs.options', 'خيارات')}</h4>
+          </div>
+          <div className="mt-2">
+            <div className="flex items-center mb-2">
+              <Checkbox
+                id="has-scholarship"
+                checked={hasScholarship}
+                onCheckedChange={() => setHasScholarship(!hasScholarship)}
+              />
+              <label
+                htmlFor="has-scholarship"
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t('programs.hasScholarship', 'منح دراسية متاحة')}
+              </label>
+            </div>
+            <div className="flex items-center mb-2">
+              <Checkbox
+                id="is-popular"
+                checked={isPopular}
+                onCheckedChange={() => setIsPopular(!isPopular)}
+              />
+              <label
+                htmlFor="is-popular"
+                className="ml-2 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {t('programs.isPopular', 'برامج شائعة')}
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between mt-8">
+          <Button variant="ghost" onClick={resetFilters} className="text-unlimited-gray hover:text-unlimited-dark-blue">
+            {t('programs.resetFilters', 'إعادة تعيين')}
+          </Button>
+          <Button onClick={applyFilters} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
+            {t('programs.applyFilters', 'تطبيق الفلاتر')}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -21,7 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SlidersHorizontal, Search, BookOpen, Building, Loader2 } from 'lucide-react';
+import { SlidersHorizontal, Search, BookOpen, Building, Loader2, MapPin } from 'lucide-react';
 
 // بيانات تجريبية للبرامج - يمكن استبدالها بطلب API حقيقي
 const samplePrograms: ProgramInfo[] = [
@@ -188,11 +187,11 @@ const ProgramsPage = () => {
         duration: [
           parseInt(searchParams.get('minDuration') || '1'),
           parseInt(searchParams.get('maxDuration') || '6')
-        ],
+        ] as [number, number],
         tuitionRange: [
           parseInt(searchParams.get('minTuition') || '0'),
           parseInt(searchParams.get('maxTuition') || '50000')
-        ],
+        ] as [number, number],
         hasScholarship: searchParams.get('scholarship') === 'true',
         isPopular: searchParams.get('popular') === 'true'
       });
@@ -348,11 +347,11 @@ const ProgramsPage = () => {
       duration: [
         parseInt(searchParams.get('minDuration') || '1'),
         parseInt(searchParams.get('maxDuration') || '6')
-      ],
+      ] as [number, number],
       tuitionRange: [
         parseInt(searchParams.get('minTuition') || '0'),
         parseInt(searchParams.get('maxTuition') || '50000')
-      ],
+      ] as [number, number],
       hasScholarship: searchParams.get('scholarship') === 'true',
       isPopular: searchParams.get('popular') === 'true'
     };
@@ -407,12 +406,11 @@ const ProgramsPage = () => {
               </span>
             </div>
             
-            <div className="flex items-center bg-unlimited-blue/10 rounded-full px-4 py-1.5">
-              <MapPin className="h-4 w-4 text-unlimited-blue mr-2" />
-              <span className="text-unlimited-dark-blue font-medium text-sm">
+            <motion.div variants={itemVariants}>
+              <span className="text-unlimited-blue font-medium text-sm">
                 {Array.from(new Set(filteredPrograms.map(p => p.country))).length} {t('programs.countriesAvailable', 'دولة متاحة')}
               </span>
-            </div>
+            </motion.div>
           </motion.div>
         </div>
         
@@ -435,11 +433,11 @@ const ProgramsPage = () => {
                 duration: [
                   parseInt(searchParams.get('minDuration') || '1'),
                   parseInt(searchParams.get('maxDuration') || '6')
-                ],
+                ] as [number, number],
                 tuitionRange: [
                   parseInt(searchParams.get('minTuition') || '0'),
                   parseInt(searchParams.get('maxTuition') || '50000')
-                ],
+                ] as [number, number],
                 hasScholarship: searchParams.get('scholarship') === 'true',
                 isPopular: searchParams.get('popular') === 'true'
               }}
@@ -487,11 +485,11 @@ const ProgramsPage = () => {
                           duration: [
                             parseInt(searchParams.get('minDuration') || '1'),
                             parseInt(searchParams.get('maxDuration') || '6')
-                          ],
+                          ] as [number, number],
                           tuitionRange: [
                             parseInt(searchParams.get('minTuition') || '0'),
                             parseInt(searchParams.get('maxTuition') || '50000')
-                          ],
+                          ] as [number, number],
                           hasScholarship: searchParams.get('scholarship') === 'true',
                           isPopular: searchParams.get('popular') === 'true'
                         }}
