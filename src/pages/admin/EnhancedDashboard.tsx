@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, LineChart, PieChart, TrendingUp, Users, GraduationCap, School, FileText } from 'lucide-react';
@@ -7,8 +8,8 @@ import { ApplicationsChart } from '@/components/admin/reports/ApplicationsChart'
 import { StudentsByCountry } from '@/components/admin/reports/StudentsByCountry';
 import { UniversityStats } from '@/components/admin/reports/UniversityStats';
 import { ReportActions } from '@/components/admin/reports/ReportActions';
-// Import the required components for the DonutChart
-import { DonutChart } from "@/components/ui/donut-chart";
+// Import the PieChart component instead of DonutChart
+import { PieChart as RechartsDonutChart } from "@/components/ui/chart";
 
 const EnhancedDashboard = () => {
   return (
@@ -65,8 +66,8 @@ const EnhancedDashboard = () => {
 
         <Card className="p-6">
           <h2 className="text-lg font-semibold mb-4">توزيع الطلاب حسب التخصص</h2>
-          {/* Update the DonutChart usage to match its props */}
-          <DonutChart
+          {/* Update DonutChart to PieChart */}
+          <RechartsDonutChart
             data={[
               { name: 'Engineering', value: 42 },
               { name: 'Medicine', value: 28 },

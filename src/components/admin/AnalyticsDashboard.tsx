@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DonutChart } from "@/components/ui/donut-chart";
+import { PieChart } from "@/components/ui/chart"; // Changed from DonutChart to PieChart
 import { 
   Select,
   SelectContent,
@@ -15,7 +15,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
-import { BarChart, LineChart } from "@/components/ui/charts";
+import { BarChart, LineChart } from "@/components/ui/chart";
 
 export interface AnalyticsDashboardProps {
   className?: string;
@@ -24,7 +24,7 @@ export interface AnalyticsDashboardProps {
 export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
   const [activePeriod, setActivePeriod] = useState<"day" | "week" | "month" | "year">("month");
   
-  // Dummy data for the donut charts
+  // Dummy data for the charts
   const studentsByCountry = [
     { name: 'Turkey', value: 1200 },
     { name: 'Egypt', value: 850 },
@@ -98,7 +98,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             <CardTitle>Students by Country</CardTitle>
           </CardHeader>
           <CardContent>
-            <DonutChart
+            <PieChart
               data={studentsByCountry}
               index="name"
               category="value" 
@@ -114,7 +114,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             <CardTitle>Programs Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <DonutChart
+            <PieChart
               data={programsData}
               index="name"
               category="value"
@@ -139,7 +139,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               <CardTitle>Application Status</CardTitle>
             </CardHeader>
             <CardContent>
-              <DonutChart
+              <PieChart
                 data={applicationStatusData}
                 index="name"
                 category="value"
