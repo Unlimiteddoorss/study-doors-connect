@@ -9,6 +9,9 @@ import AdvancedSearch from './AdvancedSearch';
 import { AdminStatCard } from './AdminStatCard';
 import DateRangeSelector from './DateRangeSelector';
 import { FilterableTable } from './FilterableTable';
+import KPIDashboardWidget from './KPIDashboardWidget';
+import AnalyticsDashboard from './AnalyticsDashboard';
+import AdminTasksOverview from './AdminTasksOverview';
 
 export {
   AnimatedStatCard,
@@ -20,5 +23,8 @@ export {
   AdvancedSearch,
   AdminStatCard,
   DateRangeSelector,
-  FilterableTable
+  FilterableTable,
+  KPIDashboardWidget,
+  AnalyticsDashboard,
+  AdminTasksOverview
 };

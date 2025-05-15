@@ -172,7 +172,6 @@ const KPIDashboardWidget: React.FC<KPIWidgetProps> = ({
                 colors={["blue"]}
                 valueFormatter={(value) => `${value}`}
                 className="h-52"
-                showAnimation={true}
               />
             </div>
           </CardContent>
@@ -207,7 +206,6 @@ const KPIDashboardWidget: React.FC<KPIWidgetProps> = ({
                 colors={["blue"]}
                 valueFormatter={(value) => `${value}%`}
                 className="h-52"
-                showAnimation={true}
               />
             </div>
           </CardContent>

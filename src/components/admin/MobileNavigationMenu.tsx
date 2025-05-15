@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -195,7 +194,7 @@ const MobileNavigationMenu = () => {
                         <span>{item.name}</span>
                       </div>
                       {item.badge && (
-                        <Badge variant="unlimited" className="ml-2">
+                        <Badge variant="outline" className="ml-2">
                           {item.badge}
                         </Badge>
                       )}
