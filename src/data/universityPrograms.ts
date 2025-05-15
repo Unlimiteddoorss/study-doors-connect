@@ -1,4 +1,3 @@
-
 import { University } from '@/components/universities/UniversityCard';
 
 // نموذج لبرنامج دراسي
@@ -1152,7 +1151,7 @@ export const bahcesehirPrograms: UniversityProgram[] = [
     id: 1076,
     universityId: 26,
     name: "Industry 4.0 (English) (Thesis)",
-    nameAr: "الصناعة 4.0 (إنجليزي) (بأطروحة)",
+    nameAr: "ا��صناعة 4.0 (إنجليزي) (بأطروحة)",
     degree: "Master",
     language: "English",
     campus: "Beşiktaş South",
@@ -1710,3 +1709,34 @@ export const getFilteredPrograms = (
   });
 };
 
+export interface Program {
+  id: number;
+  name: string;
+  university: string;
+  country: string;
+  degree: string;
+  duration: string;
+  languages: string[];
+  tuitionFee: number;
+  discount?: number;
+  isFeatured?: boolean;
+  description?: string;
+  requirements?: string[];
+  careerOpportunities?: string[];
+}
+
+export interface ProgramInfo {
+  id: number;
+  title: string;
+  university: string;
+  location: string;
+  degree: string;
+  duration: string;
+  language: string[];
+  fee: number;
+  discount?: number;
+  isFeatured?: boolean;
+  description?: string;
+  requirements?: string[];
+  opportunities?: string[];
+}

@@ -1,327 +1,48 @@
-import { ProgramInfo } from "../components/programs/ProgramCard";
 
-// Define the categories
-export const degreeTypes = [
-  { value: "bachelor", label: "Bachelor's" },
-  { value: "master", label: "Master's" },
-  { value: "phd", label: "PhD" },
-  { value: "diploma", label: "Diploma" },
-  { value: "certificate", label: "Certificate" }
-];
+import { Program } from './universityPrograms';
 
-export const programSpecialties = [
-  { value: "engineering", label: "Engineering" },
-  { value: "medicine", label: "Medicine" },
-  { value: "business", label: "Business Administration" },
-  { value: "computer_science", label: "Computer Science" },
-  { value: "arts", label: "Arts & Humanities" },
-  { value: "science", label: "Natural Sciences" },
-  { value: "social_science", label: "Social Sciences" },
-  { value: "education", label: "Education" },
-  { value: "law", label: "Law" }
-];
-
-// Available countries data for filtering
-export const availableCountries = [
-  { value: "Turkey", label: "تركيا" },
-  { value: "Cyprus", label: "قبرص" },
-  { value: "Malaysia", label: "ماليزيا" },
-  { value: "Hungary", label: "المجر" },
-  { value: "Poland", label: "بولندا" },
-  { value: "Czech Republic", label: "جمهورية التشيك" },
-  { value: "United Arab Emirates", label: "الإمارات العربية المتحدة" },
-  { value: "Egypt", label: "مصر" },
-  { value: "Syria", label: "سوريا" }
-];
-
-// Sample universities data
-export const turkishUniversities = [
-  {
-    id: 1,
-    name: "Istanbul Technical University",
-    nameAr: "جامعة إسطنبول التقنية",
-    location: "Istanbul",
-    city: "Istanbul",
-    country: "Turkey",
-    type: "Public" as const,
-    founded: "1773",
-    programs: 120,
-    students: 32000,
-    ranking: 501,
-    fees: "$6,000 - $8,000",
-    image: "/images/universities/istanbul-technical-university.jpg",
-    website: "https://www.itu.edu.tr/en",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-  {
-    id: 2,
-    name: "Bilkent University",
-    nameAr: "جامعة بيلكنت",
-    location: "Ankara",
-    city: "Ankara",
-    country: "Turkey",
-    type: "Private" as const,
-    founded: "1984",
-    programs: 89,
-    students: 12500,
-    ranking: 401,
-    fees: "$8,000 - $12,000",
-    image: "/images/universities/bilkent-university.jpg",
-    website: "http://www.bilkent.edu.tr/",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-  {
-    id: 3,
-    name: "Middle East Technical University",
-    nameAr: "جامعة الشرق الأوسط التقنية",
-    location: "Ankara",
-    city: "Ankara",
-    country: "Turkey",
-    type: "Public" as const,
-    founded: "1956",
-    programs: 124,
-    students: 28000,
-    ranking: 451,
-    fees: "$5,000 - $7,500",
-    image: "/images/universities/metu.jpg",
-    website: "https://www.metu.edu.tr/",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-  {
-    id: 4,
-    name: "Bogazici University",
-    nameAr: "جامعة بوغaziتشي",
-    location: "Istanbul",
-    city: "Istanbul",
-    country: "Turkey",
-    type: "Public" as const,
-    founded: "1863",
-    programs: 97,
-    students: 15000,
-    ranking: 651,
-    fees: "$4,500 - $6,500",
-    image: "/images/universities/bogazici.jpg",
-    website: "http://www.boun.edu.tr/",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-  {
-    id: 5,
-    name: "Koç University",
-    nameAr: "جامعة كوتش",
-    location: "Istanbul",
-    city: "Istanbul",
-    country: "Turkey",
-    type: "Private" as const,
-    founded: "1993",
-    programs: 86,
-    students: 7000,
-    ranking: 511,
-    fees: "$15,000 - $25,000",
-    image: "/images/universities/koc.jpg",
-    website: "https://www.ku.edu.tr/",
-    languages: ["English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  }
-];
-
-// Sample programs data
-export const dummyPrograms: ProgramInfo[] = [
-  {
-    id: 1,
-    name: 'Software Engineering',
-    name_ar: 'هندسة البرمجيات',
-    university: 'Istanbul Technical University',
-    university_id: 1,
-    degree_type: 'bachelor',
-    duration: 4,
-    tuition_fee: 6000,
-    language: 'English',
-    country: 'Turkey',
-    city: 'Istanbul',
-    has_scholarship: false,
-    is_popular: true,
-    description: 'برنامج متميز في هندسة البرمجيات يركز على تطوير المهارات العملية والنظرية في مجال البرمجة وتطوير البرمجيات.',
-    university_image: '/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png',
-  },
-  {
-    id: 2,
-    name: 'Business Administration',
-    name_ar: 'إدارة الأعمال',
-    university: 'Bahçeşehir University',
-    university_id: 2,
-    degree_type: 'bachelor',
-    duration: 4,
-    tuition_fee: 7500,
-    language: 'English',
-    country: 'Turkey',
-    city: 'Istanbul',
-    has_scholarship: true,
-    is_popular: false,
-    description: 'برنامج شامل في إدارة الأعمال يؤهل الطلاب للعمل في مجالات الإدارة والتسويق والموارد البشرية وريادة الأعمال.'
-  },
-  {
-    id: 3,
-    name: 'Computer Science',
-    name_ar: 'علوم الحاسب',
-    university: 'Middle East Technical University',
-    university_id: 3,
-    degree_type: 'master',
-    duration: 2,
-    tuition_fee: 5000,
-    language: 'English',
-    country: 'Turkey',
-    city: 'Ankara',
-    has_scholarship: false,
-    is_popular: true,
-    description: 'برنامج متقدم في علوم الحاسب يركز على الذكاء الاصطناعي وتعلم الآلة والحوسبة السحابية وأمن المعلومات.'
-  },
-  {
-    id: 4,
-    name: 'Medicine',
-    name_ar: 'الطب البشري',
-    university: 'Near East University',
-    university_id: 4,
-    degree_type: 'bachelor',
-    duration: 6,
-    tuition_fee: 12000,
-    language: 'English',
-    country: 'Cyprus',
-    city: 'Nicosia',
-    has_scholarship: true,
-    is_popular: true,
-    description: 'برنامج الطب البشري المعتمد دولياً يؤهل الطلاب للعمل كأطباء مؤهلين في مختلف التخصصات الطبية.',
-    university_image: '/lovable-uploads/6e0c99ef-ce91-48b1-b3c8-49e2ef5a454a.png',
-  },
-  {
-    id: 5,
-    name: 'Civil Engineering',
-    name_ar: 'الهندسة المدنية',
-    university: 'University of Technology Malaysia',
-    university_id: 5,
-    degree_type: 'bachelor',
-    duration: 4,
-    tuition_fee: 8000,
-    language: 'English',
-    country: 'Malaysia',
-    city: 'Kuala Lumpur',
-    has_scholarship: false,
-    is_popular: false,
-    description: 'برنامج متكامل في الهندسة المدنية يغطي تصميم وبناء البنى التحتية والمباني والجسور والطرق وإدارة المشاريع الهندسية.'
-  },
-  {
-    id: 6,
-    name: 'International Relations',
-    name_ar: 'العلاقات الدولية',
-    university: 'Budapest University',
-    university_id: 6,
-    degree_type: 'master',
-    duration: 2,
-    tuition_fee: 4500,
-    language: 'English',
-    country: 'Hungary',
-    city: 'Budapest',
-    has_scholarship: true,
-    is_popular: false,
-    description: 'برنامج متميز في العلاقات الدولية يتناول القضايا العالمية المعاصرة والدبلوماسية والسياسة الخارجية والمنظمات الدولية.'
-  },
-  {
-    id: 7,
-    name: 'Pharmacy',
-    name_ar: 'الصيدلة',
-    university: 'Warsaw Medical University',
-    university_id: 7,
-    degree_type: 'bachelor',
-    duration: 5,
-    tuition_fee: 9000,
-    language: 'English',
-    country: 'Poland',
-    city: 'Warsaw',
-    has_scholarship: false,
-    is_popular: false,
-    description: 'برنامج الصيدلة المعتمد دولياً يؤهل الطلاب للعمل كصيادلة محترفين في المستشفيات والصيدليات ومجال البحث والتطوير الدوائي.'
-  },
-  {
-    id: 8,
-    name: 'Architecture',
-    name_ar: 'العمارة',
-    university: 'Czech Technical University',
-    university_id: 8,
-    degree_type: 'bachelor',
-    duration: 5,
-    tuition_fee: 7000,
-    language: 'English',
-    country: 'Czech Republic',
-    city: 'Prague',
-    has_scholarship: false,
-    is_popular: false,
-    description: 'برنامج متميز في العمارة يجمع بين النظرية والممارسة العملية في تصميم المباني والتخطيط العمراني والتصميم الداخلي.',
-    university_image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png',
-  },
-  {
-    id: 9,
-    name: 'Dentistry',
-    name_ar: 'طب الأسنان',
-    university: 'Eastern Mediterranean University',
-    university_id: 9,
-    degree_type: 'bachelor',
-    duration: 5,
-    tuition_fee: 11000,
-    language: 'English',
-    country: 'Turkish Cyprus',
-    city: 'Famagusta',
-    has_scholarship: false,
-    is_popular: true,
-    description: 'برنامج معتمد دولياً في طب الأسنان يؤهل الطلاب للعمل كأطباء أسنان مؤهلين مع التركيز على الممارسة العملية والتقنيات الحديثة.'
-  }
-];
-
-// Helper to convert between different program interfaces
-export const convertToProgramInfo = (program: any): ProgramInfo => {
-  return {
-    id: program.id,
-    name: program.title || program.name || "",
-    name_ar: program.nameAr || program.name_ar || program.title || "",
-    university: program.university || "",
-    university_id: program.university_id || 0,
-    degree_type: program.degree_type || "bachelor",
-    duration: typeof program.duration === 'number' ? program.duration : parseInt(program.duration?.toString() || "4"),
-    tuition_fee: typeof program.tuition_fee === 'number' ? program.tuition_fee : 
-                parseInt(program.fee?.replace(/[^0-9]/g, '') || "0"),
-    language: program.language || "English",
-    country: program.location?.split(',')[0]?.trim() || program.country || "Turkey",
-    city: program.location?.split(',')[1]?.trim() || program.city || "Istanbul",
-    has_scholarship: program.scholarshipAvailable || program.has_scholarship || false,
-    is_popular: program.isFeatured || program.is_popular || false,
-    description: program.description || "",
-    university_image: program.university_image || "",
-    image: program.image || ""
-  };
-};
-
-// Helper for uniform Program interface
-export interface Program {
+export interface ProgramInfo {
   id: number;
   title: string;
-  nameAr: string;
   university: string;
   location: string;
-  language: string;
+  degree: string;
   duration: string;
-  deadline: string;
-  fee: string;
-  discount?: string;
-  image?: string;
+  language: string[];
+  fee: number;
+  discount?: number;
   isFeatured?: boolean;
-  badges?: string[];
-  scholarshipAvailable?: boolean;
   description?: string;
+  requirements?: string[];
+  opportunities?: string[];
 }
+
+export const availableCountries = [
+  { value: "turkey", label: "تركيا" },
+  { value: "cyprus", label: "قبرص" },
+  { value: "malaysia", label: "ماليزيا" },
+  { value: "egypt", label: "مصر" },
+  { value: "hungary", label: "المجر" },
+  { value: "poland", label: "بولندا" },
+  { value: "czechRepublic", label: "التشيك" },
+  { value: "syria", label: "سوريا" }
+];
+
+// Function to convert Program to ProgramInfo format
+export const convertToProgramInfo = (programs: Program[]): ProgramInfo[] => {
+  return programs.map(program => ({
+    id: program.id,
+    title: program.name,
+    university: program.university,
+    location: program.country,
+    degree: program.degree,
+    duration: program.duration,
+    language: program.languages,
+    fee: program.tuitionFee,
+    discount: program.discount,
+    isFeatured: program.isFeatured,
+    description: program.description,
+    requirements: program.requirements,
+    opportunities: program.careerOpportunities
+  }));
+};

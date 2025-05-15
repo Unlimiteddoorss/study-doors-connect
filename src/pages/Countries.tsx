@@ -1,227 +1,316 @@
 
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import MainLayout from '@/components/layout/MainLayout';
-import SectionTitle from '@/components/shared/SectionTitle';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search, MapPin, Globe } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, GraduationCap, Building } from 'lucide-react';
 import { availableCountries } from '@/data/programsData';
-import WorldMap from '@/components/countries/WorldMap';
 
-// صور للدول
-const countryImages: { [key: string]: string } = {
-  'Turkey': 'https://images.unsplash.com/photo-1589561454668-97bd6c606f78?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'United Kingdom': 'https://images.unsplash.com/photo-1520986606214-8b456906c813?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Germany': 'https://images.unsplash.com/photo-1560969184-10fe8719e047?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'United States': 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=2089&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Malaysia': 'https://images.unsplash.com/photo-1596422846543-75c6fc197f07?q=80&w=2064&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Ireland': 'https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Spain': 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Australia': 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=2030&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Egypt': 'https://images.unsplash.com/photo-1568322445389-f64ac2515022?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3',
-  'Azerbaijan': 'https://images.unsplash.com/photo-1633903998646-f610459bc17d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3',
-};
+interface CountryOption {
+  value: string;
+  label: string;
+}
 
-// معلومات الدول
-const countryInfo: { [key: string]: { universities: number, programs: number, description: string, languages: string[] } } = {
-  'Turkey': {
-    universities: 35,
-    programs: 250,
-    description: 'تتميز تركيا بموقعها الاستراتيجي بين أوروبا وآسيا، وتوفر تعليماً عالي الجودة بأسعار معقولة. الجامعات التركية معترف بها دولياً وتقدم برامج دراسية باللغات التركية والإنجليزية والعربية.',
-    languages: ['التركية', 'الإنجليزية', 'العربية']
-  },
-  'United Kingdom': {
-    universities: 15,
-    programs: 120,
-    description: 'تتمتع المملكة المتحدة بسمعة عالمية في مجال التعليم العالي، وتضم بعضاً من أقدم وأعرق الجامعات في العالم. توفر المملكة المتحدة بيئة أكاديمية متميزة وفرص تعليمية متنوعة.',
-    languages: ['الإنجليزية']
-  },
-  'Germany': {
-    universities: 12,
-    programs: 85,
-    description: 'تُعد ألمانيا وجهة مثالية للطلاب الدوليين بفضل جودة التعليم العالية والرسوم الدراسية المنخفضة أو المجانية في الجامعات الحكومية. تتميز بتخصصاتها التقنية والهندسية المتقدمة.',
-    languages: ['الألمانية', 'الإنجليزية']
-  },
-  'United States': {
-    universities: 8,
-    programs: 65,
-    description: 'تقدم الولايات المتحدة تجربة تعليمية فريدة مع أكثر من 4,000 جامعة وكلية. تُعرف بمرونتها الأكاديمية ونظامها التعليمي المتقدم، وتوفر العديد من فرص المنح والبحث العلمي.',
-    languages: ['الإنجليزية']
-  },
-  'Malaysia': {
-    universities: 10,
-    programs: 70,
-    description: 'تُعتبر ماليزيا من أفضل الوجهات الدراسية في جنوب شرق آسيا، وتوفر بيئة متعددة الثقافات ورسوم دراسية معقولة. تتميز بجامعاتها ذات التصنيفات العالمية وجودة التعليم العالية.',
-    languages: ['الإنجليزية', 'الماليزية']
-  },
-};
+interface CountryInfo {
+  id: string;
+  name: string;
+  nameAr: string;
+  flag: string;
+  description: string;
+  universitiesCount: number;
+  programsCount: number;
+  featuredUniversities: string[];
+  featuredPrograms: string[];
+  visa: {
+    requirements: string[];
+    process: string;
+    duration: string;
+  };
+  livingCost: {
+    accommodation: string;
+    food: string;
+    transport: string;
+    total: string;
+  };
+}
 
-// الدول الأكثر شعبية
-const popularCountries = ['Turkey', 'United Kingdom', 'Germany', 'United States', 'Malaysia'];
+const countriesData: CountryInfo[] = [
+  {
+    id: "turkey",
+    name: "Turkey",
+    nameAr: "تركيا",
+    flag: "/images/countries/turkey-flag.png",
+    description: "تُعد تركيا وجهة دراسية رائدة توفر تعليمًا عالي الجودة بتكاليف معقولة. تجمع بين التقاليد العريقة والتطور الحديث، وتضم العديد من الجامعات المرموقة. تتميز بموقعها الإستراتيجي الذي يربط بين آسيا وأوروبا، وتوفر بيئة آمنة وغنية ثقافياً للطلاب الدوليين.",
+    universitiesCount: 207,
+    programsCount: 850,
+    featuredUniversities: [
+      "جامعة إسطنبول التقنية",
+      "جامعة بيلكنت",
+      "جامعة الشرق الأوسط التقنية"
+    ],
+    featuredPrograms: [
+      "الطب البشري",
+      "الهندسة المدنية",
+      "علوم الحاسوب"
+    ],
+    visa: {
+      requirements: [
+        "جواز سفر ساري المفعول",
+        "خطاب قبول من الجامعة",
+        "إثبات القدرة المالية",
+        "تأمين صحي"
+      ],
+      process: "يمكن التقديم عبر السفارة أو القنصلية التركية، ويستغرق معالجة الطلب حوالي 15-30 يومًا.",
+      duration: "سنة واحدة قابلة للتجديد"
+    },
+    livingCost: {
+      accommodation: "$150 - $350 شهرياً",
+      food: "$150 - $200 شهرياً",
+      transport: "$30 - $50 شهرياً",
+      total: "$400 - $600 شهرياً"
+    }
+  },
+  {
+    id: "cyprus",
+    name: "Cyprus",
+    nameAr: "قبرص",
+    flag: "/images/countries/cyprus-flag.png",
+    description: "تتميز قبرص بمناخها المتوسطي الجميل وتوفر تعليماً عالي الجودة بنظام تعليمي بريطاني. تضم العديد من الجامعات المعترف بها دولياً، وتعتبر واحدة من أكثر الوجهات الدراسية أماناً في أوروبا مع تكاليف معيشة معقولة نسبياً مقارنة بدول أوروبية أخرى.",
+    universitiesCount: 25,
+    programsCount: 420,
+    featuredUniversities: [
+      "جامعة قبرص الشرقية",
+      "جامعة قبرص الدولية",
+      "جامعة جيرنا الأمريكية"
+    ],
+    featuredPrograms: [
+      "إدارة الأعمال",
+      "السياحة والضيافة",
+      "العلوم الصحية"
+    ],
+    visa: {
+      requirements: [
+        "جواز سفر ساري المفعول",
+        "خطاب قبول من الجامعة",
+        "إثبات القدرة المالية",
+        "تأمين صحي"
+      ],
+      process: "يتم التقديم عبر السفارة القبرصية، ويستغرق معالجة الطلب حوالي 4-6 أسابيع.",
+      duration: "تصريح إقامة طالب لمدة سنة قابلة للتجديد"
+    },
+    livingCost: {
+      accommodation: "$250 - $450 شهرياً",
+      food: "$200 - $300 شهرياً",
+      transport: "$50 - $80 شهرياً",
+      total: "$500 - $800 شهرياً"
+    }
+  }
+];
 
 const Countries = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredCountries, setFilteredCountries] = useState(availableCountries);
-
-  useEffect(() => {
-    if (searchTerm) {
-      setFilteredCountries(
-        availableCountries.filter(
-          country =>
-            country.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredCountries(availableCountries);
+  const { t } = useTranslation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryInfo | null>(null);
+  
+  // Filter countries based on search query
+  const filteredCountries = searchQuery 
+    ? availableCountries.filter(country => 
+        country.label.includes(searchQuery) || 
+        country.value.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : availableCountries;
+  
+  // Handle country selection
+  const handleCountrySelect = (countryValue: string) => {
+    const countryData = countriesData.find(c => c.id === countryValue);
+    if (countryData) {
+      setSelectedCountry(countryData);
     }
-  }, [searchTerm]);
-
-  const getCountryImage = (country: string) => {
-    return countryImages[country] || 'https://images.unsplash.com/photo-1526778548025-fa2f459cd5ce?q=80&w=2033&auto=format&fit=crop&ixlib=rb-4.0.3';
   };
-
-  const getCountryInfo = (country: string) => {
-    return countryInfo[country] || { 
-      universities: Math.floor(Math.random() * 10) + 3,
-      programs: Math.floor(Math.random() * 50) + 10,
-      description: 'توفر هذه الدولة فرصًا تعليمية متميزة للطلاب الدوليين مع مجموعة متنوعة من البرامج الأكاديمية.',
-      languages: ['الإنجليزية']
-    };
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // البحث تم تنفيذه في useEffect أعلاه
-  };
-
+  
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
-        <SectionTitle
-          title="الدول الدراسية"
-          subtitle="استكشف أفضل الوجهات الدراسية حول العالم واختر الدولة المناسبة لطموحاتك التعليمية"
-        />
-
-        {/* قسم البحث */}
-        <div className="max-w-2xl mx-auto mb-10">
-          <form onSubmit={handleSearch} className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="ابحث عن دولة..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4"
-            />
-          </form>
+        <h1 className="text-3xl font-bold mb-2 text-unlimited-blue">استكشف دول الدراسة</h1>
+        <p className="text-unlimited-gray mb-8">
+          تعرف على أفضل الوجهات الدراسية حول العالم ومميزات كل دولة وبرامجها الأكاديمية
+        </p>
+        
+        <div className="mb-8 relative">
+          <Input
+            type="text"
+            placeholder="ابحث عن دولة..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+          <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
-
-        {/* خريطة العالم التفاعلية */}
-        <div className="bg-white rounded-lg shadow-sm border mb-12">
-          <WorldMap />
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-8">
+          {filteredCountries.map((country) => (
+            <Button
+              key={country.value}
+              variant={selectedCountry?.id === country.value ? "default" : "outline"}
+              onClick={() => handleCountrySelect(country.value)}
+              className="justify-between"
+            >
+              {country.label}
+            </Button>
+          ))}
         </div>
-
-        {/* الدول الشائعة */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">الدول الأكثر شعبية للدراسة</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {popularCountries.map((country, index) => {
-              const info = getCountryInfo(country);
-              return (
-                <Card key={index} className="overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={getCountryImage(country)} 
-                      alt={country} 
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end">
-                      <div className="p-4 text-white">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 ml-1" />
-                          <h3 className="font-bold text-xl">{country}</h3>
-                        </div>
-                      </div>
+        
+        {selectedCountry && (
+          <div className="space-y-8">
+            <Card className="overflow-hidden">
+              <div className="bg-unlimited-blue text-white p-6 flex flex-col md:flex-row justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">{selectedCountry.nameAr}</h2>
+                  <p className="text-unlimited-light-blue">وجهة دراسية مميزة للطلاب الدوليين</p>
+                </div>
+                <div className="mt-4 md:mt-0">
+                  <img 
+                    src={selectedCountry.flag} 
+                    alt={`علم ${selectedCountry.nameAr}`} 
+                    className="h-16 rounded shadow"
+                  />
+                </div>
+              </div>
+              <CardContent className="p-6">
+                <p className="mb-6 text-unlimited-gray">{selectedCountry.description}</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <Building className="h-8 w-8 text-unlimited-blue mr-4" />
+                    <div>
+                      <p className="font-bold text-xl">{selectedCountry.universitiesCount}+</p>
+                      <p className="text-unlimited-gray">جامعة</p>
                     </div>
                   </div>
-                  
-                  <CardContent className="p-6">
-                    <div className="flex justify-between mb-4">
-                      <div>
-                        <p className="text-unlimited-gray text-sm">الجامعات</p>
-                        <p className="font-semibold">{info.universities}+</p>
-                      </div>
-                      <div>
-                        <p className="text-unlimited-gray text-sm">البرامج الدراسية</p>
-                        <p className="font-semibold">{info.programs}+</p>
-                      </div>
-                      <div>
-                        <p className="text-unlimited-gray text-sm">لغات الدراسة</p>
-                        <p className="font-semibold">{info.languages.join(', ')}</p>
-                      </div>
+                  <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <GraduationCap className="h-8 w-8 text-unlimited-blue mr-4" />
+                    <div>
+                      <p className="font-bold text-xl">{selectedCountry.programsCount}+</p>
+                      <p className="text-unlimited-gray">برنامج دراسي</p>
                     </div>
-                    
-                    <p className="text-unlimited-gray line-clamp-3">{info.description}</p>
-                  </CardContent>
-                  
-                  <CardFooter>
-                    <Button asChild className="w-full bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                      <Link to={`/countries/${country.toLowerCase().replace(/\s+/g, '-')}`}>عرض التفاصيل</Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* كل الدول */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6">جميع الدول ({filteredCountries.length})</h2>
-
-          {filteredCountries.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredCountries.map((country, index) => (
-                <Link 
-                  to={`/countries/${country.toLowerCase().replace(/\s+/g, '-')}`} 
-                  key={index}
-                  className="block"
-                >
-                  <Card className="overflow-hidden h-full hover:border-unlimited-blue hover:shadow-md transition-all">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 bg-unlimited-blue/10 rounded-full flex items-center justify-center text-unlimited-blue">
-                        <Globe className="h-5 w-5" />
-                      </div>
-                      <h3 className="font-medium">{country}</h3>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
+                  </div>
+                  <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-md">
+                    <MapPin className="h-8 w-8 text-unlimited-blue mr-4" />
+                    <div>
+                      <p className="font-bold text-xl">مدن متعددة</p>
+                      <p className="text-unlimited-gray">خيارات متنوعة</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4 text-unlimited-blue">أبرز الجامعات</h3>
+                  <ul className="space-y-3">
+                    {selectedCountry.featuredUniversities.map((uni, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-unlimited-blue mt-1 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {uni}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button variant="outline" className="mt-4 w-full">
+                    استعرض جميع الجامعات
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4 text-unlimited-blue">أشهر التخصصات</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCountry.featuredPrograms.map((program, index) => (
+                      <Badge key={index} variant="outline" className="text-unlimited-blue border-unlimited-blue px-3 py-1">
+                        {program}
+                      </Badge>
+                    ))}
+                  </div>
+                  <Button variant="outline" className="mt-4 w-full">
+                    استعرض جميع التخصصات
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على دول تطابق بحثك</p>
-              <Button onClick={() => setSearchTerm("")} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
-                إعادة ضبط البحث
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4 text-unlimited-blue">متطلبات التأشيرة</h3>
+                  <ul className="space-y-3">
+                    {selectedCountry.visa.requirements.map((req, index) => (
+                      <li key={index} className="flex items-start">
+                        <svg className="w-5 h-5 text-unlimited-blue mt-1 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        {req}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-4 space-y-2 text-unlimited-gray">
+                    <p><strong>عملية التقديم:</strong> {selectedCountry.visa.process}</p>
+                    <p><strong>مدة التأشيرة:</strong> {selectedCountry.visa.duration}</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="p-6">
+                  <h3 className="text-xl font-bold mb-4 text-unlimited-blue">تكاليف المعيشة</h3>
+                  <div className="space-y-3 text-unlimited-gray">
+                    <div className="flex justify-between border-b pb-2 dark:border-gray-700">
+                      <p>السكن:</p>
+                      <p className="font-medium">{selectedCountry.livingCost.accommodation}</p>
+                    </div>
+                    <div className="flex justify-between border-b pb-2 dark:border-gray-700">
+                      <p>الطعام:</p>
+                      <p className="font-medium">{selectedCountry.livingCost.food}</p>
+                    </div>
+                    <div className="flex justify-between border-b pb-2 dark:border-gray-700">
+                      <p>المواصلات:</p>
+                      <p className="font-medium">{selectedCountry.livingCost.transport}</p>
+                    </div>
+                    <div className="flex justify-between font-bold text-unlimited-blue">
+                      <p>المجموع التقريبي:</p>
+                      <p>{selectedCountry.livingCost.total}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="text-center">
+              <Button className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
+                قدم طلب الآن للدراسة في {selectedCountry.nameAr}
               </Button>
             </div>
-          )}
-        </div>
-
-        {/* قسم الاستشارة */}
-        <div className="mt-16 bg-unlimited-blue/10 p-8 rounded-lg">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">غير متأكد من الوجهة الدراسية المناسبة لك؟</h2>
-            <p className="text-unlimited-gray mb-6">
-              دعنا نساعدك في اختيار الدولة والجامعة المثالية لأهدافك الأكاديمية والمهنية. مستشارونا التعليميون جاهزون لتقديم النصائح المخصصة لاحتياجاتك.
-            </p>
-            <Button asChild className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
-              <Link to="/contact">احصل على استشارة مجانية</Link>
-            </Button>
           </div>
-        </div>
+        )}
+        
+        {!selectedCountry && (
+          <div className="text-center py-12">
+            <svg className="w-16 h-16 mx-auto text-unlimited-gray mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p className="text-unlimited-gray text-lg">
+              اختر دولة من القائمة أعلاه لعرض المزيد من المعلومات
+            </p>
+          </div>
+        )}
       </div>
     </MainLayout>
   );
