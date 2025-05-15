@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DonutChart } from "@/components/ui/donut-chart";
@@ -34,7 +35,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
           <DonutChart
             data={studentsByCountry}
             index="name"
-            category="value"  // Change from categories to category
+            category="value" 
             colors={['#1E40AF', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']}
             valueFormatter={(value) => `${value} طالب`}
             className="h-80"
@@ -49,8 +50,8 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
         <CardContent>
           <DonutChart
             data={programsData}
-            index="name"  // or whatever your index property is
-            category="value"  // Change from categories to category
+            index="name"
+            category="value"
             colors={['#1E40AF', '#3B82F6', '#60A5FA', '#93C5FD', '#BFDBFE']}
             valueFormatter={(value) => `${value}`}
             className="h-80"

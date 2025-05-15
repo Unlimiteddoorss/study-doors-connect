@@ -1,171 +1,63 @@
-
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
-import { Building, MapPin, Clock, GraduationCap, Languages } from 'lucide-react';
-import { motion } from 'framer-motion';
 
+// Add ProgramInfo interface for external use
 export interface ProgramInfo {
   id: number;
   name: string;
   name_ar?: string;
   university: string;
   university_id: number;
-  university_image?: string;
-  degree_type: 'bachelor' | 'master' | 'doctorate' | 'certificate';
+  degree_type: string;
   duration: number;
   tuition_fee: number;
   language: string;
   country: string;
   city: string;
-  has_scholarship?: boolean;
-  is_popular?: boolean;
+  has_scholarship: boolean;
+  is_popular: boolean;
   description?: string;
-}
-
-// Also export the legacy Program interface for backward compatibility
-export interface Program {
-  id: number;
-  title: string;
-  university: string;
-  location: string;
-  duration: string;
-  language: string;
-  fee: string;
-  discount?: string;
-  image?: string;
-  badges?: string[];
-  deadline?: string;
-  scholarshipAvailable?: boolean;
-  isFeatured?: boolean;
 }
 
 interface ProgramCardProps {
   program: ProgramInfo;
-  index?: number;
 }
 
-const ProgramCard: React.FC<ProgramCardProps> = ({ program, index = 0 }) => {
-  // Animation configuration
-  const variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        duration: 0.5,
-        delay: index * 0.1
-      } 
-    }
-  };
-
-  // Format tuition fee with currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-  
-  // Format degree type to be more readable
-  const formatDegreeType = (type: string) => {
-    switch (type) {
-      case 'bachelor':
-        return 'بكالوريوس';
-      case 'master':
-        return 'ماجستير';
-      case 'doctorate':
-        return 'دكتوراه';
-      case 'certificate':
-        return 'شهادة';
-      default:
-        return type;
-    }
-  };
-  
-  // Format duration with appropriate unit
-  const formatDuration = (years: number) => {
-    return years === 1 ? `سنة واحدة` : `${years} سنوات`;
-  };
-
+const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
   return (
-    <motion.div
-      variants={variants}
-      initial="hidden"
-      animate="visible"
-    >
-      <Card className="overflow-hidden transition-transform hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
-        <Link to={`/programs/${program.id}`} className="block h-48 relative overflow-hidden">
-          {program.university_image ? (
-            <img 
-              src={program.university_image}
-              alt={program.university}
-              className="w-full h-full object-cover transition-transform hover:scale-105"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-r from-unlimited-blue to-blue-700 flex items-center justify-center">
-              <Building className="h-16 w-16 text-white/70" />
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <Link to={`/program/${program.id}`}>
+        <div className="relative">
+          <img
+            className="w-full h-48 object-cover"
+            src={program.image || "https://via.placeholder.com/400x200"}
+            alt={program.name}
+          />
+          {program.is_popular && (
+            <div className="absolute top-2 right-2 bg-unlimited-blue text-white text-xs px-2 py-1 rounded">
+              {program.is_popular ? 'Popular' : ''}
             </div>
           )}
-          
-          <div className="absolute top-2 right-2 flex flex-col gap-1">
+        </div>
+        <div className="p-4">
+          <h3 className="text-lg font-semibold text-gray-800">{program.name}</h3>
+          <p className="text-gray-600 text-sm mt-1">{program.university}</p>
+          <div className="flex items-center mt-2">
+            <span className="text-gray-700 text-sm">
+              {program.country}, {program.city}
+            </span>
+          </div>
+          <div className="mt-3 flex justify-between items-center">
+            <span className="text-unlimited-blue font-medium">
+              ${program.tuition_fee} / year
+            </span>
             {program.has_scholarship && (
-              <Badge className="bg-green-600">منحة دراسية</Badge>
-            )}
-            {program.is_popular && (
-              <Badge className="bg-unlimited-blue">شائع</Badge>
+              <span className="text-green-500 text-sm">Scholarship Available</span>
             )}
           </div>
-        </Link>
-        
-        <CardContent className="p-4 flex flex-col flex-grow">
-          <div className="mb-3">
-            <Link to={`/programs/${program.id}`}>
-              <h3 className="font-bold text-lg hover:text-unlimited-blue transition-colors line-clamp-2 mb-1">
-                {program.name_ar || program.name}
-              </h3>
-            </Link>
-            
-            <p className="text-unlimited-gray text-sm flex items-center">
-              <Building className="h-3.5 w-3.5 ml-1 flex-shrink-0" />
-              <span className="line-clamp-1">{program.university}</span>
-            </p>
-          </div>
-          
-          <div className="space-y-2 text-sm flex-grow">
-            <div className="flex items-center text-unlimited-gray">
-              <MapPin className="h-3.5 w-3.5 ml-1 flex-shrink-0" />
-              <span>{program.city}, {program.country}</span>
-            </div>
-            
-            <div className="flex items-center text-unlimited-gray">
-              <GraduationCap className="h-3.5 w-3.5 ml-1 flex-shrink-0" />
-              <span>{formatDegreeType(program.degree_type)}</span>
-            </div>
-            
-            <div className="flex items-center text-unlimited-gray">
-              <Clock className="h-3.5 w-3.5 ml-1 flex-shrink-0" />
-              <span>{formatDuration(program.duration)}</span>
-            </div>
-            
-            <div className="flex items-center text-unlimited-gray">
-              <Languages className="h-3.5 w-3.5 ml-1 flex-shrink-0" />
-              <span>{program.language}</span>
-            </div>
-          </div>
-          
-          <div className="mt-4 pt-3 border-t">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-unlimited-gray">الرسوم السنوية</span>
-              <span className="font-bold text-unlimited-blue">{formatCurrency(program.tuition_fee)}</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        </div>
+      </Link>
+    </div>
   );
 };
 

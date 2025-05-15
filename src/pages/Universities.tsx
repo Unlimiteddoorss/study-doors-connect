@@ -6,7 +6,6 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, MapPin, School, SlidersHorizontal } from 'lucide-react';
-import { turkishUniversities } from '@/data/programsData';
 import { useToast } from '@/hooks/use-toast';
 import UniversitiesGrid from '@/components/universities/UniversitiesGrid';
 import UniversitiesMap from '@/components/universities/UniversitiesMap';
@@ -18,6 +17,145 @@ import ScrollToTop from '@/components/shared/ScrollToTop';
 import CountUp from '@/components/shared/CountUp';
 import DarkModeToggle from '@/components/shared/DarkModeToggle';
 import SavedFilters from '@/components/universities/SavedFilters';
+
+// Define the University type locally since the imported one has issues
+interface University {
+  id: number;
+  name: string;
+  nameAr?: string;
+  country: string;
+  city: string;
+  location: string;
+  type: "Public" | "Private";
+  founded: string;
+  programs: number;
+  students: number;
+  ranking: number;
+  fees: string;
+  image: string;
+  website: string;
+  languages: string[];
+  accreditation: string;
+  isFeatured: boolean;
+}
+
+// Define turkish universities data here
+const turkishUniversities: University[] = [
+  {
+    id: 1,
+    name: "Istanbul Technical University",
+    nameAr: "جامعة إسطنبول التقنية",
+    location: "Istanbul",
+    city: "Istanbul",
+    country: "Turkey",
+    type: "Public",
+    founded: "1773",
+    programs: 120,
+    students: 32000,
+    ranking: 501,
+    fees: "$6,000 - $8,000",
+    image: "/images/universities/istanbul-technical-university.jpg",
+    website: "https://www.itu.edu.tr/en",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  },
+  {
+    id: 2,
+    name: "Bilkent University",
+    nameAr: "جامعة بيلكنت",
+    location: "Ankara",
+    city: "Ankara",
+    country: "Turkey",
+    type: "Private",
+    founded: "1984",
+    programs: 89,
+    students: 12500,
+    ranking: 401,
+    fees: "$8,000 - $12,000",
+    image: "/images/universities/bilkent-university.jpg",
+    website: "http://www.bilkent.edu.tr/",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  },
+  {
+    id: 3,
+    name: "Middle East Technical University",
+    nameAr: "جامعة الشرق الأوسط التقنية",
+    location: "Ankara",
+    city: "Ankara",
+    country: "Turkey",
+    type: "Public",
+    founded: "1956",
+    programs: 110,
+    students: 27000,
+    ranking: 451,
+    fees: "$5,000 - $7,000",
+    image: "/images/universities/middle-east-technical-university.jpg",
+    website: "https://www.metu.edu.tr/",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: false
+  },
+  {
+    id: 4,
+    name: "Koç University",
+    nameAr: "جامعة كوتش",
+    location: "Istanbul",
+    city: "Istanbul",
+    country: "Turkey",
+    type: "Private",
+    founded: "1993",
+    programs: 75,
+    students: 7000,
+    ranking: 451,
+    fees: "$15,000 - $20,000",
+    image: "/images/universities/koc-university.jpg",
+    website: "https://www.ku.edu.tr/en/",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  },
+  {
+    id: 5,
+    name: "Boğaziçi University",
+    nameAr: "جامعة بوغaziتشي",
+    location: "Istanbul",
+    city: "Istanbul",
+    country: "Turkey",
+    type: "Public",
+    founded: "1863",
+    programs: 95,
+    students: 15000,
+    ranking: 551,
+    fees: "$5,000 - $7,000",
+    image: "/images/universities/bogazici-university.jpg",
+    website: "http://www.boun.edu.tr/",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: false
+  },
+  {
+    id: 6,
+    name: "Sabancı University",
+    nameAr: "جامعة سابانجي",
+    location: "Istanbul",
+    city: "Istanbul",
+    country: "Turkey",
+    type: "Private",
+    founded: "1994",
+    programs: 60,
+    students: 4000,
+    ranking: 521,
+    fees: "$12,000 - $18,000",
+    image: "/images/universities/sabanci-university.jpg",
+    website: "https://www.sabanciuniv.edu/en",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  }
+];
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -71,7 +209,7 @@ const Universities = () => {
     turkishUniversities.map(uni => uni.city)
   )).map(city => ({ 
     value: city as string, 
-    label: countryTranslations[city as string] || city 
+    label: countryTranslations[city] || city 
   }));
 
   const typeOptions = [

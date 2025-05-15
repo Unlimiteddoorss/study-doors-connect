@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
@@ -15,7 +16,49 @@ import ProgramDetails from '@/components/student/program/ProgramDetails';
 import PreferencesForm from '@/components/student/program/PreferencesForm';
 
 // Import university and program data
-import { turkishUniversities, dummyPrograms } from '@/data/programsData';
+import { dummyPrograms } from '@/data/programsData';
+
+// Define example universities data
+const universities = [
+  {
+    id: 1,
+    name: "Istanbul Technical University",
+    nameAr: "جامعة إسطنبول التقنية",
+    location: "Istanbul",
+    city: "Istanbul",
+    country: "Turkey",
+    type: "Public" as const,
+    founded: "1773",
+    programs: 120,
+    students: 32000,
+    ranking: 501,
+    fees: "$6,000 - $8,000",
+    image: "/images/universities/istanbul-technical-university.jpg",
+    website: "https://www.itu.edu.tr/en",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  },
+  {
+    id: 2,
+    name: "Bilkent University",
+    nameAr: "جامعة بيلكنت",
+    location: "Ankara",
+    city: "Ankara",
+    country: "Turkey",
+    type: "Private" as const,
+    founded: "1984",
+    programs: 89,
+    students: 12500,
+    ranking: 401,
+    fees: "$8,000 - $12,000",
+    image: "/images/universities/bilkent-university.jpg",
+    website: "http://www.bilkent.edu.tr/",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  },
+];
 
 // Define the country data
 const countries = [
@@ -88,6 +131,15 @@ export interface University {
   programs?: number;
   image?: string;
   location?: string;
+  type: "Public" | "Private";
+  founded: string;
+  students: number;
+  ranking: number;
+  fees: string;
+  website: string;
+  languages: string[];
+  accreditation: string;
+  isFeatured: boolean;
 }
 
 interface ProgramSelectionFormProps {

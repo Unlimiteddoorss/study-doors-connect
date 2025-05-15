@@ -4,9 +4,10 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recha
 import { cn } from "@/lib/utils";
 
 interface DonutChartProps {
-  data: { name: string; value: number }[];
+  data: { name: string; value: number; }[];
   index: string;
-  category: string; // Changed from categories to category to match expected prop
+  category?: string; // Support for single category
+  categories?: string[]; // Support for multiple categories
   colors?: string[];
   valueFormatter?: (value: number) => string;
   className?: string;
@@ -16,6 +17,7 @@ export function DonutChart({
   data,
   index,
   category,
+  categories,
   colors = ["#1E40AF", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE"],
   valueFormatter = (value: number) => `${value}`,
   className,
