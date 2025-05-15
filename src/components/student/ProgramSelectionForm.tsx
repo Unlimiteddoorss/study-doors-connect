@@ -1,4 +1,3 @@
-
 // Update imports to include the turkishUniversities
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
@@ -121,7 +120,8 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   // Modify the imported Turkish universities to match the University type
   const universities: University[] = turkishUniversities.map(uni => ({
     ...uni,
-    type: uni.type as "Public" | "Private",
+    type: (uni.type as "Public" | "Private"),
+    nameAr: uni.nameAr || uni.name
   }));
 
   const [activeTab, setActiveTab] = useState<string>("browse");
@@ -142,7 +142,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     university: program.university,
     location: `${program.city}, ${program.country}`,
     language: Array.isArray(program.language) ? program.language[0] : program.language,
-    duration: `${program.duration} years`,
+    duration: typeof program.duration === 'number' ? `${program.duration} years` : program.duration,
     deadline: "2025-09-01", // Provide a default deadline
     fee: `$${program.tuition_fee}`,
     discount: program.has_scholarship ? "Available" : undefined,

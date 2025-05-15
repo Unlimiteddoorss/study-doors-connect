@@ -1,3 +1,4 @@
+
 import { Program } from './universityPrograms';
 
 export interface ProgramInfo {
@@ -10,7 +11,7 @@ export interface ProgramInfo {
   location?: string;
   degree?: string;
   degree_type?: string;
-  duration: string;
+  duration: string | number;
   language: string | string[];
   fee?: number | string;
   tuition_fee?: number;
@@ -46,10 +47,12 @@ export const convertToProgramInfo = (program: any): ProgramInfo => {
     id: program.id,
     title: program.title || program.name,
     name: program.name || program.title,
-    name_ar: program.name_ar,
+    name_ar: program.name_ar || "",
     university: program.university,
+    university_id: program.university_id || 0,
     location: program.location || `${program.city}, ${program.country}`,
     degree: program.degree || program.degree_type,
+    degree_type: program.degree_type,
     duration: typeof program.duration === 'number' ? `${program.duration} years` : program.duration,
     language: Array.isArray(program.language) ? program.language : [program.language || "English"],
     fee: program.tuition_fee || program.fee,
@@ -64,7 +67,6 @@ export const convertToProgramInfo = (program: any): ProgramInfo => {
     opportunities: program.careerOpportunities,
     country: program.country,
     city: program.city,
-    university_id: program.university_id,
     image: program.image || program.university_image,
     university_image: program.university_image
   };
