@@ -1,40 +1,45 @@
 
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import SectionTitle from '../shared/SectionTitle';
-import ProgramCard from '../programs/ProgramCard';
-import { dummyPrograms, convertToProgramInfo } from '@/data/programsData';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import ProgramCard, { ProgramInfo } from '@/components/programs/ProgramCard';
+import { dummyPrograms } from '@/data/programsData';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const FeaturedPrograms = () => {
-  // Filter featured programs
+  // Get featured programs
   const featuredPrograms = dummyPrograms
-    .filter(program => program.isFeatured)
-    .slice(0, 3);
+    .filter(program => program.is_popular)
+    .slice(0, 4);
 
   return (
-    <section className="py-16 bg-gray-50">
+    <div className="bg-unlimited-light-blue/5 py-16">
       <div className="container mx-auto px-4">
-        <SectionTitle 
-          title="البرامج المميزة"
-          subtitle="برامجنا الأكثر شعبية بين الطلاب"
-          action={
-            <Button asChild variant="outline">
-              <Link to="/programs" className="flex items-center">
-                عرض جميع البرامج
-                <ArrowRight className="mr-2 h-4 w-4" />
-              </Link>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold">برامج دراسية مميزة</h2>
+          <div className="flex gap-2">
+            <Button variant="outline" size="icon" id="prev-featured" aria-label="Previous">
+              <ChevronRight className="h-4 w-4" />
             </Button>
-          }
-        />
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+            <Button variant="outline" size="icon" id="next-featured" aria-label="Next">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {featuredPrograms.map((program) => (
-            <ProgramCard key={program.id} program={convertToProgramInfo(program)} />
+            <ProgramCard key={program.id} program={program} />
           ))}
         </div>
+
+        <div className="text-center">
+          <Button asChild>
+            <Link to="/programs">عرض جميع البرامج</Link>
+          </Button>
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

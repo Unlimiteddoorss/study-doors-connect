@@ -1,162 +1,110 @@
 
-import { 
-  GraduationCap, 
-  Building2, 
-  Globe2, 
-  FileCheck, 
-  Handshake, 
-  HeartHandshake,
-  ArrowLeft
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
-import { useToast } from '@/components/ui/use-toast';
+import React from 'react';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { School, FileText, GraduationCap, Building, PenTool, MessageSquare, Globe, FileCheck, ArrowRight } from 'lucide-react';
 
-const servicesData = [
-  {
-    id: 1,
-    title: 'استشارات القبول الجامعي',
-    description: 'نقدم استشارات متخصصة لاختيار أفضل الجامعات والبرامج المناسبة لك',
-    icon: GraduationCap,
-    link: '/programs'
-  },
-  {
-    id: 2,
-    title: 'خدمات التأشيرات',
-    description: 'نساعدك في إجراءات التأشيرة الدراسية وتجهيز جميع المستندات المطلوبة',
-    icon: Globe2,
-    link: '/services'
-  },
-  {
-    id: 3,
-    title: 'تقديم الطلبات',
-    description: 'نقوم بتقديم طلبات القبول نيابة عنك ومتابعتها مع الجامعات',
-    icon: FileCheck,
-    link: '/apply'
-  },
-  {
-    id: 4,
-    title: 'السكن الطلابي',
-    description: 'نوفر خدمات البحث عن السكن المناسب وحجزه قبل وصولك',
-    icon: Building2,
-    link: '/services'
-  },
-  {
-    id: 5,
-    title: 'خدمات ما بعد القبول',
-    description: 'نقدم الدعم المستمر بعد القبول للتأكد من راحتك واستقرارك',
-    icon: HeartHandshake,
-    link: '/services'
-  },
-  {
-    id: 6,
-    title: 'شراكات دولية',
-    description: 'نتعاون مع أفضل الجامعات العالمية لضمان أفضل فرص التعليم',
-    icon: Handshake,
-    link: '/universities'
-  }
-];
+interface Service {
+  id: number;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  color: string;
+}
 
 const Services = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [hoveredService, setHoveredService] = useState<number | null>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  const [selectedService, setSelectedService] = useState<number | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const servicesSection = document.querySelector('.services-section');
-    if (servicesSection) {
-      observer.observe(servicesSection);
+  const services: Service[] = [
+    {
+      id: 1,
+      title: 'استشارات تعليمية',
+      description: 'نقدم استشارات شخصية لمساعدتك في اختيار المسار التعليمي المناسب والجامعة الأفضل لتخصصك وأهدافك المهنية.',
+      icon: <GraduationCap />,
+      color: 'bg-unlimited-blue/10 text-unlimited-blue'
+    },
+    {
+      id: 2,
+      title: 'التقديم للجامعات',
+      description: 'نتولى إعداد وتقديم طلبات القبول للجامعات المختارة بشكل احترافي لزيادة فرص قبولك.',
+      icon: <FileText />,
+      color: 'bg-green-100 text-green-700'
+    },
+    {
+      id: 3,
+      title: 'المنح الدراسية',
+      description: 'نساعدك في البحث عن المنح الدراسية المتاحة وإعداد طلبات التقديم للحصول على الدعم المالي.',
+      icon: <School />,
+      color: 'bg-purple-100 text-purple-700'
+    },
+    {
+      id: 4,
+      title: 'السكن الجامعي',
+      description: 'نقدم خدمات البحث عن السكن المناسب قرب الجامعة وبأسعار تناسب ميزانيتك.',
+      icon: <Building />,
+      color: 'bg-yellow-100 text-yellow-700'
+    },
+    {
+      id: 5,
+      title: 'تجهيز المستندات',
+      description: 'نساعدك في إعداد وترجمة وتصديق جميع المستندات المطلوبة للقبول الجامعي والتأشيرة.',
+      icon: <FileCheck />,
+      color: 'bg-red-100 text-red-700'
+    },
+    {
+      id: 6,
+      title: 'خدمات الترجمة',
+      description: 'نوفر خدمات ترجمة معتمدة لجميع الوثائق والشهادات المطلوبة للتقديم.',
+      icon: <PenTool />,
+      color: 'bg-blue-100 text-blue-700'
+    },
+    {
+      id: 7,
+      title: 'التأشيرات الطلابية',
+      description: 'نقدم المساعدة في إجراءات الحصول على التأشيرة الطلابية بسهولة وسرعة.',
+      icon: <Globe />,
+      color: 'bg-indigo-100 text-indigo-700'
+    },
+    {
+      id: 8,
+      title: 'دعم مستمر',
+      description: 'نقدم الدعم المستمر للطلاب قبل وأثناء وبعد الالتحاق بالجامعة لضمان تجربة تعليمية ناجحة.',
+      icon: <MessageSquare />,
+      color: 'bg-teal-100 text-teal-700'
     }
-
-    return () => observer.disconnect();
-  }, []);
-
-  const handleServiceClick = (serviceId: number, link: string) => {
-    setSelectedService(serviceId);
-    setTimeout(() => {
-      navigate(link);
-    }, 300);
-    
-    // Show feedback toast
-    toast({
-      title: "تم اختيار الخدمة بنجاح",
-      description: `سيتم توجيهك إلى صفحة ${servicesData.find(s => s.id === serviceId)?.title}`,
-    });
-  };
+  ];
 
   return (
-    <section className="py-16 services-section">
-      <div className="container mx-auto px-4">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-unlimited-dark-blue mb-4">خدماتنا</h2>
-          <p className="text-unlimited-gray max-w-2xl mx-auto">
-            نقدم مجموعة شاملة من الخدمات لمساعدتك في رحلتك التعليمية
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {servicesData.map((service, index) => (
-            <motion.div 
-              key={service.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              onHoverStart={() => setHoveredService(service.id)}
-              onHoverEnd={() => setHoveredService(null)}
-              onClick={() => handleServiceClick(service.id, service.link)}
-              className={`bg-white p-6 rounded-lg shadow-sm transition-all duration-300 cursor-pointer
-                ${hoveredService === service.id ? 'shadow-lg border-2 border-unlimited-blue/20' : ''}
-                ${selectedService === service.id ? 'bg-unlimited-blue/5' : ''}`}
-            >
-              <div className={`p-3 rounded-full w-fit mb-4 transition-all duration-300
-                ${hoveredService === service.id ? 'bg-unlimited-blue text-white scale-110' : 'bg-unlimited-blue/10 text-unlimited-blue'}`}>
-                <service.icon className="h-6 w-6" />
-              </div>
-              <h3 className={`text-xl font-semibold mb-3 transition-colors duration-300
-                ${hoveredService === service.id ? 'text-unlimited-blue' : 'text-unlimited-dark-blue'}`}>
-                {service.title}
-              </h3>
-              <p className="text-unlimited-gray mb-4">
-                {service.description}
-              </p>
-              <Button 
-                variant="link" 
-                className={`text-unlimited-blue hover:text-unlimited-dark-blue p-0 flex items-center gap-2 group
-                  ${hoveredService === service.id ? 'underline' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(service.link);
-                }}
-              >
-                اكتشف المزيد
-                <ArrowLeft className="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" />
-              </Button>
-            </motion.div>
-          ))}
-        </div>
+    <div className="container mx-auto px-4 py-16">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">خدماتنا التعليمية</h2>
+        <p className="text-unlimited-gray max-w-3xl mx-auto">
+          نقدم مجموعة شاملة من الخدمات المصممة لمساعدة الطلاب في كل خطوة من رحلتهم التعليمية في الخارج
+        </p>
       </div>
-    </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {services.map((service) => (
+          <Card key={service.id} className="border border-gray-100 hover:shadow-md transition-shadow overflow-hidden">
+            <CardHeader>
+              <div className={`w-12 h-12 rounded-lg ${service.color} flex items-center justify-center mb-3`}>
+                {service.icon}
+              </div>
+              <CardTitle className="text-xl">{service.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>{service.description}</CardDescription>
+            </CardContent>
+            <CardFooter>
+              <Button variant="ghost" className="p-0 h-auto text-unlimited-blue hover:text-unlimited-dark-blue">
+                <Link to="/services" className="flex items-center">
+                  اقرأ المزيد <ArrowRight className="mr-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
 };
 

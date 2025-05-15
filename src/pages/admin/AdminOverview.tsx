@@ -32,10 +32,7 @@ const AdminOverview = () => {
           </TabsList>
           
           <TabsContent value="analytics" className="mt-0">
-            <AnalyticsDashboard 
-              periodFilter={period} 
-              onPeriodChange={(p) => setPeriod(p)}
-            />
+            <AnalyticsDashboard className="w-full" />
           </TabsContent>
           
           <TabsContent value="tasks" className="mt-0">

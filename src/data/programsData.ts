@@ -1,100 +1,29 @@
-import { ProgramInfo } from "@/components/programs/ProgramCard";
 
-// Define Program interface that matches the data structure
-export interface Program {
-  id: number;
-  title: string;
-  university: string;
-  location: string;
-  duration: string;
-  language: string;
-  fee: string;
-  discount?: string;
-  image?: string;
-  badges?: string[];
-  deadline: string;
-  scholarshipAvailable?: boolean;
-  isFeatured?: boolean;
-  nameAr?: string;
-  description?: string;
-}
+import { ProgramInfo } from "../components/programs/ProgramCard";
 
-// Create a function to convert between Program and ProgramInfo
-export function convertToProgramInfo(program: Program): ProgramInfo {
-  return {
-    id: program.id,
-    name: program.title,
-    name_ar: program.nameAr,
-    university: program.university,
-    university_id: 1, // Default value, should be replaced with actual data
-    degree_type: 'bachelor', // Default value, should be parsed from title
-    duration: parseInt(program.duration) || 4, // Extract number from string
-    tuition_fee: parseInt(program.fee.replace(/[^0-9]/g, '')) || 6000, // Extract number from fee string
-    language: program.language,
-    country: program.location.split(',')[0].trim(),
-    city: program.location.split(',')[1]?.trim() || '',
-    has_scholarship: program.scholarshipAvailable || false,
-    is_popular: program.isFeatured || false,
-    description: program.description
-  };
-}
-
-// Available countries for filtering
-export const availableCountries = [
-  "Turkey",
-  "Hungary",
-  "United Kingdom",
-  "United States",
-  "Malaysia",
-  "Cyprus",
-  "Poland",
-  "Czech Republic",
-  "Northern Cyprus",
-  "Egypt",
-  "United Arab Emirates",
-];
-
-// Add missing exports
+// Define the categories
 export const degreeTypes = [
-  { value: 'bachelor', label: 'Bachelor', labelAr: 'بكالوريوس' },
-  { value: 'master', label: 'Master', labelAr: 'ماجستير' },
-  { value: 'doctorate', label: 'Doctorate', labelAr: 'دكتوراه' },
-  { value: 'certificate', label: 'Certificate', labelAr: 'شهادة' }
+  { value: "bachelor", label: "Bachelor's" },
+  { value: "master", label: "Master's" },
+  { value: "phd", label: "PhD" },
+  { value: "diploma", label: "Diploma" },
+  { value: "certificate", label: "Certificate" }
 ];
 
 export const programSpecialties = [
-  { value: 'engineering', label: 'Engineering', labelAr: 'هندسة' },
-  { value: 'medicine', label: 'Medicine', labelAr: 'طب' },
-  { value: 'business', label: 'Business', labelAr: 'إدارة أعمال' },
-  { value: 'arts', label: 'Arts', labelAr: 'فنون' },
-  { value: 'science', label: 'Science', labelAr: 'علوم' },
-  { value: 'law', label: 'Law', labelAr: 'قانون' },
-  { value: 'education', label: 'Education', labelAr: 'تعليم' }
+  { value: "engineering", label: "Engineering" },
+  { value: "medicine", label: "Medicine" },
+  { value: "business", label: "Business Administration" },
+  { value: "computer_science", label: "Computer Science" },
+  { value: "arts", label: "Arts & Humanities" },
+  { value: "science", label: "Natural Sciences" },
+  { value: "social_science", label: "Social Sciences" },
+  { value: "education", label: "Education" },
+  { value: "law", label: "Law" }
 ];
 
-// Export University interface for consistency
-export interface University {
-  id: number;
-  name: string;
-  nameAr?: string;
-  country: string;
-  city: string;
-  location: string;
-  type: "Public" | "Private";
-  founded: string;
-  programs: number;
-  students: number;
-  ranking: number;
-  fees: string;
-  image: string;
-  website: string;
-  languages: string[];
-  accreditation: string;
-  isFeatured: boolean;
-}
-
-// Define turkish universities data
-export const turkishUniversities: University[] = [
+// Sample universities data
+export const turkishUniversities = [
   {
     id: 1,
     name: "Istanbul Technical University",
@@ -102,7 +31,7 @@ export const turkishUniversities: University[] = [
     location: "Istanbul",
     city: "Istanbul",
     country: "Turkey",
-    type: "Public",
+    type: "Public" as const,
     founded: "1773",
     programs: 120,
     students: 32000,
@@ -121,7 +50,7 @@ export const turkishUniversities: University[] = [
     location: "Ankara",
     city: "Ankara",
     country: "Turkey",
-    type: "Private",
+    type: "Private" as const,
     founded: "1984",
     programs: 89,
     students: 12500,
@@ -140,236 +69,205 @@ export const turkishUniversities: University[] = [
     location: "Ankara",
     city: "Ankara",
     country: "Turkey",
-    type: "Public",
+    type: "Public" as const,
     founded: "1956",
-    programs: 110,
-    students: 27000,
+    programs: 124,
+    students: 28000,
     ranking: 451,
-    fees: "$5,000 - $7,000",
-    image: "/images/universities/middle-east-technical-university.jpg",
+    fees: "$5,000 - $7,500",
+    image: "/images/universities/metu.jpg",
     website: "https://www.metu.edu.tr/",
     languages: ["Turkish", "English"],
     accreditation: "YÖK Accredited",
-    isFeatured: false
+    isFeatured: true
   },
   {
     id: 4,
+    name: "Bogazici University",
+    nameAr: "جامعة بوغازيتشي",
+    location: "Istanbul",
+    city: "Istanbul",
+    country: "Turkey",
+    type: "Public" as const,
+    founded: "1863",
+    programs: 97,
+    students: 15000,
+    ranking: 651,
+    fees: "$4,500 - $6,500",
+    image: "/images/universities/bogazici.jpg",
+    website: "http://www.boun.edu.tr/",
+    languages: ["Turkish", "English"],
+    accreditation: "YÖK Accredited",
+    isFeatured: true
+  },
+  {
+    id: 5,
     name: "Koç University",
     nameAr: "جامعة كوتش",
     location: "Istanbul",
     city: "Istanbul",
     country: "Turkey",
-    type: "Private",
+    type: "Private" as const,
     founded: "1993",
-    programs: 75,
+    programs: 86,
     students: 7000,
-    ranking: 451,
-    fees: "$15,000 - $20,000",
-    image: "/images/universities/koc-university.jpg",
-    website: "https://www.ku.edu.tr/en/",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-  {
-    id: 5,
-    name: "Boğaziçi University",
-    nameAr: "جامعة بوغaziتشي",
-    location: "Istanbul",
-    city: "Istanbul",
-    country: "Turkey",
-    type: "Public",
-    founded: "1863",
-    programs: 95,
-    students: 15000,
-    ranking: 551,
-    fees: "$5,000 - $7,000",
-    image: "/images/universities/bogazici-university.jpg",
-    website: "http://www.boun.edu.tr/",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: false
-  },
-  {
-    id: 6,
-    name: "Sabancı University",
-    nameAr: "جامعة سابانجي",
-    location: "Istanbul",
-    city: "Istanbul",
-    country: "Turkey",
-    type: "Private",
-    founded: "1994",
-    programs: 60,
-    students: 4000,
-    ranking: 521,
-    fees: "$12,000 - $18,000",
-    image: "/images/universities/sabanci-university.jpg",
-    website: "https://www.sabanciuniv.edu/en",
-    languages: ["Turkish", "English"],
+    ranking: 511,
+    fees: "$15,000 - $25,000",
+    image: "/images/universities/koc.jpg",
+    website: "https://www.ku.edu.tr/",
+    languages: ["English"],
     accreditation: "YÖK Accredited",
     isFeatured: true
   }
 ];
 
-// Dummy data for programs
-export const dummyPrograms: Program[] = [
+// Sample programs data
+export const dummyPrograms: ProgramInfo[] = [
   {
     id: 1,
-    title: 'Software Engineering',
+    name: 'Software Engineering',
+    name_ar: 'هندسة البرمجيات',
     university: 'Istanbul Technical University',
-    location: 'Turkey, Istanbul',
-    duration: '4 years',
+    university_id: 1,
+    degree_type: 'bachelor',
+    duration: 4,
+    tuition_fee: 6000,
     language: 'English',
-    fee: '$6,000',
-    image: '/images/programs/software-engineering.jpg',
-    badges: ['ABET Accredited', 'Top 10% in Turkey'],
-    deadline: '30 June 2024',
-    scholarshipAvailable: true,
-    isFeatured: true,
+    country: 'Turkey',
+    city: 'Istanbul',
+    has_scholarship: false,
+    is_popular: true,
+    description: 'برنامج متميز في هندسة البرمجيات يركز على تطوير المهارات العملية والنظرية في مجال البرمجة وتطوير البرمجيات.',
+    university_image: '/lovable-uploads/f8873ff7-8cb5-44bd-8671-099033106e13.png',
   },
   {
     id: 2,
-    title: 'Medicine',
-    university: 'Cairo University',
-    location: 'Egypt, Cairo',
-    duration: '6 years',
-    language: 'Arabic/English',
-    fee: 'EGP 85,000',
-    image: '/images/programs/medicine.jpg',
-    badges: ['WHO Recognized'],
-    deadline: '15 August 2024',
-    scholarshipAvailable: false,
+    name: 'Business Administration',
+    name_ar: 'إدارة الأعمال',
+    university: 'Bahçeşehir University',
+    university_id: 2,
+    degree_type: 'bachelor',
+    duration: 4,
+    tuition_fee: 7500,
+    language: 'English',
+    country: 'Turkey',
+    city: 'Istanbul',
+    has_scholarship: true,
+    is_popular: false,
+    description: 'برنامج شامل في إدارة الأعمال يؤهل الطلاب للعمل في مجالات الإدارة والتسويق والموارد البشرية وريادة الأعمال.'
   },
   {
     id: 3,
-    title: 'Business Administration',
-    university: 'American University in Dubai',
-    location: 'United Arab Emirates, Dubai',
-    duration: '4 years',
+    name: 'Computer Science',
+    name_ar: 'علوم الحاسب',
+    university: 'Middle East Technical University',
+    university_id: 3,
+    degree_type: 'master',
+    duration: 2,
+    tuition_fee: 5000,
     language: 'English',
-    fee: 'AED 95,000',
-    image: '/images/programs/business-administration.jpg',
-    badges: ['AACSB Accredited'],
-    deadline: '1 September 2024',
-    scholarshipAvailable: true,
+    country: 'Turkey',
+    city: 'Ankara',
+    has_scholarship: false,
+    is_popular: true,
+    description: 'برنامج متقدم في علوم الحاسب يركز على الذكاء الاصطناعي وتعلم الآلة والحوسبة السحابية وأمن المعلومات.'
   },
   {
     id: 4,
-    title: 'Computer Science',
-    university: 'Eötvös Loránd University',
-    location: 'Hungary, Budapest',
-    duration: '3 years',
+    name: 'Medicine',
+    name_ar: 'الطب البشري',
+    university: 'Near East University',
+    university_id: 4,
+    degree_type: 'bachelor',
+    duration: 6,
+    tuition_fee: 12000,
     language: 'English',
-    fee: '$7,000',
-    image: '/images/programs/computer-science.jpg',
-    badges: ['EU Program'],
-    deadline: '10 July 2024',
-    scholarshipAvailable: false,
+    country: 'Cyprus',
+    city: 'Nicosia',
+    has_scholarship: true,
+    is_popular: true,
+    description: 'برنامج الطب البشري المعتمد دولياً يؤهل الطلاب للعمل كأطباء مؤهلين في مختلف التخصصات الطبية.',
+    university_image: '/lovable-uploads/6e0c99ef-ce91-48b1-b3c8-49e2ef5a454a.png',
   },
   {
     id: 5,
-    title: 'Mechanical Engineering',
-    university: 'Istanbul Technical University',
-    location: 'Turkey, Istanbul',
-    duration: '4 years',
+    name: 'Civil Engineering',
+    name_ar: 'الهندسة المدنية',
+    university: 'University of Technology Malaysia',
+    university_id: 5,
+    degree_type: 'bachelor',
+    duration: 4,
+    tuition_fee: 8000,
     language: 'English',
-    fee: '$6,500',
-    image: '/images/programs/mechanical-engineering.jpg',
-    badges: ['ABET Accredited'],
-    deadline: '30 June 2024',
-    scholarshipAvailable: true,
-    isFeatured: true,
+    country: 'Malaysia',
+    city: 'Kuala Lumpur',
+    has_scholarship: false,
+    is_popular: false,
+    description: 'برنامج متكامل في الهندسة المدنية يغطي تصميم وبناء البنى التحتية والمباني والجسور والطرق وإدارة المشاريع الهندسية.'
   },
   {
     id: 6,
-    title: 'Dentistry',
-    university: 'Cairo University',
-    location: 'Egypt, Cairo',
-    duration: '5 years',
-    language: 'Arabic/English',
-    fee: 'EGP 90,000',
-    image: '/images/programs/dentistry.jpg',
-    badges: ['WHO Recognized'],
-    deadline: '15 August 2024',
-    scholarshipAvailable: false,
+    name: 'International Relations',
+    name_ar: 'العلاقات الدولية',
+    university: 'Budapest University',
+    university_id: 6,
+    degree_type: 'master',
+    duration: 2,
+    tuition_fee: 4500,
+    language: 'English',
+    country: 'Hungary',
+    city: 'Budapest',
+    has_scholarship: true,
+    is_popular: false,
+    description: 'برنامج متميز في العلاقات الدولية يتناول القضايا العالمية المعاصرة والدبلوماسية والسياسة الخارجية والمنظمات الدولية.'
   },
   {
     id: 7,
-    title: 'Architecture',
-    university: 'American University in Dubai',
-    location: 'United Arab Emirates, Dubai',
-    duration: '5 years',
+    name: 'Pharmacy',
+    name_ar: 'الصيدلة',
+    university: 'Warsaw Medical University',
+    university_id: 7,
+    degree_type: 'bachelor',
+    duration: 5,
+    tuition_fee: 9000,
     language: 'English',
-    fee: 'AED 100,000',
-    image: '/images/programs/architecture.jpg',
-    badges: ['RIBA Accredited'],
-    deadline: '1 September 2024',
-    scholarshipAvailable: true,
+    country: 'Poland',
+    city: 'Warsaw',
+    has_scholarship: false,
+    is_popular: false,
+    description: 'برنامج الصيدلة المعتمد دولياً يؤهل الطلاب للعمل كصيادلة محترفين في المستشفيات والصيدليات ومجال البحث والتطوير الدوائي.'
   },
   {
     id: 8,
-    title: 'International Relations',
-    university: 'Eötvös Loránd University',
-    location: 'Hungary, Budapest',
-    duration: '3 years',
+    name: 'Architecture',
+    name_ar: 'العمارة',
+    university: 'Czech Technical University',
+    university_id: 8,
+    degree_type: 'bachelor',
+    duration: 5,
+    tuition_fee: 7000,
     language: 'English',
-    fee: '$6,800',
-    image: '/images/programs/international-relations.jpg',
-    badges: ['EU Program'],
-    deadline: '10 July 2024',
-    scholarshipAvailable: true,
+    country: 'Czech Republic',
+    city: 'Prague',
+    has_scholarship: false,
+    is_popular: false,
+    description: 'برنامج متميز في العمارة يجمع بين النظرية والممارسة العملية في تصميم المباني والتخطيط العمراني والتصميم الداخلي.',
+    university_image: '/lovable-uploads/9152a791-f246-458d-bd7c-b3c15d53cdbf.png',
   },
   {
     id: 9,
-    title: 'Civil Engineering',
-    university: 'Istanbul Technical University',
-    location: 'Turkey, Istanbul',
-    duration: '4 years',
+    name: 'Dentistry',
+    name_ar: 'طب الأسنان',
+    university: 'Eastern Mediterranean University',
+    university_id: 9,
+    degree_type: 'bachelor',
+    duration: 5,
+    tuition_fee: 11000,
     language: 'English',
-    fee: '$7,000',
-    image: '/images/programs/civil-engineering.jpg',
-    badges: ['ABET Accredited'],
-    deadline: '30 June 2024',
-    scholarshipAvailable: false,
-  },
-  {
-    id: 10,
-    title: 'Pharmacy',
-    university: 'Cairo University',
-    location: 'Egypt, Cairo',
-    duration: '5 years',
-    language: 'Arabic/English',
-    fee: 'EGP 88,000',
-    image: '/images/programs/pharmacy.jpg',
-    badges: ['WHO Recognized'],
-    deadline: '15 August 2024',
-    scholarshipAvailable: true,
-  },
-  {
-    id: 11,
-    title: 'Marketing',
-    university: 'American University in Dubai',
-    location: 'United Arab Emirates, Dubai',
-    duration: '4 years',
-    language: 'English',
-    fee: 'AED 92,000',
-    image: '/images/programs/marketing.jpg',
-    badges: ['AACSB Accredited'],
-    deadline: '1 September 2024',
-    scholarshipAvailable: false,
-  },
-  {
-    id: 12,
-    title: 'Psychology',
-    university: 'Eötvös Loránd University',
-    location: 'Hungary, Budapest',
-    duration: '3 years',
-    language: 'English',
-    fee: '$6,500',
-    image: '/images/programs/psychology.jpg',
-    badges: ['EU Program'],
-    deadline: '10 July 2024',
-    scholarshipAvailable: true,
-    isFeatured: true,
-  },
+    country: 'Turkish Cyprus',
+    city: 'Famagusta',
+    has_scholarship: false,
+    is_popular: true,
+    description: 'برنامج معتمد دولياً في طب الأسنان يؤهل الطلاب للعمل كأطباء أسنان مؤهلين مع التركيز على الممارسة العملية والتقنيات الحديثة.'
+  }
 ];

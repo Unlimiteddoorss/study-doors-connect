@@ -10,7 +10,7 @@ import { AdminStatCard } from './AdminStatCard';
 import DateRangeSelector from './DateRangeSelector';
 import { FilterableTable } from './FilterableTable';
 import KPIDashboardWidget from './KPIDashboardWidget';
-import { AnalyticsDashboard } from './AnalyticsDashboard'; // Changed to named import
+import { AnalyticsDashboard } from './AnalyticsDashboard';
 import AdminTasksOverview from './AdminTasksOverview';
 
 export {

@@ -1,110 +1,110 @@
 
-import { useState } from 'react';
-import { ArrowLeft, ArrowRight, Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import SectionTitle from '../shared/SectionTitle';
+import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star, Quote } from 'lucide-react';
+
+interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  university: string;
+  country: string;
+  image: string;
+  rating: number;
+  text: string;
+}
 
 const Testimonials = () => {
-  const testimonials = [
+  const testimonials: Testimonial[] = [
     {
       id: 1,
-      name: 'محمد أحمد',
+      name: 'محمد العلي',
+      role: 'طالب هندسة',
+      university: 'جامعة إسطنبول التقنية',
+      country: 'سوريا',
       image: 'https://i.pravatar.cc/150?img=1',
-      role: 'طالب بكالوريوس هندسة',
-      university: 'جامعة أوزيجين',
-      country: 'تركيا',
       rating: 5,
-      text: 'كانت تجربتي مع أبواب بلا حدود ممتازة من كل النواحي. ساعدوني في اختيار التخصص المناسب والجامعة الأفضل، وتابعوا معي خطوة بخطوة حتى بدأت دراستي.'
+      text: 'ساعدتني أبواب غير محدودة في تحقيق حلمي بالدراسة في تركيا. كان فريق العمل متعاونًا جدًا وقدم لي كل المساعدة التي احتجتها من بداية التقديم حتى الحصول على القبول والتأشيرة.'
     },
     {
       id: 2,
-      name: 'سارة محمد',
+      name: 'فاطمة الزهراء',
+      role: 'طالبة طب',
+      university: 'جامعة أنقرة',
+      country: 'مصر',
       image: 'https://i.pravatar.cc/150?img=5',
-      role: 'طالبة ماجستير إدارة أعمال',
-      university: 'جامعة فاتح سلطان محمد',
-      country: 'تركيا',
       rating: 5,
-      text: 'أشكر فريق أبواب بلا حدود على الدعم الكبير الذي قدموه لي. استطعت الحصول على قبول في جامعة مرموقة وحصلت على منحة دراسية بفضل توجيههم.'
+      text: 'تجربتي مع أبواب غير محدودة كانت ممتازة من كل النواحي. استطاعوا مساعدتي في اختيار الجامعة المناسبة وتقديم طلبي بشكل صحيح، كما ساعدوني في الحصول على منحة دراسية جزئية.'
     },
     {
       id: 3,
-      name: 'أحمد خالد',
+      name: 'عبدالله الراشد',
+      role: 'طالب إدارة أعمال',
+      university: 'جامعة بيلكنت',
+      country: 'السعودية',
       image: 'https://i.pravatar.cc/150?img=3',
-      role: 'طالب دكتوراه علوم حاسوب',
-      university: 'جامعة المجر للتكنولوجيا',
-      country: 'المجر',
       rating: 4,
-      text: 'خدمات استثنائية وفريق عمل محترف. ساعدوني في جميع مراحل التقديم وإجراءات التأشيرة. أنصح بشدة بالتعامل معهم للراغبين في الدراسة في الخارج.'
+      text: 'أشكر فريق أبواب غير محدودة على المتابعة المستمرة والدعم المقدم طوال فترة التقديم. استطاعوا حل جميع المشكلات التي واجهتني وتذليل الصعوبات في عملية القبول.'
+    },
+    {
+      id: 4,
+      name: 'مريم الحسن',
+      role: 'طالبة علوم حاسوب',
+      university: 'جامعة الشرق الأوسط التقنية',
+      country: 'الأردن',
+      image: 'https://i.pravatar.cc/150?img=9',
+      rating: 5,
+      text: 'خدمة احترافية وسريعة، والأهم من ذلك أنها صادقة. وجدت كل ما وعدوني به على أرض الواقع. أنصح كل الطلاب الراغبين بالدراسة في الخارج بالتعامل مع أبواب غير محدودة.'
     }
   ];
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const nextTestimonial = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === testimonials.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const prevTestimonial = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? testimonials.length - 1 : prevIndex - 1
-    );
-  };
-
-  const currentTestimonial = testimonials[currentIndex];
-
   return (
-    <section className="py-16 bg-unlimited-dark-blue text-white">
+    <div className="bg-unlimited-light-blue/5 py-16">
       <div className="container mx-auto px-4">
-        <SectionTitle
-          title="آراء طلابنا"
-          subtitle="ما يقوله الطلاب عن تجربتهم معنا"
-          centered
-          titleClassName="text-white"
-          subtitleClassName="text-gray-300"
-        />
-        
-        <div className="max-w-4xl mx-auto mt-10">
-          <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="md:w-1/3 flex flex-col items-center">
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-unlimited-blue mb-4">
-                  <img 
-                    src={currentTestimonial.image} 
-                    alt={currentTestimonial.name}
-                    className="w-full h-full object-cover"
-                  />
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">شهادات طلابنا</h2>
+          <p className="text-unlimited-gray max-w-3xl mx-auto">
+            استمع إلى تجارب طلابنا الذين ساعدناهم في تحقيق أحلامهم الأكاديمية وبدء مسيرتهم التعليمية في الخارج
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+          {testimonials.map((testimonial) => (
+            <Card key={testimonial.id} className="bg-white hover:shadow-lg transition-shadow overflow-hidden">
+              <CardContent className="p-6 relative">
+                <Quote className="absolute top-4 right-4 h-8 w-8 text-unlimited-blue/10" />
+                
+                <div className="flex items-center mb-4">
+                  <Avatar className="h-12 w-12 border-2 border-unlimited-blue/20">
+                    <AvatarImage src={testimonial.image} alt={testimonial.name} />
+                    <AvatarFallback>{testimonial.name.substring(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <div className="mr-3">
+                    <p className="font-semibold">{testimonial.name}</p>
+                    <p className="text-sm text-unlimited-gray">{testimonial.role} | {testimonial.country}</p>
+                  </div>
                 </div>
-                <h4 className="font-bold text-xl mb-1">{currentTestimonial.name}</h4>
-                <p className="text-unlimited-light-blue mb-1">{currentTestimonial.role}</p>
-                <p className="text-gray-300 text-sm mb-3">{currentTestimonial.university}, {currentTestimonial.country}</p>
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
-                      className={`h-5 w-5 ${i < currentTestimonial.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-400'}`}
-                    />
-                  ))}
+                
+                <p className="text-sm mb-4 line-clamp-4">{testimonial.text}</p>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex">
+                    {Array(5).fill(0).map((_, index) => (
+                      <Star 
+                        key={index} 
+                        className={`h-4 w-4 ${index < testimonial.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`} 
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-unlimited-blue font-medium">{testimonial.university}</p>
                 </div>
-              </div>
-              <div className="md:w-2/3">
-                <p className="text-lg italic">"&nbsp;{currentTestimonial.text}&nbsp;"</p>
-              </div>
-            </div>
-            
-            <div className="flex justify-center mt-8 gap-4">
-              <Button variant="outline" size="icon" onClick={prevTestimonial} className="border-white/30 hover:bg-white/10">
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={nextTestimonial} className="border-white/30 hover:bg-white/10">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 

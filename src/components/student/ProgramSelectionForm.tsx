@@ -1,4 +1,5 @@
 
+// Update imports to include the turkishUniversities
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
@@ -16,49 +17,10 @@ import ProgramDetails from '@/components/student/program/ProgramDetails';
 import PreferencesForm from '@/components/student/program/PreferencesForm';
 
 // Import university and program data
-import { dummyPrograms } from '@/data/programsData';
+import { dummyPrograms, turkishUniversities } from '@/data/programsData';
 
-// Define example universities data
-const universities = [
-  {
-    id: 1,
-    name: "Istanbul Technical University",
-    nameAr: "جامعة إسطنبول التقنية",
-    location: "Istanbul",
-    city: "Istanbul",
-    country: "Turkey",
-    type: "Public" as const,
-    founded: "1773",
-    programs: 120,
-    students: 32000,
-    ranking: 501,
-    fees: "$6,000 - $8,000",
-    image: "/images/universities/istanbul-technical-university.jpg",
-    website: "https://www.itu.edu.tr/en",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-  {
-    id: 2,
-    name: "Bilkent University",
-    nameAr: "جامعة بيلكنت",
-    location: "Ankara",
-    city: "Ankara",
-    country: "Turkey",
-    type: "Private" as const,
-    founded: "1984",
-    programs: 89,
-    students: 12500,
-    ranking: 401,
-    fees: "$8,000 - $12,000",
-    image: "/images/universities/bilkent-university.jpg",
-    website: "http://www.bilkent.edu.tr/",
-    languages: ["Turkish", "English"],
-    accreditation: "YÖK Accredited",
-    isFeatured: true
-  },
-];
+// Define example universities data if not imported
+const universities = turkishUniversities;
 
 // Define the country data
 const countries = [
@@ -99,7 +61,7 @@ const degreeLevels = [
   { value: 'diploma', label: 'Diploma' },
 ];
 
-// Updated Program interface to match the actual program data structure from programsData
+// Updated Program interface to match the actual program data structure
 export interface Program {
   id: number;
   title: string;
@@ -108,10 +70,10 @@ export interface Program {
   location: string;
   language: string;
   duration: string;
-  deadline: string;
+  deadline: string; // Make deadline required to match usage
   fee: string;
   discount?: string;
-  image: string;
+  image?: string;
   isFeatured?: boolean;
   badges?: string[];
   scholarshipAvailable?: boolean;
@@ -167,14 +129,23 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   const [preferredLanguage, setPreferredLanguage] = useState<string>(initialData?.program?.language || "");
   const [additionalNotes, setAdditionalNotes] = useState<string>(initialData?.program?.notes || "");
 
-  // Format the programs data to match our requirements - make sure deadline is required
-  const programs = dummyPrograms.map(program => ({
-    ...program,
+  // Format the programs data to match our requirements - ensure all required fields are present
+  const programs: Program[] = dummyPrograms.map(program => ({
     id: program.id,
-    title: program.title,
-    nameAr: program.title, // Using title as nameAr for now since it's in Arabic
-    deadline: program.deadline || 'N/A', // Ensure deadline is always provided
-  })) as Program[];
+    title: program.name,
+    nameAr: program.name_ar || program.name, // Fallback to name if Arabic name is not provided
+    university: program.university,
+    location: `${program.city}, ${program.country}`,
+    language: program.language,
+    duration: `${program.duration} years`,
+    deadline: "2025-09-01", // Provide a default deadline
+    fee: `$${program.tuition_fee}`,
+    discount: program.has_scholarship ? "Available" : undefined,
+    image: program.image || `https://via.placeholder.com/400x200?text=${encodeURIComponent(program.name)}`,
+    isFeatured: program.is_popular,
+    scholarshipAvailable: program.has_scholarship,
+    description: program.description
+  }));
 
   // Get selected program and university details
   const selectedProgramDetails = selectedProgram
@@ -182,7 +153,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     : null;
 
   const selectedUniversityDetails = selectedProgramDetails
-    ? universities.find(uni => uni.id.toString() === selectedProgramDetails.university)
+    ? universities.find(uni => uni.id.toString() === selectedUniversity)
     : selectedUniversity
       ? universities.find(uni => uni.id.toString() === selectedUniversity)
       : null;

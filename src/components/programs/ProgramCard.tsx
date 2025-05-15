@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -17,10 +18,13 @@ export interface ProgramInfo {
   has_scholarship: boolean;
   is_popular: boolean;
   description?: string;
+  university_image?: string; // Optional property for university logo
+  image?: string; // Optional property for program image
 }
 
 interface ProgramCardProps {
   program: ProgramInfo;
+  // Don't include the index prop in the interface since it's causing errors
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
@@ -30,7 +34,7 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
         <div className="relative">
           <img
             className="w-full h-48 object-cover"
-            src={program.image || "https://via.placeholder.com/400x200"}
+            src={program.image || program.university_image || "https://via.placeholder.com/400x200"}
             alt={program.name}
           />
           {program.is_popular && (

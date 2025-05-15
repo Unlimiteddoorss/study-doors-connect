@@ -16,8 +16,7 @@ interface DonutChartProps {
 export function DonutChart({
   data,
   index,
-  category,
-  categories,
+  category = "value", // Default to "value" if not specified
   colors = ["#1E40AF", "#3B82F6", "#60A5FA", "#93C5FD", "#BFDBFE"],
   valueFormatter = (value: number) => `${value}`,
   className,
@@ -60,7 +59,7 @@ export function DonutChart({
             labelLine={false}
             outerRadius="80%"
             innerRadius="60%"
-            dataKey="value"
+            dataKey={category}
             nameKey={index}
           >
             {data.map((entry, index) => (
