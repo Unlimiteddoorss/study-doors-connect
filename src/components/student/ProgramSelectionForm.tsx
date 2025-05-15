@@ -117,7 +117,12 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const isRtl = i18n.language === 'ar';
-  const universities = turkishUniversities;
+  
+  // Modify the imported Turkish universities to match the University type
+  const universities: University[] = turkishUniversities.map(uni => ({
+    ...uni,
+    type: uni.type as "Public" | "Private",
+  }));
 
   const [activeTab, setActiveTab] = useState<string>("browse");
   const [selectedCountry, setSelectedCountry] = useState<string>(initialData?.program?.country || "");
@@ -136,12 +141,12 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
     nameAr: program.name_ar || program.name, // Fallback to name if Arabic name is not provided
     university: program.university,
     location: `${program.city}, ${program.country}`,
-    language: program.language,
+    language: Array.isArray(program.language) ? program.language[0] : program.language,
     duration: `${program.duration} years`,
     deadline: "2025-09-01", // Provide a default deadline
     fee: `$${program.tuition_fee}`,
     discount: program.has_scholarship ? "Available" : undefined,
-    image: program.image || `https://via.placeholder.com/400x200?text=${encodeURIComponent(program.name)}`,
+    image: program.university_image || `https://via.placeholder.com/400x200?text=${encodeURIComponent(program.name)}`,
     isFeatured: program.is_popular,
     scholarshipAvailable: program.has_scholarship,
     description: program.description

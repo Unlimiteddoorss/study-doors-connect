@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { ProgramInfo } from '@/components/programs/ProgramCard';
+import { ProgramInfo } from '@/data/programsData';
 import ProgramCard from '@/components/programs/ProgramCard';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/shared/Pagination';

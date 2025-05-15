@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -37,86 +38,98 @@ const countryTranslations: Record<string, string> = {
 // Create engineering programs data
 const engineeringPrograms = dummyPrograms
   .filter(program => 
-    program.name.includes('هندسة') || program.name.includes('Engineering')
+    (program.name && (program.name.includes('هندسة') || program.name.includes('Engineering')))
   )
   .concat([
     {
       id: 201,
-      title: "بكالوريوس الهندسة المدنية",
+      name: "بكالوريوس الهندسة المدنية",
       university: "جامعة اسطنبول التقنية",
-      location: "Turkey، إسطنبول",
+      country: "Turkey",
+      city: "إسطنبول",
+      degree_type: "Bachelor",
+      duration: 4,
+      tuition_fee: 5200,
       language: "إنجليزية",
-      duration: "4 سنوات",
-      deadline: "30/08/2023",
-      fee: "$5,200 / سنة",
-      image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      isFeatured: true,
-      badges: ["معتمد دوليًا", "تدريب عملي"]
+      is_popular: true,
+      has_scholarship: false,
+      description: "برنامج شامل يغطي تصميم وبناء الهياكل المدنية.",
+      university_image: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: 202,
-      title: "بكالوريوس هندسة البرمجيات",
+      name: "بكالوريوس هندسة البرمجيات",
       university: "جامعة الشرق الأوسط التقنية",
-      location: "Turkey، أنقرة",
+      country: "Turkey",
+      city: "أنقرة",
+      degree_type: "Bachelor",
+      duration: 4,
+      tuition_fee: 4800,
       language: "إنجليزية",
-      duration: "4 سنوات",
-      deadline: "15/08/2023",
-      fee: "$4,800 / سنة",
-      discount: "$4,200 / سنة",
-      image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["وظائف مضمونة", "تقنيات حديثة"]
+      is_popular: false,
+      has_scholarship: true,
+      description: "برنامج متميز في هندسة البرمجيات وتطوير النظم.",
+      university_image: "https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: 203,
-      title: "بكالوريوس الهندسة الميكانيكية",
+      name: "بكالوريوس الهندسة الميكانيكية",
       university: "جامعة إسطنبول بيلجي",
-      location: "Turkey، إسطنبول",
+      country: "Turkey",
+      city: "إسطنبول",
+      degree_type: "Bachelor",
+      duration: 4,
+      tuition_fee: 5500,
       language: "إنجليزية",
-      duration: "4 سنوات",
-      deadline: "10/09/2023",
-      fee: "$5,500 / سنة",
-      image: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      scholarshipAvailable: true,
-      badges: ["معدات حديثة", "برامج تبادل طلابي"]
+      is_popular: false,
+      has_scholarship: true,
+      description: "دراسة مبادئ الميكانيكا والديناميكا وعلوم المواد.",
+      university_image: "https://images.unsplash.com/photo-1537462715879-360eeb61a0ad?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: 204,
-      title: "بكالوريوس الهندسة الكهربائية",
+      name: "بكالوريوس الهندسة الكهربائية",
       university: "جامعة يلدز التقنية",
-      location: "Turkey، إسطنبول",
+      country: "Turkey",
+      city: "إسطنبول",
+      degree_type: "Bachelor",
+      duration: 4,
+      tuition_fee: 4900,
       language: "تركية وإنجليزية",
-      duration: "4 سنوات",
-      deadline: "05/08/2023",
-      fee: "$4,900 / سنة",
-      discount: "$4,500 / سنة",
-      image: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["معامل متطورة", "تدريب صناعي"]
+      is_popular: false,
+      has_scholarship: false,
+      description: "برنامج متكامل في الهندسة الكهربائية والإلكترونية.",
+      university_image: "https://images.unsplash.com/photo-1505159940484-eb2b9f2588e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: 205,
-      title: "ماجستير هندسة الإلكترونيات",
+      name: "ماجستير هندسة الإلكترونيات",
       university: "جامعة غazi",
-      location: "Turkey، أنقرة",
+      country: "Turkey",
+      city: "أنقرة",
+      degree_type: "Master",
+      duration: 2,
+      tuition_fee: 6800,
       language: "إنجليزية",
-      duration: "2 سنوات",
-      deadline: "20/08/2023",
-      fee: "$6,800 / سنة",
-      image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      isFeatured: true,
-      badges: ["بحث متقدم", "فرص عمل دولية"]
+      is_popular: true,
+      has_scholarship: true,
+      description: "دراسات متقدمة في الإلكترونيات والدوائر المتكاملة.",
+      university_image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     },
     {
       id: 206,
-      title: "بكالوريوس هندسة الطيران",
+      name: "بكالوريوس هندسة الطيران",
       university: "جامعة اسطنبول التقنية",
-      location: "Turkey، إسطنبول",
+      country: "Turkey",
+      city: "إسطنبول",
+      degree_type: "Bachelor",
+      duration: 4,
+      tuition_fee: 7200,
       language: "إنجليزية",
-      duration: "4 سنوات",
-      deadline: "01/09/2023",
-      fee: "$7,200 / سنة",
-      image: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      scholarshipAvailable: true,
-      badges: ["فرص تدريب في شركات الطيران", "معامل محاكاة حديثة"]
+      is_popular: false,
+      has_scholarship: true,
+      description: "دراسة تصميم وتطوير المركبات الجوية والفضائية.",
+      university_image: "https://images.unsplash.com/photo-1559297434-fae8a1916a79?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
     }
   ]);
 
@@ -143,7 +156,7 @@ const EngineeringPrograms = () => {
     if (searchTerm) {
       result = result.filter(
         program =>
-          program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (program.name && program.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
           program.university.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -151,17 +164,16 @@ const EngineeringPrograms = () => {
     // Apply country filter
     if (selectedCountry && selectedCountry !== "all") {
       result = result.filter(program => {
-        const programCountry = program.location.split('،')[0].trim();
-        return programCountry === selectedCountry;
+        return program.country === selectedCountry;
       });
     }
     
     // Apply degree filter
     if (selectedDegree && selectedDegree !== "all") {
       result = result.filter(program => {
-        if (program.title.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
-        if (program.title.includes('ماجستير') && selectedDegree === 'Master') return true;
-        if (program.title.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
+        if (program.name && program.name.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
+        if (program.name && program.name.includes('ماجستير') && selectedDegree === 'Master') return true;
+        if (program.name && program.name.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
         return false;
       });
     }
@@ -169,19 +181,20 @@ const EngineeringPrograms = () => {
     // Apply specialty filter
     if (selectedSpecialty && selectedSpecialty !== "all") {
       result = result.filter(program => {
+        if (!program.name) return false;
         switch(selectedSpecialty) {
           case "Civil":
-            return program.title.includes('مدنية');
+            return program.name.includes('مدنية');
           case "Computer":
-            return program.title.includes('برمجيات') || program.title.includes('حاسوب');
+            return program.name.includes('برمجيات') || program.name.includes('حاسوب');
           case "Mechanical":
-            return program.title.includes('ميكانيكية');
+            return program.name.includes('ميكانيكية');
           case "Electrical":
-            return program.title.includes('كهربائية');
+            return program.name.includes('كهربائية');
           case "Electronics":
-            return program.title.includes('إلكترونيات');
+            return program.name.includes('إلكترونيات');
           case "Aerospace":
-            return program.title.includes('طيران');
+            return program.name.includes('طيران');
           default:
             return true;
         }
@@ -195,15 +208,15 @@ const EngineeringPrograms = () => {
         break;
       case "priceAsc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceA = a.tuition_fee || 0;
+          const priceB = b.tuition_fee || 0;
           return priceA - priceB;
         });
         break;
       case "priceDesc":
         result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
+          const priceA = a.tuition_fee || 0;
+          const priceB = b.tuition_fee || 0;
           return priceB - priceA;
         });
         break;
@@ -211,7 +224,7 @@ const EngineeringPrograms = () => {
       default:
         // In a real app, this would use a relevance algorithm
         // For now, put featured programs first
-        result = [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
+        result = [...result].sort((a, b) => (b.is_popular ? 1 : 0) - (a.is_popular ? 1 : 0));
         break;
     }
     
@@ -291,8 +304,19 @@ const EngineeringPrograms = () => {
           setSelectedDegree={setSelectedDegree}
           selectedSpecialty={selectedSpecialty}
           setSelectedSpecialty={setSelectedSpecialty}
-          handleSearch={handleSearch}
-          resetFilters={resetFilters}
+          handleSearch={(e) => e.preventDefault()}
+          resetFilters={() => {
+            setSearchTerm('');
+            setSelectedCountry("");
+            setSelectedDegree("");
+            setSelectedSpecialty("");
+            setSortOrder("relevance");
+            
+            toast({
+              title: "تم إعادة ضبط التصفية",
+              description: "تم مسح جميع عوامل التصفية والبحث",
+            });
+          }}
           countryTranslations={countryTranslations}
         />
 
@@ -309,7 +333,14 @@ const EngineeringPrograms = () => {
             <select 
               className="px-3 py-1 border border-gray-300 rounded-md text-unlimited-gray focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
               value={sortOrder}
-              onChange={handleSortChange}
+              onChange={(e) => {
+                setSortOrder(e.target.value);
+                
+                toast({
+                  title: "تم تغيير الترتيب",
+                  description: `تم ترتيب البرامج حسب: ${e.target.options[e.target.selectedIndex].text}`,
+                });
+              }}
             >
               <option value="relevance">الأكثر صلة</option>
               <option value="newest">الأحدث</option>
@@ -323,9 +354,25 @@ const EngineeringPrograms = () => {
         <ProgramsGrid 
           programs={programsToDisplay}
           currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={paginate}
-          onResetFilters={resetFilters}
+          totalPages={Math.ceil(filteredPrograms.length / programsPerPage)}
+          onPageChange={(pageNumber) => {
+            if (pageNumber > 0 && pageNumber <= Math.ceil(filteredPrograms.length / programsPerPage)) {
+              setCurrentPage(pageNumber);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+          onResetFilters={() => {
+            setSearchTerm('');
+            setSelectedCountry("");
+            setSelectedDegree("");
+            setSelectedSpecialty("");
+            setSortOrder("relevance");
+            
+            toast({
+              title: "تم إعادة ضبط التصفية",
+              description: "تم مسح جميع عوامل التصفية والبحث",
+            });
+          }}
         />
       </div>
     </MainLayout>

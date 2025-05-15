@@ -1,4 +1,3 @@
-
 import { Program } from './universityPrograms';
 
 export interface ProgramInfo {
@@ -8,17 +7,18 @@ export interface ProgramInfo {
   name_ar?: string;
   university: string;
   university_id?: number;
-  location: string;
+  location?: string;
   degree?: string;
   degree_type?: string;
   duration: string;
-  language: string[];
-  fee?: number;
+  language: string | string[];
+  fee?: number | string;
   tuition_fee?: number;
-  discount?: number;
+  discount?: number | string;
   isFeatured?: boolean;
   is_popular?: boolean;
   has_scholarship?: boolean;
+  scholarshipAvailable?: boolean;
   description?: string;
   requirements?: string[];
   opportunities?: string[];
@@ -26,7 +26,6 @@ export interface ProgramInfo {
   city?: string;
   image?: string;
   university_image?: string;
-  scholarshipAvailable?: boolean;
   badges?: string[];
 }
 
@@ -45,29 +44,29 @@ export const availableCountries = [
 export const convertToProgramInfo = (program: any): ProgramInfo => {
   return {
     id: program.id,
-    title: program.name || program.title,
+    title: program.title || program.name,
     name: program.name || program.title,
+    name_ar: program.name_ar,
     university: program.university,
-    location: program.country || program.location,
+    location: program.location || `${program.city}, ${program.country}`,
     degree: program.degree || program.degree_type,
     duration: typeof program.duration === 'number' ? `${program.duration} years` : program.duration,
     language: Array.isArray(program.language) ? program.language : [program.language || "English"],
     fee: program.tuition_fee || program.fee,
+    tuition_fee: program.tuition_fee,
     discount: program.discount,
     isFeatured: program.isFeatured || program.is_popular,
     is_popular: program.is_popular || program.isFeatured,
     has_scholarship: program.has_scholarship || program.scholarshipAvailable,
+    scholarshipAvailable: program.scholarshipAvailable || program.has_scholarship,
     description: program.description,
     requirements: program.requirements,
     opportunities: program.careerOpportunities,
     country: program.country,
     city: program.city,
     university_id: program.university_id,
-    tuition_fee: program.tuition_fee,
-    degree_type: program.degree_type,
-    image: program.image,
-    university_image: program.university_image,
-    scholarshipAvailable: program.scholarshipAvailable || program.has_scholarship
+    image: program.image || program.university_image,
+    university_image: program.university_image
   };
 };
 
@@ -285,7 +284,7 @@ export const turkishUniversities = [
   {
     id: 5,
     name: "Boğaziçi University",
-    nameAr: "جامعة بوغازيتشي",
+    nameAr: "جامعة بوغaziتشي",
     location: "Istanbul",
     city: "Istanbul",
     country: "Turkey",
