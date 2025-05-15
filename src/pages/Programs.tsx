@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramFilters from '@/components/programs/ProgramFilters';
 import { dummyPrograms, availableCountries } from '@/data/programsData';
 import { useToast } from '@/hooks/use-toast';
+import ProgramsGrid from '@/components/programs/ProgramsGrid';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -323,6 +323,19 @@ const Programs = () => {
               تم العثور على <span className="font-semibold text-unlimited-blue">{filteredPrograms.length}</span> برنامج دراسي
             </p>
             <ProgramFilters 
+              onApplyFilters={() => {}} // Placeholder function
+              countries={[]} // Placeholder array
+              languages={[]} // Placeholder array
+              initialFilters={{
+                search: '',
+                country: [],
+                degreeType: [],
+                language: [],
+                duration: [1, 6],
+                tuitionRange: [0, 50000],
+                hasScholarship: false,
+                isPopular: false
+              }}
               filters={filters}
               toggleCountryFilter={toggleCountryFilter}
               toggleLevelFilter={toggleLevelFilter}
@@ -348,74 +361,14 @@ const Programs = () => {
         </div>
 
         {/* Programs Grid */}
-        {currentPrograms.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {currentPrograms.map((program) => (
-              <ProgramCard 
-                key={program.id} 
-                program={{
-                  ...program,
-                  location: translateCountry(program.location)
-                }}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-xl text-unlimited-gray mb-4">لم يتم العثور على برامج تطابق بحثك</p>
-            <Button onClick={resetFilters} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">إعادة ضبط البحث</Button>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {filteredPrograms.length > 0 && (
-          <div className="flex justify-center mt-12">
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="pagination" 
-                onClick={() => paginate(currentPage - 1)} 
-                disabled={currentPage === 1}
-              >
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                // إذا كان عدد الصفحات أكثر من 5، نعرض الصفحات المحيطة بالصفحة الحالية
-                let pageNum: number;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else {
-                  if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                }
-                
-                return (
-                  <Button 
-                    key={pageNum}
-                    variant="pagination"
-                    aria-current={pageNum === currentPage ? "page" : undefined}
-                    onClick={() => paginate(pageNum)}
-                  >
-                    {pageNum}
-                  </Button>
-                );
-              })}
-              
-              <Button 
-                variant="pagination" 
-                onClick={() => paginate(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                <ArrowRight className="h-4 w-4 rotate-180" />
-              </Button>
-            </div>
-          </div>
-        )}
+        <ProgramsGrid
+          programs={currentPrograms}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={paginate}
+          isLoading={false}
+          onResetFilters={resetFilters}
+        />
       </div>
     </MainLayout>
   );

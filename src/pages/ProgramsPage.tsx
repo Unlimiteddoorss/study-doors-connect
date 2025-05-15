@@ -20,7 +20,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SlidersHorizontal, Search, BookOpen, Building, Loader2, MapPin } from 'lucide-react';
+import { SlidersHorizontal, Search, BookOpen, Building, Loader2, MapPin as MapPinIcon } from 'lucide-react';
 
 // بيانات تجريبية للبرامج - يمكن استبدالها بطلب API حقيقي
 const samplePrograms: ProgramInfo[] = [
@@ -171,6 +171,26 @@ const ProgramsPage = () => {
   const [sortBy, setSortBy] = useState('relevance');
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [visibleCount, setVisibleCount] = useState(6);
+  
+  // Define animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.3 }
+    }
+  };
   
   // استخراج المعايير المتاحة من البيانات
   const countries = Array.from(new Set(samplePrograms.map(p => p.country)));

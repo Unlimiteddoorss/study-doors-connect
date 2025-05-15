@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowRight, Check, MapPin, Calendar, Clock, Book, Languages, Award, GraduationCap, Globe, School } from 'lucide-react';

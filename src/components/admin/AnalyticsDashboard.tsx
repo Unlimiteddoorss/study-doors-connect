@@ -111,13 +111,14 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
     { program: 'أخرى', value: 12 },
   ];
 
+  // Reformatted to match the DonutChart format
   const countryData = [
-    { country: 'تركيا', students: 45 },
-    { country: 'قبرص', students: 18 },
-    { country: 'ماليزيا', students: 12 },
-    { country: 'المجر', students: 8 },
-    { country: 'بولندا', students: 6 },
-    { country: 'أخرى', students: 11 },
+    { name: 'تركيا', value: 45 },
+    { name: 'قبرص', value: 18 },
+    { name: 'ماليزيا', value: 12 },
+    { name: 'المجر', value: 8 },
+    { name: 'بولندا', value: 6 },
+    { name: 'أخرى', value: 11 },
   ];
   
   const conversionData = [
@@ -279,8 +280,8 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({
           <CardContent>
             <DonutChart
               data={countryData}
-              index="country"
-              category="students"
+              index="name"
+              category="value"
               colors={["#3498db", "#2ecc71", "#f1c40f", "#e74c3c", "#9b59b6", "#1abc9c"]}
               valueFormatter={(value) => `${value} ${t('admin.analytics.students', 'طالب')}`}
               className="h-[250px]"
