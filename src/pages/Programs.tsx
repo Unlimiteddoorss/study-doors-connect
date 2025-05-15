@@ -8,7 +8,7 @@ import ProgramFilters, { ProgramFiltersValues } from '@/components/programs/Prog
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/shared/ModeToggle';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import { dummyPrograms, availableCountries, convertToProgramInfo, Program } from '@/data/programsData';
+import { dummyPrograms, availableCountries, convertToProgramInfo, ProgramInfo } from '@/data/programsData';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Skeleton } from '@/components/ui/skeleton';

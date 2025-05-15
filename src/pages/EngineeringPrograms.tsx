@@ -5,8 +5,7 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { dummyPrograms } from '@/data/programsData';
-import { convertToProgramInfo } from '@/data/programsData';
+import { dummyPrograms, ProgramInfo, convertToProgramInfo } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -38,7 +37,7 @@ const countryTranslations: Record<string, string> = {
 // Create engineering programs data
 const engineeringPrograms = dummyPrograms
   .filter(program => 
-    program.title.includes('هندسة')
+    program.name.includes('هندسة') || program.name.includes('Engineering')
   )
   .concat([
     {
@@ -133,7 +132,7 @@ const EngineeringPrograms = () => {
   const programsPerPage = 9;
   
   // Convert Legacy Program type to ProgramInfo type for rendering
-  const programsToDisplay: ProgramInfo[] = filteredPrograms
+  const programsToDisplay = filteredPrograms
     .map(program => convertToProgramInfo(program));
 
   // Update filtered programs when search term or filters change

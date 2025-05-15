@@ -4,21 +4,19 @@ import { Helmet } from 'react-helmet-async';
 
 interface UniversitySEOProps {
   title: string;
-  description?: string;
+  description: string;
   keywords?: string[];
-  imageUrl?: string;
+  ogImage?: string;
   canonical?: string;
 }
 
 const UniversitySEO: React.FC<UniversitySEOProps> = ({
   title,
-  description = "استكشف أفضل الجامعات التركية وتعرف على برامجها المتنوعة والمنح الدراسية المتاحة واختر مسارك الأكاديمي.",
-  keywords = ["جامعات تركيا", "دراسة في تركيا", "منح دراسية", "جامعات خاصة", "جامعات حكومية", "برامج دراسية"],
-  imageUrl,
-  canonical,
+  description,
+  keywords = [],
+  ogImage = '/images/university-og-image.jpg',
+  canonical
 }) => {
-  const defaultImageUrl = "https://yourdomain.com/default-university-image.jpg";
-  
   return (
     <Helmet>
       <title>{title}</title>
@@ -29,13 +27,13 @@ const UniversitySEO: React.FC<UniversitySEOProps> = ({
       <meta property="og:type" content="website" />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={imageUrl || defaultImageUrl} />
+      <meta property="og:image" content={ogImage} />
       
       {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:title" content={title} />
-      <meta property="twitter:description" content={description} />
-      <meta property="twitter:image" content={imageUrl || defaultImageUrl} />
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={ogImage} />
       
       {canonical && <link rel="canonical" href={canonical} />}
     </Helmet>

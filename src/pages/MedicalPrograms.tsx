@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -5,8 +6,7 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import { SlidersHorizontal } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { dummyPrograms } from '@/data/programsData';
-import { convertToProgramInfo } from '@/data/programsData';
+import { dummyPrograms, ProgramInfo, convertToProgramInfo } from '@/data/programsData';
 
 // ترجمة أسماء الدول إلى العربية
 const countryTranslations: Record<string, string> = {
@@ -38,10 +38,14 @@ const countryTranslations: Record<string, string> = {
 // Create medical programs data
 const medicalPrograms = dummyPrograms
   .filter(program => 
-    program.title.includes('طب') || 
-    program.title.includes('صيدلة') || 
-    program.title.includes('طبي') ||
-    program.title.includes('تمريض')
+    program.name.includes('طب') || 
+    program.name.includes('صيدلة') || 
+    program.name.includes('طبي') ||
+    program.name.includes('تمريض') ||
+    program.name.includes('Medicine') ||
+    program.name.includes('Pharmacy') ||
+    program.name.includes('Medical') ||
+    program.name.includes('Nursing')
   )
   .concat([
     {
@@ -123,7 +127,7 @@ const MedicalPrograms = () => {
   const programsPerPage = 9;
   
   // Convert Legacy Program type to ProgramInfo type for rendering
-  const programsToDisplay: ProgramInfo[] = filteredPrograms
+  const programsToDisplay = filteredPrograms
     .map(program => convertToProgramInfo(program));
 
   // Update filtered programs when search term or filters change

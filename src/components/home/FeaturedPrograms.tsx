@@ -2,15 +2,16 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import ProgramCard, { ProgramInfo } from '@/components/programs/ProgramCard';
-import { dummyPrograms } from '@/data/programsData';
+import ProgramCard from '@/components/programs/ProgramCard';
+import { dummyPrograms, convertToProgramInfo } from '@/data/programsData';
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const FeaturedPrograms = () => {
   // Get featured programs
   const featuredPrograms = dummyPrograms
     .filter(program => program.is_popular)
-    .slice(0, 4);
+    .slice(0, 4)
+    .map(program => convertToProgramInfo(program));
 
   return (
     <div className="bg-unlimited-light-blue/5 py-16">

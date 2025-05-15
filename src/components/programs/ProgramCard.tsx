@@ -1,30 +1,10 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-// Add ProgramInfo interface for external use
-export interface ProgramInfo {
-  id: number;
-  name: string;
-  name_ar?: string;
-  university: string;
-  university_id: number;
-  degree_type: string;
-  duration: number;
-  tuition_fee: number;
-  language: string;
-  country: string;
-  city: string;
-  has_scholarship: boolean;
-  is_popular: boolean;
-  description?: string;
-  university_image?: string; // Optional property for university logo
-  image?: string; // Optional property for program image
-}
+import { ProgramInfo } from '@/data/programsData';
 
 interface ProgramCardProps {
   program: ProgramInfo;
-  // Don't include the index prop in the interface since it's causing errors
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
@@ -35,27 +15,27 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
           <img
             className="w-full h-48 object-cover"
             src={program.image || program.university_image || "https://via.placeholder.com/400x200"}
-            alt={program.name}
+            alt={program.name || program.title || ''}
           />
-          {program.is_popular && (
+          {(program.is_popular || program.isFeatured) && (
             <div className="absolute top-2 right-2 bg-unlimited-blue text-white text-xs px-2 py-1 rounded">
-              {program.is_popular ? 'Popular' : ''}
+              Popular
             </div>
           )}
         </div>
         <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800">{program.name}</h3>
+          <h3 className="text-lg font-semibold text-gray-800">{program.name || program.title}</h3>
           <p className="text-gray-600 text-sm mt-1">{program.university}</p>
           <div className="flex items-center mt-2">
             <span className="text-gray-700 text-sm">
-              {program.country}, {program.city}
+              {program.country || program.location}, {program.city}
             </span>
           </div>
           <div className="mt-3 flex justify-between items-center">
             <span className="text-unlimited-blue font-medium">
-              ${program.tuition_fee} / year
+              ${program.tuition_fee || program.fee} / year
             </span>
-            {program.has_scholarship && (
+            {(program.has_scholarship || program.scholarshipAvailable) && (
               <span className="text-green-500 text-sm">Scholarship Available</span>
             )}
           </div>

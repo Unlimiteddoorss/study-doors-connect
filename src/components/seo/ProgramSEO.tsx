@@ -6,41 +6,36 @@ interface ProgramSEOProps {
   title: string;
   description: string;
   keywords?: string[];
-  canonicalUrl?: string;
-  imageUrl?: string;
+  ogImage?: string;
+  canonical?: string;
 }
 
 const ProgramSEO: React.FC<ProgramSEOProps> = ({
   title,
   description,
   keywords = [],
-  canonicalUrl,
-  imageUrl
+  ogImage = '/images/og-image.jpg',
+  canonical
 }) => {
-  const siteUrl = window.location.origin;
-  const currentUrl = window.location.href;
-
   return (
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
-      {keywords.length > 0 && <meta name="keywords" content={keywords.join(', ')} />}
+      <meta name="keywords" content={keywords.join(', ')} />
       
       {/* Open Graph / Facebook */}
       <meta property="og:type" content="website" />
-      <meta property="og:url" content={canonicalUrl || currentUrl} />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      {imageUrl && <meta property="og:image" content={imageUrl.startsWith('http') ? imageUrl : `${siteUrl}${imageUrl}`} />}
+      <meta property="og:image" content={ogImage} />
       
       {/* Twitter */}
-      <meta property="twitter:card" content="summary_large_image" />
-      <meta property="twitter:url" content={canonicalUrl || currentUrl} />
-      <meta property="twitter:title" content={title} />
-      <meta property="twitter:description" content={description} />
-      {imageUrl && <meta property="twitter:image" content={imageUrl.startsWith('http') ? imageUrl : `${siteUrl}${imageUrl}`} />}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={ogImage} />
       
-      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+      {canonical && <link rel="canonical" href={canonical} />}
     </Helmet>
   );
 };

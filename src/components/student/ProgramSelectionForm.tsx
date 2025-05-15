@@ -1,3 +1,4 @@
+
 // Update imports to include the turkishUniversities
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
@@ -16,7 +17,7 @@ import ProgramDetails from '@/components/student/program/ProgramDetails';
 import PreferencesForm from '@/components/student/program/PreferencesForm';
 
 // Import university and program data
-import { dummyPrograms, turkishUniversities } from '@/data/programsData';
+import { dummyPrograms, turkishUniversities, convertToProgramInfo } from '@/data/programsData';
 
 // Define the country data
 const countries = [
@@ -60,14 +61,15 @@ const degreeLevels = [
 // Updated Program interface to match the actual program data structure
 export interface Program {
   id: number;
-  title: string;
+  title?: string;
+  name?: string;
   nameAr?: string;
   university: string;
   location: string;
   language: string;
   duration: string;
-  deadline: string;
-  fee: string;
+  deadline?: string;
+  fee?: string;
   discount?: string;
   image?: string;
   isFeatured?: boolean;
@@ -130,6 +132,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   const programs: Program[] = dummyPrograms.map(program => ({
     id: program.id,
     title: program.name,
+    name: program.name,
     nameAr: program.name_ar || program.name, // Fallback to name if Arabic name is not provided
     university: program.university,
     location: `${program.city}, ${program.country}`,

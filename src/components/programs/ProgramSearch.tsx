@@ -22,27 +22,54 @@ import {
 interface ProgramSearchProps {
   onSearch?: (query: string) => void;
   onFilterChange?: (filters: any) => void;
+  searchTerm?: string;
+  setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
+  selectedCountry?: string;
+  setSelectedCountry?: React.Dispatch<React.SetStateAction<string>>;
+  selectedDegree?: string;
+  setSelectedDegree?: React.Dispatch<React.SetStateAction<string>>;
+  selectedSpecialty?: string;
+  setSelectedSpecialty?: React.Dispatch<React.SetStateAction<string>>;
+  handleSearch?: (e: React.FormEvent) => void;
+  resetFilters?: () => void;
+  countryTranslations?: Record<string, string>;
 }
 
-interface CountryOption {
-  value: string;
-  label: string;
-}
-
-const ProgramSearch: React.FC<ProgramSearchProps> = ({ onSearch, onFilterChange }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+const ProgramSearch: React.FC<ProgramSearchProps> = ({ 
+  onSearch, 
+  onFilterChange,
+  searchTerm = "",
+  setSearchTerm,
+  selectedCountry = null,
+  setSelectedCountry,
+  selectedDegree,
+  setSelectedDegree,
+  selectedSpecialty,
+  setSelectedSpecialty,
+  handleSearch,
+  resetFilters,
+  countryTranslations = {}
+}) => {
   const [open, setOpen] = useState(false);
   
-  const handleSearch = () => {
+  const localSearchTerm = searchTerm !== undefined ? searchTerm : "";
+  const localSetSearchTerm = setSearchTerm || (() => {});
+  
+  const handleLocalSearch = () => {
     if (onSearch) {
-      onSearch(searchQuery);
+      onSearch(localSearchTerm);
+    }
+    
+    if (handleSearch) {
+      handleSearch(new Event('submit') as any);
     }
   };
 
   const handleCountrySelect = (value: string) => {
-    setSelectedCountry(value);
-    setOpen(false);
+    if (setSelectedCountry) {
+      setSelectedCountry(value);
+      setOpen(false);
+    }
     
     if (onFilterChange) {
       onFilterChange({ country: value });
@@ -55,8 +82,8 @@ const ProgramSearch: React.FC<ProgramSearchProps> = ({ onSearch, onFilterChange 
         <Input
           type="text"
           placeholder="ابحث عن برنامج دراسي..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={localSearchTerm}
+          onChange={(e) => localSetSearchTerm(e.target.value)}
           className="pl-10 pr-4"
         />
         <svg className="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -98,7 +125,7 @@ const ProgramSearch: React.FC<ProgramSearchProps> = ({ onSearch, onFilterChange 
           </PopoverContent>
         </Popover>
         
-        <Button onClick={handleSearch} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
+        <Button onClick={handleLocalSearch} className="bg-unlimited-blue hover:bg-unlimited-dark-blue">
           بحث
         </Button>
         
@@ -106,9 +133,14 @@ const ProgramSearch: React.FC<ProgramSearchProps> = ({ onSearch, onFilterChange 
           <Button
             variant="outline"
             onClick={() => {
-              setSelectedCountry(null);
+              if (setSelectedCountry) {
+                setSelectedCountry(null);
+              }
               if (onFilterChange) {
                 onFilterChange({ country: null });
+              }
+              if (resetFilters) {
+                resetFilters();
               }
             }}
             className="gap-1"

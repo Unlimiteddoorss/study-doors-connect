@@ -1,47 +1,45 @@
 
-import { useState, useEffect } from 'react';
-import { ChevronUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from 'react';
+import { ArrowUp } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
-interface ScrollToTopProps {
-  showBelow?: number;
-  className?: string;
-}
-
-const ScrollToTop = ({ showBelow = 500, className }: ScrollToTopProps) => {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > showBelow) {
-        if (!show) setShow(true);
-      } else {
-        if (show) setShow(false);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [show, showBelow]);
-
-  const handleClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+const ScrollToTop: React.FC = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  
+  const toggleVisibility = () => {
+    if (window.pageYOffset > 300) {
+      setIsVisible(true);
+    } else {
+      setIsVisible(false);
+    }
   };
-
+  
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+  
+  useEffect(() => {
+    window.addEventListener('scroll', toggleVisibility);
+    
+    return () => {
+      window.removeEventListener('scroll', toggleVisibility);
+    };
+  }, []);
+  
   return (
-    <button
-      className={cn(
-        "fixed bottom-8 right-8 p-3 rounded-full bg-unlimited-blue text-white shadow-lg z-50 transition-all duration-300 hover:bg-unlimited-dark-blue transform hover:scale-110",
-        show ? "translate-y-0 opacity-100" : "translate-y-16 opacity-0 pointer-events-none",
-        className
-      )}
-      onClick={handleClick}
-      aria-label="إلى الأعلى"
-    >
-      <ChevronUp size={24} />
-    </button>
+    <div className={`fixed bottom-6 right-6 z-50 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <Button
+        variant="outline"
+        size="icon"
+        className="rounded-full shadow-lg bg-white dark:bg-gray-800 h-12 w-12"
+        onClick={scrollToTop}
+      >
+        <ArrowUp className="h-6 w-6" />
+      </Button>
+    </div>
   );
 };
 
