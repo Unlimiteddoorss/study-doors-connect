@@ -1,6 +1,6 @@
 
+import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import HomePage from '@/pages/HomePage';
 import LoginPage from '@/pages/LoginPage';
 import RegisterPage from '@/pages/RegisterPage';

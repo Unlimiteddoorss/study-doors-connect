@@ -1,5 +1,6 @@
 
 import { createRoot } from 'react-dom/client'
+import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.tsx'
@@ -27,15 +28,17 @@ const rootElement = document.getElementById("root");
 // Create a root for React to render into
 if (rootElement) {
   createRoot(rootElement).render(
-    <ErrorBoundary>
-      <BrowserRouter>
-        <HelmetProvider>
-          <ThemeProvider defaultTheme="light">
-            <App />
-          </ThemeProvider>
-        </HelmetProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <React.StrictMode>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <HelmetProvider>
+            <ThemeProvider defaultTheme="light">
+              <App />
+            </ThemeProvider>
+          </HelmetProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
+    </React.StrictMode>
   );
 } else {
   console.error("Root element not found");

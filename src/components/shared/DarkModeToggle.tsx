@@ -10,13 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
-type ThemeOption = "light" | "dark" | "system";
-
 export default function DarkModeToggle() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   
-  const handleThemeChange = (newTheme: ThemeOption) => {
+  const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
     
     const themeLabels = {
