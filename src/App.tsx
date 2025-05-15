@@ -50,6 +50,13 @@ import UnauthorizedPage from './pages/UnauthorizedPage';
 // 👋 New Enhanced Admin Pages - Added for better UI/UX
 import EnhancedDashboard from './pages/admin/EnhancedDashboard';
 import EnhancedStudentsManagement from './pages/admin/EnhancedStudentsManagement';
+import EnhancedAgentsManagement from './pages/admin/EnhancedAgentsManagement';
+import AdminOverview from './pages/admin/AdminOverview';
+
+// 👋 New Pages - Added to complete the application
+import Support from './pages/Support';
+import Testimonials from './pages/Testimonials';
+import ProgramsPage from './pages/ProgramsPage';
 
 function App() {
   // Listen for network status changes
@@ -95,7 +102,8 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/countries" element={<Countries />} />
           <Route path="/countries/:id" element={<CountryDetails />} />
-          <Route path="/programs" element={<Programs />} />
+          <Route path="/programs" element={<ProgramsPage />} />
+          <Route path="/programs-old" element={<Programs />} />
           <Route path="/programs/:id" element={<ProgramDetails />} />
           <Route path="/universities" element={<Universities />} />
           <Route path="/universities/:id" element={<UniversityDetails />} />
@@ -106,6 +114,8 @@ function App() {
           <Route path="/turkish-universities" element={<TurkishUniversities />} />
           <Route path="/apply" element={<StudentApplication />} />
           <Route path="/apply/turkish" element={<TurkishUniversityApplication />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/testimonials" element={<Testimonials />} />
 
           {/* Student Dashboard Routes */}
           <Route path="/dashboard" element={<Dashboard />} />
@@ -118,14 +128,15 @@ function App() {
           <Route path="/student/messages" element={<StudentMessages />} />
 
           {/* Admin Routes */}
-          <Route path="/admin" element={<EnhancedDashboard />} />
+          <Route path="/admin" element={<AdminOverview />} />
+          <Route path="/admin/dashboard" element={<EnhancedDashboard />} />
           <Route path="/admin/classic" element={<AdminDashboard />} />  {/* Keep classic dashboard */}
           <Route path="/admin/students" element={<EnhancedStudentsManagement />} />
           <Route path="/admin/students/classic" element={<ManageStudents />} />  {/* Keep classic students */}
           <Route path="/admin/applications" element={<ManageApplications />} />
           <Route path="/admin/universities" element={<ManageUniversities />} />
           <Route path="/admin/programs" element={<ManagePrograms />} />
-          <Route path="/admin/agents" element={<ManageAgents />} />
+          <Route path="/admin/agents" element={<EnhancedAgentsManagement />} />
           <Route path="/admin/messages" element={<AdminMessages />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
           <Route path="/admin/reports" element={<Reports />} />
