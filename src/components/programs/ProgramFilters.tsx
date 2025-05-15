@@ -20,20 +20,32 @@ export interface ProgramFiltersValues {
   isPopular: boolean;
 }
 
+// Support legacy filter format
+export interface LegacyFilters {
+  country: string;
+  university: string;
+  degree: string;
+  language: string;
+  fee: number[];
+  hasScholarship: boolean;
+}
+
+export interface FiltersMapping {
+  countries?: string[];
+  levels?: string[];
+  specialties?: string[];
+  languages?: string[];
+}
+
 export interface ProgramFiltersProps {
-  onApplyFilters: (filters: ProgramFiltersValues) => void;
-  countries: string[];
-  languages: string[];
-  initialFilters: ProgramFiltersValues;
+  onApplyFilters?: (filters: ProgramFiltersValues) => void;
+  countries?: string[];
+  languages?: string[];
+  initialFilters?: ProgramFiltersValues;
   className?: string;
   isMobileFilterOpen?: boolean;
   onCloseMobileFilter?: () => void;
-  filters?: {
-    countries: string[];
-    levels: string[];
-    specialties: string[];
-    languages: string[];
-  };
+  filters?: FiltersMapping;
   toggleCountryFilter?: (country: string) => void;
   toggleLevelFilter?: (level: string) => void;
   toggleSpecialtyFilter?: (specialty: string) => void;
@@ -41,27 +53,186 @@ export interface ProgramFiltersProps {
   resetFilters?: () => void;
 }
 
-const ProgramFilters: React.FC<ProgramFiltersProps> = ({
-  onApplyFilters,
-  countries,
-  languages,
-  initialFilters,
-  className = '',
-  isMobileFilterOpen,
-  onCloseMobileFilter,
-  filters = {
-    countries: [],
-    levels: [],
-    specialties: [],
-    languages: []
-  },
-  toggleCountryFilter,
-  toggleLevelFilter,
-  toggleSpecialtyFilter,
-  toggleLanguageFilter,
-  resetFilters
-}) => {
+const ProgramFilters: React.FC<ProgramFiltersProps | { filters: LegacyFilters, setFilters: (filters: LegacyFilters) => void }> = (props) => {
   const { t } = useTranslation();
+  
+  // Handle legacy props structure
+  if ('filters' in props && 'setFilters' in props && typeof props.setFilters === 'function') {
+    const { filters, setFilters } = props;
+    
+    // Legacy filters UI
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-medium flex items-center">
+            <SlidersHorizontal className="h-4 w-4 mr-2" />
+            {t('programs.filters', 'فلاتر البرامج')}
+          </CardTitle>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <div>
+            <h3 className="font-medium mb-2">{t('programs.country', 'الدولة')}</h3>
+            <div className="space-y-1">
+              <Button 
+                variant={filters.country === 'Turkey' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, country: filters.country === 'Turkey' ? '' : 'Turkey'})}
+                className="mr-2 mb-2"
+              >
+                تركيا
+              </Button>
+              <Button 
+                variant={filters.country === 'Cyprus' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, country: filters.country === 'Cyprus' ? '' : 'Cyprus'})}
+                className="mr-2 mb-2"
+              >
+                قبرص
+              </Button>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="font-medium mb-2">{t('programs.degreeType', 'نوع الدرجة')}</h3>
+            <div className="space-y-1">
+              <Button 
+                variant={filters.degree === 'Bachelor' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, degree: filters.degree === 'Bachelor' ? '' : 'Bachelor'})}
+                className="mr-2 mb-2"
+              >
+                بكالوريوس
+              </Button>
+              <Button 
+                variant={filters.degree === 'Master' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, degree: filters.degree === 'Master' ? '' : 'Master'})}
+                className="mr-2 mb-2"
+              >
+                ماجستير
+              </Button>
+              <Button 
+                variant={filters.degree === 'PhD' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, degree: filters.degree === 'PhD' ? '' : 'PhD'})}
+                className="mr-2 mb-2"
+              >
+                دكتوراه
+              </Button>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="font-medium mb-2">{t('programs.language', 'لغة الدراسة')}</h3>
+            <div className="space-y-1">
+              <Button 
+                variant={filters.language === 'English' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, language: filters.language === 'English' ? '' : 'English'})}
+                className="mr-2 mb-2"
+              >
+                الإنجليزية
+              </Button>
+              <Button 
+                variant={filters.language === 'Turkish' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, language: filters.language === 'Turkish' ? '' : 'Turkish'})}
+                className="mr-2 mb-2"
+              >
+                التركية
+              </Button>
+              <Button 
+                variant={filters.language === 'Arabic' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFilters({...filters, language: filters.language === 'Arabic' ? '' : 'Arabic'})}
+                className="mr-2 mb-2"
+              >
+                العربية
+              </Button>
+            </div>
+          </div>
+          
+          <div>
+            <div className="flex justify-between mb-2">
+              <h3 className="font-medium">{t('programs.tuitionFee', 'الرسوم الدراسية')}</h3>
+              <span className="text-sm text-unlimited-gray">
+                ${filters.fee[0]} - ${filters.fee[1]}
+              </span>
+            </div>
+            <Slider
+              value={filters.fee}
+              min={0}
+              max={20000}
+              step={500}
+              onValueChange={(value) => setFilters({...filters, fee: value as [number, number]})}
+              className="py-4"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="scholarship"
+              checked={filters.hasScholarship}
+              onCheckedChange={(checked) => 
+                setFilters({...filters, hasScholarship: checked === true})
+              }
+            />
+            <Label htmlFor="scholarship" className="mr-2 cursor-pointer">
+              {t('programs.hasScholarship', 'منح دراسية متاحة')}
+            </Label>
+          </div>
+          
+          <Button 
+            onClick={() => setFilters({
+              country: '',
+              university: '',
+              degree: '',
+              language: '',
+              fee: [0, 20000],
+              hasScholarship: false
+            })} 
+            variant="outline" 
+            className="w-full"
+          >
+            {t('programs.resetFilters', 'إعادة ضبط')}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+  
+  // Modern version of filters
+  const { 
+    onApplyFilters,
+    countries = ["Turkey", "Cyprus", "UK", "USA", "Canada"],
+    languages = ["English", "Turkish", "Arabic"],
+    initialFilters = {
+      search: '',
+      country: [],
+      degreeType: [],
+      language: [],
+      duration: [1, 6],
+      tuitionRange: [0, 50000],
+      hasScholarship: false,
+      isPopular: false
+    },
+    className = '',
+    isMobileFilterOpen,
+    onCloseMobileFilter,
+    filters = {
+      countries: [],
+      levels: [],
+      specialties: [],
+      languages: []
+    },
+    toggleCountryFilter,
+    toggleLevelFilter,
+    toggleSpecialtyFilter,
+    toggleLanguageFilter,
+    resetFilters
+  } = props as ProgramFiltersProps;
+  
   const [filterValues, setFilterValues] = useState<ProgramFiltersValues>(initialFilters);
   
   // Update local state when initialFilters change
@@ -91,7 +262,9 @@ const ProgramFilters: React.FC<ProgramFiltersProps> = ({
   };
   
   const handleApply = () => {
-    onApplyFilters(filterValues);
+    if (onApplyFilters) {
+      onApplyFilters(filterValues);
+    }
     if (onCloseMobileFilter) {
       onCloseMobileFilter();
     }
@@ -110,7 +283,9 @@ const ProgramFilters: React.FC<ProgramFiltersProps> = ({
     };
     
     setFilterValues(resetValues);
-    onApplyFilters(resetValues);
+    if (onApplyFilters) {
+      onApplyFilters(resetValues);
+    }
     
     if (resetFilters) {
       resetFilters();

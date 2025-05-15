@@ -1,324 +1,256 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import MainLayout from '@/components/layout/MainLayout';
-import SectionTitle from '@/components/shared/SectionTitle';
+import { useTranslation } from 'react-i18next';
 import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
-import { SlidersHorizontal } from 'lucide-react';
+import ProgramFilters, { LegacyFilters } from '@/components/programs/ProgramFilters';
+import { ProgramInfo, convertToProgramInfo } from '@/data/programsData';
 import { useToast } from '@/hooks/use-toast';
-import { dummyPrograms, ProgramInfo, convertToProgramInfo } from '@/data/programsData';
 
-// ترجمة أسماء الدول إلى العربية
-const countryTranslations: Record<string, string> = {
-  'Australia': 'أستراليا',
-  'Azerbaijan': 'أذربيجان',
-  'Bosnia and Herzegovina': 'البوسنة والهرسك',
-  'Czech Republic': 'جمهورية التشيك',
-  'Egypt': 'مصر',
-  'Georgia': 'جورجيا',
-  'Germany': 'ألمانيا',
-  'Hungary': 'المجر',
-  'Ireland': 'أيرلندا',
-  'Kosovo': 'كوسوفو',
-  'Macedonia': 'مقدونيا',
-  'Malaysia': 'ماليزيا',
-  'Malta': 'مالطا',
-  'Montenegro': 'الجبل الأسود',
-  'Northern Cyprus': 'شمال قبرص',
-  'Poland': 'بولندا',
-  'Scotland': 'اسكتلندا',
-  'Serbia': 'صربيا',
-  'Spain': 'إسبانيا',
-  'Turkey': 'تركيا',
-  'United Kingdom': 'المملكة المتحدة',
-  'United States': 'الولايات المتحدة الأمريكية',
-  'United Arab Emirates': 'الإمارات العربية المتحدة'
-};
-
-// Create medical programs data
-const medicalPrograms = dummyPrograms
-  .filter(program => 
-    program.name.includes('طب') || 
-    program.name.includes('صيدلة') || 
-    program.name.includes('طبي') ||
-    program.name.includes('تمريض') ||
-    program.name.includes('Medicine') ||
-    program.name.includes('Pharmacy') ||
-    program.name.includes('Medical') ||
-    program.name.includes('Nursing')
-  )
-  .concat([
-    {
-      id: 101,
-      title: "بكالوريوس الطب والجراحة - MBBS",
-      university: "جامعة إسطنبول",
-      location: "Turkey، إسطنبول",
-      language: "إنجليزية",
-      duration: "6 سنوات",
-      deadline: "15/08/2023",
-      fee: "$8,500 / سنة",
-      image: "https://images.unsplash.com/photo-1581056771107-24ca5f033842?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      isFeatured: true,
-      scholarshipAvailable: true,
-      badges: ["برنامج معتمد", "تدريب عملي"]
-    },
-    {
-      id: 102,
-      title: "بكالوريوس طب الأسنان",
-      university: "جامعة أنقرة",
-      location: "Turkey، أنقرة",
-      language: "تركية",
-      duration: "5 سنوات",
-      deadline: "30/07/2023",
-      fee: "$7,500 / سنة",
-      discount: "$6,800 / سنة",
-      image: "https://images.unsplash.com/photo-1588776814546-daab30f0477e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["منهج حديث", "معامل متطورة"]
-    },
-    {
-      id: 103,
-      title: "بكالوريوس الصيدلة",
-      university: "جامعة إزمير",
-      location: "Turkey، إزمير",
-      language: "إنجليزية وتركية",
-      duration: "5 سنوات",
-      deadline: "10/09/2023",
-      fee: "$5,200 / سنة",
-      image: "https://images.unsplash.com/photo-1585435557343-3b348b7a7cef?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["تدريب مهني", "برنامج تبادل طلابي"]
-    },
-    {
-      id: 104,
-      title: "بكالوريوس العلاج الطبيعي",
-      university: "جامعة بورصة",
-      location: "Turkey، بورصة",
-      language: "إنجليزية",
-      duration: "4 سنوات",
-      deadline: "20/08/2023",
-      fee: "$4,800 / سنة",
-      discount: "$4,300 / سنة",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      badges: ["تدريب ميداني", "فرص وظيفية"]
-    },
-    {
-      id: 105,
-      title: "ماجستير الجراحة العامة",
-      university: "جامعة إسطنبول",
-      location: "Turkey، إسطنبول",
-      language: "إنجليزية",
-      duration: "3 سنوات",
-      deadline: "05/08/2023",
-      fee: "$10,200 / سنة",
-      image: "https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      isFeatured: true,
-      badges: ["بحث متخصص", "تدريب في المستشفيات"]
-    }
-  ]);
-
-const MedicalPrograms = () => {
+const MedicalPrograms: React.FC = () => {
+  const { t } = useTranslation();
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredPrograms, setFilteredPrograms] = useState(medicalPrograms);
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedDegree, setSelectedDegree] = useState("");
-  const [selectedSpecialty, setSelectedSpecialty] = useState("");
-  const [sortOrder, setSortOrder] = useState("relevance");
+  const [programs, setPrograms] = useState<ProgramInfo[]>([]);
+  const [filteredPrograms, setFilteredPrograms] = useState<ProgramInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const programsPerPage = 9;
-  
-  // Convert Legacy Program type to ProgramInfo type for rendering
-  const programsToDisplay = filteredPrograms
-    .map(program => convertToProgramInfo(program));
+  const [filters, setFilters] = useState<LegacyFilters>({
+    country: '',
+    university: '',
+    degree: '',
+    language: '',
+    fee: [0, 100000],
+    hasScholarship: false,
+  });
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Update filtered programs when search term or filters change
+  // Simulate API call to fetch programs
   useEffect(() => {
-    let result = medicalPrograms;
-    
-    // Apply search filter
-    if (searchTerm) {
+    const fetchData = async () => {
+      // Mock data for medical programs
+      const medicalPrograms = [
+        {
+          id: 201,
+          name: "Medicine",
+          name_ar: "الطب البشري",
+          university: "Ankara University",
+          university_id: 6,
+          degree_type: "Bachelor",
+          duration: 6,
+          tuition_fee: 12000,
+          language: "English",
+          country: "Turkey",
+          city: "Ankara",
+          is_popular: true,
+          has_scholarship: true,
+          description: "Complete medical training program including clinical practice.",
+          university_image: "/images/universities/ankara-university.jpg"
+        },
+        {
+          id: 202,
+          name: "Dentistry",
+          name_ar: "طب الأسنان",
+          university: "Istanbul University",
+          university_id: 7,
+          degree_type: "Bachelor",
+          duration: 5,
+          tuition_fee: 10500,
+          language: "English",
+          country: "Turkey",
+          city: "Istanbul",
+          is_popular: true,
+          has_scholarship: false,
+          description: "Comprehensive dental education with clinical training.",
+          university_image: "/images/universities/istanbul-university.jpg"
+        },
+        {
+          id: 203,
+          name: "Pharmacy",
+          name_ar: "الصيدلة",
+          university: "Hacettepe University",
+          university_id: 8,
+          degree_type: "Bachelor",
+          duration: 5,
+          tuition_fee: 9000,
+          language: "English",
+          country: "Turkey",
+          city: "Ankara",
+          is_popular: false,
+          has_scholarship: true,
+          description: "Study pharmaceutical sciences and medication management.",
+          university_image: "/images/universities/hacettepe-university.jpg"
+        },
+        {
+          id: 204,
+          name: "Nursing",
+          name_ar: "التمريض",
+          university: "Ege University",
+          university_id: 9,
+          degree_type: "Bachelor",
+          duration: 4,
+          tuition_fee: 7000,
+          language: "Turkish",
+          country: "Turkey",
+          city: "Izmir",
+          is_popular: false,
+          has_scholarship: true,
+          description: "Comprehensive nursing education with clinical practice.",
+          university_image: "/images/universities/ege-university.jpg"
+        },
+        {
+          id: 205,
+          name: "Physical Therapy",
+          name_ar: "العلاج الطبيعي",
+          university: "Gazi University",
+          university_id: 10,
+          degree_type: "Bachelor",
+          duration: 4,
+          tuition_fee: 8000,
+          language: "English",
+          country: "Turkey",
+          city: "Ankara",
+          is_popular: false,
+          has_scholarship: false,
+          description: "Learn rehabilitation techniques and patient care.",
+          university_image: "/images/universities/gazi-university.jpg"
+        }
+      ];
+
+      // Convert to ProgramInfo format
+      const medicalProgramsFormatted = medicalPrograms.map(program => convertToProgramInfo(program));
+      
+      setTimeout(() => {
+        setPrograms(medicalProgramsFormatted);
+        setFilteredPrograms(medicalProgramsFormatted);
+        setIsLoading(false);
+      }, 1000); // Simulate loading delay
+    };
+
+    fetchData();
+  }, []);
+
+  // Handle search and filtering
+  useEffect(() => {
+    let result = [...programs];
+
+    // Apply search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
       result = result.filter(
-        program =>
-          program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          program.university.toLowerCase().includes(searchTerm.toLowerCase())
+        (program) =>
+          program.name?.toLowerCase().includes(query) ||
+          program.university.toLowerCase().includes(query) ||
+          program.description?.toLowerCase().includes(query)
       );
     }
-    
-    // Apply country filter
-    if (selectedCountry && selectedCountry !== "all") {
-      result = result.filter(program => {
-        const programCountry = program.location.split('،')[0].trim();
-        return programCountry === selectedCountry;
-      });
+
+    // Apply filters
+    if (filters.country) {
+      result = result.filter((program) => program.country === filters.country);
     }
-    
-    // Apply degree filter
-    if (selectedDegree && selectedDegree !== "all") {
-      result = result.filter(program => {
-        if (program.title.includes('بكالوريوس') && selectedDegree === 'Bachelor') return true;
-        if (program.title.includes('ماجستير') && selectedDegree === 'Master') return true;
-        if (program.title.includes('دكتوراه') && selectedDegree === 'Doctorate') return true;
-        return false;
-      });
+    if (filters.university) {
+      result = result.filter((program) => program.university === filters.university);
     }
-    
-    // Apply specialty filter
-    if (selectedSpecialty && selectedSpecialty !== "all") {
-      result = result.filter(program => {
-        switch(selectedSpecialty) {
-          case "Medicine":
-            return program.title.includes('طب') && !program.title.includes('أسنان');
-          case "Dentistry":
-            return program.title.includes('أسنان');
-          case "Pharmacy":
-            return program.title.includes('صيدلة');
-          case "Nursing":
-            return program.title.includes('تمريض');
-          case "Physiotherapy":
-            return program.title.includes('علاج طبيعي');
-          default:
-            return true;
+    if (filters.degree) {
+      result = result.filter((program) => program.degree_type === filters.degree);
+    }
+    if (filters.language) {
+      result = result.filter((program) => {
+        if (Array.isArray(program.language)) {
+          return program.language.includes(filters.language);
         }
+        return program.language === filters.language;
       });
     }
     
-    // Apply sorting
-    switch (sortOrder) {
-      case "newest":
-        // In a real app, this would sort by date added
-        break;
-      case "priceAsc":
-        result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          return priceA - priceB;
-        });
-        break;
-      case "priceDesc":
-        result = [...result].sort((a, b) => {
-          const priceA = parseFloat(a.discount ? a.discount.replace('$', '').replace(',', '') : a.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          const priceB = parseFloat(b.discount ? b.discount.replace('$', '').replace(',', '') : b.fee.replace('$', '').replace(',', '').split(' ')[0]);
-          return priceB - priceA;
-        });
-        break;
-      case "relevance":
-      default:
-        // In a real app, this would use a relevance algorithm
-        // For now, put featured programs first
-        result = [...result].sort((a, b) => (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0));
-        break;
+    if (filters.hasScholarship) {
+      result = result.filter((program) => program.has_scholarship === true);
     }
-    
+
+    // Apply fee range filter
+    result = result.filter(
+      (program) =>
+        (program.tuition_fee || 0) >= filters.fee[0] &&
+        (program.tuition_fee || 0) <= filters.fee[1]
+    );
+
     setFilteredPrograms(result);
     setCurrentPage(1); // Reset to first page when filters change
-  }, [searchTerm, selectedCountry, selectedDegree, selectedSpecialty, sortOrder]);
+  }, [searchQuery, filters, programs]);
+
+  // Handle pagination
+  const programsPerPage = 6;
+  const totalPages = Math.ceil(filteredPrograms.length / programsPerPage);
+  const currentPrograms = filteredPrograms.slice(
+    (currentPage - 1) * programsPerPage,
+    currentPage * programsPerPage
+  );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     toast({
       title: "تم البحث",
-      description: `تم البحث عن: ${searchTerm || 'جميع البرامج الطبية'}`,
+      description: `تم البحث عن: ${searchQuery || 'جميع البرامج الطبية'}`,
     });
   };
-
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedCountry("");
-    setSelectedDegree("");
-    setSelectedSpecialty("");
-    setSortOrder("relevance");
-    
-    toast({
-      title: "تم إعادة ضبط التصفية",
-      description: "تم مسح جميع عوامل التصفية والبحث",
-    });
-  };
-
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortOrder(e.target.value);
-    
-    toast({
-      title: "تم تغيير الترتيب",
-      description: `تم ترتيب البرامج حسب: ${e.target.options[e.target.selectedIndex].text}`,
-    });
-  };
-
-  // حساب الصفحات
-  const indexOfLastProgram = currentPage * programsPerPage;
-  const indexOfFirstProgram = indexOfLastProgram - programsPerPage;
-  const currentPrograms = filteredPrograms.slice(indexOfFirstProgram, indexOfLastProgram);
-  const totalPages = Math.ceil(filteredPrograms.length / programsPerPage);
-
-  // التنقل بين الصفحات
-  const paginate = (pageNumber: number) => {
-    if (pageNumber > 0 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  // Add Medical Specialties
-  const medicalSpecialties = [
-    { value: "Medicine", label: "الطب البشري" },
-    { value: "Dentistry", label: "طب الأسنان" },
-    { value: "Pharmacy", label: "الصيدلة" },
-    { value: "Nursing", label: "التمريض" },
-    { value: "Physiotherapy", label: "العلاج الطبيعي" }
-  ];
 
   return (
     <MainLayout>
-      <div className="container mx-auto px-4 py-12">
-        <SectionTitle
-          title="البرامج الطبية"
-          subtitle="استكشف أفضل برامج الطب والعلوم الصحية في أرقى الجامعات العالمية"
-        />
+      <Helmet>
+        <title>{t('medicalPrograms.title', 'البرامج الطبية')} | Unlimited Doors</title>
+        <meta name="description" content={t('medicalPrograms.metaDescription', 'استكشف البرامج الطبية المتاحة في أفضل الجامعات')} />
+      </Helmet>
 
-        {/* Search Component */}
-        <ProgramSearch 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          selectedCountry={selectedCountry}
-          setSelectedCountry={setSelectedCountry}
-          selectedDegree={selectedDegree}
-          setSelectedDegree={setSelectedDegree}
-          selectedSpecialty={selectedSpecialty}
-          setSelectedSpecialty={setSelectedSpecialty}
-          handleSearch={handleSearch}
-          resetFilters={resetFilters}
-          countryTranslations={countryTranslations}
-        />
-
-        {/* Results info and Filters */}
-        <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <p className="text-unlimited-gray">
-              تم العثور على <span className="font-semibold text-unlimited-blue">{filteredPrograms.length}</span> برنامج طبي
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="h-4 w-4 text-unlimited-gray" />
-            <span className="text-unlimited-gray">ترتيب حسب:</span>
-            <select 
-              className="px-3 py-1 border border-gray-300 rounded-md text-unlimited-gray focus:outline-none focus:ring-1 focus:ring-unlimited-blue"
-              value={sortOrder}
-              onChange={handleSortChange}
-            >
-              <option value="relevance">الأكثر صلة</option>
-              <option value="newest">الأحدث</option>
-              <option value="priceAsc">السعر: من الأقل للأعلى</option>
-              <option value="priceDesc">السعر: من الأعلى للأقل</option>
-            </select>
-          </div>
+      <div className="container mx-auto py-8 px-4">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-unlimited-dark-blue mb-2">
+            {t('medicalPrograms.title', 'البرامج الطبية')}
+          </h1>
+          <p className="text-unlimited-gray max-w-2xl mx-auto">
+            {t('medicalPrograms.subtitle', 'استكشف مجموعة واسعة من البرامج الطبية في أفضل الجامعات التركية')}
+          </p>
         </div>
 
-        {/* Programs Grid */}
-        <ProgramsGrid 
-          programs={programsToDisplay}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={paginate}
-          onResetFilters={resetFilters}
-        />
+        <div className="mb-8">
+          <ProgramSearch
+            searchQuery={searchQuery} 
+            setSearchQuery={setSearchQuery} 
+            placeholder={t('medicalPrograms.searchPlaceholder', 'ابحث عن برنامج طبي...')}
+            handleSearch={handleSearch}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-1">
+            <ProgramFilters 
+              filters={filters} 
+              setFilters={setFilters} 
+            />
+          </div>
+
+          <div className="lg:col-span-3">
+            <ProgramsGrid
+              programs={currentPrograms}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              isLoading={isLoading}
+              onResetFilters={() => {
+                setFilters({
+                  country: '',
+                  university: '',
+                  degree: '',
+                  language: '',
+                  fee: [0, 100000],
+                  hasScholarship: false,
+                });
+                setSearchQuery('');
+              }}
+            />
+          </div>
+        </div>
       </div>
     </MainLayout>
   );

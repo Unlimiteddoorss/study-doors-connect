@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { getFieldValue } from '@/utils/programsUtils';
 import { ProgramInfo } from '@/data/programsData';
 
 interface ProgramCardProps {
-  program: ProgramInfo;
+  program: ProgramInfo | any;
 }
 
 const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
@@ -14,28 +15,29 @@ const ProgramCard: React.FC<ProgramCardProps> = ({ program }) => {
         <div className="relative">
           <img
             className="w-full h-48 object-cover"
-            src={program.image || program.university_image || "https://via.placeholder.com/400x200"}
-            alt={program.name || program.title || ''}
+            src={getFieldValue(program, 'university_image') as string || getFieldValue(program, 'image') as string || "https://via.placeholder.com/400x200"}
+            alt={getFieldValue(program, 'name') as string || ''}
           />
-          {(program.is_popular || program.isFeatured) && (
+          {(getFieldValue(program, 'is_popular') || getFieldValue(program, 'isFeatured')) && (
             <div className="absolute top-2 right-2 bg-unlimited-blue text-white text-xs px-2 py-1 rounded">
               Popular
             </div>
           )}
         </div>
         <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-800">{program.name || program.title}</h3>
-          <p className="text-gray-600 text-sm mt-1">{program.university}</p>
+          <h3 className="text-lg font-semibold text-gray-800">{getFieldValue(program, 'name') as string}</h3>
+          <p className="text-gray-600 text-sm mt-1">{getFieldValue(program, 'university') as string}</p>
           <div className="flex items-center mt-2">
             <span className="text-gray-700 text-sm">
-              {program.country || program.location}, {program.city}
+              {getFieldValue(program, 'country') as string || getFieldValue(program, 'location') as string}
+              {program.city && `, ${program.city}`}
             </span>
           </div>
           <div className="mt-3 flex justify-between items-center">
             <span className="text-unlimited-blue font-medium">
-              ${program.tuition_fee || program.fee} / year
+              ${getFieldValue(program, 'tuition_fee') || getFieldValue(program, 'fee')} / year
             </span>
-            {(program.has_scholarship || program.scholarshipAvailable) && (
+            {(getFieldValue(program, 'has_scholarship') || getFieldValue(program, 'scholarshipAvailable')) && (
               <span className="text-green-500 text-sm">Scholarship Available</span>
             )}
           </div>

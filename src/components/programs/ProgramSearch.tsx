@@ -24,6 +24,8 @@ interface ProgramSearchProps {
   onFilterChange?: (filters: any) => void;
   searchTerm?: string;
   setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
+  searchQuery?: string; 
+  setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
   selectedCountry?: string;
   setSelectedCountry?: React.Dispatch<React.SetStateAction<string>>;
   selectedDegree?: string;
@@ -33,6 +35,7 @@ interface ProgramSearchProps {
   handleSearch?: (e: React.FormEvent) => void;
   resetFilters?: () => void;
   countryTranslations?: Record<string, string>;
+  placeholder?: string;
 }
 
 const ProgramSearch: React.FC<ProgramSearchProps> = ({ 
@@ -40,6 +43,8 @@ const ProgramSearch: React.FC<ProgramSearchProps> = ({
   onFilterChange,
   searchTerm = "",
   setSearchTerm,
+  searchQuery = "",
+  setSearchQuery,
   selectedCountry = null,
   setSelectedCountry,
   selectedDegree,
@@ -48,12 +53,14 @@ const ProgramSearch: React.FC<ProgramSearchProps> = ({
   setSelectedSpecialty,
   handleSearch,
   resetFilters,
-  countryTranslations = {}
+  countryTranslations = {},
+  placeholder = "ابحث عن برنامج دراسي..."
 }) => {
   const [open, setOpen] = useState(false);
   
-  const localSearchTerm = searchTerm !== undefined ? searchTerm : "";
-  const localSetSearchTerm = setSearchTerm || (() => {});
+  // Use either searchTerm or searchQuery based on what's provided
+  const localSearchTerm = searchQuery !== undefined ? searchQuery : (searchTerm !== undefined ? searchTerm : "");
+  const localSetSearchTerm = setSearchQuery || setSearchTerm || (() => {});
   
   const handleLocalSearch = () => {
     if (onSearch) {
@@ -81,7 +88,7 @@ const ProgramSearch: React.FC<ProgramSearchProps> = ({
       <div className="relative">
         <Input
           type="text"
-          placeholder="ابحث عن برنامج دراسي..."
+          placeholder={placeholder}
           value={localSearchTerm}
           onChange={(e) => localSetSearchTerm(e.target.value)}
           className="pl-10 pr-4"

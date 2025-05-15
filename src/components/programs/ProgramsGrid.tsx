@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { ProgramInfo } from '@/data/programsData';
 import ProgramCard from '@/components/programs/ProgramCard';
 import { Button } from '@/components/ui/button';
 import Pagination from '@/components/shared/Pagination';
+import { ProgramInfo } from '@/data/programsData';
 
 interface ProgramsGridProps {
-  programs: ProgramInfo[];
+  programs: ProgramInfo[] | any[];
   currentPage: number;
   totalPages: number;
   onPageChange: (pageNumber: number) => void;

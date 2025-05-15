@@ -1,4 +1,4 @@
-// Update imports to include the turkishUniversities
+
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/ui/card";
@@ -64,7 +64,7 @@ export interface Program {
   name?: string;
   nameAr?: string;
   university: string;
-  location: string;
+  location?: string;
   language: string;
   duration: string;
   deadline?: string;
@@ -120,8 +120,11 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   // Modify the imported Turkish universities to match the University type
   const universities: University[] = turkishUniversities.map(uni => ({
     ...uni,
-    type: (uni.type as "Public" | "Private"),
-    nameAr: uni.nameAr || uni.name
+    type: (uni.type === "Public" || uni.type === "Private") ? uni.type : "Public",
+    nameAr: uni.nameAr || uni.name,
+    // Add any missing required properties
+    image: uni.image || `https://via.placeholder.com/400x200?text=${encodeURIComponent(uni.name)}`,
+    location: uni.location || `${uni.city}, ${uni.country}`
   }));
 
   const [activeTab, setActiveTab] = useState<string>("browse");

@@ -5,7 +5,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import { useTranslation } from 'react-i18next';
 import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
-import ProgramFilters from '@/components/programs/ProgramFilters';
+import ProgramFilters, { LegacyFilters } from '@/components/programs/ProgramFilters';
 import { ProgramInfo, dummyPrograms, convertToProgramInfo } from '@/data/programsData';
 
 const EngineeringPrograms: React.FC = () => {
@@ -14,7 +14,7 @@ const EngineeringPrograms: React.FC = () => {
   const [filteredPrograms, setFilteredPrograms] = useState<ProgramInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<LegacyFilters>({
     country: '',
     university: '',
     degree: '',
@@ -213,7 +213,10 @@ const EngineeringPrograms: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-1">
-            <ProgramFilters filters={filters} setFilters={setFilters} />
+            <ProgramFilters 
+              filters={filters} 
+              setFilters={setFilters} 
+            />
           </div>
 
           <div className="lg:col-span-3">
