@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -117,62 +118,73 @@ const Programs = () => {
     // Apply search filter
     if (searchTerm) {
       results = results.filter(program =>
-        program.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         program.university.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Apply country filter
     if (selectedCountry !== 'all') {
-      results = results.filter(program => program.location.includes(selectedCountry));
+      results = results.filter(program => program.country.includes(selectedCountry));
     }
 
     // Apply degree filter
     if (selectedDegree !== 'all') {
-      results = results.filter(program => selectedDegree === 'Bachelor' ? program.title.toLowerCase().includes('bachelor') : program.title.toLowerCase().includes(selectedDegree.toLowerCase()));
+      results = results.filter(program => selectedDegree === 'Bachelor' ? program.name.toLowerCase().includes('bachelor') : program.name.toLowerCase().includes(selectedDegree.toLowerCase()));
     }
 
     // Apply specialty filter
     if (selectedSpecialty !== 'all') {
-      results = results.filter(program => program.title.toLowerCase().includes(selectedSpecialty.toLowerCase()));
+      results = results.filter(program => program.name.toLowerCase().includes(selectedSpecialty.toLowerCase()));
     }
 
     // Apply advanced filters
     if (advancedFilters.search) {
       results = results.filter(program =>
-        program.title.toLowerCase().includes(advancedFilters.search.toLowerCase()) ||
+        program.name.toLowerCase().includes(advancedFilters.search.toLowerCase()) ||
         program.university.toLowerCase().includes(advancedFilters.search.toLowerCase())
       );
     }
 
     if (advancedFilters.country.length > 0) {
-      results = results.filter(program => advancedFilters.country.some(country => program.location.includes(country)));
+      results = results.filter(program => advancedFilters.country.some(country => program.country.includes(country)));
     }
 
     if (advancedFilters.degreeType.length > 0) {
-      results = results.filter(program => advancedFilters.degreeType.some(degree => program.title.toLowerCase().includes(degree.toLowerCase())));
+      results = results.filter(program => advancedFilters.degreeType.some(degree => program.name.toLowerCase().includes(degree.toLowerCase())));
     }
 
     if (advancedFilters.language.length > 0) {
-      results = results.filter(program => advancedFilters.language.includes(program.language));
+      results = results.filter(program => {
+        if (Array.isArray(program.language)) {
+          return program.language.some(lang => advancedFilters.language.includes(lang));
+        }
+        return advancedFilters.language.includes(program.language);
+      });
     }
 
     results = results.filter(program => {
-      const duration = parseInt(program.duration.split(' ')[0]);
+      const duration = typeof program.duration === 'number' 
+        ? program.duration 
+        : typeof program.duration === 'string' 
+          ? parseInt(program.duration.toString()) 
+          : 0;
       return duration >= advancedFilters.duration[0] && duration <= advancedFilters.duration[1];
     });
 
     results = results.filter(program => {
-      const fee = parseInt(program.fee.replace(/[^0-9]/g, ''));
+      const fee = typeof program.tuition_fee === 'number' 
+        ? program.tuition_fee 
+        : 0;
       return fee >= advancedFilters.tuitionRange[0] && fee <= advancedFilters.tuitionRange[1];
     });
 
     if (advancedFilters.hasScholarship) {
-      results = results.filter(program => program.scholarshipAvailable);
+      results = results.filter(program => program.has_scholarship);
     }
 
     if (advancedFilters.isPopular) {
-      results = results.filter(program => program.isFeatured);
+      results = results.filter(program => program.is_popular);
     }
 
     setFilteredPrograms(results);

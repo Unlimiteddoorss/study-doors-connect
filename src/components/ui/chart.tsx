@@ -1,5 +1,5 @@
 import React from "react";
-import { BarChart as RechartsBarChart, LineChart as RechartsLineChart, PieChart as RechartsPieChart, Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Sector } from "recharts";
+import { BarChart as RechartsBarChart, LineChart as RechartsLineChart, PieChart as RechartsPieChart, Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Sector, AreaChart as RechartsAreaChart, Area } from "recharts";
 
 interface ChartProps {
   data: any[];
@@ -96,6 +96,49 @@ export function LineChart({
             />
           ))}
         </RechartsLineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function AreaChart({
+  data,
+  index,
+  categories,
+  colors = ["#3B82F6", "#60A5FA", "#93C5FD"],
+  valueFormatter = (value: number) => `${value}`,
+  className,
+  ...props
+}: ChartProps) {
+  return (
+    <div className={className}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsAreaChart
+          data={data}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+          {...props}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey={index} />
+          <YAxis />
+          <Tooltip formatter={(value) => valueFormatter(value as number)} />
+          <Legend />
+          {categories && categories.map((category, i) => (
+            <Area
+              key={category}
+              type="monotone"
+              dataKey={category}
+              fill={colors[i % colors.length]}
+              stroke={colors[i % colors.length]}
+              name={category}
+            />
+          ))}
+        </RechartsAreaChart>
       </ResponsiveContainer>
     </div>
   );
