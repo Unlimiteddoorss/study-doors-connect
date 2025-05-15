@@ -1,4 +1,3 @@
-
 // Update imports to include the turkishUniversities
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
@@ -18,9 +17,6 @@ import PreferencesForm from '@/components/student/program/PreferencesForm';
 
 // Import university and program data
 import { dummyPrograms, turkishUniversities } from '@/data/programsData';
-
-// Define example universities data if not imported
-const universities = turkishUniversities;
 
 // Define the country data
 const countries = [
@@ -70,7 +66,7 @@ export interface Program {
   location: string;
   language: string;
   duration: string;
-  deadline: string; // Make deadline required to match usage
+  deadline: string;
   fee: string;
   discount?: string;
   image?: string;
@@ -119,6 +115,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
   const { t, i18n } = useTranslation();
   const { toast } = useToast();
   const isRtl = i18n.language === 'ar';
+  const universities = turkishUniversities;
 
   const [activeTab, setActiveTab] = useState<string>("browse");
   const [selectedCountry, setSelectedCountry] = useState<string>(initialData?.program?.country || "");
@@ -200,7 +197,7 @@ const ProgramSelectionForm = ({ initialData, onSave }: ProgramSelectionFormProps
         setSelectedUniversity(program.university);
         setPreferredLanguage(program.language || "");
         
-        const university = universities.find(u => u.id.toString() === program.university);
+        const university = universities.find(u => u.name === program.university);
         if (university) {
           setSelectedCountry(university.country);
         }

@@ -22,34 +22,32 @@ import TurkishUniversityApplication from '@/pages/TurkishUniversityApplication';
 
 function App() {
   return (
-    <ThemeProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/programs" element={<ProgramsPage />} />
-        <Route path="/program/:id" element={<ProgramDetails />} />
-        <Route path="/universities" element={<Universities />} />
-        <Route path="/university/:id" element={<UniversityDetails />} />
-        <Route path="/turkish-universities" element={<TurkishUniversities />} />
-        <Route path="/engineering-programs" element={<EngineeringPrograms />} />
-        <Route path="/medical-programs" element={<MedicalPrograms />} />
-        <Route path="/turkish-university-application" element={<TurkishUniversityApplication />} />
-        <Route path="/support" element={<SupportPage />} />
-        
-        {/* Student Routes */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/application" element={<ApplicationForm />} />
-        <Route path="/application/:id" element={<ApplicationStatus />} />
-        <Route path="/messages" element={<Messages />} />
-        <Route path="/profile" element={<Profile />} />
-        
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminOverview />} />
-        <Route path="/admin/*" element={<AdminOverview />} />
-      </Routes>
-    </ThemeProvider>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/programs" element={<ProgramsPage />} />
+      <Route path="/program/:id" element={<ProgramDetails />} />
+      <Route path="/universities" element={<Universities />} />
+      <Route path="/university/:id" element={<UniversityDetails />} />
+      <Route path="/turkish-universities" element={<TurkishUniversities />} />
+      <Route path="/engineering-programs" element={<EngineeringPrograms />} />
+      <Route path="/medical-programs" element={<MedicalPrograms />} />
+      <Route path="/turkish-university-application" element={<TurkishUniversityApplication />} />
+      <Route path="/support" element={<SupportPage />} />
+      
+      {/* Student Routes */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/application" element={<ApplicationForm />} />
+      <Route path="/application/:id" element={<ApplicationStatus />} />
+      <Route path="/messages" element={<Messages />} />
+      <Route path="/profile" element={<Profile />} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin" element={<AdminOverview />} />
+      <Route path="/admin/*" element={<AdminOverview />} />
+    </Routes>
   );
 }
 

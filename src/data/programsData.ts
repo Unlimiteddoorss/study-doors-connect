@@ -1,4 +1,3 @@
-
 import { ProgramInfo } from "../components/programs/ProgramCard";
 
 // Define the categories
@@ -20,6 +19,19 @@ export const programSpecialties = [
   { value: "social_science", label: "Social Sciences" },
   { value: "education", label: "Education" },
   { value: "law", label: "Law" }
+];
+
+// Available countries data for filtering
+export const availableCountries = [
+  { value: "Turkey", label: "تركيا" },
+  { value: "Cyprus", label: "قبرص" },
+  { value: "Malaysia", label: "ماليزيا" },
+  { value: "Hungary", label: "المجر" },
+  { value: "Poland", label: "بولندا" },
+  { value: "Czech Republic", label: "جمهورية التشيك" },
+  { value: "United Arab Emirates", label: "الإمارات العربية المتحدة" },
+  { value: "Egypt", label: "مصر" },
+  { value: "Syria", label: "سوريا" }
 ];
 
 // Sample universities data
@@ -84,7 +96,7 @@ export const turkishUniversities = [
   {
     id: 4,
     name: "Bogazici University",
-    nameAr: "جامعة بوغازيتشي",
+    nameAr: "جامعة بوغaziتشي",
     location: "Istanbul",
     city: "Istanbul",
     country: "Turkey",
@@ -271,3 +283,45 @@ export const dummyPrograms: ProgramInfo[] = [
     description: 'برنامج معتمد دولياً في طب الأسنان يؤهل الطلاب للعمل كأطباء أسنان مؤهلين مع التركيز على الممارسة العملية والتقنيات الحديثة.'
   }
 ];
+
+// Helper to convert between different program interfaces
+export const convertToProgramInfo = (program: any): ProgramInfo => {
+  return {
+    id: program.id,
+    name: program.title || program.name || "",
+    name_ar: program.nameAr || program.name_ar || program.title || "",
+    university: program.university || "",
+    university_id: program.university_id || 0,
+    degree_type: program.degree_type || "bachelor",
+    duration: typeof program.duration === 'number' ? program.duration : parseInt(program.duration?.toString() || "4"),
+    tuition_fee: typeof program.tuition_fee === 'number' ? program.tuition_fee : 
+                parseInt(program.fee?.replace(/[^0-9]/g, '') || "0"),
+    language: program.language || "English",
+    country: program.location?.split(',')[0]?.trim() || program.country || "Turkey",
+    city: program.location?.split(',')[1]?.trim() || program.city || "Istanbul",
+    has_scholarship: program.scholarshipAvailable || program.has_scholarship || false,
+    is_popular: program.isFeatured || program.is_popular || false,
+    description: program.description || "",
+    university_image: program.university_image || "",
+    image: program.image || ""
+  };
+};
+
+// Helper for uniform Program interface
+export interface Program {
+  id: number;
+  title: string;
+  nameAr: string;
+  university: string;
+  location: string;
+  language: string;
+  duration: string;
+  deadline: string;
+  fee: string;
+  discount?: string;
+  image?: string;
+  isFeatured?: boolean;
+  badges?: string[];
+  scholarshipAvailable?: boolean;
+  description?: string;
+}

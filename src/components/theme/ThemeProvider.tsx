@@ -1,7 +1,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "system";
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -26,14 +26,20 @@ export function ThemeProvider({
     
     if (savedTheme) {
       setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+      if (savedTheme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     } else {
       // Check for system preference
       const systemPreference = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
       setTheme(systemPreference);
-      document.documentElement.classList.toggle("dark", systemPreference === "dark");
+      if (systemPreference === "dark") {
+        document.documentElement.classList.add("dark");
+      }
     }
   }, []);
 
@@ -42,7 +48,13 @@ export function ThemeProvider({
     setTheme: (newTheme: Theme) => {
       localStorage.setItem("theme", newTheme);
       setTheme(newTheme);
-      document.documentElement.classList.toggle("dark", newTheme === "dark");
+      
+      if (newTheme === "system") {
+        const systemIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.toggle("dark", systemIsDark);
+      } else {
+        document.documentElement.classList.toggle("dark", newTheme === "dark");
+      }
     },
   };
 
