@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import ProgramFilters, { LegacyFilters } from '@/components/programs/ProgramFilters';
-import { ProgramInfo, dummyPrograms, convertToProgramInfo } from '@/data/programsData';
+import { ProgramInfo, convertToProgramInfo } from '@/data/programsData';
 
 const EngineeringPrograms: React.FC = () => {
   const { t } = useTranslation();
