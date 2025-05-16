@@ -1,3 +1,4 @@
+
 import React from "react";
 import { BarChart as RechartsBarChart, LineChart as RechartsLineChart, PieChart as RechartsPieChart, Bar, Line, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Sector, AreaChart as RechartsAreaChart, Area } from "recharts";
 
@@ -248,6 +249,4 @@ export function PieChart({
 }
 
 // Export for backward compatibility
-export { PieChart as DonutChart } from "@/components/ui/chart";
-
-</edits_to_apply>
+export { PieChart as DonutChart };
