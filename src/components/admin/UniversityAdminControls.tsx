@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash, ImagePlus, Building, Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAdmin } from '@/contexts/AdminContext';
 import {
   Dialog,
   DialogContent,
@@ -9,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -40,12 +40,18 @@ interface UniversityAdminControlsProps {
 
 const UniversityAdminControls = ({ universityId }: UniversityAdminControlsProps) => {
   const { toast } = useToast();
+  const { isAdminMode } = useAdmin();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [isProgramsDialogOpen, setIsProgramsDialogOpen] = useState(false);
 
   const { handleAction } = useAdminActions();
+
+  // If not in admin mode, don't render the controls
+  if (!isAdminMode) {
+    return null;
+  }
 
   const handleEdit = () => {
     setIsEditDialogOpen(true);

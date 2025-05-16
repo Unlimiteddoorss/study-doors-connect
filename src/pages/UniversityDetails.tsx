@@ -1,9 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { InfoIcon, Book, Award, Users, Building, Phone, Globe, MapPin, Mail, Clock, School, FileCheck } from 'lucide-react';
 import { turkishUniversities } from '@/data/programsData';
 import { getUniversityPrograms } from '@/data/universityPrograms';
 import { useToast } from '@/hooks/use-toast';
+import { useAdmin } from '@/contexts/AdminContext';
 
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -44,6 +46,7 @@ const UniversityDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('overview');
+  const { isAdminMode } = useAdmin();
   
   const universityId = id ? parseInt(id) : -1;
   const university = turkishUniversities.find(uni => uni.id === universityId);
@@ -80,7 +83,7 @@ const UniversityDetails = () => {
 
   return (
     <MainLayout>
-      <UniversityAdminControls universityId={universityId} />
+      {isAdminMode && <UniversityAdminControls universityId={universityId} />}
       
       <div className="container mx-auto px-4 py-8">
         <div className="relative mb-8">

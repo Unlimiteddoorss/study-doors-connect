@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import MainLayout from '@/components/layout/MainLayout';
@@ -7,9 +6,34 @@ import ProgramSearch from '@/components/programs/ProgramSearch';
 import ProgramsGrid from '@/components/programs/ProgramsGrid';
 import ProgramFilters, { LegacyFilters } from '@/components/programs/ProgramFilters';
 import { ProgramInfo, convertToProgramInfo } from '@/data/programsData';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { useAdmin } from '@/contexts/AdminContext';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle,
+  DialogFooter,
+  DialogDescription
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useToast } from '@/hooks/use-toast';
 
 const EngineeringPrograms: React.FC = () => {
   const { t } = useTranslation();
+  const { toast } = useToast();
+  const { isAdminMode } = useAdmin();
   const [programs, setPrograms] = useState<ProgramInfo[]>([]);
   const [filteredPrograms, setFilteredPrograms] = useState<ProgramInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +47,8 @@ const EngineeringPrograms: React.FC = () => {
     hasScholarship: false,
   });
   const [searchQuery, setSearchQuery] = useState('');
-
+  const [isAddProgramDialogOpen, setIsAddProgramDialogOpen] = useState(false);
+  
   // Simulate API call to fetch programs
   useEffect(() => {
     const fetchData = async () => {
@@ -186,6 +211,14 @@ const EngineeringPrograms: React.FC = () => {
     currentPage * programsPerPage
   );
 
+  const handleAddProgram = () => {
+    toast({
+      title: "تمت الإضافة بنجاح",
+      description: "تم إضافة البرنامج الجديد بنجاح"
+    });
+    setIsAddProgramDialogOpen(false);
+  };
+
   return (
     <MainLayout>
       <Helmet>
@@ -203,12 +236,22 @@ const EngineeringPrograms: React.FC = () => {
           </p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 flex justify-between items-center">
           <ProgramSearch
             searchQuery={searchQuery} 
             setSearchQuery={setSearchQuery} 
             placeholder={t('engineeringPrograms.searchPlaceholder')}
           />
+          
+          {isAdminMode && (
+            <Button 
+              onClick={() => setIsAddProgramDialogOpen(true)}
+              className="bg-unlimited-blue hover:bg-unlimited-dark-blue"
+            >
+              <Plus className="h-4 w-4 ml-2" />
+              إضافة برنامج جديد
+            </Button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -237,10 +280,111 @@ const EngineeringPrograms: React.FC = () => {
                 });
                 setSearchQuery('');
               }}
+              isAdminMode={isAdminMode}
             />
           </div>
         </div>
       </div>
+      
+      {/* Add Program Dialog */}
+      <Dialog open={isAddProgramDialogOpen} onOpenChange={setIsAddProgramDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>إضافة برنامج دراسي جديد</DialogTitle>
+            <DialogDescription>
+              أدخل معلومات البرنامج الدراسي الجديد أدناه
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="program-name" className="text-right">اسم البرنامج</Label>
+              <Input id="program-name" placeholder="بكالوريوس الهندسة المدنية" className="col-span-3" />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="program-name-ar" className="text-right">اسم البرنامج (عربي)</Label>
+              <Input id="program-name-ar" placeholder="بكالوريوس الهندسة المدنية" className="col-span-3" />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="university" className="text-right">الجامعة</Label>
+              <Select>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="اختر الجامعة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Istanbul Technical University</SelectItem>
+                  <SelectItem value="2">Bilkent University</SelectItem>
+                  <SelectItem value="3">Middle East Technical University</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="degree-type" className="text-right">الدرجة العلمية</Label>
+              <Select>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="اختر الدرجة العلمية" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Bachelor">بكالوريوس</SelectItem>
+                  <SelectItem value="Master">ماجستير</SelectItem>
+                  <SelectItem value="PhD">دكتوراه</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="duration" className="text-right">المدة (سنوات)</Label>
+              <Input id="duration" type="number" min="1" max="10" placeholder="4" className="col-span-3" />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tuition" className="text-right">الرسوم الدراسية ($)</Label>
+              <Input id="tuition" type="number" placeholder="5000" className="col-span-3" />
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="language" className="text-right">لغة الدراسة</Label>
+              <Select>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="اختر اللغة" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English">الإنجليزية</SelectItem>
+                  <SelectItem value="Turkish">التركية</SelectItem>
+                  <SelectItem value="Arabic">العربية</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">منحة دراسية</Label>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse col-span-3">
+                <Checkbox id="scholarship" />
+                <label htmlFor="scholarship" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  البرنامج يقدم منحة دراسية
+                </label>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">الوصف</Label>
+              <Textarea id="description" placeholder="وصف البرنامج الدراسي..." className="col-span-3" />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsAddProgramDialogOpen(false)}>
+              إلغاء
+            </Button>
+            <Button type="button" onClick={handleAddProgram}>
+              إضافة البرنامج
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 };
