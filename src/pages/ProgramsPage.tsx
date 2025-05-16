@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -214,6 +215,17 @@ const ProgramsPage = () => {
   // استخراج المعايير المتاحة من البيانات
   const countries = Array.from(new Set(samplePrograms.map(p => p.country)));
   const languages = Array.from(new Set(samplePrograms.map(p => p.language)));
+  
+  // Transform string arrays to objects with value and label properties
+  const countryOptions = countries.map(country => ({
+    value: country,
+    label: country
+  }));
+  
+  const languageOptions = languages.map(language => ({
+    value: language,
+    label: language
+  }));
   
   // محاكاة تحميل البيانات
   useEffect(() => {
@@ -462,8 +474,8 @@ const ProgramsPage = () => {
           >
             <ProgramFilters
               onApplyFilters={handleApplyFilters}
-              countries={countries}
-              languages={languages}
+              countries={countryOptions}
+              languages={languageOptions}
               initialFilters={{
                 search: searchParams.get('search') || '',
                 country: searchParams.getAll('country'),
@@ -514,8 +526,8 @@ const ProgramsPage = () => {
                     <div className="py-4">
                       <ProgramFilters
                         onApplyFilters={handleApplyFilters}
-                        countries={countries}
-                        languages={languages}
+                        countries={countryOptions}
+                        languages={languageOptions}
                         initialFilters={{
                           search: searchParams.get('search') || '',
                           country: searchParams.getAll('country'),
@@ -569,7 +581,7 @@ const ProgramsPage = () => {
                 {filteredPrograms.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
                     <AnimatePresence>
-                      {visiblePrograms.map((program, i) => (
+                      {visiblePrograms.map((program) => (
                         <ProgramCard key={program.id} program={program} />
                       ))}
                     </AnimatePresence>
