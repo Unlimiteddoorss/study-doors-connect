@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -21,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
-import { LoveReact, Trash } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import { availableCountries } from '@/data/programsData';
 
 // New interface for ProgramFiltersValues

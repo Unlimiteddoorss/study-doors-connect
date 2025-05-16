@@ -249,3 +249,5 @@ export function PieChart({
 
 // Export for backward compatibility
 export { PieChart as DonutChart } from "@/components/ui/chart";
+
+</edits_to_apply>

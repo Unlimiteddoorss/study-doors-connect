@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BarChart, LineChart, PieChart, TrendingUp, Users, GraduationCap, School, FileText } from 'lucide-react';
+import { TrendingUp, Users, GraduationCap, School, FileText } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { AdminStatCard } from '@/components/admin/AdminStatCard';
 import { ApplicationsChart } from '@/components/admin/reports/ApplicationsChart';
@@ -10,6 +9,7 @@ import { UniversityStats } from '@/components/admin/reports/UniversityStats';
 import { ReportActions } from '@/components/admin/reports/ReportActions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PieChart, LineChart } from '@/components/ui/chart';
 
 const EnhancedDashboard = () => {
   const [activePeriod, setActivePeriod] = useState<"day" | "week" | "month" | "year">("month");

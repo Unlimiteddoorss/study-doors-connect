@@ -2,9 +2,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getFieldValue } from '@/utils/programsUtils';
-import { ProgramInfo } from '@/data/programsData';
 
-interface ProgramCardProps {
+// Define ProgramInfo interface here
+export interface ProgramInfo {
+  id: number;
+  name: string;
+  name_ar?: string;
+  university: string;
+  university_id: number;
+  university_image?: string;
+  degree_type: string;
+  duration: number;
+  tuition_fee: number;
+  language: string;
+  country: string;
+  city?: string;
+  is_popular?: boolean;
+  has_scholarship?: boolean;
+  description?: string;
+}
+
+export interface ProgramCardProps {
   program: ProgramInfo | any;
 }
 

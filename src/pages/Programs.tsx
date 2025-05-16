@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import SectionTitle from '@/components/shared/SectionTitle';
@@ -164,17 +163,17 @@ const Programs = () => {
     }
 
     results = results.filter(program => {
-      const duration = typeof program.duration === 'number' 
-        ? program.duration 
-        : typeof program.duration === 'string' 
-          ? parseInt(program.duration.toString()) 
+      const duration = typeof program.duration === 'number'
+        ? program.duration
+        : typeof program.duration === 'string'
+          ? parseInt(program.duration)
           : 0;
       return duration >= advancedFilters.duration[0] && duration <= advancedFilters.duration[1];
     });
 
     results = results.filter(program => {
-      const fee = typeof program.tuition_fee === 'number' 
-        ? program.tuition_fee 
+      const fee = typeof program.tuition_fee === 'number'
+        ? program.tuition_fee
         : 0;
       return fee >= advancedFilters.tuitionRange[0] && fee <= advancedFilters.tuitionRange[1];
     });

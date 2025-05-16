@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
-import ProgramCard, { ProgramInfo } from '@/components/programs/ProgramCard';
+import ProgramCard from '@/components/programs/ProgramCard';
 import ProgramFilters, { ProgramFiltersValues } from '@/components/programs/ProgramFilters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,25 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { SlidersHorizontal, Search, BookOpen, Building, Loader2, MapPin as MapPinIcon } from 'lucide-react';
+
+// Define ProgramInfo interface here to avoid import issues
+interface ProgramInfo {
+  id: number;
+  name: string;
+  name_ar?: string;
+  university: string;
+  university_id: number;
+  university_image?: string;
+  degree_type: string;
+  duration: number;
+  tuition_fee: number;
+  language: string;
+  country: string;
+  city?: string;
+  is_popular?: boolean;
+  has_scholarship?: boolean;
+  description?: string;
+}
 
 // بيانات تجريبية للبرامج - يمكن استبدالها بطلب API حقيقي
 const samplePrograms: ProgramInfo[] = [
@@ -550,8 +569,8 @@ const ProgramsPage = () => {
                 {filteredPrograms.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
                     <AnimatePresence>
-                      {visiblePrograms.map((program, index) => (
-                        <ProgramCard key={program.id} program={program} index={index} />
+                      {visiblePrograms.map((program, i) => (
+                        <ProgramCard key={program.id} program={program} />
                       ))}
                     </AnimatePresence>
                   </div>
