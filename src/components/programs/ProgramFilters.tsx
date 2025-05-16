@@ -53,12 +53,18 @@ export interface FilterOptions {
   languages: string[];
 }
 
+// Option interface
+export interface Option {
+  value: string;
+  label: string;
+}
+
 interface ProgramFiltersProps {
   onApplyFilters?: (filters: ProgramFiltersValues) => void;
   filters?: LegacyFilters | FilterOptions;
   setFilters?: React.Dispatch<React.SetStateAction<LegacyFilters>>;
-  countries?: Array<{ value: string; label: string; }>;
-  languages?: string[];
+  countries?: Option[];
+  languages?: Option[] | string[];
   initialFilters?: ProgramFiltersValues;
   className?: string;
   isMobileFilterOpen?: boolean;
@@ -78,6 +84,18 @@ const formatPrice = (value: number): string => {
 // Helper function to format duration
 const formatDuration = (value: number): string => {
   return value === 1 ? `${value} سنة` : `${value} سنوات`;
+};
+
+// Helper function to get value from option or string
+const getValue = (option: Option | string): string => {
+  if (typeof option === 'string') return option;
+  return option.value;
+};
+
+// Helper function to get label from option or string
+const getLabel = (option: Option | string): string => {
+  if (typeof option === 'string') return option;
+  return option.label;
 };
 
 const ProgramFilters: React.FC<ProgramFiltersProps> = ({
@@ -225,27 +243,27 @@ const ProgramFilters: React.FC<ProgramFiltersProps> = ({
           <AccordionContent>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {countries.map((country) => (
-                <div key={country.value} className="flex items-center space-x-2 space-x-reverse">
+                <div key={getValue(country)} className="flex items-center space-x-2 space-x-reverse">
                   <Checkbox
-                    id={`country-${country.value}`}
-                    checked={localFilters.country.includes(country.value)}
+                    id={`country-${getValue(country)}`}
+                    checked={localFilters.country.includes(getValue(country))}
                     onCheckedChange={(checked) => {
                       const newCountries = checked
-                        ? [...localFilters.country, country.value]
-                        : localFilters.country.filter((c) => c !== country.value);
+                        ? [...localFilters.country, getValue(country)]
+                        : localFilters.country.filter((c) => c !== getValue(country));
                       
                       handleFilterChange('country', newCountries);
                       
                       if (toggleCountryFilter) {
-                        toggleCountryFilter(country.value);
+                        toggleCountryFilter(getValue(country));
                       }
                     }}
                   />
                   <Label
-                    htmlFor={`country-${country.value}`}
+                    htmlFor={`country-${getValue(country)}`}
                     className="text-sm cursor-pointer flex-grow"
                   >
-                    {country.label}
+                    {getLabel(country)}
                   </Label>
                 </div>
               ))}
@@ -293,27 +311,27 @@ const ProgramFilters: React.FC<ProgramFiltersProps> = ({
           <AccordionContent>
             <div className="space-y-2">
               {languages.map((language) => (
-                <div key={language} className="flex items-center space-x-2 space-x-reverse">
+                <div key={getValue(language)} className="flex items-center space-x-2 space-x-reverse">
                   <Checkbox
-                    id={`language-${language}`}
-                    checked={localFilters.language.includes(language)}
+                    id={`language-${getValue(language)}`}
+                    checked={localFilters.language.includes(getValue(language))}
                     onCheckedChange={(checked) => {
                       const newLanguages = checked
-                        ? [...localFilters.language, language]
-                        : localFilters.language.filter((l) => l !== language);
+                        ? [...localFilters.language, getValue(language)]
+                        : localFilters.language.filter((l) => l !== getValue(language));
                       
                       handleFilterChange('language', newLanguages);
                       
                       if (toggleLanguageFilter) {
-                        toggleLanguageFilter(language);
+                        toggleLanguageFilter(getValue(language));
                       }
                     }}
                   />
                   <Label
-                    htmlFor={`language-${language}`}
+                    htmlFor={`language-${getValue(language)}`}
                     className="text-sm cursor-pointer flex-grow"
                   >
-                    {language}
+                    {getLabel(language)}
                   </Label>
                 </div>
               ))}

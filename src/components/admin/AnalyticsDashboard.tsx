@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart } from "@/components/ui/chart"; // Changed from DonutChart to PieChart
+import { PieChart, BarChart, LineChart } from "@/components/ui/chart";
 import { 
   Select,
   SelectContent,
@@ -15,7 +14,6 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
-import { BarChart, LineChart } from "@/components/ui/chart";
 
 export interface AnalyticsDashboardProps {
   className?: string;

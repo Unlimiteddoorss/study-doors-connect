@@ -248,5 +248,5 @@ export function PieChart({
   );
 }
 
-// Export for backward compatibility
+// Export DonutChart as an alias for PieChart for backward compatibility
 export { PieChart as DonutChart };
