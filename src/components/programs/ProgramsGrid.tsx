@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,8 @@ interface ProgramsGridProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
-  isLoading: boolean;
-  onResetFilters: () => void;
+  isLoading?: boolean;
+  onResetFilters?: () => void;
   isAdminMode?: boolean;
 }
 
@@ -29,7 +30,7 @@ const ProgramsGrid: React.FC<ProgramsGridProps> = ({
   currentPage, 
   totalPages, 
   onPageChange, 
-  isLoading,
+  isLoading = false,
   onResetFilters,
   isAdminMode = false
 }) => {
@@ -73,7 +74,9 @@ const ProgramsGrid: React.FC<ProgramsGridProps> = ({
           <div className="col-span-full text-center py-10">
             <h3 className="text-xl font-semibold mb-2">لم يتم العثور على برامج</h3>
             <p className="text-unlimited-gray mb-4">لم نتمكن من العثور على أي برامج تطابق معايير البحث الخاصة بك.</p>
-            <Button onClick={onResetFilters} variant="unlimited">إعادة تعيين المرشحات</Button>
+            {onResetFilters && (
+              <Button onClick={onResetFilters} variant="default">إعادة تعيين المرشحات</Button>
+            )}
           </div>
         ) : (
           programs.map((program) => (
@@ -120,11 +123,16 @@ const ProgramsGrid: React.FC<ProgramsGridProps> = ({
                 </div>
                 
                 <div className="flex justify-between items-center mt-4">
-                  <Badge variant={program.has_scholarship ? "success" : "default"} className="text-xs font-normal">
+                  <Badge 
+                    variant={program.has_scholarship ? "default" : "secondary"} 
+                    className={`text-xs font-normal ${
+                      program.has_scholarship ? 'bg-green-500 text-white' : ''
+                    }`}
+                  >
                     {program.has_scholarship ? 'منحة متاحة' : 'لا توجد منحة'}
                   </Badge>
                   
-                  <Button asChild size="sm" variant="unlimited-outline">
+                  <Button asChild size="sm" variant="outline">
                     <Link to={`/programs/${program.id}`}>
                       تفاصيل البرنامج
                     </Link>
@@ -136,11 +144,11 @@ const ProgramsGrid: React.FC<ProgramsGridProps> = ({
         )}
       </div>
       
-      {programs.length > 0 && (
+      {programs.length > 0 && totalPages > 1 && (
         <div className="flex justify-center mt-8">
           <div className="join">
             <Button
-              variant="pagination"
+              variant="outline"
               disabled={currentPage === 1}
               onClick={() => onPageChange(currentPage - 1)}
             >
@@ -150,8 +158,7 @@ const ProgramsGrid: React.FC<ProgramsGridProps> = ({
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
               <Button
                 key={page}
-                variant="pagination"
-                aria-current={currentPage === page}
+                variant={currentPage === page ? "default" : "outline"}
                 onClick={() => onPageChange(page)}
               >
                 {page}
@@ -159,7 +166,7 @@ const ProgramsGrid: React.FC<ProgramsGridProps> = ({
             ))}
             
             <Button
-              variant="pagination"
+              variant="outline"
               disabled={currentPage === totalPages}
               onClick={() => onPageChange(currentPage + 1)}
             >

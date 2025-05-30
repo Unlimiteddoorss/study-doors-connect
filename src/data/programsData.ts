@@ -58,6 +58,72 @@ export const convertToProgramInfo = (program: RawProgramData): ProgramInfo => {
   };
 };
 
+// Export dummy programs data
+export const dummyPrograms: RawProgramData[] = [
+  {
+    id: 1,
+    name: "Computer Science",
+    name_ar: "علوم الحاسوب",
+    university: "Istanbul Technical University",
+    university_id: 1,
+    degree_type: "Bachelor",
+    duration: 4,
+    tuition_fee: 6000,
+    language: "English",
+    country: "Turkey",
+    city: "Istanbul",
+    is_popular: true,
+    has_scholarship: true,
+    description: "A comprehensive computer science program",
+    university_image: "/images/universities/istanbul-technical-university.jpg"
+  },
+  {
+    id: 2,
+    name: "Mechanical Engineering",
+    name_ar: "الهندسة الميكانيكية",
+    university: "Middle East Technical University",
+    university_id: 3,
+    degree_type: "Bachelor",
+    duration: 4,
+    tuition_fee: 5500,
+    language: "English",
+    country: "Turkey",
+    city: "Ankara",
+    is_popular: false,
+    has_scholarship: true,
+    description: "Advanced mechanical engineering program",
+    university_image: "/images/universities/middle-east-technical-university.jpg"
+  },
+  {
+    id: 3,
+    name: "Medicine",
+    name_ar: "الطب",
+    university: "Bilkent University",
+    university_id: 2,
+    degree_type: "Bachelor",
+    duration: 6,
+    tuition_fee: 15000,
+    language: "English",
+    country: "Turkey",
+    city: "Ankara",
+    is_popular: true,
+    has_scholarship: false,
+    description: "Medical program with clinical training",
+    university_image: "/images/universities/bilkent-university.jpg"
+  }
+];
+
+// Export available countries
+export const availableCountries = [
+  { value: "turkey", label: "تركيا" },
+  { value: "usa", label: "الولايات المتحدة" },
+  { value: "uk", label: "المملكة المتحدة" },
+  { value: "germany", label: "ألمانيا" },
+  { value: "france", label: "فرنسا" },
+  { value: "canada", label: "كندا" },
+  { value: "australia", label: "أستراليا" },
+];
+
 // Export this list of Turkish universities
 export const turkishUniversities = [
   {
@@ -76,7 +142,8 @@ export const turkishUniversities = [
     languages: ["English", "Turkish"],
     fees: "5,000$ - 7,000$ سنوياً",
     accreditation: "YÖK, ABET",
-    website: "https://www.itu.edu.tr"
+    website: "https://www.itu.edu.tr",
+    location: "Istanbul, Turkey"
   },
   {
     id: 2,
@@ -94,7 +161,8 @@ export const turkishUniversities = [
     languages: ["English"],
     fees: "10,000$ - 15,000$ سنوياً",
     accreditation: "YÖK",
-    website: "https://www.bilkent.edu.tr"
+    website: "https://www.bilkent.edu.tr",
+    location: "Ankara, Turkey"
   },
   {
     id: 3,
@@ -112,7 +180,8 @@ export const turkishUniversities = [
     languages: ["English"],
     fees: "4,500$ - 6,500$ سنوياً",
     accreditation: "YÖK, ABET, AACSB",
-    website: "https://www.metu.edu.tr"
+    website: "https://www.metu.edu.tr",
+    location: "Ankara, Turkey"
   },
   {
     id: 4,
@@ -130,7 +199,8 @@ export const turkishUniversities = [
     languages: ["English"],
     fees: "15,000$ - 20,000$ سنوياً",
     accreditation: "YÖK, EQUIS",
-    website: "https://www.ku.edu.tr"
+    website: "https://www.ku.edu.tr",
+    location: "Istanbul, Turkey"
   },
   {
     id: 5,
@@ -148,6 +218,7 @@ export const turkishUniversities = [
     languages: ["English", "Turkish"],
     fees: "4,000$ - 6,000$ سنوياً",
     accreditation: "YÖK",
-    website: "https://www.boun.edu.tr"
+    website: "https://www.boun.edu.tr",
+    location: "Istanbul, Turkey"
   }
 ];

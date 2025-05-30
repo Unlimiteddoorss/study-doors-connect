@@ -1,6 +1,9 @@
 
 import { ProgramInfo } from "./programsData";
 
+// Export the UniversityProgram type
+export interface UniversityProgram extends ProgramInfo {}
+
 // Function to get programs for a specific university
 export const getUniversityPrograms = (universityId: number): ProgramInfo[] => {
   // Sample programs data - in a real application this would be fetched from an API
@@ -95,3 +98,19 @@ export const getUniversityPrograms = (universityId: number): ProgramInfo[] => {
   // Filter programs for the specified university
   return allPrograms.filter(program => program.university_id === universityId);
 };
+
+// Export available degrees
+export const availableDegrees = [
+  { value: "bachelor", label: "بكالوريوس" },
+  { value: "master", label: "ماجستير" },
+  { value: "phd", label: "دكتوراه" },
+  { value: "diploma", label: "دبلوم" }
+];
+
+// Export available languages
+export const availableLanguages = [
+  { value: "english", label: "الإنجليزية" },
+  { value: "turkish", label: "التركية" },
+  { value: "arabic", label: "العربية" },
+  { value: "german", label: "الألمانية" }
+];

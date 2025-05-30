@@ -16,16 +16,18 @@ export function AdminToggle() {
       description: isAdminMode 
         ? "تم إلغاء تفعيل أدوات الإدارة" 
         : "تم تفعيل أدوات الإدارة، يمكنك الآن التحكم بجميع أقسام الموقع",
-      variant: isAdminMode ? "default" : "unlimited",
+      variant: isAdminMode ? "default" : "default",
     });
   };
 
   return (
     <Button 
       onClick={handleToggle}
-      variant={isAdminMode ? "unlimited" : "outline"}
+      variant={isAdminMode ? "default" : "outline"}
       size="sm"
-      className="fixed bottom-4 left-4 z-50 rounded-full shadow-lg"
+      className={`fixed bottom-4 left-4 z-50 rounded-full shadow-lg ${
+        isAdminMode ? 'bg-unlimited-blue hover:bg-unlimited-dark-blue text-white' : ''
+      }`}
     >
       {isAdminMode ? (
         <>

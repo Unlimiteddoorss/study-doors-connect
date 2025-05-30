@@ -306,6 +306,8 @@ const Programs = () => {
                   currentPage={1}
                   totalPages={1}
                   onPageChange={() => {}}
+                  isLoading={isLoading}
+                  onResetFilters={resetFilters}
                 />
               )}
             </div>
