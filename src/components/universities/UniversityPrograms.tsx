@@ -38,7 +38,9 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
 
   // استخراج القيم الفريدة للتصفية
   const degrees = Array.from(new Set(programs.map(p => p.degree)));
-  const languages = Array.from(new Set(programs.map(p => p.language)));
+  const languages = Array.from(new Set(programs.map(p => 
+    typeof p.language === 'string' ? p.language : p.language[0]
+  )));
   const campuses = Array.from(new Set(programs.map(p => p.campus)));
 
   // تطبيق التصفية
@@ -47,7 +49,10 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
     if (filters.degree && program.degree !== filters.degree) return false;
     
     // تصفية حسب اللغة
-    if (filters.language && program.language !== filters.language) return false;
+    if (filters.language) {
+      const programLanguage = typeof program.language === 'string' ? program.language : program.language[0];
+      if (programLanguage !== filters.language) return false;
+    }
     
     // تصفية حسب الحرم الجامعي
     if (filters.campus && program.campus !== filters.campus) return false;
@@ -62,7 +67,7 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
     if (filters.searchTerm) {
       const searchLower = filters.searchTerm.toLowerCase();
       const nameMatch = program.name.toLowerCase().includes(searchLower);
-      const nameArMatch = program.nameAr.toLowerCase().includes(searchLower);
+      const nameArMatch = program.name_ar?.toLowerCase().includes(searchLower);
       if (!nameMatch && !nameArMatch) return false;
     }
     
@@ -130,6 +135,11 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
       case 'Diploma': return 'دبلوم';
       default: return degree;
     }
+  };
+
+  // Helper function to get language as string
+  const getLanguageString = (language: string | string[]): string => {
+    return typeof language === 'string' ? language : language[0];
   };
 
   return (
@@ -271,7 +281,7 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
               <CardContent className="p-0">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="md:col-span-2 p-6">
-                    <h3 className="font-bold text-xl mb-2 text-unlimited-blue">{program.nameAr}</h3>
+                    <h3 className="font-bold text-xl mb-2 text-unlimited-blue">{program.name_ar}</h3>
                     <p className="text-unlimited-gray mb-4">{program.name}</p>
                     
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -281,7 +291,7 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
                       </Badge>
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Languages className="h-3 w-3" />
-                        {translateLanguage(program.language)}
+                        {translateLanguage(getLanguageString(program.language))}
                       </Badge>
                       <Badge variant="outline" className="flex items-center gap-1">
                         <MapPin className="h-3 w-3" />
@@ -290,7 +300,7 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
                       {program.duration && (
                         <Badge variant="outline" className="flex items-center gap-1">
                           <CalendarDays className="h-3 w-3" />
-                          {program.duration}
+                          {program.duration} سنوات
                         </Badge>
                       )}
                     </div>
@@ -302,11 +312,11 @@ const UniversityPrograms: React.FC<UniversityProgramsProps> = ({ programs, unive
                         <div className="text-sm text-unlimited-gray">الرسوم الدراسية:</div>
                         <div className="font-semibold">
                           <DollarSign className="w-4 h-4 inline-block text-unlimited-blue" />
-                          {program.tuitionFee.toLocaleString()} USD
+                          {program.tuition_fee.toLocaleString()} USD
                         </div>
                       </div>
                       
-                      {program.discountedFee < program.tuitionFee && (
+                      {program.discountedFee < program.tuition_fee && (
                         <div>
                           <div className="text-sm text-unlimited-gray">بعد الخصم:</div>
                           <div className="font-semibold text-green-600">
