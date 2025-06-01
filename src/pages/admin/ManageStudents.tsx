@@ -1,24 +1,18 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Badge } from '@/components/ui/badge';
-import { useTableFilters } from '@/hooks/admin/useTableFilters';
-import { FilterableTable } from '@/components/admin/FilterableTable';
-import { StudentFilters } from '@/components/admin/students/StudentFilters';
-import { StudentActions } from '@/components/admin/students/StudentActions';
+
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { useToast } from '@/hooks/use-toast';
-import { Download, Edit, Eye, Search, Upload, MoreHorizontal, Plus, Trash, CheckCircle } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger
-} from '@/components/ui/dialog';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Select,
   SelectContent,
@@ -27,513 +21,404 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Search, Users, UserPlus, Eye, Edit, Trash2, Download } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { motion } from 'framer-motion';
 
 interface Student {
   id: string;
-  name: string;
+  full_name: string;
   email: string;
   phone: string;
-  nationality: string;
-  program: string;
-  university: string;
-  status: 'active' | 'inactive' | 'pending' | 'graduated';
-  agentName?: string;
+  country: string;
+  city: string;
+  created_at: string;
+  applications_count: number;
+  status: 'active' | 'inactive' | 'pending';
 }
 
-const dummyStudents: Student[] = [
-  {
-    id: "ST001",
-    name: "أحمد محمد",
-    email: "ahmed@example.com",
-    phone: "+966501234567",
-    nationality: "سعودي",
-    program: "هندسة برمجيات",
-    university: "جامعة الملك سعود",
-    status: "active",
-    agentName: "وكيل التعليم الدولي"
-  },
-  {
-    id: "ST002",
-    name: "سارة عبدالله",
-    email: "sara@example.com",
-    phone: "+966507654321",
-    nationality: "سعودي",
-    program: "طب بشري",
-    university: "جامعة الملك عبدالعزيز",
-    status: "pending"
-  },
-  {
-    id: "ST003",
-    name: "محمد العلي",
-    email: "mohammed@example.com",
-    phone: "+966509876543",
-    nationality: "كويتي",
-    program: "إدارة أعمال",
-    university: "جامعة الكويت",
-    status: "graduated",
-    agentName: "وكيل الخليج التعليمي"
-  }
-];
-
-const nationalities = [
-  'سعودي',
-  'إماراتي',
-  'كويتي',
-  'قطري',
-  'بحريني',
-  'عماني',
-  'مصري',
-  'أردني',
-  'لبناني',
-  'سوري',
-  'عراقي',
-  'يمني',
-  'فلسطيني',
-  'سوداني',
-  'مغربي',
-  'تونسي',
-  'جزائري',
-  'ليبي'
-];
-
-const statusConfig = {
-  active: { label: 'Active', color: 'bg-green-500 text-white' },
-  inactive: { label: 'Inactive', color: 'bg-gray-500 text-white' },
-  pending: { label: 'Pending', color: 'bg-yellow-500 text-white' },
-  graduated: { label: 'Graduated', color: 'bg-blue-500 text-white' },
-};
-
 const ManageStudents = () => {
-  const [students, setStudents] = useState<Student[]>(dummyStudents);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { t } = useTranslation();
-  const [newStudent, setNewStudent] = useState<Partial<Student>>({
-    name: '',
-    email: '',
-    phone: '',
-    nationality: '',
-    program: '',
-    university: '',
-    status: 'pending'
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setIsLoading(true);
+      
+      // جلب بيانات الطلاب مع ملفاتهم الشخصية
+      const { data: studentsData, error } = await supabase
+        .from('user_profiles')
+        .select(`
+          *,
+          user_roles!inner(role)
+        `)
+        .eq('user_roles.role', 'student');
+
+      if (error) throw error;
+
+      // تحويل البيانات إلى التنسيق المطلوب
+      const formattedStudents: Student[] = studentsData?.map(student => ({
+        id: student.user_id,
+        full_name: student.full_name || 'غير محدد',
+        email: student.user_id, // سيتم تحديثه من auth.users إذا أمكن
+        phone: student.phone || 'غير محدد',
+        country: student.country || 'غير محدد',
+        city: student.city || 'غير محدد',
+        created_at: student.created_at,
+        applications_count: 0, // سيتم حسابه لاحقاً
+        status: 'active' as const
+      })) || [];
+
+      setStudents(formattedStudents);
+    } catch (error) {
+      console.error('خطأ في جلب بيانات الطلاب:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في جلب بيانات الطلاب",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         student.phone.includes(searchQuery);
+    
+    const matchesStatus = statusFilter === 'all' || student.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
   });
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-
-  const {
-    searchQuery,
-    setSearchQuery,
-    filters,
-    setFilters,
-    filteredItems: filteredStudents
-  } = useTableFilters(
-    students,
-    ['name', 'email', 'id'],
-    [
-      { field: 'nationality', defaultValue: 'all' },
-      { field: 'status', defaultValue: 'all' }
-    ]
-  );
-
-  const handleImportStudents = () => {
-    // Simulate importing students
-    const importedStudents = [
-      {
-        id: `ST${String(students.length + 1).padStart(3, '0')}`,
-        name: "عبدالرحمن ناصر",
-        email: "abdulrahman@example.com",
-        phone: "+966512345678",
-        nationality: "سعودي",
-        program: "علوم الحاسب",
-        university: "جامعة الإمام",
-        status: "active" as const
-      },
-      {
-        id: `ST${String(students.length + 2).padStart(3, '0')}`,
-        name: "نورة علي",
-        email: "noura@example.com",
-        phone: "+966523456789",
-        nationality: "سعودي",
-        program: "طب أسنان",
-        university: "جامعة الملك سعود",
-        status: "pending" as const
-      }
-    ];
-
-    setStudents([...students, ...importedStudents]);
-    setIsImportDialogOpen(false);
-    toast({
-      title: t('admin.toasts.importSuccess'),
-      description: t('admin.toasts.importSuccessDesc'),
-    });
-  };
-
-  const handleExportStudents = () => {
-    // Here you would implement the actual export logic
-    const csvContent = students.map(student => 
-      Object.values(student).join(',')
-    ).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'students.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
-
-    toast({
-      title: t('admin.toasts.exportSuccess'),
-      description: t('admin.toasts.exportSuccessDesc'),
-    });
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (selectedStudent) {
-      setSelectedStudent({
-        ...selectedStudent,
-        [name]: value
-      });
-    } else {
-      setNewStudent({
-        ...newStudent,
-        [name]: value
-      });
-    }
-  };
-
-  const handleSelectChange = (name: string, value: string) => {
-    if (selectedStudent) {
-      setSelectedStudent({
-        ...selectedStudent,
-        [name]: value
-      });
-    } else {
-      setNewStudent({
-        ...newStudent,
-        [name]: value
-      });
-    }
-  };
-
-  const handleAddStudent = () => {
-    const newStudentWithId = {
-      ...newStudent,
-      id: `ST${String(students.length + 1).padStart(3, '0')}`,
-      status: newStudent.status as 'active' | 'inactive' | 'pending' | 'graduated',
-    } as Student;
-
-    setStudents([...students, newStudentWithId]);
-    setNewStudent({
-      name: '',
-      email: '',
-      phone: '',
-      nationality: '',
-      program: '',
-      university: '',
-      status: 'pending'
-    });
-    setIsAddDialogOpen(false);
-    toast({
-      title: t('admin.toasts.addSuccess'),
-      description: t('admin.toasts.addSuccessDesc'),
-    });
-  };
-
-  const handleEditStudent = () => {
-    if (!selectedStudent) return;
-
-    setStudents(students.map(student => 
-      student.id === selectedStudent.id ? selectedStudent : student
-    ));
-    setSelectedStudent(null);
-    setIsEditDialogOpen(false);
-    toast({
-      title: t('admin.toasts.updateSuccess'),
-      description: t('admin.toasts.updateSuccessDesc'),
-    });
-  };
 
   const handleViewStudent = (student: Student) => {
     setSelectedStudent(student);
     setIsViewDialogOpen(true);
   };
 
-  const handleOpenEditDialog = (student: Student) => {
-    setSelectedStudent(student);
-    setIsEditDialogOpen(true);
+  const handleDeleteStudent = async (studentId: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذا الطالب؟')) return;
+
+    try {
+      // حذف الطالب من قاعدة البيانات
+      const { error } = await supabase
+        .from('user_profiles')
+        .delete()
+        .eq('user_id', studentId);
+
+      if (error) throw error;
+
+      setStudents(students.filter(s => s.id !== studentId));
+      toast({
+        title: "نجح الحذف",
+        description: "تم حذف الطالب بنجاح",
+      });
+    } catch (error) {
+      console.error('خطأ في حذف الطالب:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في حذف الطالب",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleOpenDeleteDialog = (student: Student) => {
-    setSelectedStudent(student);
-    setIsDeleteDialogOpen(true);
-  };
+  const exportStudents = () => {
+    const csvContent = [
+      ['الاسم', 'البريد الإلكتروني', 'الهاتف', 'الدولة', 'المدينة', 'تاريخ التسجيل'].join(','),
+      ...filteredStudents.map(student => [
+        student.full_name,
+        student.email,
+        student.phone,
+        student.country,
+        student.city,
+        new Date(student.created_at).toLocaleDateString('ar-SA')
+      ].join(','))
+    ].join('\n');
 
-  const handleDeleteStudent = () => {
-    if (!selectedStudent) return;
-    
-    setStudents(students.filter((student) => student.id !== selectedStudent.id));
-    setSelectedStudent(null);
-    setIsDeleteDialogOpen(false);
-    toast({
-      title: t('admin.toasts.deleteSuccess'),
-      description: t('admin.toasts.deleteSuccessDesc'),
-    });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `students_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h2 className="text-2xl font-bold text-unlimited-dark-blue">
-            {t('admin.studentsPage.title')}
-          </h2>
+          <div>
+            <h2 className="text-2xl font-bold text-unlimited-dark-blue">إدارة الطلاب</h2>
+            <p className="text-unlimited-gray">إدارة وتتبع جميع الطلاب المسجلين في النظام</p>
+          </div>
           
-          <StudentActions
-            onImport={handleImportStudents}
-            onExport={handleExportStudents}
-            isImportDialogOpen={isImportDialogOpen}
-            setIsImportDialogOpen={setIsImportDialogOpen}
-            setIsAddDialogOpen={setIsAddDialogOpen}
-          />
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={exportStudents} variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              تصدير البيانات
+            </Button>
+            <Button>
+              <UserPlus className="h-4 w-4 mr-2" />
+              إضافة طالب جديد
+            </Button>
+          </div>
         </div>
-        
-        <StudentFilters
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          filters={filters}
-          setFilters={setFilters}
-          nationalities={nationalities}
-        />
 
-        <FilterableTable
-          data={filteredStudents}
-          isLoading={isLoading}
-          onViewDetails={handleViewStudent}
-          onEdit={handleOpenEditDialog}
-          onDelete={handleOpenDeleteDialog}
-          columns={[
-            { header: t('admin.studentsPage.tableHeaders.id'), accessor: 'id' },
-            { header: t('admin.studentsPage.tableHeaders.name'), accessor: 'name' },
-            { header: t('admin.studentsPage.tableHeaders.email'), accessor: 'email', hideOnMobile: true },
-            { header: t('admin.studentsPage.tableHeaders.phone'), accessor: 'phone', hideOnMobile: true },
-            { header: t('admin.studentsPage.tableHeaders.nationality'), accessor: 'nationality', hideOnMobile: true },
-            { header: t('admin.studentsPage.tableHeaders.program'), accessor: 'program', hideOnMobile: true },
-            { header: t('admin.studentsPage.tableHeaders.university'), accessor: 'university', hideOnMobile: true },
-            { 
-              header: t('admin.studentsPage.tableHeaders.status'), 
-              accessor: 'status',
-              render: (status) => (
-                <Badge className={statusConfig[status].color}>
-                  {t(`admin.studentsPage.${status}`)}
-                </Badge>
-              )
-            }
-          ]}
-        />
-      </div>
+        {/* بطاقات الإحصائيات */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-unlimited-gray">إجمالي الطلاب</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <Users className="h-4 w-4 text-unlimited-blue mr-2" />
+                <span className="text-2xl font-bold text-unlimited-dark-blue">{students.length}</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-unlimited-gray">طلاب نشطون</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="h-4 w-4 bg-green-500 rounded-full mr-2"></div>
+                <span className="text-2xl font-bold text-green-600">
+                  {students.filter(s => s.status === 'active').length}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-unlimited-gray">طلاب جدد هذا الشهر</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="h-4 w-4 bg-blue-500 rounded-full mr-2"></div>
+                <span className="text-2xl font-bold text-blue-600">12</span>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-unlimited-gray">متوسط الطلبات لكل طالب</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="h-4 w-4 bg-purple-500 rounded-full mr-2"></div>
+                <span className="text-2xl font-bold text-purple-600">2.3</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* View Student Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{t('admin.studentsPage.viewStudentDetails')}</DialogTitle>
-          </DialogHeader>
-          {selectedStudent && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.id')}</p>
-                  <p className="font-medium">{selectedStudent.id}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.name')}</p>
-                  <p className="font-medium">{selectedStudent.name}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.email')}</p>
-                  <p className="font-medium">{selectedStudent.email}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.phone')}</p>
-                  <p className="font-medium">{selectedStudent.phone}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.nationality')}</p>
-                  <p className="font-medium">{selectedStudent.nationality}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.program')}</p>
-                  <p className="font-medium">{selectedStudent.program}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.university')}</p>
-                  <p className="font-medium">{selectedStudent.university}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.tableHeaders.status')}</p>
-                  <Badge className={statusConfig[selectedStudent.status].color}>
-                    {t(`admin.studentsPage.${selectedStudent.status}`)}
-                  </Badge>
-                </div>
-                {selectedStudent.agentName && (
-                  <div className="col-span-2">
-                    <p className="text-sm text-unlimited-gray">{t('admin.studentsPage.agent')}</p>
-                    <p className="font-medium">{selectedStudent.agentName}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button onClick={() => setIsViewDialogOpen(false)}>
-              {t('admin.actions.close')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {/* أدوات البحث والفلترة */}
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div className="relative w-full md:w-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+            <Input
+              placeholder="ابحث عن طالب..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-full md:w-[300px]"
+            />
+          </div>
+          
+          <div className="flex flex-wrap gap-2 items-center">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="حالة الطالب" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="active">نشط</SelectItem>
+                <SelectItem value="inactive">غير نشط</SelectItem>
+                <SelectItem value="pending">في الانتظار</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
-      {/* Edit Student Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>{t('admin.studentsPage.editStudent')}</DialogTitle>
-          </DialogHeader>
-          {selectedStudent && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.name')}</label>
-                <Input 
-                  name="name" 
-                  value={selectedStudent.name} 
-                  onChange={handleInputChange} 
-                  className="col-span-3" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.email')}</label>
-                <Input 
-                  name="email" 
-                  type="email" 
-                  value={selectedStudent.email} 
-                  onChange={handleInputChange} 
-                  className="col-span-3" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.phone')}</label>
-                <Input 
-                  name="phone" 
-                  value={selectedStudent.phone} 
-                  onChange={handleInputChange} 
-                  className="col-span-3" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.nationality')}</label>
-                <Select 
-                  value={selectedStudent.nationality} 
-                  onValueChange={(value) => handleSelectChange("nationality", value)}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder={t('admin.studentsPage.tableHeaders.nationality')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {nationalities.map((nationality) => (
-                      <SelectItem key={nationality} value={nationality}>{nationality}</SelectItem>
+        {/* جدول الطلاب */}
+        <div className="rounded-md border shadow-sm">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>الاسم الكامل</TableHead>
+                <TableHead>البريد الإلكتروني</TableHead>
+                <TableHead>الهاتف</TableHead>
+                <TableHead>الدولة</TableHead>
+                <TableHead>المدينة</TableHead>
+                <TableHead>عدد الطلبات</TableHead>
+                <TableHead>الحالة</TableHead>
+                <TableHead>تاريخ التسجيل</TableHead>
+                <TableHead>الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, index) => (
+                  <TableRow key={index}>
+                    {Array.from({ length: 9 }).map((_, cellIndex) => (
+                      <TableCell key={cellIndex}>
+                        <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      </TableCell>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.program')}</label>
-                <Input 
-                  name="program" 
-                  value={selectedStudent.program} 
-                  onChange={handleInputChange} 
-                  className="col-span-3" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.tableHeaders.university')}</label>
-                <Input 
-                  name="university" 
-                  value={selectedStudent.university} 
-                  onChange={handleInputChange} 
-                  className="col-span-3" 
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.status')}</label>
-                <Select 
-                  value={selectedStudent.status} 
-                  onValueChange={(value) => handleSelectChange("status", value as 'active' | 'inactive' | 'pending' | 'graduated')}
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder={t('admin.studentsPage.status')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">{t('admin.studentsPage.active')}</SelectItem>
-                    <SelectItem value="inactive">{t('admin.studentsPage.inactive')}</SelectItem>
-                    <SelectItem value="pending">{t('admin.studentsPage.pending')}</SelectItem>
-                    <SelectItem value="graduated">{t('admin.studentsPage.graduated')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <label className="text-right col-span-1">{t('admin.studentsPage.agent')}</label>
-                <Input 
-                  name="agentName" 
-                  value={selectedStudent.agentName || ''} 
-                  onChange={handleInputChange} 
-                  className="col-span-3" 
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button type="submit" onClick={handleEditStudent}>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              {t('admin.studentsPage.save')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                  </TableRow>
+                ))
+              ) : filteredStudents.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center h-40 text-unlimited-gray">
+                    لم يتم العثور على طلاب
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredStudents.map((student, index) => (
+                  <motion.tr
+                    key={student.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="hover:bg-gray-50"
+                  >
+                    <TableCell className="font-medium">{student.full_name}</TableCell>
+                    <TableCell>{student.email}</TableCell>
+                    <TableCell>{student.phone}</TableCell>
+                    <TableCell>{student.country}</TableCell>
+                    <TableCell>{student.city}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{student.applications_count}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={student.status === 'active' ? 'default' : 'secondary'}
+                        className={
+                          student.status === 'active' ? 'bg-green-600' :
+                          student.status === 'inactive' ? 'bg-red-600' :
+                          'bg-yellow-600'
+                        }
+                      >
+                        {student.status === 'active' ? 'نشط' :
+                         student.status === 'inactive' ? 'غير نشط' : 'في الانتظار'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {new Date(student.created_at).toLocaleDateString('ar-SA')}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleViewStudent(student)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-red-600"
+                          onClick={() => handleDeleteStudent(student.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </motion.tr>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('admin.actions.confirmDelete')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('admin.actions.deleteConfirmMessage')} "{selectedStudent?.name}"؟
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('admin.actions.cancel')}</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDeleteStudent}
-              className="bg-unlimited-danger hover:bg-unlimited-danger/90"
-            >
-              {t('admin.actions.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {/* Dialog عرض تفاصيل الطالب */}
+        <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>تفاصيل الطالب</DialogTitle>
+              <DialogDescription>
+                معلومات مفصلة عن الطالب المحدد
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedStudent && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-unlimited-gray mb-1">الاسم الكامل</label>
+                    <p className="font-medium">{selectedStudent.full_name}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-unlimited-gray mb-1">البريد الإلكتروني</label>
+                    <p>{selectedStudent.email}</p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-unlimited-gray mb-1">رقم الهاتف</label>
+                    <p>{selectedStudent.phone}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-unlimited-gray mb-1">الحالة</label>
+                    <Badge variant={selectedStudent.status === 'active' ? 'default' : 'secondary'}>
+                      {selectedStudent.status === 'active' ? 'نشط' :
+                       selectedStudent.status === 'inactive' ? 'غير نشط' : 'في الانتظار'}
+                    </Badge>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-unlimited-gray mb-1">الدولة</label>
+                    <p>{selectedStudent.country}</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-unlimited-gray mb-1">المدينة</label>
+                    <p>{selectedStudent.city}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-unlimited-gray mb-1">تاريخ التسجيل</label>
+                  <p>{new Date(selectedStudent.created_at).toLocaleDateString('ar-SA')}</p>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </DashboardLayout>
   );
 };
