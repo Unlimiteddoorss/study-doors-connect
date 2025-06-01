@@ -11,7 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const [userRole, setUserRole] = useState<string>('student');
+  const [userRole, setUserRole] = useState<'student' | 'admin' | 'agent'>('student');
   const [stats, setStats] = useState({
     totalApplications: 0,
     pendingApplications: 0,
@@ -46,7 +46,7 @@ const Dashboard = () => {
         .eq('user_id', user.id)
         .single();
 
-      if (roleData) {
+      if (roleData && (roleData.role === 'student' || roleData.role === 'admin' || roleData.role === 'agent')) {
         setUserRole(roleData.role);
       }
 
