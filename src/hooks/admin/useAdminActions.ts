@@ -2,47 +2,51 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-interface AdminActionsConfig {
-  onSuccess?: () => void;
-  onError?: (error: any) => void;
+interface ActionOptions {
   successMessage?: string;
   errorMessage?: string;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
 }
 
 export function useAdminActions() {
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
-  const [pendingConfig, setPendingConfig] = useState<AdminActionsConfig | null>(null);
+  const [pendingOptions, setPendingOptions] = useState<ActionOptions | null>(null);
   const { toast } = useToast();
 
   const handleAction = async (
     action: () => Promise<void>,
-    config: AdminActionsConfig = {}
+    options: ActionOptions = {}
   ) => {
-    const {
-      onSuccess,
-      onError,
-      successMessage = 'تمت العملية بنجاح',
-      errorMessage = 'حدث خطأ أثناء تنفيذ العملية'
-    } = config;
-
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       await action();
-      toast({
-        title: 'نجاح',
-        description: successMessage
-      });
-      onSuccess?.();
+      
+      if (options.successMessage) {
+        toast({
+          title: "نجح العمل",
+          description: options.successMessage,
+        });
+      }
+      
+      if (options.onSuccess) {
+        options.onSuccess();
+      }
     } catch (error) {
-      console.error('Admin action error:', error);
+      console.error('Action failed:', error);
+      
+      const errorMessage = options.errorMessage || "حدث خطأ أثناء تنفيذ العملية";
       toast({
-        title: 'خطأ',
+        title: "خطأ",
         description: errorMessage,
-        variant: 'destructive'
+        variant: "destructive",
       });
-      onError?.(error);
+      
+      if (options.onError && error instanceof Error) {
+        options.onError(error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -50,26 +54,26 @@ export function useAdminActions() {
 
   const confirmAction = (
     action: () => Promise<void>,
-    config: AdminActionsConfig = {}
+    options: ActionOptions = {}
   ) => {
     setPendingAction(() => action);
-    setPendingConfig(config);
+    setPendingOptions(options);
     setIsConfirmDialogOpen(true);
   };
 
   const executePendingAction = async () => {
-    if (pendingAction && pendingConfig) {
-      await handleAction(pendingAction, pendingConfig);
+    if (pendingAction && pendingOptions) {
+      setIsConfirmDialogOpen(false);
+      await handleAction(pendingAction, pendingOptions);
+      setPendingAction(null);
+      setPendingOptions(null);
     }
-    setIsConfirmDialogOpen(false);
-    setPendingAction(null);
-    setPendingConfig(null);
   };
 
   const cancelConfirmAction = () => {
     setIsConfirmDialogOpen(false);
     setPendingAction(null);
-    setPendingConfig(null);
+    setPendingOptions(null);
   };
 
   return {
@@ -78,6 +82,6 @@ export function useAdminActions() {
     confirmAction,
     isConfirmDialogOpen,
     executePendingAction,
-    cancelConfirmAction
+    cancelConfirmAction,
   };
 }

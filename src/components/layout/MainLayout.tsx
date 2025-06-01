@@ -1,22 +1,23 @@
 
 import React, { ReactNode } from 'react';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
-import { AdminProvider } from '@/contexts/AdminContext';
+import Header from './Header';
+import Footer from './Footer';
 import { AdminToggle } from '@/components/admin/AdminToggle';
+import { AdminProvider } from '@/contexts/AdminContext';
 
 interface MainLayoutProps {
   children: ReactNode;
-  hideFooter?: boolean;
 }
 
-const MainLayout = ({ children, hideFooter = false }: MainLayoutProps) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <AdminProvider>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-grow">{children}</main>
-        {!hideFooter && <Footer />}
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header />
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
         <AdminToggle />
       </div>
     </AdminProvider>

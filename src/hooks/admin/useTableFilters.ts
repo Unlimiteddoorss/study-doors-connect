@@ -1,31 +1,59 @@
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
-export function useTableFilters<T>(
+interface FilterConfig {
+  field: string;
+  defaultValue: string;
+}
+
+interface Filters {
+  [key: string]: string;
+}
+
+export function useTableFilters<T extends Record<string, any>>(
   items: T[],
   searchFields: (keyof T)[],
-  filterFields: { field: keyof T; defaultValue: string }[]
+  filterConfigs: FilterConfig[]
 ) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState<Record<string, string>>(
-    filterFields.reduce((acc, { field, defaultValue }) => {
-      acc[field as string] = defaultValue;
-      return acc;
-    }, {} as Record<string, string>)
-  );
+  
+  // Initialize filters with default values
+  const initialFilters = filterConfigs.reduce((acc, config) => {
+    acc[config.field] = config.defaultValue;
+    return acc;
+  }, {} as Filters);
+  
+  const [filters, setFilters] = useState<Filters>(initialFilters);
 
-  const filteredItems = items.filter((item) => {
-    const matchesSearch = searchQuery === '' || searchFields.some((field) => {
-      const value = item[field];
-      return value && String(value).toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredItems = useMemo(() => {
+    let result = [...items];
+
+    // Apply search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter((item) =>
+        searchFields.some((field) => {
+          const value = item[field];
+          if (typeof value === 'string') {
+            return value.toLowerCase().includes(query);
+          }
+          return false;
+        })
+      );
+    }
+
+    // Apply filters
+    Object.entries(filters).forEach(([field, value]) => {
+      if (value && value !== 'all') {
+        result = result.filter((item) => {
+          const itemValue = item[field];
+          return itemValue === value;
+        });
+      }
     });
 
-    const matchesFilters = Object.entries(filters).every(([field, filterValue]) => {
-      return filterValue === 'all' || String(item[field as keyof T]) === filterValue;
-    });
-
-    return matchesSearch && matchesFilters;
-  });
+    return result;
+  }, [items, searchQuery, filters, searchFields]);
 
   return {
     searchQuery,
