@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -429,7 +428,11 @@ const StudentMessages = () => {
           </TabsContent>
 
           <TabsContent value="messages" className="space-y-4">
-            <MessagesContainer />
+            <MessagesContainer 
+              programName="برنامج الهندسة"
+              universityName="جامعة إسطنبول"
+              applicationId="default-app-id"
+            />
           </TabsContent>
 
           <TabsContent value="updates" className="space-y-4">
@@ -437,7 +440,7 @@ const StudentMessages = () => {
           </TabsContent>
 
           <TabsContent value="ai-assistant" className="space-y-4">
-            <MessagesAI />
+            <MessagesAI applicationId="ai-assistant" />
           </TabsContent>
         </Tabs>
       </div>
