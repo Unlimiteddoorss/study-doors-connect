@@ -2,125 +2,157 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle 
+} from '@/components/ui/dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
 import { 
   Users, 
   Search, 
   Filter, 
-  Download, 
-  Plus, 
-  MoreVertical,
+  MoreHorizontal, 
+  Edit, 
+  Trash2, 
+  Eye,
+  Download,
+  UserPlus,
   Mail,
   Phone,
   MapPin,
   Calendar,
-  FileText,
-  Eye,
-  Edit,
-  Trash2,
-  UserCheck,
-  UserX,
-  MessageSquare
+  GraduationCap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { motion } from 'framer-motion';
 
 const EnhancedStudentsManagement = () => {
   const [students, setStudents] = useState([]);
+  const [agents, setAgents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedCountry, setSelectedCountry] = useState('all');
   const [selectedAgent, setSelectedAgent] = useState('all');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [showDetails, setShowDetails] = useState(false);
-  const [agents, setAgents] = useState([]);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeStudents: 0,
+    newThisMonth: 0,
+    withApplications: 0
+  });
+
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchStudents();
-    fetchAgents();
+    fetchData();
   }, []);
 
   useEffect(() => {
     filterStudents();
-  }, [students, searchTerm, selectedStatus, selectedAgent]);
+  }, [students, searchTerm, selectedCountry, selectedAgent]);
 
-  const fetchStudents = async () => {
+  const fetchData = async () => {
     try {
       setIsLoading(true);
       
-      // جلب بيانات الطلاب مع ملفاتهم الشخصية وأدوارهم
-      const { data: studentsData, error } = await supabase
+      // جلب الطلاب مع معلوماتهم الشخصية
+      const { data: studentsData, error: studentsError } = await supabase
         .from('user_roles')
         .select(`
-          *,
-          user_profiles (*)
+          user_id,
+          created_at,
+          user_profiles!inner (
+            full_name,
+            country,
+            city,
+            phone,
+            avatar_url
+          )
         `)
         .eq('role', 'student');
 
-      if (error) throw error;
+      if (studentsError) throw studentsError;
 
-      // جلب إحصائيات الطلبات لكل طالب
-      const studentsWithStats = await Promise.all(
-        studentsData.map(async (student) => {
-          const { count: totalApplications } = await supabase
-            .from('applications')
-            .select('*', { count: 'exact' })
-            .eq('student_id', student.user_id);
+      // جلب الوكلاء
+      const { data: agentsData, error: agentsError } = await supabase
+        .from('user_roles')
+        .select(`
+          user_id,
+          user_profiles!inner (
+            full_name
+          )
+        `)
+        .eq('role', 'agent');
 
-          const { count: pendingApplications } = await supabase
-            .from('applications')
-            .select('*', { count: 'exact' })
-            .eq('student_id', student.user_id)
-            .eq('status', 'pending');
+      if (agentsError) throw agentsError;
 
-          const { count: acceptedApplications } = await supabase
-            .from('applications')
-            .select('*', { count: 'exact' })
-            .eq('student_id', student.user_id)
-            .eq('status', 'accepted');
+      // جلب الطلبات لكل طالب
+      const { data: applicationsData, error: applicationsError } = await supabase
+        .from('applications')
+        .select('student_id, status');
 
-          // جلب معلومات الوكيل المسؤول
-          const { data: agentData } = await supabase
-            .from('agent_students')
-            .select(`
-              agent_id,
-              assigned_at,
-              is_active,
-              user_profiles!agent_students_agent_id_fkey (full_name)
-            `)
-            .eq('student_id', student.user_id)
-            .eq('is_active', true)
-            .single();
+      if (applicationsError) throw applicationsError;
 
-          return {
-            ...student,
-            totalApplications: totalApplications || 0,
-            pendingApplications: pendingApplications || 0,
-            acceptedApplications: acceptedApplications || 0,
-            agent: agentData?.user_profiles?.full_name || 'غير محدد',
-            agentId: agentData?.agent_id || null,
-            lastActivity: new Date().toISOString(),
-            status: totalApplications > 0 ? 'active' : 'inactive'
-          };
-        })
-      );
+      // ربط البيانات
+      const studentsWithApplications = studentsData.map(student => {
+        const studentApplications = applicationsData.filter(app => app.student_id === student.user_id);
+        return {
+          ...student,
+          applications_count: studentApplications.length,
+          latest_application_status: studentApplications[0]?.status || null
+        };
+      });
 
-      setStudents(studentsWithStats);
+      setStudents(studentsWithApplications || []);
+      setAgents(agentsData || []);
+
+      // حساب الإحصائيات
+      const totalStudents = studentsWithApplications.length;
+      const thisMonth = new Date();
+      thisMonth.setMonth(thisMonth.getMonth() - 1);
+      
+      const newThisMonth = studentsWithApplications.filter(
+        student => new Date(student.created_at) > thisMonth
+      ).length;
+      
+      const withApplications = studentsWithApplications.filter(
+        student => student.applications_count > 0
+      ).length;
+
+      setStats({
+        totalStudents,
+        activeStudents: totalStudents, // يمكن تعديل هذا حسب معايير النشاط
+        newThisMonth,
+        withApplications
+      });
+
     } catch (error) {
-      console.error('خطأ في جلب بيانات الطلاب:', error);
+      console.error('خطأ في جلب البيانات:', error);
       toast({
         title: "خطأ",
-        description: "حدث خطأ في جلب بيانات الطلاب",
+        description: "حدث خطأ في جلب البيانات",
         variant: "destructive",
       });
     } finally {
@@ -128,225 +160,167 @@ const EnhancedStudentsManagement = () => {
     }
   };
 
-  const fetchAgents = async () => {
-    try {
-      const { data: agentsData, error } = await supabase
-        .from('user_roles')
-        .select(`
-          *,
-          user_profiles (full_name)
-        `)
-        .eq('role', 'agent');
-
-      if (error) throw error;
-      setAgents(agentsData);
-    } catch (error) {
-      console.error('خطأ في جلب بيانات الوكلاء:', error);
-    }
-  };
-
   const filterStudents = () => {
-    let filtered = [...students];
+    let filtered = students;
 
-    // فلترة البحث
+    // فلترة حسب البحث
     if (searchTerm) {
       filtered = filtered.filter(student =>
         student.user_profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.user_profiles?.phone?.includes(searchTerm) ||
-        student.user_profiles?.country?.toLowerCase().includes(searchTerm.toLowerCase())
+        student.user_profiles?.country?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.user_profiles?.city?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    // فلترة الحالة
-    if (selectedStatus !== 'all') {
-      filtered = filtered.filter(student => student.status === selectedStatus);
-    }
-
-    // فلترة الوكيل
-    if (selectedAgent !== 'all') {
-      filtered = filtered.filter(student => student.agentId === selectedAgent);
+    // فلترة حسب البلد
+    if (selectedCountry !== 'all') {
+      filtered = filtered.filter(student => 
+        student.user_profiles?.country === selectedCountry
+      );
     }
 
     setFilteredStudents(filtered);
   };
 
-  const assignAgent = async (studentId, agentId) => {
-    try {
-      // إلغاء تعيين الوكيل السابق
-      await supabase
-        .from('agent_students')
-        .update({ is_active: false })
-        .eq('student_id', studentId);
-
-      // تعيين الوكيل الجديد
-      const { error } = await supabase
-        .from('agent_students')
-        .insert({
-          agent_id: agentId,
-          student_id: studentId,
-          is_active: true
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "تم التعيين",
-        description: "تم تعيين الوكيل بنجاح",
-      });
-
-      fetchStudents();
-    } catch (error) {
-      console.error('خطأ في تعيين الوكيل:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ في تعيين الوكيل",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      active: { label: 'نشط', className: 'bg-green-100 text-green-800' },
-      inactive: { label: 'غير نشط', className: 'bg-gray-100 text-gray-800' },
-      suspended: { label: 'موقوف', className: 'bg-red-100 text-red-800' }
-    };
-    
-    const config = statusConfig[status] || statusConfig.inactive;
-    return <Badge className={config.className}>{config.label}</Badge>;
-  };
-
-  const StudentCard = ({ student }) => (
+  const StatCard = ({ title, value, icon, color }: any) => (
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300 }}
     >
-      <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src={student.user_profiles?.avatar_url} />
-                <AvatarFallback>
-                  {student.user_profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'طالب'}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="font-medium text-unlimited-dark-blue">
-                  {student.user_profiles?.full_name || 'غير محدد'}
-                </h3>
-                <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm text-unlimited-gray">
-                  <Mail className="h-3 w-3" />
-                  <span>{student.user_id}</span>
-                </div>
-                <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm text-unlimited-gray">
-                  <MapPin className="h-3 w-3" />
-                  <span>{student.user_profiles?.country || 'غير محدد'}</span>
-                </div>
-              </div>
-            </div>
-            {getStatusBadge(student.status)}
-          </div>
-
-          <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-lg font-bold text-unlimited-blue">{student.totalApplications}</div>
-              <div className="text-xs text-unlimited-gray">إجمالي الطلبات</div>
-            </div>
-            <div>
-              <div className="text-lg font-bold text-yellow-600">{student.pendingApplications}</div>
-              <div className="text-xs text-unlimited-gray">قيد الانتظار</div>
-            </div>
-            <div>
-              <div className="text-lg font-bold text-green-600">{student.acceptedApplications}</div>
-              <div className="text-xs text-unlimited-gray">مقبولة</div>
-            </div>
-          </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <div className="text-sm text-unlimited-gray">
-              الوكيل: <span className="font-medium">{student.agent}</span>
-            </div>
-            <div className="flex space-x-2 rtl:space-x-reverse">
-              <Button size="sm" variant="outline" onClick={() => {
-                setSelectedStudent(student);
-                setShowDetails(true);
-              }}>
-                <Eye className="h-3 w-3" />
-              </Button>
-              <Button size="sm" variant="outline">
-                <MessageSquare className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          <div className={`text-${color}`}>{icon}</div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{value.toLocaleString('ar-EG')}</div>
         </CardContent>
       </Card>
     </motion.div>
   );
 
+  const handleViewStudent = (student) => {
+    setSelectedStudent(student);
+    setIsDetailDialogOpen(true);
+  };
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      pending: { label: 'قيد المراجعة', variant: 'secondary' },
+      accepted: { label: 'مقبول', variant: 'default' },
+      rejected: { label: 'مرفوض', variant: 'destructive' }
+    };
+    
+    const config = statusConfig[status] || { label: 'غير محدد', variant: 'outline' };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout userRole="admin">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">جاري التحميل...</div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+        <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-unlimited-dark-blue">إدارة الطلاب المتقدمة</h1>
-            <p className="text-unlimited-gray">إدارة شاملة لجميع الطلاب والوكلاء</p>
+            <p className="text-unlimited-gray">إدارة شاملة للطلاب مع تتبع الطلبات والوكلاء</p>
           </div>
           
-          <div className="flex gap-2 flex-wrap">
-            <Button variant="outline" size="sm">
+          <div className="flex gap-2">
+            <Button variant="outline">
               <Download className="h-4 w-4 mr-2" />
               تصدير البيانات
             </Button>
             <Button>
-              <Plus className="h-4 w-4 mr-2" />
+              <UserPlus className="h-4 w-4 mr-2" />
               إضافة طالب
             </Button>
           </div>
         </div>
 
-        {/* فلاتر البحث */}
+        {/* الإحصائيات */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <StatCard
+            title="إجمالي الطلاب"
+            value={stats.totalStudents}
+            icon={<Users className="h-4 w-4" />}
+            color="unlimited-blue"
+          />
+          <StatCard
+            title="الطلاب النشطون"
+            value={stats.activeStudents}
+            icon={<Users className="h-4 w-4" />}
+            color="green-600"
+          />
+          <StatCard
+            title="طلاب جدد هذا الشهر"
+            value={stats.newThisMonth}
+            icon={<UserPlus className="h-4 w-4" />}
+            color="purple-600"
+          />
+          <StatCard
+            title="لديهم طلبات"
+            value={stats.withApplications}
+            icon={<GraduationCap className="h-4 w-4" />}
+            color="yellow-600"
+          />
+        </div>
+
+        {/* أدوات البحث والفلترة */}
         <Card>
-          <CardContent className="p-6">
+          <CardHeader>
+            <CardTitle>البحث والفلترة</CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-unlimited-gray" />
                 <Input
-                  placeholder="البحث بالاسم، الهاتف، أو البلد..."
+                  placeholder="البحث في الطلاب..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pr-10"
+                  className="pl-9"
                 />
               </div>
               
-              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <Select value={selectedCountry} onValueChange={setSelectedCountry}>
                 <SelectTrigger>
-                  <SelectValue placeholder="حالة الطالب" />
+                  <SelectValue placeholder="اختر البلد" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الحالات</SelectItem>
-                  <SelectItem value="active">نشط</SelectItem>
-                  <SelectItem value="inactive">غير نشط</SelectItem>
-                  <SelectItem value="suspended">موقوف</SelectItem>
+                  <SelectItem value="all">جميع البلدان</SelectItem>
+                  <SelectItem value="saudi_arabia">السعودية</SelectItem>
+                  <SelectItem value="egypt">مصر</SelectItem>
+                  <SelectItem value="jordan">الأردن</SelectItem>
+                  <SelectItem value="lebanon">لبنان</SelectItem>
+                  <SelectItem value="syria">سوريا</SelectItem>
                 </SelectContent>
               </Select>
 
               <Select value={selectedAgent} onValueChange={setSelectedAgent}>
                 <SelectTrigger>
-                  <SelectValue placeholder="الوكيل المسؤول" />
+                  <SelectValue placeholder="اختر الوكيل" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">جميع الوكلاء</SelectItem>
                   {agents.map((agent) => (
                     <SelectItem key={agent.user_id} value={agent.user_id}>
-                      {agent.user_profiles?.full_name || 'وكيل غير محدد'}
+                      {agent.user_profiles?.full_name || 'غير محدد'}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
-              <Button variant="outline" className="w-full">
+              <Button variant="outline">
                 <Filter className="h-4 w-4 mr-2" />
                 مزيد من الفلاتر
               </Button>
@@ -354,218 +328,117 @@ const EnhancedStudentsManagement = () => {
           </CardContent>
         </Card>
 
-        {/* إحصائيات سريعة */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="p-6 text-center">
-              <Users className="h-8 w-8 text-unlimited-blue mx-auto mb-2" />
-              <div className="text-2xl font-bold text-unlimited-dark-blue">{students.length}</div>
-              <div className="text-sm text-unlimited-gray">إجمالي الطلاب</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6 text-center">
-              <UserCheck className="h-8 w-8 text-green-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-green-600">
-                {students.filter(s => s.status === 'active').length}
-              </div>
-              <div className="text-sm text-unlimited-gray">طلاب نشطون</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6 text-center">
-              <UserX className="h-8 w-8 text-gray-600 mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-600">
-                {students.filter(s => s.status === 'inactive').length}
-              </div>
-              <div className="text-sm text-unlimited-gray">طلاب غير نشطين</div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-6 text-center">
-              <FileText className="h-8 w-8 text-unlimited-blue mx-auto mb-2" />
-              <div className="text-2xl font-bold text-unlimited-blue">
-                {students.reduce((sum, s) => sum + s.totalApplications, 0)}
-              </div>
-              <div className="text-sm text-unlimited-gray">إجمالي الطلبات</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* عرض البيانات */}
-        <Tabs defaultValue="cards" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="cards">عرض البطاقات</TabsTrigger>
-            <TabsTrigger value="table">عرض الجدول</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="cards">
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-6">
-                      <div className="h-20 bg-gray-200 rounded"></div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* جدول الطلاب */}
+        <Card>
+          <CardHeader>
+            <CardTitle>قائمة الطلاب ({filteredStudents.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>الاسم الكامل</TableHead>
+                  <TableHead>البلد والمدينة</TableHead>
+                  <TableHead>عدد الطلبات</TableHead>
+                  <TableHead>آخر طلب</TableHead>
+                  <TableHead>تاريخ التسجيل</TableHead>
+                  <TableHead>الإجراءات</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {filteredStudents.map((student) => (
-                  <StudentCard key={student.user_id} student={student} />
+                  <TableRow key={student.user_id}>
+                    <TableCell>
+                      <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                        <div className="w-8 h-8 bg-unlimited-blue rounded-full flex items-center justify-center text-white text-sm">
+                          {student.user_profiles?.full_name?.charAt(0) || 'ط'}
+                        </div>
+                        <div>
+                          <div className="font-medium">{student.user_profiles?.full_name || 'غير محدد'}</div>
+                          <div className="text-sm text-unlimited-gray flex items-center">
+                            <Phone className="h-3 w-3 mr-1" />
+                            {student.user_profiles?.phone || 'غير محدد'}
+                          </div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1 text-unlimited-gray" />
+                        <div>
+                          <div>{student.user_profiles?.country || 'غير محدد'}</div>
+                          <div className="text-sm text-unlimited-gray">{student.user_profiles?.city || 'غير محدد'}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {student.applications_count} طلب
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {student.latest_application_status ? 
+                        getStatusBadge(student.latest_application_status) : 
+                        <span className="text-unlimited-gray">لا يوجد</span>
+                      }
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Calendar className="h-4 w-4 mr-1 text-unlimited-gray" />
+                        {new Date(student.created_at).toLocaleDateString('ar-EG')}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewStudent(student)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Mail className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </div>
-            )}
-          </TabsContent>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-          <TabsContent value="table">
-            <Card>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>الطالب</TableHead>
-                      <TableHead>البلد</TableHead>
-                      <TableHead>الوكيل المسؤول</TableHead>
-                      <TableHead>الطلبات</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead>الإجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredStudents.map((student) => (
-                      <TableRow key={student.user_id}>
-                        <TableCell>
-                          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                            <Avatar className="h-8 w-8">
-                              <AvatarFallback>
-                                {student.user_profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'ط'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="font-medium">{student.user_profiles?.full_name || 'غير محدد'}</div>
-                              <div className="text-sm text-unlimited-gray">{student.user_profiles?.phone}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>{student.user_profiles?.country || 'غير محدد'}</TableCell>
-                        <TableCell>{student.agent}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{student.totalApplications}</Badge>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(student.status)}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2 rtl:space-x-reverse">
-                            <Button size="sm" variant="ghost">
-                              <Eye className="h-3 w-3" />
-                            </Button>
-                            <Button size="sm" variant="ghost">
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                            <Button size="sm" variant="ghost">
-                              <MessageSquare className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* تفاصيل الطالب */}
-        <Dialog open={showDetails} onOpenChange={setShowDetails}>
-          <DialogContent className="max-w-4xl">
+        {/* Dialog تفاصيل الطالب */}
+        <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+          <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>تفاصيل الطالب</DialogTitle>
             </DialogHeader>
             {selectedStudent && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>المعلومات الشخصية</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div>
-                        <label className="text-sm font-medium">الاسم الكامل</label>
-                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.full_name || 'غير محدد'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">رقم الهاتف</label>
-                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.phone || 'غير محدد'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">البلد</label>
-                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.country || 'غير محدد'}</p>
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium">المدينة</label>
-                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.city || 'غير محدد'}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>إحصائيات الطلبات</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                          <div className="text-2xl font-bold text-unlimited-blue">{selectedStudent.totalApplications}</div>
-                          <div className="text-sm text-unlimited-gray">إجمالي الطلبات</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-yellow-600">{selectedStudent.pendingApplications}</div>
-                          <div className="text-sm text-unlimited-gray">قيد الانتظار</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-green-600">{selectedStudent.acceptedApplications}</div>
-                          <div className="text-sm text-unlimited-gray">مقبولة</div>
-                        </div>
-                        <div>
-                          <div className="text-2xl font-bold text-red-600">
-                            {selectedStudent.totalApplications - selectedStudent.pendingApplications - selectedStudent.acceptedApplications}
-                          </div>
-                          <div className="text-sm text-unlimited-gray">مرفوضة</div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>تعيين الوكيل</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                      <Select 
-                        value={selectedStudent.agentId || ''} 
-                        onValueChange={(agentId) => assignAgent(selectedStudent.user_id, agentId)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="اختيار الوكيل" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {agents.map((agent) => (
-                            <SelectItem key={agent.user_id} value={agent.user_id}>
-                              {agent.user_profiles?.full_name || 'وكيل غير محدد'}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium mb-2">المعلومات الشخصية</h3>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>الاسم:</strong> {selectedStudent.user_profiles?.full_name || 'غير محدد'}</div>
+                      <div><strong>الهاتف:</strong> {selectedStudent.user_profiles?.phone || 'غير محدد'}</div>
+                      <div><strong>البلد:</strong> {selectedStudent.user_profiles?.country || 'غير محدد'}</div>
+                      <div><strong>المدينة:</strong> {selectedStudent.user_profiles?.city || 'غير محدد'}</div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                  <div>
+                    <h3 className="font-medium mb-2">إحصائيات الطلبات</h3>
+                    <div className="space-y-2 text-sm">
+                      <div><strong>عدد الطلبات:</strong> {selectedStudent.applications_count}</div>
+                      <div><strong>آخر طلب:</strong> {selectedStudent.latest_application_status ? getStatusBadge(selectedStudent.latest_application_status) : 'لا يوجد'}</div>
+                      <div><strong>تاريخ التسجيل:</strong> {new Date(selectedStudent.created_at).toLocaleDateString('ar-EG')}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </DialogContent>

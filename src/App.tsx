@@ -90,7 +90,7 @@ import './App.css';
 function App() {
   return (
     <HelmetProvider>
-      <ThemeProvider defaultTheme="system" storageKey="unlimited-theme">
+      <ThemeProvider defaultTheme="system">
         <ErrorBoundary>
           <Router>
             <div className="min-h-screen bg-background">

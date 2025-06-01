@@ -39,67 +39,67 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
       { label: t('dashboard.student.title'), href: '/dashboard' },
       { label: t('application.myApplications.title'), href: '/dashboard/applications' },
     ];
-  } else if (pathname === '/admin') {
-    title = t('admin.breadcrumbs.adminDashboard');
+  } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
+    title = 'لوحة التحكم الإدارية';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' }, 
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' }
+      { label: 'الرئيسية', href: '/' }, 
+      { label: 'لوحة التحكم', href: '/admin' }
     ];
-  } else if (pathname === '/admin/students') {
-    title = t('admin.students');
+  } else if (pathname === '/admin/students' || pathname === '/admin/students-enhanced') {
+    title = 'إدارة الطلاب';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.students'), href: '/admin/students' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'إدارة الطلاب', href: '/admin/students' },
     ];
   } else if (pathname === '/admin/applications') {
-    title = t('admin.applications');
+    title = 'إدارة الطلبات';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.applications'), href: '/admin/applications' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'إدارة الطلبات', href: '/admin/applications' },
     ];
-  } else if (pathname === '/admin/programs') {
-    title = t('admin.programs');
+  } else if (pathname === '/admin/programs' || pathname === '/admin/programs-enhanced') {
+    title = 'إدارة البرامج';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.programs'), href: '/admin/programs' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'إدارة البرامج', href: '/admin/programs' },
     ];
-  } else if (pathname === '/admin/agents') {
-    title = t('admin.agents');
+  } else if (pathname === '/admin/agents' || pathname === '/admin/agents-enhanced') {
+    title = 'إدارة الوكلاء';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.agents'), href: '/admin/agents' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'إدارة الوكلاء', href: '/admin/agents' },
     ];
   } else if (pathname === '/admin/universities') {
-    title = t('admin.universities');
+    title = 'إدارة الجامعات';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.universities'), href: '/admin/universities' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'إدارة الجامعات', href: '/admin/universities' },
     ];
   } else if (pathname === '/admin/reports') {
-    title = t('admin.reports.title');
+    title = 'التقارير والإحصائيات';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.reports.title'), href: '/admin/reports' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'التقارير', href: '/admin/reports' },
     ];
   } else if (pathname === '/admin/notifications') {
-    title = t('admin.notifications');
+    title = 'إدارة الإشعارات';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.notifications'), href: '/admin/notifications' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'الإشعارات', href: '/admin/notifications' },
     ];
   } else if (pathname === '/admin/messages') {
-    title = t('admin.messages');
+    title = 'إدارة الرسائل';
     breadcrumbs = [
-      { label: t('admin.breadcrumbs.home'), href: '/' },
-      { label: t('admin.breadcrumbs.adminDashboard'), href: '/admin' },
-      { label: t('admin.breadcrumbs.messages'), href: '/admin/messages' },
+      { label: 'الرئيسية', href: '/' },
+      { label: 'لوحة التحكم', href: '/admin' },
+      { label: 'الرسائل', href: '/admin/messages' },
     ];
   }
   
