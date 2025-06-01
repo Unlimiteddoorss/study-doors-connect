@@ -1,182 +1,486 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Users, GraduationCap, School, FileText } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { AdminStatCard } from '@/components/admin/AdminStatCard';
-import { ApplicationsChart } from '@/components/admin/reports/ApplicationsChart';
-import { StudentsByCountry } from '@/components/admin/reports/StudentsByCountry';
-import { UniversityStats } from '@/components/admin/reports/UniversityStats';
-import { ReportActions } from '@/components/admin/reports/ReportActions';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PieChart, LineChart } from '@/components/ui/chart';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Users, 
+  GraduationCap, 
+  School, 
+  FileText, 
+  TrendingUp, 
+  Clock, 
+  CheckCircle, 
+  XCircle,
+  DollarSign,
+  Calendar,
+  Globe,
+  Activity,
+  Bell,
+  Download,
+  Filter,
+  Search,
+  MoreVertical
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const EnhancedDashboard = () => {
-  const [activePeriod, setActivePeriod] = useState<"day" | "week" | "month" | "year">("month");
-  const [activeTab, setActiveTab] = useState("overview");
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalApplications: 0,
+    totalUniversities: 0,
+    totalPrograms: 0,
+    totalAgents: 0,
+    pendingApplications: 0,
+    approvedApplications: 0,
+    rejectedApplications: 0,
+    monthlyRevenue: 0,
+    totalRevenue: 0,
+    newStudentsThisMonth: 0,
+    conversionRate: 0
+  });
 
-  // Interactive chart data
-  const studentByMajorData = [
-    { name: 'Engineering', value: 42 },
-    { name: 'Medicine', value: 28 },
-    { name: 'Business', value: 15 },
-    { name: 'Science', value: 10 },
-    { name: 'Arts', value: 5 }
-  ];
-  
-  const applicationTrendData = [
-    { month: 'Jan', applications: 45, approved: 25, rejected: 10 },
-    { month: 'Feb', applications: 52, approved: 30, rejected: 8 },
-    { month: 'Mar', applications: 61, approved: 35, rejected: 12 },
-    { month: 'Apr', applications: 67, approved: 40, rejected: 15 },
-    { month: 'May', applications: 70, approved: 45, rejected: 10 },
-    { month: 'Jun', applications: 78, approved: 50, rejected: 12 }
-  ];
+  const [chartData, setChartData] = useState({
+    applicationsChart: [],
+    revenueChart: [],
+    studentsChart: [],
+    universitiesChart: []
+  });
+
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState('week');
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [selectedPeriod]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setIsLoading(true);
+      
+      // جلب الإحصائيات الأساسية
+      const [
+        studentsResult,
+        applicationsResult,
+        universitiesResult,
+        programsResult,
+        agentsResult
+      ] = await Promise.all([
+        supabase.from('user_roles').select('*', { count: 'exact' }).eq('role', 'student'),
+        supabase.from('applications').select('*', { count: 'exact' }),
+        supabase.from('universities').select('*', { count: 'exact' }).eq('is_active', true),
+        supabase.from('programs').select('*', { count: 'exact' }).eq('is_active', true),
+        supabase.from('user_roles').select('*', { count: 'exact' }).eq('role', 'agent')
+      ]);
+
+      // جلب إحصائيات الطلبات حسب الحالة
+      const [pendingApps, approvedApps, rejectedApps] = await Promise.all([
+        supabase.from('applications').select('*', { count: 'exact' }).eq('status', 'pending'),
+        supabase.from('applications').select('*', { count: 'exact' }).eq('status', 'accepted'),
+        supabase.from('applications').select('*', { count: 'exact' }).eq('status', 'rejected')
+      ]);
+
+      // إعداد بيانات الرسوم البيانية (بيانات تجريبية)
+      const applicationsData = [
+        { name: 'يناير', طلبات: 65, مقبول: 45, مرفوض: 10 },
+        { name: 'فبراير', طلبات: 78, مقبول: 52, مرفوض: 15 },
+        { name: 'مارس', طلبات: 90, مقبول: 68, مرفوض: 12 },
+        { name: 'أبريل', طلبات: 85, مقبول: 61, مرفوض: 14 },
+        { name: 'مايو', طلبات: 95, مقبول: 73, مرفوض: 10 },
+        { name: 'يونيو', طلبات: 102, مقبول: 81, مرفوض: 11 }
+      ];
+
+      const revenueData = [
+        { name: 'يناير', إيرادات: 12000, عمولات: 2400 },
+        { name: 'فبراير', إيرادات: 15000, عمولات: 3000 },
+        { name: 'مارس', إيرادات: 18000, عمولات: 3600 },
+        { name: 'أبريل', إيرادات: 16500, عمولات: 3300 },
+        { name: 'مايو', إيرادات: 20000, عمولات: 4000 },
+        { name: 'يونيو', إيرادات: 22500, عمولات: 4500 }
+      ];
+
+      setStats({
+        totalStudents: studentsResult.count || 0,
+        totalApplications: applicationsResult.count || 0,
+        totalUniversities: universitiesResult.count || 0,
+        totalPrograms: programsResult.count || 0,
+        totalAgents: agentsResult.count || 0,
+        pendingApplications: pendingApps.count || 0,
+        approvedApplications: approvedApps.count || 0,
+        rejectedApplications: rejectedApps.count || 0,
+        monthlyRevenue: 22500,
+        totalRevenue: 180000,
+        newStudentsThisMonth: 24,
+        conversionRate: 78.5
+      });
+
+      setChartData({
+        applicationsChart: applicationsData,
+        revenueChart: revenueData,
+        studentsChart: [],
+        universitiesChart: []
+      });
+
+      // بيانات الأنشطة الأخيرة (تجريبية)
+      setRecentActivities([
+        {
+          id: 1,
+          type: 'application',
+          title: 'طلب جديد تم تقديمه',
+          description: 'أحمد محمد - علوم الحاسوب',
+          time: 'منذ 5 دقائق',
+          status: 'pending'
+        },
+        {
+          id: 2,
+          type: 'approval',
+          title: 'تم قبول طلب',
+          description: 'فاطمة علي - الهندسة الطبية',
+          time: 'منذ 15 دقيقة',
+          status: 'approved'
+        },
+        {
+          id: 3,
+          type: 'university',
+          title: 'جامعة جديدة تمت إضافتها',
+          description: 'جامعة إسطنبول التقنية',
+          time: 'منذ ساعة',
+          status: 'info'
+        }
+      ]);
+
+    } catch (error) {
+      console.error('خطأ في جلب بيانات لوحة التحكم:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في جلب البيانات",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const StatCard = ({ title, value, icon, change, changeType, prefix = '', suffix = '' }: any) => (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      <Card className="relative overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-unlimited-gray">{title}</CardTitle>
+          <div className="text-unlimited-blue">{icon}</div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-unlimited-dark-blue">
+            {isLoading ? '...' : `${prefix}${value.toLocaleString('ar-EG')}${suffix}`}
+          </div>
+          {change && (
+            <p className={`text-xs mt-1 flex items-center ${changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
+              <TrendingUp className="h-3 w-3 mr-1" />
+              {change}
+            </p>
+          )}
+        </CardContent>
+        <div className="absolute top-0 right-0 w-16 h-16 bg-gradient-to-br from-unlimited-blue/10 to-transparent rounded-bl-full" />
+      </Card>
+    </motion.div>
+  );
+
+  const ActivityCard = ({ activity }: any) => (
+    <div className="flex items-start space-x-4 rtl:space-x-reverse p-4 rounded-lg border hover:bg-gray-50 transition-colors">
+      <div className={`w-2 h-2 rounded-full mt-2 ${
+        activity.status === 'approved' ? 'bg-green-500' :
+        activity.status === 'pending' ? 'bg-yellow-500' :
+        activity.status === 'rejected' ? 'bg-red-500' :
+        'bg-blue-500'
+      }`} />
+      <div className="flex-1">
+        <h4 className="font-medium text-unlimited-dark-blue">{activity.title}</h4>
+        <p className="text-sm text-unlimited-gray">{activity.description}</p>
+        <p className="text-xs text-unlimited-gray mt-1">{activity.time}</p>
+      </div>
+    </div>
+  );
+
+  const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4'];
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-2xl font-bold">لوحة التحكم</h1>
-            <p className="text-muted-foreground">نظرة عامة على أداء المنصة</p>
+            <h1 className="text-3xl font-bold text-unlimited-dark-blue">لوحة التحكم المتقدمة</h1>
+            <p className="text-unlimited-gray">نظرة شاملة على أداء النظام والإحصائيات</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Select
-              value={activePeriod}
-              onValueChange={(value: "day" | "week" | "month" | "year") => setActivePeriod(value)}
+          
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm">
+              <Download className="h-4 w-4 mr-2" />
+              تصدير التقرير
+            </Button>
+            <Button variant="outline" size="sm">
+              <Filter className="h-4 w-4 mr-2" />
+              فلترة
+            </Button>
+            <Button>
+              <Bell className="h-4 w-4 mr-2" />
+              الإشعارات
+            </Button>
+          </div>
+        </div>
+
+        {/* فترة الإحصائيات */}
+        <div className="flex gap-2">
+          {['أسبوع', 'شهر', '3 أشهر', 'سنة'].map((period) => (
+            <Button
+              key={period}
+              variant={selectedPeriod === period ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setSelectedPeriod(period)}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="اختر الفترة" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="day">آخر 24 ساعة</SelectItem>
-                <SelectItem value="week">آخر أسبوع</SelectItem>
-                <SelectItem value="month">آخر شهر</SelectItem>
-                <SelectItem value="year">آخر سنة</SelectItem>
-              </SelectContent>
-            </Select>
-            <ReportActions />
-          </div>
+              {period}
+            </Button>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <AdminStatCard
+        {/* الإحصائيات الرئيسية */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
             title="إجمالي الطلاب"
-            value="1,234"
-            change="+12.5%"
-            trend="up"
-            icon={<Users className="h-6 w-6" />}
+            value={stats.totalStudents}
+            icon={<Users className="h-4 w-4" />}
+            change="+12% من الشهر الماضي"
+            changeType="positive"
           />
-          <AdminStatCard
-            title="الطلبات النشطة"
-            value="256"
-            change="+5.2%"
-            trend="up"
-            icon={<FileText className="h-6 w-6" />}
+          <StatCard
+            title="إجمالي الطلبات"
+            value={stats.totalApplications}
+            icon={<FileText className="h-4 w-4" />}
+            change="+8% من الشهر الماضي"
+            changeType="positive"
           />
-          <AdminStatCard
-            title="الجامعات المتعاقدة"
-            value="45"
-            change="+2"
-            trend="up"
-            icon={<School className="h-6 w-6" />}
+          <StatCard
+            title="الجامعات النشطة"
+            value={stats.totalUniversities}
+            icon={<School className="h-4 w-4" />}
+            change="+2 جامعات جديدة"
+            changeType="positive"
           />
-          <AdminStatCard
+          <StatCard
             title="البرامج المتاحة"
-            value="189"
-            change="+8"
-            trend="up"
-            icon={<GraduationCap className="h-6 w-6" />}
+            value={stats.totalPrograms}
+            icon={<GraduationCap className="h-4 w-4" />}
+            change="+15 برنامج جديد"
+            changeType="positive"
           />
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="applications">الطلبات</TabsTrigger>
-            <TabsTrigger value="universities">الجامعات</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold mb-4">تطور الطلبات</h2>
-                <ApplicationsChart />
-              </Card>
-              <Card className="p-6">
-                <h2 className="text-lg font-semibold mb-4">توزيع الطلاب حسب الدول</h2>
-                <StudentsByCountry />
-              </Card>
-            </div>
-            
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold mb-4">توزيع الطلاب حسب التخصص</h2>
-              <div className="h-80">
-                <PieChart
-                  data={studentByMajorData}
-                  index="name"
-                  category="value"
-                  colors={['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']}
-                  valueFormatter={(value: number) => `${value} طالب`}
-                />
-              </div>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="applications" className="space-y-6">
+        {/* إحصائيات إضافية */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title="الوكلاء النشطون"
+            value={stats.totalAgents}
+            icon={<Activity className="h-4 w-4" />}
+            change="+3 وكلاء جدد"
+            changeType="positive"
+          />
+          <StatCard
+            title="الإيرادات الشهرية"
+            value={stats.monthlyRevenue}
+            icon={<DollarSign className="h-4 w-4" />}
+            change="+15% من الشهر الماضي"
+            changeType="positive"
+            prefix="$"
+          />
+          <StatCard
+            title="طلاب جدد هذا الشهر"
+            value={stats.newStudentsThisMonth}
+            icon={<TrendingUp className="h-4 w-4" />}
+            change="+20% من الشهر الماضي"
+            changeType="positive"
+          />
+          <StatCard
+            title="معدل التحويل"
+            value={stats.conversionRate}
+            icon={<CheckCircle className="h-4 w-4" />}
+            change="+5.2% من الشهر الماضي"
+            changeType="positive"
+            suffix="%"
+          />
+        </div>
+
+        {/* حالة الطلبات */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard
+            title="طلبات قيد الانتظار"
+            value={stats.pendingApplications}
+            icon={<Clock className="h-4 w-4 text-yellow-600" />}
+          />
+          <StatCard
+            title="طلبات مقبولة"
+            value={stats.approvedApplications}
+            icon={<CheckCircle className="h-4 w-4 text-green-600" />}
+          />
+          <StatCard
+            title="طلبات مرفوضة"
+            value={stats.rejectedApplications}
+            icon={<XCircle className="h-4 w-4 text-red-600" />}
+          />
+        </div>
+
+        {/* الرسوم البيانية والتحليلات */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* رسم بياني للطلبات */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                إحصائيات الطلبات الشهرية
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={chartData.applicationsChart}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Area type="monotone" dataKey="طلبات" stackId="1" stroke="#3B82F6" fill="#3B82F6" />
+                  <Area type="monotone" dataKey="مقبول" stackId="1" stroke="#10B981" fill="#10B981" />
+                  <Area type="monotone" dataKey="مرفوض" stackId="1" stroke="#EF4444" fill="#EF4444" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          {/* رسم بياني للإيرادات */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                تحليل الإيرادات والعمولات
+                <Button variant="ghost" size="sm">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData.revenueChart}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="إيرادات" stroke="#3B82F6" strokeWidth={3} />
+                  <Line type="monotone" dataKey="عمولات" stroke="#10B981" strokeWidth={3} />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* الأنشطة الأخيرة والإشعارات */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
             <Card>
               <CardHeader>
-                <CardTitle>اتجاهات الطلبات</CardTitle>
+                <CardTitle className="flex items-center justify-between">
+                  الأنشطة الأخيرة
+                  <Badge variant="secondary">{recentActivities.length}</Badge>
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="h-80">
-                  <LineChart
-                    data={applicationTrendData}
-                    index="month"
-                    categories={["applications", "approved", "rejected"]}
-                    colors={["#3B82F6", "#10B981", "#EF4444"]}
-                    valueFormatter={(value: number) => `${value} طلب`}
-                  />
-                </div>
+              <CardContent className="space-y-4">
+                {recentActivities.map((activity) => (
+                  <ActivityCard key={activity.id} activity={activity} />
+                ))}
               </CardContent>
             </Card>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">معدل القبول</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">76.3%</div>
-                  <p className="text-xs text-muted-foreground">+2.5% من الشهر الماضي</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">متوسط وقت المعالجة</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">5.2 يوم</div>
-                  <p className="text-xs text-muted-foreground">-1.3 يوم من الشهر الماضي</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium">نسبة الاكتمال</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">89.7%</div>
-                  <p className="text-xs text-muted-foreground">+3.2% من الشهر الماضي</p>
-                </CardContent>
-              </Card>
+          </div>
+
+          {/* إحصائيات سريعة */}
+          <Card>
+            <CardHeader>
+              <CardTitle>الإحصائيات السريعة</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>معدل القبول</span>
+                  <span className="font-medium">78%</span>
+                </div>
+                <Progress value={78} className="h-2" />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>متوسط وقت المعالجة</span>
+                  <span className="font-medium">5 أيام</span>
+                </div>
+                <Progress value={65} className="h-2" />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>رضا العملاء</span>
+                  <span className="font-medium">4.8/5</span>
+                </div>
+                <Progress value={96} className="h-2" />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>النمو الشهري</span>
+                  <span className="font-medium text-green-600">+15%</span>
+                </div>
+                <Progress value={85} className="h-2" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* أهداف الأداء */}
+        <Card>
+          <CardHeader>
+            <CardTitle>أهداف الأداء الشهرية</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-unlimited-blue">120</div>
+                <div className="text-sm text-unlimited-gray">طلب جديد (الهدف: 150)</div>
+                <Progress value={80} className="mt-2" />
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">95</div>
+                <div className="text-sm text-unlimited-gray">طلب مقبول (الهدف: 100)</div>
+                <Progress value={95} className="mt-2" />
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-unlimited-blue">$18,500</div>
+                <div className="text-sm text-unlimited-gray">الإيرادات (الهدف: $20,000)</div>
+                <Progress value={92.5} className="mt-2" />
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-purple-600">24</div>
+                <div className="text-sm text-unlimited-gray">طلاب جدد (الهدف: 30)</div>
+                <Progress value={80} className="mt-2" />
+              </div>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="universities">
-            <UniversityStats />
-          </TabsContent>
-        </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );

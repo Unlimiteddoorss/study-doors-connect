@@ -9,9 +9,37 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agent_students: {
+        Row: {
+          agent_id: string
+          assigned_at: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          student_id: string
+        }
+        Insert: {
+          agent_id: string
+          assigned_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          student_id: string
+        }
+        Update: {
+          agent_id?: string
+          assigned_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          student_id?: string
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           academic_info: Json | null
+          agent_id: string | null
           created_at: string | null
           id: string
           personal_info: Json | null
@@ -23,6 +51,7 @@ export type Database = {
         }
         Insert: {
           academic_info?: Json | null
+          agent_id?: string | null
           created_at?: string | null
           id?: string
           personal_info?: Json | null
@@ -34,6 +63,7 @@ export type Database = {
         }
         Update: {
           academic_info?: Json | null
+          agent_id?: string | null
           created_at?: string | null
           id?: string
           personal_info?: Json | null
@@ -56,6 +86,92 @@ export type Database = {
             columns: ["university_id"]
             isOneToOne: false
             referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: unknown | null
+          new_values: Json | null
+          old_values: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: unknown | null
+          new_values?: Json | null
+          old_values?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      commissions: {
+        Row: {
+          agent_id: string
+          amount: number
+          application_id: string
+          created_at: string | null
+          id: string
+          notes: string | null
+          paid_at: string | null
+          percentage: number
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          application_id: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          percentage: number
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          application_id?: string
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          percentage?: number
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
@@ -104,6 +220,39 @@ export type Database = {
           },
         ]
       }
+      file_settings: {
+        Row: {
+          allowed_extensions: string[]
+          category: string
+          created_at: string | null
+          file_type: string
+          id: string
+          is_required: boolean | null
+          max_size_mb: number
+          updated_at: string | null
+        }
+        Insert: {
+          allowed_extensions: string[]
+          category?: string
+          created_at?: string | null
+          file_type: string
+          id?: string
+          is_required?: boolean | null
+          max_size_mb?: number
+          updated_at?: string | null
+        }
+        Update: {
+          allowed_extensions?: string[]
+          category?: string
+          created_at?: string | null
+          file_type?: string
+          id?: string
+          is_required?: boolean | null
+          max_size_mb?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           application_id: string
@@ -147,6 +296,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notifications: {
+        Row: {
+          action_url: string | null
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string
+          metadata: Json | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message: string
+          metadata?: Json | null
+          read_at?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          action_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string
+          metadata?: Json | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       programs: {
         Row: {
@@ -206,6 +394,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      settings: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
       }
       timeline: {
         Row: {
@@ -358,9 +579,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_commission: {
+        Args: { p_application_id: string; p_agent_id: string }
+        Returns: undefined
+      }
+      create_notification: {
+        Args: {
+          p_user_id: string
+          p_title: string
+          p_message: string
+          p_type?: string
+          p_action_url?: string
+          p_metadata?: Json
+        }
+        Returns: string
+      }
       create_user_role: {
         Args: { user_id: string; user_role: string }
         Returns: boolean
+      }
+      get_user_role: {
+        Args: { user_id: string }
+        Returns: string
+      }
+      log_audit: {
+        Args: {
+          p_user_id: string
+          p_action: string
+          p_table_name: string
+          p_record_id?: string
+          p_old_values?: Json
+          p_new_values?: Json
+        }
+        Returns: string
       }
       mark_messages_read: {
         Args: { p_application_id: string; p_user_id: string }

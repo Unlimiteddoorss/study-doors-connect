@@ -1,503 +1,576 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { motion } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useTranslation } from 'react-i18next';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
+  Users, 
   Search, 
-  Plus, 
-  Upload, 
-  Download, 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  Trash, 
   Filter, 
-  Send,
-  UserPlus,
+  Download, 
+  Plus, 
+  MoreVertical,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
   FileText,
-  Badge
+  Eye,
+  Edit,
+  Trash2,
+  UserCheck,
+  UserX,
+  MessageSquare
 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { StudentFilters } from '@/components/admin/students/StudentFilters';
-import AdvancedSearch from '@/components/admin/AdvancedSearch';
-
-// Mock data for students
-const studentsData = [
-  { 
-    id: '1', 
-    name: 'أحمد محمد', 
-    email: 'ahmed@example.com', 
-    phone: '+90 555 123 4567', 
-    nationality: 'مصري', 
-    status: 'نشط',
-    applications: 2,
-    createdAt: '2023-01-15'
-  },
-  { 
-    id: '2', 
-    name: 'فاطمة علي', 
-    email: 'fatima@example.com', 
-    phone: '+90 555 234 5678', 
-    nationality: 'سعودية', 
-    status: 'نشط',
-    applications: 1,
-    createdAt: '2023-02-20'
-  },
-  { 
-    id: '3', 
-    name: 'محمد أحمد', 
-    email: 'mohamed@example.com', 
-    phone: '+90 555 345 6789', 
-    nationality: 'سوري', 
-    status: 'معلق',
-    applications: 3,
-    createdAt: '2023-03-10'
-  },
-  { 
-    id: '4', 
-    name: 'نور حسن', 
-    email: 'noor@example.com', 
-    phone: '+90 555 456 7890', 
-    nationality: 'أردنية', 
-    status: 'نشط',
-    applications: 1,
-    createdAt: '2023-04-05'
-  },
-  { 
-    id: '5', 
-    name: 'علي حسين', 
-    email: 'ali@example.com', 
-    phone: '+90 555 567 8901', 
-    nationality: 'عراقي', 
-    status: 'غير نشط',
-    applications: 0,
-    createdAt: '2023-05-12'
-  },
-];
-
-// Mock data for nationalities (for filters)
-const nationalities = ['مصري', 'سعودي', 'سوري', 'أردني', 'عراقي', 'لبناني', 'فلسطيني', 'يمني', 'إماراتي', 'كويتي'];
+import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
 
 const EnhancedStudentsManagement = () => {
-  const { t } = useTranslation();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-  const [filters, setFilters] = useState<Record<string, string>>({ nationality: 'all', status: 'all' });
-  
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
+  const [students, setStudents] = useState([]);
+  const [filteredStudents, setFilteredStudents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedAgent, setSelectedAgent] = useState('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [showDetails, setShowDetails] = useState(false);
+  const [agents, setAgents] = useState([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchStudents();
+    fetchAgents();
+  }, []);
+
+  useEffect(() => {
+    filterStudents();
+  }, [students, searchTerm, selectedStatus, selectedAgent]);
+
+  const fetchStudents = async () => {
+    try {
+      setIsLoading(true);
+      
+      // جلب بيانات الطلاب مع ملفاتهم الشخصية وأدوارهم
+      const { data: studentsData, error } = await supabase
+        .from('user_roles')
+        .select(`
+          *,
+          user_profiles (*)
+        `)
+        .eq('role', 'student');
+
+      if (error) throw error;
+
+      // جلب إحصائيات الطلبات لكل طالب
+      const studentsWithStats = await Promise.all(
+        studentsData.map(async (student) => {
+          const { count: totalApplications } = await supabase
+            .from('applications')
+            .select('*', { count: 'exact' })
+            .eq('student_id', student.user_id);
+
+          const { count: pendingApplications } = await supabase
+            .from('applications')
+            .select('*', { count: 'exact' })
+            .eq('student_id', student.user_id)
+            .eq('status', 'pending');
+
+          const { count: acceptedApplications } = await supabase
+            .from('applications')
+            .select('*', { count: 'exact' })
+            .eq('student_id', student.user_id)
+            .eq('status', 'accepted');
+
+          // جلب معلومات الوكيل المسؤول
+          const { data: agentData } = await supabase
+            .from('agent_students')
+            .select(`
+              agent_id,
+              assigned_at,
+              is_active,
+              user_profiles!agent_students_agent_id_fkey (full_name)
+            `)
+            .eq('student_id', student.user_id)
+            .eq('is_active', true)
+            .single();
+
+          return {
+            ...student,
+            totalApplications: totalApplications || 0,
+            pendingApplications: pendingApplications || 0,
+            acceptedApplications: acceptedApplications || 0,
+            agent: agentData?.user_profiles?.full_name || 'غير محدد',
+            agentId: agentData?.agent_id || null,
+            lastActivity: new Date().toISOString(),
+            status: totalApplications > 0 ? 'active' : 'inactive'
+          };
+        })
+      );
+
+      setStudents(studentsWithStats);
+    } catch (error) {
+      console.error('خطأ في جلب بيانات الطلاب:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في جلب بيانات الطلاب",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.3 }
+
+  const fetchAgents = async () => {
+    try {
+      const { data: agentsData, error } = await supabase
+        .from('user_roles')
+        .select(`
+          *,
+          user_profiles (full_name)
+        `)
+        .eq('role', 'agent');
+
+      if (error) throw error;
+      setAgents(agentsData);
+    } catch (error) {
+      console.error('خطأ في جلب بيانات الوكلاء:', error);
     }
   };
 
-  const handleExport = () => {
-    console.log('Exporting students data...');
-    // Implement export functionality
+  const filterStudents = () => {
+    let filtered = [...students];
+
+    // فلترة البحث
+    if (searchTerm) {
+      filtered = filtered.filter(student =>
+        student.user_profiles?.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.user_profiles?.phone?.includes(searchTerm) ||
+        student.user_profiles?.country?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // فلترة الحالة
+    if (selectedStatus !== 'all') {
+      filtered = filtered.filter(student => student.status === selectedStatus);
+    }
+
+    // فلترة الوكيل
+    if (selectedAgent !== 'all') {
+      filtered = filtered.filter(student => student.agentId === selectedAgent);
+    }
+
+    setFilteredStudents(filtered);
   };
 
-  const handleImport = () => {
-    console.log('Importing students data...');
-    setIsImportDialogOpen(false);
-    // Implement import functionality
-  };
+  const assignAgent = async (studentId, agentId) => {
+    try {
+      // إلغاء تعيين الوكيل السابق
+      await supabase
+        .from('agent_students')
+        .update({ is_active: false })
+        .eq('student_id', studentId);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'نشط': return 'bg-green-100 text-green-800';
-      case 'غير نشط': return 'bg-red-100 text-red-800';
-      case 'معلق': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
+      // تعيين الوكيل الجديد
+      const { error } = await supabase
+        .from('agent_students')
+        .insert({
+          agent_id: agentId,
+          student_id: studentId,
+          is_active: true
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "تم التعيين",
+        description: "تم تعيين الوكيل بنجاح",
+      });
+
+      fetchStudents();
+    } catch (error) {
+      console.error('خطأ في تعيين الوكيل:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في تعيين الوكيل",
+        variant: "destructive",
+      });
     }
   };
 
-  // Filter and search functionality
-  const filteredStudents = studentsData.filter(student => {
-    const matchesSearch = student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          student.phone.includes(searchQuery);
-                          
-    const matchesNationality = filters.nationality === 'all' || student.nationality === filters.nationality;
-    const matchesStatus = filters.status === 'all' || student.status === filters.status;
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      active: { label: 'نشط', className: 'bg-green-100 text-green-800' },
+      inactive: { label: 'غير نشط', className: 'bg-gray-100 text-gray-800' },
+      suspended: { label: 'موقوف', className: 'bg-red-100 text-red-800' }
+    };
     
-    return matchesSearch && matchesNationality && matchesStatus;
-  });
+    const config = statusConfig[status] || statusConfig.inactive;
+    return <Badge className={config.className}>{config.label}</Badge>;
+  };
+
+  const StudentCard = ({ student }) => (
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300 }}
+    >
+      <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={student.user_profiles?.avatar_url} />
+                <AvatarFallback>
+                  {student.user_profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'طالب'}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="font-medium text-unlimited-dark-blue">
+                  {student.user_profiles?.full_name || 'غير محدد'}
+                </h3>
+                <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm text-unlimited-gray">
+                  <Mail className="h-3 w-3" />
+                  <span>{student.user_id}</span>
+                </div>
+                <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm text-unlimited-gray">
+                  <MapPin className="h-3 w-3" />
+                  <span>{student.user_profiles?.country || 'غير محدد'}</span>
+                </div>
+              </div>
+            </div>
+            {getStatusBadge(student.status)}
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-lg font-bold text-unlimited-blue">{student.totalApplications}</div>
+              <div className="text-xs text-unlimited-gray">إجمالي الطلبات</div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-yellow-600">{student.pendingApplications}</div>
+              <div className="text-xs text-unlimited-gray">قيد الانتظار</div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-green-600">{student.acceptedApplications}</div>
+              <div className="text-xs text-unlimited-gray">مقبولة</div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between">
+            <div className="text-sm text-unlimited-gray">
+              الوكيل: <span className="font-medium">{student.agent}</span>
+            </div>
+            <div className="flex space-x-2 rtl:space-x-reverse">
+              <Button size="sm" variant="outline" onClick={() => {
+                setSelectedStudent(student);
+                setShowDetails(true);
+              }}>
+                <Eye className="h-3 w-3" />
+              </Button>
+              <Button size="sm" variant="outline">
+                <MessageSquare className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
 
   return (
     <DashboardLayout userRole="admin">
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-        className="space-y-6"
-      >
-        <motion.div variants={itemVariants} className="flex justify-between items-center">
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
           <div>
-            <h1 className="text-2xl font-bold">{t('admin.studentsPage.title')}</h1>
-            <p className="text-unlimited-gray">{t('admin.studentsPage.subtitle')}</p>
+            <h1 className="text-3xl font-bold text-unlimited-dark-blue">إدارة الطلاب المتقدمة</h1>
+            <p className="text-unlimited-gray">إدارة شاملة لجميع الطلاب والوكلاء</p>
           </div>
           
-          <div className="flex flex-col md:flex-row gap-2">
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              {t('admin.studentsPage.addStudent')}
-            </Button>
-            
-            <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('admin.studentsPage.importStudents')}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>{t('admin.studentsPage.importData')}</DialogTitle>
-                  <DialogDescription>
-                    {t('admin.studentsPage.importDataDesc')}
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-md p-6 text-center">
-                    <Upload className="h-8 w-8 mx-auto text-unlimited-gray" />
-                    <p className="mt-2 text-sm text-unlimited-gray">
-                      {t('admin.studentsPage.dragDrop')}
-                    </p>
-                    <input type="file" className="hidden" />
-                    <Button variant="outline" className="mt-4">
-                      {t('admin.studentsPage.chooseFile')}
-                    </Button>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button onClick={handleImport}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    {t('admin.studentsPage.importStudents')}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-            
-            <Button variant="outline" onClick={handleExport}>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm">
               <Download className="h-4 w-4 mr-2" />
-              {t('admin.studentsPage.exportStudents')}
+              تصدير البيانات
+            </Button>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              إضافة طالب
             </Button>
           </div>
-        </motion.div>
+        </div>
 
-        <motion.div variants={itemVariants}>
-          <AdvancedSearch 
-            placeholder={t('admin.studentsPage.searchPlaceholder')}
-            filterOptions={{
-              status: ['نشط', 'معلق', 'غير نشط'],
-              nationality: nationalities
-            }}
-          />
-        </motion.div>
+        {/* فلاتر البحث */}
+        <Card>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="relative">
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+                <Input
+                  placeholder="البحث بالاسم، الهاتف، أو البلد..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pr-10"
+                />
+              </div>
+              
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                <SelectTrigger>
+                  <SelectValue placeholder="حالة الطالب" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الحالات</SelectItem>
+                  <SelectItem value="active">نشط</SelectItem>
+                  <SelectItem value="inactive">غير نشط</SelectItem>
+                  <SelectItem value="suspended">موقوف</SelectItem>
+                </SelectContent>
+              </Select>
 
-        <motion.div variants={itemVariants}>
+              <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+                <SelectTrigger>
+                  <SelectValue placeholder="الوكيل المسؤول" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">جميع الوكلاء</SelectItem>
+                  {agents.map((agent) => (
+                    <SelectItem key={agent.user_id} value={agent.user_id}>
+                      {agent.user_profiles?.full_name || 'وكيل غير محدد'}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Button variant="outline" className="w-full">
+                <Filter className="h-4 w-4 mr-2" />
+                مزيد من الفلاتر
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* إحصائيات سريعة */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card>
-            <CardHeader className="px-6">
-              <CardTitle>{t('admin.studentsPage.studentsList')}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
+            <CardContent className="p-6 text-center">
+              <Users className="h-8 w-8 text-unlimited-blue mx-auto mb-2" />
+              <div className="text-2xl font-bold text-unlimited-dark-blue">{students.length}</div>
+              <div className="text-sm text-unlimited-gray">إجمالي الطلاب</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 text-center">
+              <UserCheck className="h-8 w-8 text-green-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-green-600">
+                {students.filter(s => s.status === 'active').length}
+              </div>
+              <div className="text-sm text-unlimited-gray">طلاب نشطون</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 text-center">
+              <UserX className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+              <div className="text-2xl font-bold text-gray-600">
+                {students.filter(s => s.status === 'inactive').length}
+              </div>
+              <div className="text-sm text-unlimited-gray">طلاب غير نشطين</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardContent className="p-6 text-center">
+              <FileText className="h-8 w-8 text-unlimited-blue mx-auto mb-2" />
+              <div className="text-2xl font-bold text-unlimited-blue">
+                {students.reduce((sum, s) => sum + s.totalApplications, 0)}
+              </div>
+              <div className="text-sm text-unlimited-gray">إجمالي الطلبات</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* عرض البيانات */}
+        <Tabs defaultValue="cards" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="cards">عرض البطاقات</TabsTrigger>
+            <TabsTrigger value="table">عرض الجدول</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="cards">
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="h-20 bg-gray-200 rounded"></div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredStudents.map((student) => (
+                  <StudentCard key={student.user_id} student={student} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="table">
+            <Card>
+              <CardContent>
                 <Table>
-                  <TableCaption>{t('admin.studentsPage.studentsList')}</TableCaption>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[80px]">{t('admin.studentsPage.id')}</TableHead>
-                      <TableHead>{t('admin.studentsPage.name')}</TableHead>
-                      <TableHead>{t('admin.studentsPage.email')}</TableHead>
-                      <TableHead>{t('admin.studentsPage.phone')}</TableHead>
-                      <TableHead>{t('admin.studentsPage.nationality')}</TableHead>
-                      <TableHead>{t('admin.studentsPage.status')}</TableHead>
-                      <TableHead className="text-center">{t('admin.studentsPage.applications')}</TableHead>
-                      <TableHead>{t('admin.studentsPage.createdAt')}</TableHead>
-                      <TableHead className="text-right">{t('admin.studentsPage.actions')}</TableHead>
+                      <TableHead>الطالب</TableHead>
+                      <TableHead>البلد</TableHead>
+                      <TableHead>الوكيل المسؤول</TableHead>
+                      <TableHead>الطلبات</TableHead>
+                      <TableHead>الحالة</TableHead>
+                      <TableHead>الإجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredStudents.map((student) => (
-                      <TableRow key={student.id} className="hover:bg-unlimited-blue/5 transition-colors">
-                        <TableCell className="font-medium">{student.id}</TableCell>
+                      <TableRow key={student.user_id}>
                         <TableCell>
-                          <div className="font-medium">{student.name}</div>
+                          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback>
+                                {student.user_profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'ط'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-medium">{student.user_profiles?.full_name || 'غير محدد'}</div>
+                              <div className="text-sm text-unlimited-gray">{student.user_profiles?.phone}</div>
+                            </div>
+                          </div>
                         </TableCell>
-                        <TableCell>{student.email}</TableCell>
-                        <TableCell>{student.phone}</TableCell>
-                        <TableCell>{student.nationality}</TableCell>
+                        <TableCell>{student.user_profiles?.country || 'غير محدد'}</TableCell>
+                        <TableCell>{student.agent}</TableCell>
                         <TableCell>
-                          <span className={`px-2 py-1 rounded-full text-xs ${getStatusColor(student.status)}`}>
-                            {student.status}
-                          </span>
+                          <Badge variant="outline">{student.totalApplications}</Badge>
                         </TableCell>
-                        <TableCell className="text-center">{student.applications}</TableCell>
-                        <TableCell>{student.createdAt}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <span className="sr-only">{t('admin.studentsPage.openMenu')}</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>{t('admin.studentsPage.actions')}</DropdownMenuLabel>
-                              <DropdownMenuItem className="flex items-center">
-                                <Eye className="h-4 w-4 mr-2" />
-                                {t('admin.studentsPage.view')}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="flex items-center">
-                                <Edit className="h-4 w-4 mr-2" />
-                                {t('admin.studentsPage.edit')}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="flex items-center">
-                                <Send className="h-4 w-4 mr-2" />
-                                {t('admin.studentsPage.sendMessage')}
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="flex items-center text-unlimited-danger">
-                                <Trash className="h-4 w-4 mr-2" />
-                                {t('admin.studentsPage.delete')}
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    
-                    {filteredStudents.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={9} className="text-center py-8">
-                          <div className="flex flex-col items-center">
-                            <Search className="h-10 w-10 text-unlimited-gray mb-2" />
-                            <p className="text-unlimited-gray">
-                              {t('admin.studentsPage.noStudentsFound')}
-                            </p>
-                            <Button 
-                              variant="outline" 
-                              onClick={() => {
-                                setSearchQuery('');
-                                setFilters({ nationality: 'all', status: 'all' });
-                              }} 
-                              className="mt-2"
-                            >
-                              {t('admin.studentsPage.clearFilters')}
+                        <TableCell>{getStatusBadge(student.status)}</TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2 rtl:space-x-reverse">
+                            <Button size="sm" variant="ghost">
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost">
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost">
+                              <MessageSquare className="h-3 w-3" />
                             </Button>
                           </div>
                         </TableCell>
                       </TableRow>
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-        <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('admin.studentsPage.quickActions')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 pt-2">
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  {t('admin.studentsPage.newStudent')}
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  {t('admin.studentsPage.newApplication')}
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Send className="h-4 w-4" />
-                  {t('admin.studentsPage.bulkMessage')}
-                </Button>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Badge className="h-4 w-4" />
-                  {t('admin.studentsPage.assignBadge')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('admin.studentsPage.recentActivity')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 py-2">
-              <div className="space-y-2">
-                <div className="flex justify-between border-b pb-1 text-sm">
-                  <span>{t('admin.studentsPage.newStudentAdded')}</span>
-                  <span className="text-unlimited-gray">10:30 AM</span>
-                </div>
-                <div className="flex justify-between border-b pb-1 text-sm">
-                  <span>{t('admin.studentsPage.profileUpdated')}</span>
-                  <span className="text-unlimited-gray">{t('time.yesterday')}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>{t('admin.studentsPage.documentSubmitted')}</span>
-                  <span className="text-unlimited-gray">2 {t('time.daysAgo')}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {t('admin.studentsPage.statsOverview')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-6 py-2">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">{t('admin.studentsPage.totalStudents')}</span>
-                  <span className="font-bold">1,234</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">{t('admin.studentsPage.activeStudents')}</span>
-                  <span className="font-bold text-unlimited-success">978</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">{t('admin.studentsPage.pendingVerification')}</span>
-                  <span className="font-bold text-unlimited-warning">56</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
+        {/* تفاصيل الطالب */}
+        <Dialog open={showDetails} onOpenChange={setShowDetails}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>تفاصيل الطالب</DialogTitle>
+            </DialogHeader>
+            {selectedStudent && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>المعلومات الشخصية</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">الاسم الكامل</label>
+                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.full_name || 'غير محدد'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">رقم الهاتف</label>
+                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.phone || 'غير محدد'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">البلد</label>
+                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.country || 'غير محدد'}</p>
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">المدينة</label>
+                        <p className="text-unlimited-gray">{selectedStudent.user_profiles?.city || 'غير محدد'}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
 
-      {/* Add Student Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-[560px]">
-          <DialogHeader>
-            <DialogTitle>{t('admin.studentsPage.addNewStudent')}</DialogTitle>
-            <DialogDescription>
-              {t('admin.studentsPage.addNewStudentDesc')}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <div className="grid gap-2">
-              <label htmlFor="firstName" className="text-sm font-medium">
-                {t('admin.studentsPage.firstName')}
-              </label>
-              <Input id="firstName" />
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="lastName" className="text-sm font-medium">
-                {t('admin.studentsPage.lastName')}
-              </label>
-              <Input id="lastName" />
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                {t('admin.studentsPage.email')}
-              </label>
-              <Input id="email" type="email" />
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="phone" className="text-sm font-medium">
-                {t('admin.studentsPage.phone')}
-              </label>
-              <Input id="phone" />
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="nationality" className="text-sm font-medium">
-                {t('admin.studentsPage.nationality')}
-              </label>
-              <select
-                id="nationality"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-unlimited-blue/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {nationalities.map((nationality) => (
-                  <option key={nationality} value={nationality}>
-                    {nationality}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="grid gap-2">
-              <label htmlFor="status" className="text-sm font-medium">
-                {t('admin.studentsPage.status')}
-              </label>
-              <select
-                id="status"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-unlimited-blue/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="نشط">{t('admin.studentsPage.active')}</option>
-                <option value="معلق">{t('admin.studentsPage.pending')}</option>
-                <option value="غير نشط">{t('admin.studentsPage.inactive')}</option>
-              </select>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              {t('cancel')}
-            </Button>
-            <Button type="submit">
-              {t('admin.studentsPage.addStudent')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>إحصائيات الطلبات</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <div className="text-2xl font-bold text-unlimited-blue">{selectedStudent.totalApplications}</div>
+                          <div className="text-sm text-unlimited-gray">إجمالي الطلبات</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-yellow-600">{selectedStudent.pendingApplications}</div>
+                          <div className="text-sm text-unlimited-gray">قيد الانتظار</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-green-600">{selectedStudent.acceptedApplications}</div>
+                          <div className="text-sm text-unlimited-gray">مقبولة</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-bold text-red-600">
+                            {selectedStudent.totalApplications - selectedStudent.pendingApplications - selectedStudent.acceptedApplications}
+                          </div>
+                          <div className="text-sm text-unlimited-gray">مرفوضة</div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>تعيين الوكيل</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                      <Select 
+                        value={selectedStudent.agentId || ''} 
+                        onValueChange={(agentId) => assignAgent(selectedStudent.user_id, agentId)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="اختيار الوكيل" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {agents.map((agent) => (
+                            <SelectItem key={agent.user_id} value={agent.user_id}>
+                              {agent.user_profiles?.full_name || 'وكيل غير محدد'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
     </DashboardLayout>
   );
 };
