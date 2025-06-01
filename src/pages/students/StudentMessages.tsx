@@ -311,15 +311,13 @@ const MessagingUpdates = () => {
             variant={selectedView === 'all' ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedView('all')}
-            className="flex-1"
           >
-            الكل
+            الجميع
           </Button>
           <Button 
             variant={selectedView === 'appointments' ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedView('appointments')}
-            className="flex-1"
           >
             المواعيد
           </Button>
@@ -327,7 +325,6 @@ const MessagingUpdates = () => {
             variant={selectedView === 'updates' ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedView('updates')}
-            className="flex-1"
           >
             التحديثات
           </Button>
@@ -336,51 +333,41 @@ const MessagingUpdates = () => {
       <CardContent className="p-0">
         <ScrollArea className="h-[calc(100vh-20rem)]">
           <div className="px-4 py-2 space-y-3">
-            {filteredUpdates.length > 0 ? (
-              filteredUpdates.map(update => (
-                <div 
-                  key={update.id}
-                  className={cn(
-                    "p-3 rounded-md border transition-all",
-                    update.isNew 
-                      ? "bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 animate-pulse-light" 
-                      : "bg-white border-gray-200 dark:bg-gray-800 dark:border-gray-700 hover:shadow-sm"
-                  )}
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium flex items-center">
-                        {update.type === 'feature' && <Bell className="h-4 w-4 ml-1 text-unlimited-blue" />}
-                        {update.type === 'appointment' && <Calendar className="h-4 w-4 ml-1 text-green-500" />}
-                        {update.type === 'update' && <ArrowUp className="h-4 w-4 ml-1 text-purple-500" />}
-                        {update.type === 'deadline' && <Bell className="h-4 w-4 ml-1 text-red-500" />}
-                        {update.title}
-                        {update.isNew && (
-                          <Badge variant="secondary" className="mr-2 h-5 px-2 text-xs">جديد</Badge>
-                        )}
-                      </h4>
-                      <p className="text-sm text-unlimited-gray mt-1">{update.description}</p>
-                      <div className="text-xs text-unlimited-gray mt-2">{update.date}</div>
+            {filteredUpdates.map((update) => (
+              <div
+                key={update.id}
+                className={cn(
+                  "p-4 rounded-lg border transition-all hover:shadow-sm cursor-pointer",
+                  update.isNew 
+                    ? "border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800" 
+                    : "border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700"
+                )}
+                onClick={() => markAsRead(update.id)}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-grow">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-sm">{update.title}</h4>
+                      {update.isNew && (
+                        <Badge variant="destructive" className="text-xs animate-pulse">
+                          جديد
+                        </Badge>
+                      )}
                     </div>
-                    {update.isNew && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-6 w-6 p-0 rounded-full hover:bg-green-100 hover:text-green-600 dark:hover:bg-green-900/30"
-                        onClick={() => markAsRead(update.id)}
-                      >
-                        <CheckCircle className="h-4 w-4 text-unlimited-blue" />
-                      </Button>
-                    )}
+                    <p className="text-sm text-unlimited-gray mb-2">{update.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-unlimited-gray">{update.date}</span>
+                      <div className="flex items-center gap-1">
+                        {update.type === 'appointment' && <Calendar className="h-3 w-3" />}
+                        {update.type === 'update' && <Bell className="h-3 w-3" />}
+                        {update.type === 'feature' && <ArrowUp className="h-3 w-3" />}
+                        {update.type === 'deadline' && <ArrowUp className="h-3 w-3 text-orange-500" />}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-10 text-unlimited-gray">
-                <Bell className="h-10 w-10 mb-3 text-unlimited-gray/50" />
-                <p>لا توجد تحديثات لعرضها</p>
               </div>
-            )}
+            ))}
           </div>
         </ScrollArea>
       </CardContent>
@@ -389,231 +376,69 @@ const MessagingUpdates = () => {
 };
 
 const StudentMessages = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('messages');
-  const [activeApplication, setActiveApplication] = useState({
-    id: 'app-123',
-    programName: 'بكالوريوس الطب',
-    universityName: 'جامعة إسطنبول'
-  });
-  const [applications, setApplications] = useState([
-    {
-      id: 'app-123',
-      programName: 'بكالوريوس الطب',
-      universityName: 'جامعة إسطنبول',
-      unreadCount: 2
-    },
-    {
-      id: 'app-456',
-      programName: 'ماجستير هندسة البرمجيات',
-      universityName: 'جامعة أنقرة',
-      unreadCount: 0
-    }
-  ]);
-  
-  const handleApplicationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const appId = e.target.value;
-    const selected = applications.find(app => app.id === appId);
-    if (selected) {
-      setActiveApplication(selected);
-      
-      toast({
-        title: `تم تغيير الطلب النشط`,
-        description: `${selected.programName} - ${selected.universityName}`
-      });
-    }
-  };
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('contacts');
 
   useEffect(() => {
-    // محاكاة التحميل
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-
-      // إظهار إشعار الترحيب
-      toast({
-        title: "مرحباً بك في نظام الرسائل المحدث",
-        description: "تم تحديث نظام الرسائل بتاريخ 8 مايو 2025 مع العديد من الميزات الجديدة"
-      });
-    }, 1500);
-
-    return () => clearTimeout(timer);
+    // Load any necessary data for messages
   }, []);
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">الرسائل</h1>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-unlimited-dark-blue">الرسائل والتواصل</h1>
+            <p className="text-unlimited-gray">تواصل مع المستشارين وممثلي الجامعات</p>
+          </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="relative">
-              <Bell className="h-4 w-4 ml-1" />
-              الإشعارات
-              <Badge 
-                variant="secondary" 
-                className="absolute -top-2 -right-2 animate-pulse"
-              >
-                3
-              </Badge>
+            <Button variant="outline" onClick={() => navigate('/user-messages')}>
+              <MessageSquare className="h-4 w-4 ml-2" />
+              المحادثات المفصلة
             </Button>
-            <Button className="animate-scale-in">
-              <MessageSquare className="h-4 w-4 ml-1" />
-              رسالة جديدة
+            <Button onClick={() => navigate('/apply')}>
+              <Plus className="h-4 w-4 ml-2" />
+              طلب جديد
             </Button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="col-span-4 bg-gradient-to-r from-unlimited-light-blue to-unlimited-blue text-white overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('/pattern-dots.svg')] opacity-10"></div>
-            <CardContent className="p-4 relative z-10">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-xl font-bold mb-1">مركز الرسائل والتواصل</h2>
-                  <p className="text-blue-50">
-                    تواصل مباشرة مع المستشارين التعليميين وممثلي الجامعات وتابع المستجدات
-                  </p>
-                  <div className="flex items-center mt-3 gap-5">
-                    <div className="flex items-center">
-                      <Users className="h-5 w-5 ml-1" />
-                      <span>5 جهات اتصال</span>
-                    </div>
-                    <div className="flex items-center">
-                      <MessageSquare className="h-5 w-5 ml-1" />
-                      <span>12 رسالة جديدة</span>
-                    </div>
-                    <div className="flex items-center">
-                      <School className="h-5 w-5 ml-1" />
-                      <span>2 طلبات تقديم</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="hidden md:block">
-                  <Button 
-                    variant="secondary" 
-                    size="lg"
-                    className="animate-bounce-light hover:bg-white hover:text-unlimited-blue transition-all"
-                  >
-                    تصفح الجامعات الجديدة
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="contacts" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              جهات الاتصال
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              الرسائل
+            </TabsTrigger>
+            <TabsTrigger value="updates" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              التحديثات
+            </TabsTrigger>
+            <TabsTrigger value="ai-assistant" className="flex items-center gap-2">
+              <School className="h-4 w-4" />
+              المساعد الذكي
+            </TabsTrigger>
+          </TabsList>
 
-        <Tabs 
-          defaultValue="messages" 
-          className="mb-6"
-          value={activeTab}
-          onValueChange={setActiveTab}
-        >
-          <div className="flex justify-between items-center">
-            <TabsList>
-              <TabsTrigger value="messages" className="relative">
-                المراسلات
-                <Badge variant="secondary" className="absolute -top-2 -left-2">4</Badge>
-              </TabsTrigger>
-              <TabsTrigger value="contacts">جهات الاتصال</TabsTrigger>
-              <TabsTrigger value="ai-assistant">المساعد الذكي</TabsTrigger>
-            </TabsList>
-            
-            <div className="flex gap-2 items-center">
-              <select 
-                className="bg-white dark:bg-gray-800 border border-unlimited-gray/20 rounded px-3 py-1 text-sm"
-                value={activeApplication.id}
-                onChange={handleApplicationChange}
-              >
-                <option value="" disabled>اختر الطلب...</option>
-                {applications.map(app => (
-                  <option key={app.id} value={app.id}>
-                    {app.programName} - {app.universityName}
-                    {app.unreadCount > 0 ? ` (${app.unreadCount} غير مقروء)` : ''}
-                  </option>
-                ))}
-              </select>
-              
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+          <TabsContent value="contacts" className="space-y-4">
+            <ContactsList />
+          </TabsContent>
 
-          {isLoading ? (
-            <div className="flex justify-center items-center h-96">
-              <div className="flex flex-col items-center">
-                <div className="animate-rotate-360 rounded-full h-12 w-12 border-b-2 border-unlimited-blue"></div>
-                <p className="mt-4 text-unlimited-gray animate-pulse">جاري تحميل الرسائل...</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <TabsContent value="messages" className="animate-fade-in">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <div className="col-span-1">
-                    <ContactsList />
-                  </div>
-                  <div className="lg:col-span-2">
-                    <Card className="h-[calc(100vh-13rem)]">
-                      <CardContent className="p-0">
-                        <MessagesContainer
-                          programName={activeApplication.programName}
-                          universityName={activeApplication.universityName}
-                          applicationId={activeApplication.id}
-                        />
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <div className="col-span-1">
-                    <MessagingUpdates />
-                  </div>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="contacts">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <Card className="animate-slide-in-up [animation-delay:100ms]">
-                    <CardHeader>
-                      <CardTitle>المستشارين التعليميين</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>قائمة المستشارين التعليميين المتاحين للتواصل</p>
-                      <Button className="mt-4 w-full">عرض المستشارين</Button>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="animate-slide-in-up [animation-delay:200ms]">
-                    <CardHeader>
-                      <CardTitle>ممثلي الجامعات</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>قائمة ممثلي الجامعات المتاحين للتواصل</p>
-                      <Button className="mt-4 w-full">عرض الممثلين</Button>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="animate-slide-in-up [animation-delay:300ms]">
-                    <CardHeader>
-                      <CardTitle>خدمات الدعم</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p>فريق الدعم والخدمات الطلابية</p>
-                      <Button className="mt-4 w-full">طلب المساعدة</Button>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="ai-assistant" className="h-[calc(100vh-20rem)]">
-                <Card className="h-full">
-                  <CardContent className="p-0 h-full">
-                    <MessagesAI applicationId={activeApplication.id} />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </>
-          )}
+          <TabsContent value="messages" className="space-y-4">
+            <MessagesContainer />
+          </TabsContent>
+
+          <TabsContent value="updates" className="space-y-4">
+            <MessagingUpdates />
+          </TabsContent>
+
+          <TabsContent value="ai-assistant" className="space-y-4">
+            <MessagesAI />
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>

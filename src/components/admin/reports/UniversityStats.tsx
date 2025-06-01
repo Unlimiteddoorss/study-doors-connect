@@ -1,41 +1,34 @@
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
-import { Card } from '@/components/ui/card';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const data = [
-  { name: 'جامعة لندن', students: 142, applications: 280 },
-  { name: 'جامعة تورنتو', students: 123, applications: 250 },
-  { name: 'جامعة ملبورن', students: 98, applications: 190 },
-  { name: 'جامعة برلين', students: 85, applications: 170 },
-  { name: 'جامعة طوكيو', students: 76, applications: 150 },
+const universityData = [
+  { name: 'جامعة إسطنبول', students: 145, applications: 180 },
+  { name: 'جامعة أنقرة', students: 128, applications: 165 },
+  { name: 'جامعة غازي عنتاب', students: 95, applications: 125 },
+  { name: 'جامعة صباح الدين زعيم', students: 87, applications: 110 },
+  { name: 'جامعة بيلكنت', students: 72, applications: 95 },
 ];
 
 export const UniversityStats = () => {
   return (
-    <Card className="p-6">
-      <h2 className="text-lg font-semibold mb-4">إحصائيات الجامعات</h2>
-      <div className="h-[400px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
+    <Card className="col-span-full">
+      <CardHeader>
+        <CardTitle>إحصائيات الجامعات</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={400}>
+          <BarChart data={universityData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
+            <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
             <YAxis />
             <Tooltip />
-            <Legend />
-            <Bar dataKey="students" fill="#2563eb" name="الطلاب" />
-            <Bar dataKey="applications" fill="#10b981" name="الطلبات" />
+            <Bar dataKey="students" fill="#2563eb" name="الطلاب المقبولين" />
+            <Bar dataKey="applications" fill="#16a34a" name="إجمالي الطلبات" />
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </CardContent>
     </Card>
   );
 };

@@ -1,7 +1,7 @@
 
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface AdminStatCardProps {
   title: string;
@@ -11,31 +11,32 @@ interface AdminStatCardProps {
   icon: React.ReactNode;
 }
 
-export const AdminStatCard = ({
+export const AdminStatCard: React.FC<AdminStatCardProps> = ({
   title,
   value,
   change,
   trend,
   icon
-}: AdminStatCardProps) => {
+}) => {
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between">
-        <div className="rounded-lg bg-unlimited-blue/10 p-2">
-          {icon}
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        <div className="flex items-center text-xs text-muted-foreground">
+          {trend === 'up' ? (
+            <TrendingUp className="h-4 w-4 text-green-600 mr-1" />
+          ) : (
+            <TrendingDown className="h-4 w-4 text-red-600 mr-1" />
+          )}
+          <span className={trend === 'up' ? 'text-green-600' : 'text-red-600'}>
+            {change}
+          </span>
         </div>
-        <div className={cn(
-          "flex items-center text-sm",
-          trend === 'up' ? 'text-unlimited-success' : 'text-unlimited-danger'
-        )}>
-          {trend === 'up' ? <ArrowUp className="h-4 w-4 mr-1" /> : <ArrowDown className="h-4 w-4 mr-1" />}
-          {change}
-        </div>
-      </div>
-      <div className="mt-4">
-        <p className="text-sm text-unlimited-gray">{title}</p>
-        <p className="text-2xl font-bold mt-1">{value}</p>
-      </div>
+      </CardContent>
     </Card>
   );
 };

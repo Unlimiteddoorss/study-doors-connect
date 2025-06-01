@@ -1,99 +1,59 @@
 
-import { Download, Printer, Calendar, FileSpreadsheet } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { DatePickerWithRange } from '@/components/ui/date-range-picker';
-import { DateRange } from 'react-day-picker';
+import { Download, FileText, Filter, Calendar } from 'lucide-react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 export const ReportActions = () => {
-  const { toast } = useToast();
-
-  const handleDownload = (format: 'pdf' | 'excel') => {
-    toast({
-      title: "جاري التحميل",
-      description: `يتم الآن تحميل التقرير بصيغة ${format === 'pdf' ? 'PDF' : 'Excel'}`,
-      variant: "default",
-    });
-
-    // Simulate download delay
-    setTimeout(() => {
-      toast({
-        title: "تم التحميل بنجاح",
-        description: `تم تحميل التقرير بصيغة ${format === 'pdf' ? 'PDF' : 'Excel'} بنجاح`,
-        variant: "default",
-      });
-    }, 2000);
-  };
-
-  const handlePrint = () => {
-    toast({
-      title: "جاري الطباعة",
-      description: "تم إرسال التقرير إلى الطابعة",
-      variant: "default",
-    });
-    window.print();
-  };
-
-  const handleDateChange = (range: DateRange) => {
-    if (range.from && range.to) {
-      toast({
-        title: "تم تحديث الفترة الزمنية",
-        description: `تم تحديث التقرير للفترة من ${range.from.toLocaleDateString('ar-SA')} إلى ${range.to.toLocaleDateString('ar-SA')}`,
-        variant: "default",
-      });
-    }
-  };
-
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button 
-        variant="outline" 
-        onClick={handlePrint}
-        className="hover:bg-gray-100 transition-colors"
-      >
-        <Printer className="h-4 w-4 ml-2" />
-        طباعة
-      </Button>
-      <Button 
-        variant="outline" 
-        onClick={() => handleDownload('pdf')}
-        className="hover:bg-gray-100 transition-colors"
-      >
-        <Download className="h-4 w-4 ml-2" />
-        تحميل PDF
-      </Button>
-      <Button 
-        variant="outline" 
-        onClick={() => handleDownload('excel')}
-        className="hover:bg-gray-100 transition-colors"
-      >
-        <FileSpreadsheet className="h-4 w-4 ml-2" />
-        تحميل Excel
-      </Button>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="hover:bg-blue-700 transition-colors">
-            <Calendar className="h-4 w-4 ml-2" />
-            تغيير الفترة
+    <div className="flex gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">
+            <Calendar className="h-4 w-4 mr-2" />
+            فترة التقرير
           </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>اختر الفترة الزمنية</DialogTitle>
-          </DialogHeader>
-          <DatePickerWithRange 
-            className="mt-4" 
-            onChange={handleDateChange}
-          />
-        </DialogContent>
-      </Dialog>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>آخر 30 يوم</DropdownMenuItem>
+          <DropdownMenuItem>آخر 3 أشهر</DropdownMenuItem>
+          <DropdownMenuItem>آخر 6 أشهر</DropdownMenuItem>
+          <DropdownMenuItem>السنة الحالية</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Button variant="outline">
+        <Filter className="h-4 w-4 mr-2" />
+        فلاتر متقدمة
+      </Button>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button>
+            <Download className="h-4 w-4 mr-2" />
+            تصدير
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>
+            <FileText className="h-4 w-4 mr-2" />
+            تصدير PDF
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <FileText className="h-4 w-4 mr-2" />
+            تصدير Excel
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <FileText className="h-4 w-4 mr-2" />
+            تصدير CSV
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 };
