@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/layout/DashboardLayout';
@@ -23,7 +24,6 @@ import {
   Settings,
   X
 } from 'lucide-react';
-import { getMessages } from '@/services/messageService';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -380,7 +380,7 @@ const StudentMessages = () => {
   const [activeTab, setActiveTab] = useState('contacts');
 
   useEffect(() => {
-    // Load any necessary data for messages
+    console.log('StudentMessages component mounted successfully');
   }, []);
 
   return (
