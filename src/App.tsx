@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import i18n from './i18n';
@@ -37,112 +38,107 @@ import Reports from '@/pages/admin/Reports';
 import AgentDashboard from '@/pages/agent/AgentDashboard';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import HomePage from '@/pages/HomePage';
-import { AuthProvider } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SecureLoginForm from '@/components/auth/SecureLoginForm';
 import SecureRegisterForm from '@/components/auth/SecureRegisterForm';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/programs" element={<ProgramsPage />} />
-            <Route path="/programs/:id" element={<ProgramDetails />} />
-            <Route path="/universities" element={<Universities />} />
-            <Route path="/universities/:id" element={<UniversityDetails />} />
-            <Route path="/countries" element={<Countries />} />
-            <Route path="/countries/:country" element={<CountryDetails />} />
-            <Route path="/testimonials" element={<Testimonials />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/scholarships" element={<Scholarships />} />
-            <Route path="/turkish-universities" element={<TurkishUniversities />} />
-            <Route path="/not-found" element={<NotFound />} />
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            
-            {/* Authentication routes */}
-            <Route path="/login" element={
-              <MainLayout>
-                <div className="container mx-auto px-4 py-12">
-                  <div className="max-w-md mx-auto">
-                    <div className="text-center mb-8">
-                      <h1 className="text-2xl font-bold">تسجيل الدخول</h1>
-                    </div>
-                    <SecureLoginForm />
-                  </div>
+    <div className="min-h-screen bg-gray-50">
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Index />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/support" element={<SupportPage />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/programs" element={<ProgramsPage />} />
+        <Route path="/programs/:id" element={<ProgramDetails />} />
+        <Route path="/universities" element={<Universities />} />
+        <Route path="/universities/:id" element={<UniversityDetails />} />
+        <Route path="/countries" element={<Countries />} />
+        <Route path="/countries/:country" element={<CountryDetails />} />
+        <Route path="/testimonials" element={<Testimonials />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/scholarships" element={<Scholarships />} />
+        <Route path="/turkish-universities" element={<TurkishUniversities />} />
+        <Route path="/not-found" element={<NotFound />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        
+        {/* Authentication routes */}
+        <Route path="/login" element={
+          <MainLayout>
+            <div className="container mx-auto px-4 py-12">
+              <div className="max-w-md mx-auto">
+                <div className="text-center mb-8">
+                  <h1 className="text-2xl font-bold">تسجيل الدخول</h1>
                 </div>
-              </MainLayout>
-            } />
-            <Route path="/register" element={
-              <MainLayout>
-                <div className="container mx-auto px-4 py-12">
-                  <div className="max-w-md mx-auto">
-                    <div className="text-center mb-8">
-                      <h1 className="text-2xl font-bold">إنشاء حساب جديد</h1>
-                    </div>
-                    <SecureRegisterForm />
-                  </div>
+                <SecureLoginForm />
+              </div>
+            </div>
+          </MainLayout>
+        } />
+        <Route path="/register" element={
+          <MainLayout>
+            <div className="container mx-auto px-4 py-12">
+              <div className="max-w-md mx-auto">
+                <div className="text-center mb-8">
+                  <h1 className="text-2xl font-bold">إنشاء حساب جديد</h1>
                 </div>
-              </MainLayout>
-            } />
-            
-            {/* Protected student routes */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <Dashboard />
-              </ProtectedRoute>
-            } />
-            <Route path="/student-messages" element={
-              <ProtectedRoute allowedRoles={['student']}>
-                <StudentMessages />
-              </ProtectedRoute>
-            } />
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } />
-            
-            {/* Protected admin routes */}
-            <Route path="/admin/*" element={
-              <ProtectedRoute requiredRole="admin">
-                <Routes>
-                  <Route path="/" element={<AdminDashboard />} />
-                  <Route path="dashboard" element={<EnhancedDashboard />} />
-                  <Route path="overview" element={<AdminOverview />} />
-                  <Route path="students" element={<EnhancedStudentsManagement />} />
-                  <Route path="applications" element={<ManageApplications />} />
-                  <Route path="universities" element={<ManageUniversities />} />
-                  <Route path="programs" element={<EnhancedProgramsManagement />} />
-                  <Route path="agents" element={<EnhancedAgentsManagement />} />
-                  <Route path="messages" element={<AdminMessages />} />
-                  <Route path="notifications" element={<AdminNotifications />} />
-                  <Route path="reports" element={<Reports />} />
-                </Routes>
-              </ProtectedRoute>
-            } />
-            
-            {/* Protected agent routes */}
-            <Route path="/agent" element={
-              <ProtectedRoute requiredRole="agent">
-                <AgentDashboard />
-              </ProtectedRoute>
-            } />
-            
-            {/* Catch all */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
-      </Router>
-    </AuthProvider>
+                <SecureRegisterForm />
+              </div>
+            </div>
+          </MainLayout>
+        } />
+        
+        {/* Protected student routes */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/student-messages" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentMessages />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected admin routes */}
+        <Route path="/admin/*" element={
+          <ProtectedRoute requiredRole="admin">
+            <Routes>
+              <Route path="/" element={<AdminDashboard />} />
+              <Route path="dashboard" element={<EnhancedDashboard />} />
+              <Route path="overview" element={<AdminOverview />} />
+              <Route path="students" element={<EnhancedStudentsManagement />} />
+              <Route path="applications" element={<ManageApplications />} />
+              <Route path="universities" element={<ManageUniversities />} />
+              <Route path="programs" element={<EnhancedProgramsManagement />} />
+              <Route path="agents" element={<EnhancedAgentsManagement />} />
+              <Route path="messages" element={<AdminMessages />} />
+              <Route path="notifications" element={<AdminNotifications />} />
+              <Route path="reports" element={<Reports />} />
+            </Routes>
+          </ProtectedRoute>
+        } />
+        
+        {/* Protected agent routes */}
+        <Route path="/agent" element={
+          <ProtectedRoute requiredRole="agent">
+            <AgentDashboard />
+          </ProtectedRoute>
+        } />
+        
+        {/* Catch all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
   );
 }
 

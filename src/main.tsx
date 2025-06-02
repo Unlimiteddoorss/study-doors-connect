@@ -7,7 +7,9 @@ import App from './App.tsx'
 import './index.css'
 import './i18n'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { AuthProvider } from '@/contexts/AuthContext'
 import ErrorBoundary from '@/components/shared/ErrorBoundary'
+import { Toaster } from '@/components/ui/toaster'
 
 // Register service worker for PWA functionality
 if ('serviceWorker' in navigator) {
@@ -33,7 +35,10 @@ if (rootElement) {
         <BrowserRouter>
           <HelmetProvider>
             <ThemeProvider defaultTheme="light">
-              <App />
+              <AuthProvider>
+                <App />
+                <Toaster />
+              </AuthProvider>
             </ThemeProvider>
           </HelmetProvider>
         </BrowserRouter>

@@ -2,7 +2,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -29,12 +28,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const { toast } = useToast();
+
+  // Simple toast function that doesn't depend on external hooks
+  const showToast = (title: string, description: string, variant?: 'default' | 'destructive') => {
+    console.log(`Toast: ${title} - ${description}`);
+    // We'll implement proper toast later when the app is stable
+  };
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -57,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -73,19 +79,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: 'خطأ في تسجيل الدخول',
-          description: error.message,
-          variant: 'destructive',
-        });
+        showToast('خطأ في تسجيل الدخول', error.message, 'destructive');
         return { error };
       }
 
-      toast({
-        title: 'تم تسجيل الدخول بنجاح',
-        description: 'مرحباً بك في المنصة',
-      });
-
+      showToast('تم تسجيل الدخول بنجاح', 'مرحباً بك في المنصة');
       return { error: null };
     } catch (error) {
       console.error('Sign in error:', error);
@@ -105,19 +103,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: 'خطأ في إنشاء الحساب',
-          description: error.message,
-          variant: 'destructive',
-        });
+        showToast('خطأ في إنشاء الحساب', error.message, 'destructive');
         return { error };
       }
 
-      toast({
-        title: 'تم إنشاء الحساب بنجاح',
-        description: 'تحقق من بريدك الإلكتروني لتأكيد الحساب',
-      });
-
+      showToast('تم إنشاء الحساب بنجاح', 'تحقق من بريدك الإلكتروني لتأكيد الحساب');
       return { error: null };
     } catch (error) {
       console.error('Sign up error:', error);
@@ -132,10 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setUserRole(null);
       
-      toast({
-        title: 'تم تسجيل الخروج',
-        description: 'نراك قريباً',
-      });
+      showToast('تم تسجيل الخروج', 'نراك قريباً');
     } catch (error) {
       console.error('Sign out error:', error);
     }
