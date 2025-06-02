@@ -16,49 +16,44 @@
     "login": "Giriş",
     "register": "Kayıt Ol",
     "myAccount": "Hesabım",
-    "logout": "Çıkış",
-    "accountSettings": {
-      "title": "Hesap Ayarları",
-      "securitySettings": "Güvenlik Ayarları",
-      "subAccounts": "Alt Hesaplar",
-      "preferences": "Tercihler"
+    "logout": "Çıkış"
+  },
+  "admin": {
+    "sidebar": {
+      "dashboard": "Kontrol Paneli",
+      "studentsManagement": "Öğrenci Yönetimi",
+      "agentsManagement": "Temsilci Yönetimi",
+      "universitiesManagement": "Üniversite Yönetimi",
+      "programsManagement": "Program Yönetimi",
+      "applicationsManagement": "Başvuru Yönetimi",
+      "messagingSystem": "Mesajlaşma Sistemi",
+      "notifications": "Bildirimler",
+      "reportsStatistics": "Raporlar ve İstatistikler",
+      "settings": "Ayarlar",
+      "adminPanel": "Yönetici Paneli"
     },
-    "securitySettings": {
-      "title": "Güvenlik Ayarları",
-      "description": "Hesabınızın güvenlik ayarlarını ve kimlik doğrulama seçeneklerini yönetin",
-      "twoFactor": "İki Faktörlü Kimlik Doğrulama",
-      "twoFactorEnabledInfo": "İki faktörlü kimlik doğrulama etkin, giriş yaparken doğrulama kodu gönderilecek",
-      "twoFactorDisabledInfo": "Hesabınızın güvenliğini artırmak için iki faktörlü kimlik doğrulamayı etkinleştirin",
-      "enable": "Etkinleştir",
-      "disable": "Devre Dışı Bırak",
-      "twoFactorEnabled": "İki faktörlü kimlik doğrulama etkinleştirildi",
-      "twoFactorDisabled": "İki faktörlü kimlik doğrulama devre dışı bırakıldı",
-      "twoFactorEnabledDescription": "İki faktörlü kimlik doğrulama hesabınız için başarıyla etkinleştirildi",
-      "twoFactorDisabledDescription": "İki faktörlü kimlik doğrulama hesabınız için devre dışı bırakıldı",
-      "changePassword": "Şifre Değiştir",
-      "changePasswordDescription": "Hesap şifrenizi değiştirin",
-      "change": "Değiştir",
-      "error": "Hata",
-      "errorDescription": "İsteğiniz işlenirken bir hata oluştu, lütfen tekrar deneyin",
-      "loginHistory": "Giriş Geçmişi",
-      "loginHistoryDescription": "Hesabınıza yapılan son giriş etkinliklerini görüntüleyin",
-      "viewFullHistory": "Tüm geçmişi görüntüle",
-      "lastLoginTitle": "Son Giriş",
-      "previousLoginTitle": "Önceki Giriş",
-      "securityWarning": "Güvenlik Uyarısı",
-      "securityWarningDesc": "İki faktörlü kimlik doğrulama olmadan hesabınız daha savunmasızdır. Daha iyi koruma için etkinleştirmenizi öneririz."
-    },
-    "preferences": {
-      "title": "Tercihler",
-      "description": "Kullanıcı deneyiminizi özelleştirin",
-      "language": "Dil",
-      "theme": "Tema",
-      "lightTheme": "Açık Tema",
-      "darkTheme": "Koyu Tema",
-      "systemTheme": "Sistem Teması",
-      "lightThemeDesc": "Açık temayı kullan",
-      "darkThemeDesc": "Koyu temayı kullan",
-      "systemThemeDesc": "Sistem tercihlerini takip et"
+    "communication": "İletişim",
+    "additional": "Ek"
+  },
+  "dashboard": {
+    "home": "Ana Sayfa",
+    "student": {
+      "title": "Öğrenci Paneli"
     }
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "markAllRead": "Tümünü okundu işaretle",
+    "markRead": "Okundu işaretle",
+    "all": "Tümü",
+    "unread": "Okunmamış",
+    "starred": "Yıldızlı",
+    "noNotifications": "Bildirim yok",
+    "noUnreadNotifications": "Okunmamış bildirim yok",
+    "noStarredNotifications": "Yıldızlı bildirim yok",
+    "viewAllNotifications": "Tüm bildirimleri görüntüle"
+  },
+  "language": {
+    "select": "Dil Seçin"
   }
 }

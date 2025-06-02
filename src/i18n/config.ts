@@ -6,17 +6,54 @@ import arTranslations from './locales/ar.json';
 import frTranslations from './locales/fr.json';
 import trTranslations from './locales/tr.json';
 
-// Get language from localStorage or default to browser language
-const savedLanguage = localStorage.getItem('language') || navigator.language.split('-')[0];
+// Safe function to get from localStorage
+const getSavedLanguage = () => {
+  try {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('language');
+    }
+  } catch (error) {
+    console.warn('Could not access localStorage:', error);
+  }
+  return null;
+};
+
+// Safe function to get browser language
+const getBrowserLanguage = () => {
+  try {
+    if (typeof navigator !== 'undefined') {
+      return navigator.language.split('-')[0];
+    }
+  } catch (error) {
+    console.warn('Could not access navigator:', error);
+  }
+  return 'en';
+};
+
+// Get language safely
+const savedLanguage = getSavedLanguage() || getBrowserLanguage();
 const defaultLanguage = ['ar', 'en', 'fr', 'tr'].includes(savedLanguage) ? savedLanguage : 'en';
 
 // Determine direction based on language
 const isRtlLanguage = (lang: string) => ['ar'].includes(lang);
 
-// Set document direction based on language
-document.documentElement.dir = isRtlLanguage(defaultLanguage) ? 'rtl' : 'ltr';
-document.documentElement.lang = defaultLanguage;
-document.documentElement.classList.add(isRtlLanguage(defaultLanguage) ? 'rtl' : 'ltr');
+// Safe function to set document properties
+const setDocumentProperties = (lang: string) => {
+  try {
+    if (typeof document !== 'undefined') {
+      const isRtl = isRtlLanguage(lang);
+      document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+      document.documentElement.classList.remove('rtl', 'ltr');
+      document.documentElement.classList.add(isRtl ? 'rtl' : 'ltr');
+    }
+  } catch (error) {
+    console.warn('Could not set document properties:', error);
+  }
+};
+
+// Set initial document direction
+setDocumentProperties(defaultLanguage);
 
 i18n
   .use(initReactI18next)
@@ -29,10 +66,10 @@ i18n
         translation: arTranslations
       },
       fr: {
-        translation: frTranslations || {}
+        translation: frTranslations
       },
       tr: {
-        translation: trTranslations || {}
+        translation: trTranslations
       }
     },
     lng: defaultLanguage,
@@ -42,37 +79,41 @@ i18n
     }
   });
 
-// Function to change language
+// Function to change language safely
 export const changeLanguage = (lng: string) => {
   i18n.changeLanguage(lng).then(() => {
-    localStorage.setItem('language', lng);
-    
-    // Update document direction
-    const isRtl = isRtlLanguage(lng);
-    document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
-    document.documentElement.lang = lng;
-    
-    // Update CSS classes for RTL support
-    if (isRtl) {
-      document.documentElement.classList.add('rtl');
-      document.documentElement.classList.remove('ltr');
-    } else {
-      document.documentElement.classList.add('ltr');
-      document.documentElement.classList.remove('rtl');
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', lng);
+      }
+    } catch (error) {
+      console.warn('Could not save language to localStorage:', error);
     }
     
-    // Force re-render of RTL/LTR sensitive components
-    window.dispatchEvent(new Event('languagechange'));
+    // Update document direction
+    setDocumentProperties(lng);
     
-    // Refresh page for comprehensive RTL/LTR adjustment if needed
-    // Uncomment if you encounter layout issues when switching languages
-    // window.location.reload();
+    // Force re-render of RTL/LTR sensitive components
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('languagechange'));
+    }
   });
 };
 
 // Export language utility functions
-export const isRTL = () => document.documentElement.dir === 'rtl';
-export const getCurrentLanguage = () => i18n.language;
+export const isRTL = () => {
+  try {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.dir === 'rtl';
+    }
+  } catch (error) {
+    console.warn('Could not check RTL status:', error);
+  }
+  return false;
+};
+
+export const getCurrentLanguage = () => i18n.language || 'en';
+
 export const getLanguageName = (code: string) => {
   const names: Record<string, string> = {
     en: 'English',

@@ -27,8 +27,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTranslation } from 'react-i18next';
 import { changeLanguage, getCurrentLanguage, getLanguageName } from '@/i18n/config';
 
-// Import our notification center component
-import NotificationCenter from '@/components/admin/NotificationCenter';
+// Import our simplified notification center component
+import SimpleNotificationCenter from '@/components/admin/SimpleNotificationCenter';
 
 interface DashboardHeaderProps {
   userRole?: 'student' | 'admin' | 'agent';
@@ -37,18 +37,60 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeaderProps) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const { t, i18n } = useTranslation();
-  const currentLanguage = getCurrentLanguage();
+  const { t } = useTranslation();
+  
+  // Safe function to get current language
+  const getCurrentLang = () => {
+    try {
+      return getCurrentLanguage();
+    } catch (error) {
+      console.warn('Error getting current language:', error);
+      return 'en';
+    }
+  };
+  
+  const currentLanguage = getCurrentLang();
   
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
-    // Implement actual theme toggling here
-    document.documentElement.classList.toggle('dark');
+    try {
+      if (typeof document !== 'undefined') {
+        document.documentElement.classList.toggle('dark');
+      }
+    } catch (error) {
+      console.warn('Could not toggle theme:', error);
+    }
   };
 
   const handleLanguageChange = (lang: string) => {
     if (lang !== currentLanguage) {
-      changeLanguage(lang);
+      try {
+        changeLanguage(lang);
+      } catch (error) {
+        console.warn('Could not change language:', error);
+      }
+    }
+  };
+
+  const getDashboardTitle = () => {
+    try {
+      if (userRole === 'admin') return t('admin.dashboard.title', 'لوحة تحكم الإدارة');
+      if (userRole === 'agent') return t('agent.dashboard.title', 'لوحة تحكم الوكيل');
+      return t('student.dashboard.title', 'لوحة تحكم الطالب');
+    } catch (error) {
+      console.warn('Error getting dashboard title:', error);
+      return 'لوحة التحكم';
+    }
+  };
+
+  const getUserName = () => {
+    try {
+      if (userRole === 'admin') return t('auth.userNames.admin', 'المدير');
+      if (userRole === 'agent') return t('auth.userNames.agent', 'الوكيل');
+      return t('auth.userNames.student', 'الطالب');
+    } catch (error) {
+      console.warn('Error getting user name:', error);
+      return 'المستخدم';
     }
   };
 
@@ -62,15 +104,13 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
           
           <div className="ml-4 md:ml-0">
             <h1 className="text-lg font-medium text-unlimited-dark-blue dark:text-white">
-              {userRole === 'admin' ? t('admin.dashboard.title') : 
-               userRole === 'agent' ? t('agent.dashboard.title') : 
-               t('student.dashboard.title')}
+              {getDashboardTitle()}
             </h1>
           </div>
         </div>
         
         <div className="flex items-center space-x-4 rtl:space-x-reverse">
-          {/* Language Switcher - Enhanced */}
+          {/* Language Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon" className="relative">
@@ -79,7 +119,7 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>{t('language.select')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('language.select', 'اختر اللغة')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuRadioGroup value={currentLanguage} onValueChange={handleLanguageChange}>
                 <DropdownMenuRadioItem value="ar" className="flex items-center justify-between">
@@ -102,7 +142,7 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
             </DropdownMenuContent>
           </DropdownMenu>
           
-          {/* Theme Toggle - Enhanced */}
+          {/* Theme Toggle */}
           <Button 
             variant="outline" 
             size="icon" 
@@ -112,10 +152,10 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
             {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </Button>
           
-          {/* Notifications - Use the new NotificationCenter component */}
-          <NotificationCenter />
+          {/* Notifications - Use the simplified component */}
+          <SimpleNotificationCenter />
           
-          {/* User Menu - Enhanced */}
+          {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center">
@@ -126,30 +166,26 @@ const DashboardHeader = ({ userRole = 'student', toggleSidebar }: DashboardHeade
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden md:inline">
-                  {userRole === 'admin' ? 
-                    t('auth.userNames.admin') : 
-                    userRole === 'agent' ? 
-                    t('auth.userNames.agent') : 
-                    t('auth.userNames.student')}
+                  {getUserName()}
                 </span>
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel>{t('auth.profile')}</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('auth.profile', 'الملف الشخصي')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
                 <User className="h-4 w-4 mr-2" />
-                {t('auth.viewProfile')}
+                {t('auth.viewProfile', 'عرض الملف الشخصي')}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Settings className="h-4 w-4 mr-2" />
-                {t('auth.settings')}
+                {t('auth.settings', 'الإعدادات')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-unlimited-danger focus:text-unlimited-danger">
+              <DropdownMenuItem className="text-red-600 focus:text-red-600">
                 <LogOut className="h-4 w-4 mr-2" />
-                {t('auth.logout')}
+                {t('auth.logout', 'تسجيل الخروج')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
