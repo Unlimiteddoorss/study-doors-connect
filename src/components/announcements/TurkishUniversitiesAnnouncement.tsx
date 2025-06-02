@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { X, Check, Calendar, Smartphone, Link as LinkIcon, Phone } from 'lucide-react';
+import { X, Check, Calendar, Phone, Link as LinkIcon } from 'lucide-react';
 
 interface AnnouncementProps {
   onClose?: () => void;
@@ -12,18 +12,15 @@ const TurkishUniversitiesAnnouncement = ({ onClose }: AnnouncementProps) => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    // Check if the announcement was previously closed
     const announcementClosed = localStorage.getItem('turkishAnnouncementClosed');
     
     if (announcementClosed && (new Date().getTime() - parseInt(announcementClosed)) < 86400000) {
-      // If closed within the last 24 hours, don't show it
       setIsVisible(false);
     }
   }, []);
 
   const handleClose = () => {
     setIsVisible(false);
-    // Save the close timestamp
     localStorage.setItem('turkishAnnouncementClosed', new Date().getTime().toString());
     
     if (onClose) {

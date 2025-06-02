@@ -1,7 +1,8 @@
+
 {
   "site": {
     "name": "Unlimited Doors",
-    "tagline": "Unlimited Doors - Since 1992"
+    "tagline": "Unlimited Doors Educational - Since 1992"
   },
   "nav": {
     "home": "Home",
@@ -9,234 +10,23 @@
     "universities": "Universities",
     "about": "About",
     "contact": "Contact",
-    "apply": "Apply Now"
+    "apply": "Apply"
   },
   "auth": {
     "login": "Login",
     "register": "Register",
     "myAccount": "My Account",
-    "logout": "Logout"
-  },
-  "hero": {
-    "title": "Opening Future Doors for Students Worldwide",
-    "subtitle": "We help you choose the right university and ideal program for your academic and professional future",
-    "exploreCta": "Explore Programs",
-    "applyCta": "Apply Now",
-    "search": {
-      "title": "Find Your Perfect Program",
-      "country": "Country",
-      "selectCountry": "Select Country",
-      "level": "Study Level",
-      "selectLevel": "Select Level",
-      "major": "Major",
-      "selectMajor": "Select Major",
-      "button": "Search"
-    }
-  },
-  "stats": {
-    "successfulStudents": "Successful Students",
-    "partnerUniversities": "Partner Universities",
-    "availableCountries": "Available Countries",
-    "programs": "Study Programs",
-    "title": "Our Numbers Speak for Themselves",
-    "subtitle": "Our achievements in higher education over the years"
-  },
-  "application": {
-    "title": "Submit Application",
-    "subtitle": "Apply to the best universities worldwide",
-    "tabs": {
-      "newApplication": "New Application",
-      "browsePrograms": "Browse Programs",
-      "myApplications": "My Applications"
-    },
-    "search": {
-      "placeholder": "Search for program or university...",
-      "country": "Country",
-      "level": "Study Level",
-      "language": "Study Language",
-      "resetFilters": "Reset Filters",
-      "allCountries": "All Countries",
-      "allLevels": "All Levels",
-      "allLanguages": "All Languages"
-    },
-    "programCard": {
-      "applyNow": "Apply for this Program",
-      "duration": "Duration",
-      "tuitionFees": "Tuition Fees"
-    },
-    "noPrograms": {
-      "title": "No Matching Programs",
-      "description": "No programs match your current search criteria. Please adjust your search options or reset filters.",
-      "resetFilters": "Reset Filters"
-    },
-    "myApplications": {
-      "title": "My Applications",
-      "subtitle": "Track your application status and updates",
-      "submission": "Submission Date",
-      "notes": "Notes",
-      "completeApplication": "Complete Application",
-      "viewDetails": "View Details",
-      "empty": {
-        "title": "No Current Applications",
-        "description": "You haven't submitted any applications yet. Browse available programs and apply now.",
-        "browsePrograms": "Browse Programs"
-      }
-    },
-    "status": {
-      "approved": "Approved",
-      "rejected": "Rejected",
-      "review": "Under Review",
-      "incomplete": "Incomplete",
-      "processing": "Processing"
-    },
-    "notifications": {
-      "applyStart": "Application Started",
-      "applyStartDesc": "Application process started successfully",
-      "continueApplication": "Continue Application",
-      "continueApplicationDesc": "You can now continue completing your application"
+    "logout": "Logout",
+    "profile": "Profile",
+    "viewProfile": "View Profile",
+    "settings": "Settings",
+    "userNames": {
+      "admin": "Admin",
+      "agent": "Agent",
+      "student": "Student"
     }
   },
   "admin": {
-    "dashboard": "Dashboard",
-    "students": "Students Management",
-    "agents": "Agents Management",
-    "universities": "Universities Management",
-    "programs": "Programs Management",
-    "applications": "Applications Management",
-    "notifications": "Notifications",
-    "messages": "Messaging System",
-    "reports": "Reports & Statistics",
-    "settings": "Settings",
-    "additional": "Additional",
-    "communication": "Communication & Notifications",
-    "breadcrumbs": {
-      "home": "Home",
-      "dashboard": "Dashboard",
-      "adminDashboard": "Admin Dashboard",
-      "students": "Students Management",
-      "agents": "Agents Management",
-      "programs": "Programs Management",
-      "applications": "Applications Management",
-      "universities": "Universities Management"
-    },
-    "studentsPage": {
-      "title": "Students Management",
-      "addStudent": "Add Student",
-      "importStudents": "Import",
-      "exportStudents": "Export",
-      "searchPlaceholder": "Search for student...",
-      "nationality": "Nationality",
-      "allNationalities": "All Nationalities",
-      "status": "Status",
-      "allStatuses": "All Statuses",
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending Activation",
-      "graduated": "Graduated",
-      "tableHeaders": {
-        "id": "Student ID",
-        "name": "Name",
-        "email": "Email",
-        "phone": "Phone",
-        "nationality": "Nationality",
-        "program": "Program",
-        "university": "University",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "noData": "No matching data found",
-      "agent": "Agent",
-      "addNewStudent": "Add New Student",
-      "addNewStudentDesc": "Enter new student information. Click save when done.",
-      "importData": "Import Student Data",
-      "importDataDesc": "Please upload a CSV or Excel file containing student data.",
-      "uploadFile": "Upload File",
-      "dragDrop": "Drag and drop file here or click to select",
-      "chooseFile": "Choose File",
-      "save": "Save",
-      "import": "Import Data"
-    },
-    "agentsPage": {
-      "title": "Agents Management",
-      "addAgent": "Add Agent",
-      "importAgents": "Import",
-      "exportAgents": "Export",
-      "searchPlaceholder": "Search for agent...",
-      "country": "Country",
-      "allCountries": "All Countries",
-      "status": "Status",
-      "allStatuses": "All Statuses",
-      "active": "Active",
-      "inactive": "Inactive",
-      "pending": "Pending Activation",
-      "tableHeaders": {
-        "id": "Agent ID",
-        "name": "Name",
-        "email": "Email",
-        "phone": "Phone",
-        "country": "Country",
-        "students": "Students",
-        "applications": "Applications",
-        "commission": "Commission",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "noData": "No matching data found",
-      "addNewAgent": "Add New Agent",
-      "addNewAgentDesc": "Enter new agent information. Click save when done.",
-      "importData": "Import Agent Data",
-      "importDataDesc": "Please upload a CSV or Excel file containing agent data.",
-      "commissionRate": "Commission Rate (%)",
-      "agentOptions": "Agent Options",
-      "viewAgentRequests": "View Agent Requests",
-      "viewAgentStudents": "View Agent Students",
-      "editCommissionRate": "Edit Commission Rate",
-      "sendMessage": "Send Message",
-      "disableAccount": "Disable Account",
-      "enableAccount": "Enable Account",
-      "delete": "Delete"
-    },
-    "universitiesPage": {
-      "title": "Universities Management",
-      "addUniversity": "Add University",
-      "importUniversities": "Import",
-      "exportUniversities": "Export",
-      "searchPlaceholder": "Search for university...",
-      "country": "Country",
-      "allCountries": "All Countries",
-      "status": "Status",
-      "allStatuses": "All Statuses",
-      "active": "Active",
-      "inactive": "Inactive",
-      "tableHeaders": {
-        "id": "University ID",
-        "name": "University Name",
-        "country": "Country",
-        "city": "City",
-        "programsCount": "Programs",
-        "studentsCount": "Students",
-        "ranking": "Ranking",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "noData": "No matching data found",
-      "addNewUniversity": "Add New University",
-      "addNewUniversityDesc": "Enter new university information. Click save when done.",
-      "importData": "Import University Data",
-      "importDataDesc": "Please upload a CSV or Excel file containing university data.",
-      "nameEn": "Name (English)",
-      "nameAr": "Name (Arabic)",
-      "city": "City",
-      "website": "Website",
-      "ranking": "Global Ranking",
-      "universityLogo": "University Logo",
-      "universityOptions": "University Options",
-      "disableUniversity": "Disable University",
-      "enableUniversity": "Enable University",
-      "viewPrograms": "View Programs",
-      "viewStudents": "View Students",
-      "visitWebsite": "Visit Official Website"
-    },
     "sidebar": {
       "dashboard": "Dashboard",
       "studentsManagement": "Students Management",
@@ -250,46 +40,48 @@
       "settings": "Settings",
       "adminPanel": "Admin Panel"
     },
-    "actions": {
-      "view": "View",
-      "edit": "Edit",
-      "delete": "Delete"
-    },
-    "toasts": {
-      "addSuccess": "Added successfully",
-      "addSuccessDesc": "New item added successfully",
-      "importSuccess": "Import successful",
-      "importSuccessDesc": "Data imported successfully",
-      "exportSuccess": "Export successful",
-      "exportSuccessDesc": "Data exported successfully",
-      "deleteSuccess": "Deleted successfully",
-      "deleteSuccessDesc": "Item deleted successfully",
-      "statusChange": "Status changed",
-      "statusChangeDesc": "Status changed successfully"
+    "communication": "Communication",
+    "additional": "Additional",
+    "dashboard": {
+      "title": "Admin Dashboard"
     }
   },
-  "footer": {
-    "companyDescription": "Unlimited Doors is a trusted educational consulting company helping students navigate international education opportunities since 1992. We provide comprehensive support for study abroad programs worldwide.",
-    "programs": "Study Programs",
-    "bachelorPrograms": "Bachelor's Programs",
-    "masterPrograms": "Master's Programs",
-    "phdPrograms": "PhD Programs",
-    "diplomaPrograms": "Diploma Programs",
-    "languagePrograms": "Language Programs",
-    "quickLinks": "Quick Links",
+  "dashboard": {
     "home": "Home",
-    "about": "About Us",
-    "universities": "Universities",
-    "programs": "Study Programs",
-    "contact": "Contact Us",
-    "contactUs": "Contact Information",
-    "allRightsReserved": "All Rights Reserved",
-    "privacy": "Privacy Policy",
-    "terms": "Terms & Conditions",
-    "cookies": "Cookie Policy",
-    "newsletter": "Subscribe to Newsletter",
-    "emailPlaceholder": "Your email address",
-    "subscribe": "Subscribe",
-    "followUs": "Follow Us"
+    "student": {
+      "title": "Student Dashboard"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "markRead": "Mark as read",
+    "all": "All",
+    "unread": "Unread",
+    "starred": "Starred",
+    "noNotifications": "No notifications",
+    "noUnreadNotifications": "No unread notifications",
+    "noStarredNotifications": "No starred notifications",
+    "viewAllNotifications": "View all notifications"
+  },
+  "language": {
+    "select": "Select Language"
+  },
+  "student": {
+    "dashboard": {
+      "title": "Student Dashboard"
+    }
+  },
+  "agent": {
+    "dashboard": {
+      "title": "Agent Dashboard"
+    }
+  },
+  "application": {
+    "myApplications": {
+      "title": "My Applications",
+      "subtitle": "Track all your university applications",
+      "newApplication": "New Application"
+    }
   }
 }

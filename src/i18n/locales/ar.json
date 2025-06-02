@@ -1,182 +1,32 @@
+
 {
   "site": {
-    "name": "أبواب غير محدودة",
-    "tagline": "أبواب غير محدودة - منذ 1992"
+    "name": "أبواب بلا حدود",
+    "tagline": "أبواب بلا حدود التعليمية - منذ 1992"
   },
   "nav": {
     "home": "الرئيسية",
     "programs": "البرامج",
     "universities": "الجامعات",
-    "about": "من نحن",
+    "about": "حولنا",
     "contact": "اتصل بنا",
     "apply": "قدم الآن"
   },
   "auth": {
     "login": "تسجيل الدخول",
-    "register": "تسجيل جديد",
+    "register": "إنشاء حساب",
     "myAccount": "حسابي",
     "logout": "تسجيل الخروج",
-    "subAccounts": "الحسابات الفرعية",
-    "permissions": "الصلاحيات",
-    "accountSettings": "إعدادات الحساب",
-    "securitySettings": "إعدادات الأمان",
     "profile": "الملف الشخصي",
     "viewProfile": "عرض الملف الشخصي",
     "settings": "الإعدادات",
     "userNames": {
-      "student": "طالب",
-      "admin": "مدير النظام",
-      "agent": "وكيل"
-    },
-    "accountSettings": {
-      "title": "إعدادات الحساب",
-      "securitySettings": "إعدادات الأمان",
-      "subAccounts": "الحسابات الفرعية"
-    },
-    "securitySettings": {
-      "title": "إعدادات الأمان",
-      "description": "إدارة إعدادات الأمان وخيارات المصادقة لحسابك",
-      "twoFactor": "المصادقة الثنائية",
-      "twoFactorEnabledInfo": "المصادقة الثنائية مفعلة، سيتم إرسال رمز تحقق عند تسجيل الدخول",
-      "twoFactorDisabledInfo": "قم بتفعيل المصادقة الثنائية لتعزيز أمان حسابك",
-      "enable": "تفعيل",
-      "disable": "تعطيل",
-      "twoFactorEnabled": "تم تفعيل المصادقة الثنائية",
-      "twoFactorDisabled": "تم تعطيل المصادقة الثنائية",
-      "twoFactorEnabledDescription": "تم تفعيل المصادقة الثنائية بنجاح لحسابك",
-      "twoFactorDisabledDescription": "تم تعطيل المصادقة الثنائية لحسابك",
-      "changePassword": "تغيير كلمة المرور",
-      "changePasswordDescription": "قم بتغيير كلمة المرور الخاصة بحسابك",
-      "change": "تغيير",
-      "error": "خطأ",
-      "errorDescription": "حدث خطأ أثناء معالجة طلبك، يرجى المحاولة مرة أخرى",
-      "loginHistory": "سجل تسجيل الدخول",
-      "loginHistoryDescription": "اطّلع على آخر نشاطات تسجيل الدخول إلى حسابك",
-      "viewFullHistory": "عرض سجل تسجيل الدخول الكامل"
-    }
-  },
-  "login": {
-    "studentTab": "طالب",
-    "agentTab": "وكيل",
-    "adminTab": "مدير النظام",
-    "studentTitle": "تسجيل دخول الطالب",
-    "studentDescription": "قم بتسجيل الدخول للوصول إلى حسابك وإدارة طلباتك",
-    "agentTitle": "تسجيل دخول الوكيل",
-    "agentDescription": "قم بتسجيل الدخول لإدارة طلبات الطلاب والعمولات",
-    "adminTitle": "تسجيل دخول المدير",
-    "adminDescription": "قم بتسجيل الدخول للوصول إلى لوحة التحكم",
-    "emailLabel": "البريد الإلكتروني",
-    "emailPlaceholder": "أدخل بريدك الإلكتروني",
-    "emailRequired": "البريد الإلكتروني مطلوب",
-    "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
-    "passwordLabel": "كلمة المرور",
-    "passwordPlaceholder": "أدخل كلمة المرور",
-    "passwordRequired": "كلمة المرور مطلوبة",
-    "passwordTooShort": "كلمة المرور قصيرة جداً",
-    "rememberMe": "تذكرني",
-    "forgotPassword": "نسيت كلمة المرور؟",
-    "loginButton": "تسجيل الدخول",
-    "loggingIn": "جاري تسجيل الدخول...",
-    "noAccount": "ليس لديك حساب؟",
-    "createAccount": "إنشاء حساب جديد",
-    "2faTitle": "التحقق بخطوتين",
-    "2faDescription": "أدخل رمز التحقق المرسل إلى بريدك الإلكتروني",
-    "2faCodeLabel": "رمز التحقق",
-    "2faRequired": "رمز التحقق مطلوب",
-    "enter2faCode": "الرجاء إدخال رمز التحقق",
-    "verifyButton": "تحقق",
-    "verifying": "جاري التحقق...",
-    "successTitle": "تم تسجيل الدخول بنجاح",
-    "successMessage": "مرحباً بك في منصة أبواب غير محدودة",
-    "errorTitle": "خطأ في تسجيل الدخول",
-    "errorMessage": "يرجى التحقق من البريد الإلكتروني وكلمة المرور",
-    "suspiciousActivityTitle": "نشاط مشبوه",
-    "suspiciousActivityDescription": "تم رصد محاولات تسجيل دخول متكررة. يرجى المحاولة لاحقاً",
-    "securityOptions": "خيارات الأمان",
-    "enableTwoFactor": "تفعيل المصادقة الثنائية",
-    "disableTwoFactor": "تعطيل المصادقة الثنائية"
-  },
-  "forgotPassword": {
-    "title": "استعادة كلمة المرور",
-    "description": "أدخل بريدك الإلكتروني وسنرسل لك رابطاً لإعادة تعيين كلمة المرور",
-    "emailLabel": "البريد الإلكتروني",
-    "emailPlaceholder": "أدخل بريدك الإلكتروني",
-    "emailRequired": "البريد الإلكتروني مطلوب",
-    "emailInvalid": "البريد الإلكتروني غير صالح",
-    "sendResetLink": "إرسال رابط إعادة التعيين",
-    "sendingLink": "جاري الإرسال...",
-    "emailSentTitle": "تم الإرسال",
-    "emailSentDescription": "تم إرسال بريد إلكتروني يحتوي على رابط إعادة التعيين",
-    "verificationCodeLabel": "رمز التحقق",
-    "codeSentTo": "تم إرسال رمز التحقق إلى",
-    "resendCode": "إعادة إرسال الرمز",
-    "verifyCode": "التحقق من الرمز",
-    "verifying": "جاري التحقق...",
-    "codeVerifiedTitle": "تم التحقق",
-    "codeVerifiedDescription": "تم التحقق من الرمز بنجاح",
-    "backToEmail": "العودة للخطوة السابقة",
-    "newPasswordLabel": "كلمة المرور الجديدة",
-    "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
-    "confirmPasswordLabel": "تأكيد كلمة المرور",
-    "confirmPasswordPlaceholder": "أكد كلمة المرور الجديدة",
-    "resetPassword": "إعادة تعيين كلمة المرور",
-    "resettingPassword": "جاري إعادة التعيين...",
-    "passwordResetTitle": "تم إعادة التعيين",
-    "passwordResetDescription": "تمت إعادة تعيين كلمة المرور بنجاح",
-    "rememberPassword": "تذكرت كلمة المرور؟",
-    "backToLogin": "العودة لتسجيل الدخول",
-    "errorTitle": "خطأ",
-    "errorSendingEmail": "حدث خطأ أثناء إرسال البريد الإلكتروني",
-    "errorVerifyingCode": "حدث خطأ أثناء التحقق من الرمز",
-    "errorResettingPassword": "حدث خطأ أثناء إعادة تعيين كلمة المرور"
-  },
-  "account": {
-    "title": "إدارة الحساب",
-    "subAccounts": "الحسابات الفرعية",
-    "addSubAccount": "إضافة حساب فرعي",
-    "subAccountName": "اسم المستخدم",
-    "subAccountEmail": "البريد الإلكتروني",
-    "subAccountRole": "الصلاحية",
-    "roleAdmin": "مدير - تحكم كامل",
-    "roleEditor": "محرر - تعديل وعرض",
-    "roleViewer": "مشاهد - عرض فقط",
-    "activeStatus": "نشط",
-    "inactiveStatus": "غير نشط",
-    "delete": "حذف",
-    "noSubAccounts": "لا يوجد حسابات فرعية حالياً"
-  },
-  "dashboard": {
-    "home": "الرئيسية",
-    "student": {
-      "title": "لوحة تحكم الطالب"
-    },
-    "agent": {
-      "title": "لوحة تحكم الوكيل"
+      "admin": "المدير",
+      "agent": "الوكيل", 
+      "student": "الطالب"
     }
   },
   "admin": {
-    "dashboard": {
-      "title": "لوحة تحكم المدير"
-    },
-    "breadcrumbs": {
-      "home": "الرئيسية",
-      "adminDashboard": "لوحة التحكم",
-      "students": "الطلاب",
-      "applications": "الطلبات",
-      "programs": "البرامج",
-      "agents": "الوكلاء",
-      "universities": "الجامعات"
-    },
-    "students": "إدارة الطلاب",
-    "agents": "إدارة الوكلاء",
-    "applications": "إدارة الطلبات",
-    "programs": "إدارة البرامج",
-    "universities": "إدارة الجامعات",
-    "reports": {
-      "title": "التقارير والإحصائيات"
-    },
-    "communication": "التواصل",
-    "additional": "إضافي",
     "sidebar": {
       "dashboard": "لوحة التحكم",
       "studentsManagement": "إدارة الطلاب",
@@ -184,302 +34,42 @@
       "universitiesManagement": "إدارة الجامعات",
       "programsManagement": "إدارة البرامج",
       "applicationsManagement": "إدارة الطلبات",
-      "messagingSystem": "نظام المراسلات",
+      "messagingSystem": "نظام الرسائل",
       "notifications": "الإشعارات",
       "reportsStatistics": "التقارير والإحصائيات",
       "settings": "الإعدادات",
-      "adminPanel": "لوحة المدير"
+      "adminPanel": "لوحة الإدارة"
+    },
+    "communication": "التواصل",
+    "additional": "إضافي",
+    "dashboard": {
+      "title": "لوحة تحكم الإدارة"
     }
   },
-  "application": {
-    "submit": {
-      "title": "تقديم طلب",
-      "subtitle": "أكمل المعلومات المطلوبة وقدم طلبك"
-    },
-    "myApplications": {
-      "title": "طلباتي",
-      "subtitle": "قائمة طلبات التقديم الخاصة بك",
-      "newApplication": "طلب جديد"
-    },
-    "steps": {
-      "personal": "المعلومات الشخصية",
-      "documents": "المستندات",
-      "academic": "المعلومات الأكاديمية",
-      "program": "اختيار البرنامج",
-      "review": "المراجعة والتقديم"
-    },
-    "personal": {
-      "firstName": "الاسم الأول",
-      "firstNamePlaceholder": "أدخل اسمك الأول",
-      "lastName": "اسم العائلة",
-      "lastNamePlaceholder": "أدخل اسم عائلتك",
-      "email": "البريد الإلكتروني",
-      "phone": "رقم الهاتف",
-      "gender": "الجنس",
-      "male": "ذكر",
-      "female": "أنثى",
-      "birthDate": "تاريخ الميلاد",
-      "selectDate": "اختر تاريخ",
-      "nationality": "الجنسية",
-      "selectNationality": "اختر الجنسية"
-    },
-    "documents": {
-      "title": "تحميل المستندات",
-      "description": "قم بتحميل المستندات المطلوبة أدناه. يجب أن تكون جميع الملفات بتنسيق PDF أو صور واضحة.",
-      "uploadFile": "تحم��ل ملف",
-      "dragDrop": "اسحب وأفلت أو انقر للتحميل",
-      "required": "مطلوب",
-      "approved": "معتمد",
-      "uploaded": "تم التحميل",
-      "missing": "مفقود",
-      "imageFormat": "صورة (JPG، PNG)",
-      "uploadedDescription": "تم تحميل المستند بنجاح",
-      "removed": "تم إزالة المستند",
-      "removedDescription": "تمت إزالة المستند بنجاح",
-      "uploadRequirements": "متطلبات التحميل",
-      "uploadRequirementsDescription": "جميع المستندات يجب أن تكون بالصيغ التالية وألا يتجاوز حجمها 5 ميجابايت",
-      "acceptedFormat": "صيغة مقبولة",
-      "maxSize": "الحد الأقصى 5 ميجابايت",
-      "uploadProgress": "تقدم التحميل",
-      "addDocument": "إضافة مستند آخر",
-      "addDocumentTitle": "إضافة مستند جديد",
-      "selectType": "اختر نوع المستند",
-      "selectDocumentType": "اختر نوع المستند",
-      "customName": "اسم المستند المخصص",
-      "enterCustomName": "أدخل اسم المستند المخصص",
-      "fileType": "نوع الملف",
-      "image": "صورة",
-      "anyFile": "أي ملف",
-      "dragDropFiles": "اسحب وأفلت الملفات هنا",
-      "or": "أو",
-      "browseFiles": "تصفح الملفات",
-      "uploading": "جاري التحميل...",
-      "uploadedOn": "تم التحميل في",
-      "pdfUploaded": "تم تحميل ملف PDF",
-      "rejectedMessage": "تم رفض هذا المستند. يرجى مراجعة المتطلبات وتحميله مرة أخرى.",
-      "approvedMessage": "تم اعتماد هذا المستند.",
-      "invalidType": "نوع ملف غير صالح",
-      "invalidTypeDescription": "يرجى تحميل الملف بالصيغة المطلوبة",
-      "fileTooLarge": "حجم الملف كبير جدًا",
-      "fileTooLargeDescription": "يرجى تحميل ملف لا يتجاوز 5 ميجابايت",
-      "error": "خطأ",
-      "tryAgain": "حاول مرة أخرى",
-      "documentRemoved": "تمت إزالة المستند",
-      "documentRemovedDescription": "تمت إزالة المستند بنجاح",
-      "documentAdded": "تمت إضافة المستند",
-      "documentAddedDescription": "تمت إضافة نوع مستند جديد بنجاح",
-      "enterDocumentName": "يرجى إدخال اسم المستند",
-      "selectDocumentType": "يرجى اختيار نوع المستند",
-      "statusRequired": "مطلوب",
-      "statusUploaded": "تم التحميل",
-      "statusApproved": "معتمد",
-      "statusRejected": "مرفوض",
-      "noDocuments": "لا توجد مستندات",
-      "download": "تحميل",
-      "upload": "رفع",
-      "view": "عرض",
-      "subtitle": "برنامج {{program}} في {{university}}",
-      "delete": "حذف"
-    },
-    "academic": {
-      "title": "المعلومات الأكاديمية",
-      "description": "أدخل معلوماتك الأكاديمية ومؤهلاتك التعليمية.",
-      "lastEducation": "آخر مؤهل دراسي",
-      "selectEducation": "اختر المؤهل",
-      "highSchool": "ثانوية عامة",
-      "bachelor": "بكالوريوس",
-      "master": "ماجستير",
-      "phd": "دكتوراه",
-      "other": "أخرى",
-      "graduationYear": "سنة التخرج",
-      "selectYear": "اختر السنة",
-      "gpa": "المعدل التراكمي",
-      "gpaPlaceholder": "مثال: 3.5 من 4.0",
-      "englishLevel": "مستوى اللغة الإنجليزية",
-      "selectEnglishLevel": "اختر المستوى",
-      "beginner": "مبتدئ",
-      "intermediate": "متوسط",
-      "advanced": "متقدم",
-      "fluent": "طليق",
-      "native": "لغة أم",
-      "previousStudy": "دراسات سابقة",
-      "previousStudyPlaceholder": "أدخل معلومات عن دراساتك السابقة (اختياري)",
-      "achievements": "الإنجازات والشهادات",
-      "achievementsPlaceholder": "أدخل الإنجازات والشهادات التي حصلت عليها (اختياري)",
-      "applyScholarship": "هل تريد التقديم على منحة دراسية؟",
-      "yes": "نعم",
-      "no": "لا"
-    },
-    "program": {
-      "title": "اختيار البرنامج",
-      "description": "اختر البرنامج الذي ترغب بالتقديم عليه",
-      "name": "اسم البرنامج",
-      "university": "الجامعة",
-      "annualFees": "الرسوم السنوية",
-      "duration": "مدة البرنامج",
-      "browseByLocation": "تصفح حسب الموقع",
-      "searchPrograms": "البحث عن البرامج",
-      "selectCountry": "اختر البلد",
-      "chooseCountry": "اختر البلد",
-      "degreeLevel": "المستوى الدراسي",
-      "chooseDegree": "اختر المستوى",
-      "selectUniversity": "اختر الجامعة",
-      "chooseUniversity": "اختر الجامعة",
-      "selectProgram": "اختر البرنامج",
-      "chooseProgram": "اختر البرنامج",
-      "additionalPreferences": "تفضيلات إضافية",
-      "preferredLanguage": "اللغة المفضلة",
-      "languages": {
-        "english": "الإنجليزية",
-        "turkish": "التركية",
-        "arabic": "العربية",
-        "french": "الفرنسية",
-        "german": "الألمانية",
-        "spanish": "الإسبانية",
-        "russian": "الروسية",
-        "other": "أخرى"
-      },
-      "additionalNotes": "ملاحظات إضافية",
-      "notesPlaceholder": "أي معلومات إضافية تود إضافتها حول تفضيلاتك للبرنامج الدراسي",
-      "searchByName": "البحث بالاسم",
-      "searchProgramsPlaceholder": "أدخل اسم البرنامج للبحث",
-      "searchResults": "نتائج البحث",
-      "selectFromResults": "اختر من نتائج البحث",
-      "noResultsFound": "لا توجد نتائج مطابقة للبحث",
-      "unknownUniversity": "جامعة غير معروفة",
-      "admissionRequirements": "متطلبات القبول"
-    },
-    "review": {
-      "title": "مراجعة الطلب",
-      "description": "راجع معلوماتك قبل إرسال الطلب.",
-      "personalInfo": "المعلومات الشخصية",
-      "documents": "المستندات",
-      "academicInfo": "المعلومات الأكاديمية",
-      "programSelection": "اختيار البرنامج",
-      "complete": "مكتمل",
-      "incomplete": "غير مكتمل",
-      "uploadedDocuments": "المستندات المحملة",
-      "personalInfoMissing": "يجب إكمال معلوماتك الشخصية",
-      "documentsMissing": "يجب تحميل المستندات المطلوبة",
-      "academicInfoMissing": "يجب إكمال المعلومات الأكاديمية",
-      "programMissing": "يجب اختيار البرنامج",
-      "beforeSubmitting": "قبل تقديم الطلب",
-      "checkAllInformation": "يرجى التأكد من صحة جميع المعلومات وتحميل جميع المستندات المطلوبة.",
-      "bulletComplete": "تأكد من إكمال جميع الأقسام الإلزامية.",
-      "bulletDocuments": "تأكد من تحميل جميع المستندات المطلوبة بتنسيق مناسب.",
-      "bulletApplication": "سيتم مراجعة طلبك من قبل فريقنا وإبلاغك بالنتيجة.",
-      "readyToSubmit": "جاهز للتقديم؟",
-      "willBeProcessed": "سيتم معالجة طلبك ومراجعته في أقرب وقت ممكن."
-    },
-    "status": {
-      "pending": "قيد الانتظار",
-      "review": "قيد المراجعة",
-      "approved": "مقبول",
-      "rejected": "مرفوض",
-      "documents": "بانتظار المستندات",
-      "conditional": "قبول مشروط",
-      "paid": "مدفوع",
-      "registered": "مسجل",
-      "completed": "مكتمل"
-    },
-    "buttons": {
-      "submit": "تقديم الطلب",
-      "submitting": "جاري التقديم...",
-      "submitNote": "بالضغط على زر التقديم، أنت توافق على شروط وأحكام الخدمة.",
-      "saveProgress": "حفظ التقدم"
-    },
-    "navigation": {
-      "next": "التالي",
-      "previous": "السابق"
-    },
-    "validation": {
-      "error": "خطأ في البيانات",
-      "completeAllFields": "يرجى إكمال جميع الحقول المطلوبة",
-      "personalInfoIncomplete": "المعلومات الشخصية غير مكتملة",
-      "academicInfoIncomplete": "المعلومات الأكاديمية غير مكتملة",
-      "programSelectionIncomplete": "لم يتم اختيار البرنامج أو الجامعة",
-      "pleaseCorrect": "يرجى تصحيح الأخطاء التالية",
-      "errors": {
-        "missingDocuments": "بعض المستندات المطلوبة غير محملة",
-        "incompleteProfile": "الملف الشخصي غير مكتمل"
-      },
-      "educationRequired": "المؤهل الدراسي مطلوب"
-    },
-    "export": {
-      "toExcel": "تصدير إلى Excel"
-    },
-    "tabs": {
-      "all": "جميع الطلبات"
-    },
-    "search": {
-      "applications": "بحث في الطلبات"
-    },
-    "form": {
-      "saved": "تم الحفظ",
-      "academicInfoSaved": "تم حفظ المعلومات الأكاديمية"
-    },
-    "noApplications": {
-      "message": "لا توجد طلبات مقدمة بعد"
-    },
-    "submission": {
-      "success": "تم التقديم بنجاح",
-      "successMessage": "تم تقديم طلبك بنجاح وسيتم مراجعته قريباً"
+  "dashboard": {
+    "home": "الرئيسية",
+    "student": {
+      "title": "لوحة تحكم الطالب"
     }
-  },
-  "documents": {
-    "passport": "جواز السفر",
-    "diploma": "الشهادة الدراسية",
-    "photo": "صورة شخصية",
-    "transcript": "كشف الدرجات",
-    "motivation": "رسالة التحفيز",
-    "additional": {
-      "recommendation": "خطاب توصية",
-      "cv": "السيرة الذاتية",
-      "englishTest": "شهادة إتقان اللغة الإنجليزية",
-      "idCard": "بطاقة الهوية",
-      "birthCertificate": "شهادة الميلاد",
-      "medicalReport": "التقرير الطبي",
-      "financialStatement": "كشف حساب مالي",
-      "custom": "مستند آخر"
-    }
-  },
-  "common": {
-    "cancel": "إلغاء",
-    "add": "إضافة",
-    "edit": "تعديل",
-    "delete": "حذف",
-    "save": "حفظ",
-    "loading": "جاري التحميل...",
-    "submit": "تقديم",
-    "close": "إغلاق"
   },
   "notifications": {
     "title": "الإشعارات",
-    "item": "إشعار {{number}}",
-    "time": "منذ {{number}} ساعات",
-    "viewAll": "عرض كل الإشعارات"
+    "markAllRead": "تحديد الكل كمقروء",
+    "markRead": "تحديد كمقروء",
+    "all": "الكل",
+    "unread": "غير مقروءة",
+    "starred": "مهمة",
+    "noNotifications": "لا توجد إشعارات",
+    "noUnreadNotifications": "لا توجد إشعارات غير مقروءة",
+    "noStarredNotifications": "لا توجد إشعارات مهمة",
+    "viewAllNotifications": "عرض جميع الإشعارات"
+  },
+  "language": {
+    "select": "اختر اللغة"
   },
   "student": {
     "dashboard": {
       "title": "لوحة تحكم الطالب"
-    },
-    "stats": {
-      "applications": "إجمالي عدد الطلبات",
-      "pending": "طلبات قيد المعالجة",
-      "accepted": "طلبات مقبولة",
-      "messages": "رسائل غير مقروءة"
-    },
-    "announcements": {
-      "title": "آخر الإعلانات الجامعية",
-      "deadline": "موعد نهائي",
-      "update": "تحديث",
-      "info": "معلومات"
-    },
-    "quotas": {
-      "title": "الحصص المتبقية في البرامج",
-      "remaining": "مقعد متبقي",
-      "occupied": "مقعد مشغول",
-      "total": "إجمالي المقاعد"
     }
   },
   "agent": {
@@ -487,37 +77,11 @@
       "title": "لوحة تحكم الوكيل"
     }
   },
-  "errors": {
-    "unauthorized": {
-      "title": "غير مصرح",
-      "description": "ليس لديك صلاحية للوصول إلى هذه الصفحة",
-      "backHome": "العودة للرئيسية",
-      "dashboard": "الذهاب للوحة التحكم",
-      "needHelp": "هل تحتاج للمساعدة؟",
-      "contactSupport": "يرجى التواصل مع الدعم الفني إذا كنت تعتقد أنه يجب أن يكون لديك صل��حية الوصول."
+  "application": {
+    "myApplications": {
+      "title": "طلباتي",
+      "subtitle": "متابعة جميع طلباتك الجامعية",
+      "newApplication": "طلب جديد"
     }
-  },
-  "footer": {
-    "companyDescription": "أبواب غير محدودة هي شركة استشارات تعليمية موثوقة تساعد الطلاب في استكشاف فرص التعليم الدولية منذ عام 1992. نقدم دعماً شاملاً لبرامج الدراسة في الخارج في جميع أنحاء العالم.",
-    "programs": "البرامج الدراسية",
-    "bachelorPrograms": "برامج البكالوريوس",
-    "masterPrograms": "برامج الماجستير",
-    "phdPrograms": "برامج الدكتوراه",
-    "diplomaPrograms": "برامج الدبلوم",
-    "languagePrograms": "برامج اللغة",
-    "quickLinks": "روابط سريعة",
-    "home": "الرئيسية",
-    "about": "من نحن",
-    "universities": "الجامعات",
-    "contact": "اتصل بنا",
-    "contactUs": "معلومات الاتصال",
-    "allRightsReserved": "جميع الحقوق محفوظة",
-    "privacy": "سياسة الخصوصية",
-    "terms": "الشروط والأحكام",
-    "cookies": "سياسة ملفات تعريف الارتباط",
-    "newsletter": "النشرة البريدية",
-    "emailPlaceholder": "بريدك الإلكتروني",
-    "subscribe": "اشترك",
-    "followUs": "تابعنا"
   }
 }

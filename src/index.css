@@ -1,185 +1,186 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  font-family: 'Tajawal', sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  /* Light Mode Variables */
-  --unlimited-blue: #1e40af;
-  --unlimited-dark-blue: #1e3a8a;
-  --unlimited-light-blue: #3b82f6;
-  --unlimited-gray: #64748b;
-  --unlimited-light-gray: #f1f5f9;
-  --unlimited-dark-gray: #334155;
-  --unlimited-yellow: #facc15;
-  --unlimited-background: #ffffff;
-  --unlimited-text: #0f172a;
-  --unlimited-border: #e2e8f0;
-  --unlimited-card-bg: #ffffff;
-  --unlimited-input-bg: #ffffff;
+  --unlimited-blue: #2563eb;
+  --unlimited-dark-blue: #1e40af;
+  --unlimited-gray: #6b7280;
+  --unlimited-warning: #f59e0b;
+  --unlimited-danger: #ef4444;
+  --unlimited-success: #10b981;
 }
 
-.dark {
-  /* Dark Mode Variables */
-  --unlimited-blue: #3b82f6;
-  --unlimited-dark-blue: #1d4ed8;
-  --unlimited-light-blue: #60a5fa;
-  --unlimited-gray: #94a3b8;
-  --unlimited-light-gray: #334155;
-  --unlimited-dark-gray: #cbd5e1;
-  --unlimited-yellow: #facc15;
-  --unlimited-background: #0f172a;
-  --unlimited-text: #f8fafc;
-  --unlimited-border: #1e293b;
-  --unlimited-card-bg: #1e293b;
-  --unlimited-input-bg: #0f172a;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@layer base {
-  body {
-    @apply bg-white dark:bg-[#0f172a] text-unlimited-text transition-colors duration-200;
-  }
-
-  /* إضافة خط Tajawal */
-  @font-face {
-    font-family: 'Tajawal';
-    font-style: normal;
-    font-weight: 400;
-    src: url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
-    font-display: swap;
-  }
-
-  /* إضافة خط للعناوين إن كان مختلفًا */
-  @font-face {
-    font-family: 'Almarai';
-    font-style: normal;
-    font-weight: 700;
-    src: url('https://fonts.googleapis.com/css2?family=Almarai:wght@400;700&display=swap');
-    font-display: swap;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold font-almarai;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply bg-unlimited-blue hover:bg-unlimited-dark-blue text-white py-2 px-4 rounded-md transition-colors;
-  }
-
-  .btn-secondary {
-    @apply bg-unlimited-light-gray hover:bg-unlimited-gray text-unlimited-dark-gray py-2 px-4 rounded-md transition-colors dark:bg-unlimited-light-gray dark:hover:bg-unlimited-gray dark:text-unlimited-dark-gray;
-  }
-
-  .btn-outline {
-    @apply border border-unlimited-blue text-unlimited-blue hover:bg-unlimited-blue hover:text-white py-2 px-4 rounded-md transition-colors dark:border-unlimited-blue dark:text-unlimited-blue dark:hover:bg-unlimited-blue dark:hover:text-white;
-  }
-
-  .card {
-    @apply bg-unlimited-card-bg border border-unlimited-border rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 dark:bg-[#1e293b] dark:border-[#1e293b];
-  }
-
-  .input {
-    @apply bg-unlimited-input-bg border border-unlimited-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-unlimited-blue transition-all dark:bg-[#0f172a] dark:border-[#1e293b] dark:focus:ring-[#3b82f6];
-  }
-  
-  /* Animation Utilities */
-  .fade-in {
-    @apply animate-[fadeIn_0.5s_ease-in-out];
-  }
-  
-  .slide-in {
-    @apply animate-[slideIn_0.3s_ease-in-out];
-  }
-  
-  .pulse {
-    @apply animate-[pulse_2s_infinite];
-  }
-}
-
-/* Custom Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideIn {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Custom CSS Classes */
-.rtl {
+body {
+  font-family: 'Cairo', sans-serif;
+  line-height: 1.6;
+  color: #333;
   direction: rtl;
+  text-align: right;
 }
 
 .ltr {
   direction: ltr;
+  text-align: left;
 }
 
-/* إضافة CSS للتعامل مع النص العربي */
-.arabic-text {
-  font-family: 'Tajawal', sans-serif;
-  line-height: 1.8;
+.rtl {
+  direction: rtl;
+  text-align: right;
 }
 
-/* تحسين عرض العناصر في الوضع الليلي */
-.dark .shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-}
-
-.dark .bg-white {
-  @apply bg-[#1e293b];
-}
-
-/* تحسين قابلية القراءة في الوضع الليلي */
-.dark p, .dark span, .dark div {
-  @apply text-[#f8fafc];
-}
-
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  @apply text-[#f8fafc];
-}
-
-/* تحسين عرض الروابط في الوضع الليلي */
-.dark a:not(.btn-primary):not(.btn-secondary):not(.btn-outline) {
-  @apply text-[#3b82f6] hover:text-[#60a5fa];
-}
-
-/* إضافة تأثيرات لزيادة جاذبية الموقع */
-.hover-scale {
-  @apply transition-transform duration-300 hover:scale-105;
-}
-
-.hover-shadow {
-  @apply transition-shadow duration-300 hover:shadow-lg;
-}
-
-/* تحسين عرض الصور في الوضع الليلي */
-.dark img {
-  filter: brightness(0.9);
-}
-
-/* دعم وضع الطباعة */
-@media print {
-  body {
-    -webkit-print-color-adjust: exact;
-    color-adjust: exact;
-    print-color-adjust: exact;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
-  
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+/* Custom utility classes */
+.text-unlimited-blue {
+  color: var(--unlimited-blue);
+}
+
+.text-unlimited-dark-blue {
+  color: var(--unlimited-dark-blue);
+}
+
+.text-unlimited-gray {
+  color: var(--unlimited-gray);
+}
+
+.bg-unlimited-blue {
+  background-color: var(--unlimited-blue);
+}
+
+.bg-unlimited-dark-blue {
+  background-color: var(--unlimited-dark-blue);
+}
+
+.bg-unlimited-warning {
+  background-color: var(--unlimited-warning);
+}
+
+.bg-unlimited-danger {
+  background-color: var(--unlimited-danger);
+}
+
+.border-unlimited-blue {
+  border-color: var(--unlimited-blue);
+}
+
+.border-unlimited-dark-blue {
+  border-color: var(--unlimited-dark-blue);
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Better focus states */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--unlimited-blue);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Error boundary styles */
+.error-boundary {
+  padding: 2rem;
+  text-align: center;
+  border: 2px dashed var(--unlimited-danger);
+  border-radius: 0.5rem;
+  background-color: #fef2f2;
+}
+
+/* Print styles */
+@media print {
   .no-print {
     display: none !important;
   }

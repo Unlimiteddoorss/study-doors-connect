@@ -1,8 +1,6 @@
 
-import React, { Suspense } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import i18n from './i18n';
-import { useTranslation } from 'react-i18next';
+import React from 'react';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
 import MainLayout from '@/components/layout/MainLayout';
 import Index from '@/pages/Index';

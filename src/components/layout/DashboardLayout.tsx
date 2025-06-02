@@ -25,89 +25,87 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
   
   // Determine page title and breadcrumbs based on path
   if (pathname === '/dashboard') {
-    title = t('dashboard.student.title');
+    title = t('dashboard.student.title', 'لوحة تحكم الطالب');
     breadcrumbs = [
-      { label: t('dashboard.home'), href: '/' }, 
-      { label: t('dashboard.student.title'), href: '/dashboard' }
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' }, 
+      { label: t('dashboard.student.title', 'لوحة تحكم الطالب'), href: '/dashboard' }
     ];
   } else if (pathname === '/dashboard/applications') {
-    title = t('application.myApplications.title');
-    subtitle = t('application.myApplications.subtitle');
+    title = t('application.myApplications.title', 'طلباتي');
+    subtitle = t('application.myApplications.subtitle', 'متابعة جميع طلباتك الجامعية');
     showNewApplicationButton = true;
     breadcrumbs = [
-      { label: t('dashboard.home'), href: '/' },
-      { label: t('dashboard.student.title'), href: '/dashboard' },
-      { label: t('application.myApplications.title'), href: '/dashboard/applications' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('dashboard.student.title', 'لوحة تحكم الطالب'), href: '/dashboard' },
+      { label: t('application.myApplications.title', 'طلباتي'), href: '/dashboard/applications' },
     ];
   } else if (pathname === '/admin' || pathname === '/admin/dashboard') {
-    title = 'لوحة التحكم الإدارية';
+    title = t('admin.dashboard.title', 'لوحة التحكم الإدارية');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' }, 
-      { label: 'لوحة التحكم', href: '/admin' }
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' }, 
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' }
     ];
   } else if (pathname === '/admin/students' || pathname === '/admin/students-enhanced') {
-    title = 'إدارة الطلاب';
+    title = t('admin.sidebar.studentsManagement', 'إدارة الطلاب');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'إدارة الطلاب', href: '/admin/students' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.studentsManagement', 'إدارة الطلاب'), href: '/admin/students' },
     ];
   } else if (pathname === '/admin/applications') {
-    title = 'إدارة الطلبات';
+    title = t('admin.sidebar.applicationsManagement', 'إدارة الطلبات');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'إدارة الطلبات', href: '/admin/applications' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.applicationsManagement', 'إدارة الطلبات'), href: '/admin/applications' },
     ];
   } else if (pathname === '/admin/programs' || pathname === '/admin/programs-enhanced') {
-    title = 'إدارة البرامج';
+    title = t('admin.sidebar.programsManagement', 'إدارة البرامج');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'إدارة البرامج', href: '/admin/programs' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.programsManagement', 'إدارة البرامج'), href: '/admin/programs' },
     ];
   } else if (pathname === '/admin/agents' || pathname === '/admin/agents-enhanced') {
-    title = 'إدارة الوكلاء';
+    title = t('admin.sidebar.agentsManagement', 'إدارة الوكلاء');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'إدارة الوكلاء', href: '/admin/agents' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.agentsManagement', 'إدارة الوكلاء'), href: '/admin/agents' },
     ];
   } else if (pathname === '/admin/universities') {
-    title = 'إدارة الجامعات';
+    title = t('admin.sidebar.universitiesManagement', 'إدارة الجامعات');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'إدارة الجامعات', href: '/admin/universities' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.universitiesManagement', 'إدارة الجامعات'), href: '/admin/universities' },
     ];
   } else if (pathname === '/admin/reports') {
-    title = 'التقارير والإحصائيات';
+    title = t('admin.sidebar.reportsStatistics', 'التقارير والإحصائيات');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'التقارير', href: '/admin/reports' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.reportsStatistics', 'التقارير'), href: '/admin/reports' },
     ];
   } else if (pathname === '/admin/notifications') {
-    title = 'إدارة الإشعارات';
+    title = t('admin.sidebar.notifications', 'إدارة الإشعارات');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'الإشعارات', href: '/admin/notifications' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.notifications', 'الإشعارات'), href: '/admin/notifications' },
     ];
   } else if (pathname === '/admin/messages') {
-    title = 'إدارة الرسائل';
+    title = t('admin.sidebar.messagingSystem', 'إدارة الرسائل');
     breadcrumbs = [
-      { label: 'الرئيسية', href: '/' },
-      { label: 'لوحة التحكم', href: '/admin' },
-      { label: 'الرسائل', href: '/admin/messages' },
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: t('admin.sidebar.messagingSystem', 'الرسائل'), href: '/admin/messages' },
     ];
   }
   
   // Handle hash change to update UI
   useEffect(() => {
-    // This will handle the back/forward browser navigation with hash changes
     const handleHashChange = () => {
-      // Force a re-render when hash changes
       window.dispatchEvent(new Event('hashchange'));
     };
     
@@ -149,7 +147,7 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
               <Link to="/apply">
                 <Button className="flex items-center">
                   <Plus className={`h-4 w-4 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-                  {t('application.myApplications.newApplication')}
+                  {t('application.myApplications.newApplication', 'طلب جديد')}
                 </Button>
               </Link>
             )}

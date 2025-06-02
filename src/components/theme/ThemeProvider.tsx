@@ -22,38 +22,45 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(defaultTheme);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as Theme | null;
-    
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
+    try {
+      const savedTheme = localStorage.getItem("theme") as Theme | null;
+      
+      if (savedTheme) {
+        setTheme(savedTheme);
+        if (savedTheme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
       } else {
-        document.documentElement.classList.remove("dark");
+        const systemPreference = window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+        setTheme(systemPreference);
+        if (systemPreference === "dark") {
+          document.documentElement.classList.add("dark");
+        }
       }
-    } else {
-      // Check for system preference
-      const systemPreference = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-      setTheme(systemPreference);
-      if (systemPreference === "dark") {
-        document.documentElement.classList.add("dark");
-      }
+    } catch (error) {
+      console.warn('Could not access localStorage for theme:', error);
     }
   }, []);
 
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      localStorage.setItem("theme", newTheme);
-      setTheme(newTheme);
-      
-      if (newTheme === "system") {
-        const systemIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.classList.toggle("dark", systemIsDark);
-      } else {
-        document.documentElement.classList.toggle("dark", newTheme === "dark");
+      try {
+        localStorage.setItem("theme", newTheme);
+        setTheme(newTheme);
+        
+        if (newTheme === "system") {
+          const systemIsDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.classList.toggle("dark", systemIsDark);
+        } else {
+          document.documentElement.classList.toggle("dark", newTheme === "dark");
+        }
+      } catch (error) {
+        console.warn('Could not save theme to localStorage:', error);
       }
     },
   };
