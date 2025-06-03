@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -139,10 +138,8 @@ export const BulkActions = ({
         <div className="flex items-center gap-2">
           <Checkbox
             checked={isAllSelected}
-            ref={(el) => {
-              if (el) el.indeterminate = isIndeterminate;
-            }}
             onCheckedChange={onSelectAll}
+            className={isIndeterminate ? 'data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground' : ''}
           />
           <span className="text-sm font-medium">
             {selectedItems.length > 0 

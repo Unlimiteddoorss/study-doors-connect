@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -169,6 +168,9 @@ export function EnhancedFilterableTable({
       : <ArrowDown className="h-4 w-4 text-unlimited-blue" />;
   };
 
+  const isAllSelected = selectedItems.length === sortedData.length && sortedData.length > 0;
+  const isIndeterminate = selectedItems.length > 0 && selectedItems.length < sortedData.length;
+
   return (
     <div className="space-y-4">
       {enableSearch && (
@@ -195,13 +197,9 @@ export function EnhancedFilterableTable({
               {enableBulkActions && (
                 <TableHead className="w-12">
                   <Checkbox
-                    checked={selectedItems.length === sortedData.length && sortedData.length > 0}
-                    ref={(el) => {
-                      if (el) {
-                        el.indeterminate = selectedItems.length > 0 && selectedItems.length < sortedData.length;
-                      }
-                    }}
+                    checked={isAllSelected}
                     onCheckedChange={handleSelectAll}
+                    className={isIndeterminate ? 'data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground' : ''}
                   />
                 </TableHead>
               )}
