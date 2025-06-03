@@ -97,6 +97,16 @@ const AdminSidebar = () => {
       icon: BarChart,
     },
     {
+      title: "سجلات النظام",
+      href: "/admin/audit-logs",
+      icon: Settings,
+    },
+    {
+      title: "إدارة الملفات",
+      href: "/admin/file-management",
+      icon: Settings,
+    },
+    {
       title: "الأذونات والصلاحيات",
       href: "/admin/permissions",
       icon: Settings,

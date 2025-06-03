@@ -38,6 +38,8 @@ import AdminNotifications from '@/pages/admin/AdminNotifications';
 import Reports from '@/pages/admin/Reports';
 import PermissionsManagement from '@/pages/admin/PermissionsManagement';
 import BackupManagement from '@/pages/admin/BackupManagement';
+import AuditLogs from '@/pages/admin/AuditLogs';
+import FileManagement from '@/pages/admin/FileManagement';
 import AgentDashboard from '@/pages/agent/AgentDashboard';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import HomePage from '@/pages/HomePage';
@@ -160,6 +162,16 @@ function App() {
               <Route path="backup" element={
                 <ProtectedRoute requiredRole="admin">
                   <BackupManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="audit-logs" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AuditLogs />
+                </ProtectedRoute>
+              } />
+              <Route path="file-management" element={
+                <ProtectedRoute requiredRole="admin">
+                  <FileManagement />
                 </ProtectedRoute>
               } />
             </Routes>
