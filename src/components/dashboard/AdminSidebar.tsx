@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import {
@@ -14,17 +15,17 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
-export const AdminSidebar = () => {
+const AdminSidebar = () => {
   const location = useLocation();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const { toast } = useToast();
   
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       toast({
         title: "تم تسجيل الخروج",
         description: "تم تسجيل الخروج بنجاح"
@@ -111,13 +112,16 @@ export const AdminSidebar = () => {
       <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
-            <SidebarMenuItem
-              key={item.title}
-              href={item.href}
-              active={location.pathname === item.href}
-            >
-              <item.icon className="h-4 w-4" />
-              <span>{item.title}</span>
+            <SidebarMenuItem key={item.title}>
+              <a 
+                href={item.href}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 ${
+                  location.pathname === item.href ? 'bg-gray-100 text-gray-900' : ''
+                }`}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </a>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -130,3 +134,5 @@ export const AdminSidebar = () => {
     </Sidebar>
   );
 };
+
+export default AdminSidebar;

@@ -1,4 +1,3 @@
-
 import { ReactNode, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import AdminSidebar from '@/components/dashboard/AdminSidebar';
@@ -79,6 +78,13 @@ const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProp
       { label: t('dashboard.home', 'الرئيسية'), href: '/' },
       { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
       { label: t('admin.sidebar.universitiesManagement', 'إدارة الجامعات'), href: '/admin/universities' },
+    ];
+  } else if (pathname === '/admin/universities/review') {
+    title = 'مراجعة الجامعات';
+    breadcrumbs = [
+      { label: t('dashboard.home', 'الرئيسية'), href: '/' },
+      { label: t('admin.dashboard.title', 'لوحة التحكم'), href: '/admin' },
+      { label: 'مراجعة الجامعات', href: '/admin/universities/review' },
     ];
   } else if (pathname === '/admin/reports') {
     title = t('admin.sidebar.reportsStatistics', 'التقارير والإحصائيات');
