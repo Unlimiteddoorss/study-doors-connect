@@ -1,5 +1,5 @@
 
-import { ReactNode } from "react";
+import React from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,23 +7,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2 } from "lucide-react";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 interface FormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
   description?: string;
-  children: ReactNode;
+  children: React.ReactNode;
   onSubmit: () => void;
   submitLabel?: string;
   cancelLabel?: string;
   isLoading?: boolean;
 }
 
-export function FormDialog({
+export const FormDialog: React.FC<FormDialogProps> = ({
   open,
   onOpenChange,
   title,
@@ -33,38 +32,35 @@ export function FormDialog({
   submitLabel = "حفظ",
   cancelLabel = "إلغاء",
   isLoading = false
-}: FormDialogProps) {
+}) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        
+        <div className="py-4">
           {children}
         </div>
-        <DialogFooter>
-          <Button 
-            variant="outline" 
+        
+        <DialogFooter className="gap-2">
+          <Button
+            variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isLoading}
           >
             {cancelLabel}
           </Button>
-          <Button 
+          <Button
             onClick={onSubmit}
             disabled={isLoading}
           >
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <CheckCircle className="h-4 w-4 mr-2" />
-            )}
-            {submitLabel}
+            {isLoading ? "جاري الحفظ..." : submitLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
-}
+};

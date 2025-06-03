@@ -59,21 +59,21 @@ export const ApplicationsTable = ({
   const getStatusBadge = (status: string) => {
     switch(status) {
       case 'approved':
-        return <Badge className="bg-green-500">{t("application.status.approved")}</Badge>;
+        return <Badge className="bg-green-500">مقبول</Badge>;
       case 'rejected':
-        return <Badge className="bg-red-500">{t("application.status.rejected")}</Badge>;
+        return <Badge className="bg-red-500">مرفوض</Badge>;
       case 'review':
-        return <Badge className="bg-amber-500">{t("application.status.review")}</Badge>;
+        return <Badge className="bg-amber-500">قيد المراجعة</Badge>;
       case 'documents':
-        return <Badge className="bg-blue-500">{t("application.status.documents")}</Badge>;
+        return <Badge className="bg-blue-500">بانتظار المستندات</Badge>;
       case 'pending':
-        return <Badge className="bg-yellow-500">{t("application.status.pending")}</Badge>;
+        return <Badge className="bg-yellow-500">قيد الانتظار</Badge>;
       case 'conditional':
-        return <Badge className="bg-purple-500">{t("application.status.conditional")}</Badge>;
+        return <Badge className="bg-purple-500">مقبول بشروط</Badge>;
       case 'paid':
-        return <Badge className="bg-emerald-500">{t("application.status.paid")}</Badge>;
+        return <Badge className="bg-emerald-500">مدفوع</Badge>;
       case 'registered':
-        return <Badge className="bg-indigo-500">{t("application.status.registered")}</Badge>;
+        return <Badge className="bg-indigo-500">مسجل</Badge>;
       default:
         return <Badge className="bg-gray-500">{status}</Badge>;
     }
@@ -81,10 +81,12 @@ export const ApplicationsTable = ({
 
   const handleMessageClick = (application: Application) => {
     setSelectedApplication(application);
+    window.location.hash = '#messages';
   };
 
   const handleDocumentClick = (application: Application) => {
     setSelectedApplication(application);
+    window.location.hash = '#documents';
   };
   
   return (
@@ -92,13 +94,13 @@ export const ApplicationsTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>{t("application.table.id")}</TableHead>
-            <TableHead>{t("application.table.program")}</TableHead>
-            <TableHead className="hidden md:table-cell">{t("application.table.university")}</TableHead>
-            <TableHead>{t("application.table.status")}</TableHead>
-            <TableHead className="hidden md:table-cell">{t("application.table.date")}</TableHead>
-            <TableHead>{t("application.table.documents")}</TableHead>
-            <TableHead>{t("application.table.actions")}</TableHead>
+            <TableHead>رقم الطلب</TableHead>
+            <TableHead>البرنامج</TableHead>
+            <TableHead className="hidden md:table-cell">الجامعة</TableHead>
+            <TableHead>الحالة</TableHead>
+            <TableHead className="hidden md:table-cell">التاريخ</TableHead>
+            <TableHead>المستندات</TableHead>
+            <TableHead>الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -125,7 +127,7 @@ export const ApplicationsTable = ({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>{t("application.documents.viewUpload")}</p>
+                      <p>عرض ورفع المستندات</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -140,7 +142,7 @@ export const ApplicationsTable = ({
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("application.actions.viewDetails")}</p>
+                        <p>عرض التفاصيل</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -160,7 +162,7 @@ export const ApplicationsTable = ({
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("application.actions.messages")}</p>
+                        <p>الرسائل</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -173,7 +175,7 @@ export const ApplicationsTable = ({
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("application.actions.documents")}</p>
+                        <p>المستندات</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -187,9 +189,9 @@ export const ApplicationsTable = ({
               <TableCell colSpan={7} className="h-32 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <FileText className="h-8 w-8 text-unlimited-gray mb-2" />
-                  <p className="text-unlimited-gray">{t("application.noApplications.message")}</p>
+                  <p className="text-unlimited-gray">لا توجد طلبات</p>
                   <Button variant="outline" className="mt-4">
-                    {t("application.noApplications.apply")}
+                    إضافة طلب جديد
                   </Button>
                 </div>
               </TableCell>
@@ -208,29 +210,23 @@ export const ApplicationsTable = ({
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{t("application.messages.title")}</DialogTitle>
+            <DialogTitle>الرسائل</DialogTitle>
             <DialogDescription>
-              {t("application.messages.subtitle", { program: selectedApplication?.program, university: selectedApplication?.university })}
+              رسائل الطلب: {selectedApplication?.program} - {selectedApplication?.university}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 h-96 overflow-auto border rounded-md p-4 bg-gray-50">
             <div className="space-y-4">
               <div className="flex flex-col">
                 <div className={`max-w-[80%] bg-unlimited-blue text-white p-3 rounded-lg ${i18n.language === 'ar' ? 'self-start' : 'self-end'}`}>
-                  <p>{t("application.messages.sampleMessage1")}</p>
-                  <div className="text-xs text-unlimited-light mt-1">{t("application.messages.sampleTime1")}</div>
+                  <p>مرحباً، كيف يمكنني مساعدتك في طلبك؟</p>
+                  <div className="text-xs text-unlimited-light mt-1">منذ ساعتين</div>
                 </div>
               </div>
               <div className="flex flex-col">
                 <div className={`max-w-[80%] bg-white p-3 rounded-lg shadow-sm ${i18n.language === 'ar' ? 'self-end' : 'self-start'}`}>
-                  <p>{t("application.messages.sampleMessage2")}</p>
-                  <div className="text-xs text-unlimited-gray mt-1">{t("application.messages.sampleTime2")}</div>
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <div className={`max-w-[80%] bg-unlimited-blue text-white p-3 rounded-lg ${i18n.language === 'ar' ? 'self-start' : 'self-end'}`}>
-                  <p>{t("application.messages.sampleMessage3")}</p>
-                  <div className="text-xs text-unlimited-light mt-1">{t("application.messages.sampleTime3")}</div>
+                  <p>أحتاج إلى معلومات حول حالة طلبي</p>
+                  <div className="text-xs text-unlimited-gray mt-1">منذ ساعة</div>
                 </div>
               </div>
             </div>
@@ -239,9 +235,9 @@ export const ApplicationsTable = ({
             <input 
               type="text" 
               className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue focus:border-transparent" 
-              placeholder={t("application.messages.inputPlaceholder")}
+              placeholder="اكتب رسالتك..."
             />
-            <Button>{t("application.messages.send")}</Button>
+            <Button>إرسال</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -256,9 +252,9 @@ export const ApplicationsTable = ({
       >
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>{t("application.documents.title")}</DialogTitle>
+            <DialogTitle>المستندات</DialogTitle>
             <DialogDescription>
-              {t("application.documents.subtitle", { program: selectedApplication?.program, university: selectedApplication?.university })}
+              مستندات الطلب: {selectedApplication?.program} - {selectedApplication?.university}
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-4">
@@ -269,9 +265,9 @@ export const ApplicationsTable = ({
                   <div>
                     <p className="font-medium">{doc.name}</p>
                     <p className="text-xs text-unlimited-gray">
-                      {doc.status === 'uploaded' && t("application.documents.statusUploaded")}
-                      {doc.status === 'required' && t("application.documents.statusRequired")}
-                      {doc.status === 'approved' && t("application.documents.statusApproved")}
+                      {doc.status === 'uploaded' && "تم الرفع"}
+                      {doc.status === 'required' && "مطلوب"}
+                      {doc.status === 'approved' && "تم الموافقة"}
                     </p>
                   </div>
                 </div>
@@ -279,18 +275,18 @@ export const ApplicationsTable = ({
                   {doc.status === 'uploaded' && (
                     <Button variant="outline" size="sm">
                       <Download className="h-4 w-4 mr-1" />
-                      {t("application.documents.download")}
+                      تنزيل
                     </Button>
                   )}
                   {doc.status === 'required' && (
                     <Button size="sm">
                       <Upload className="h-4 w-4 mr-1" />
-                      {t("application.documents.upload")}
+                      رفع
                     </Button>
                   )}
                   {doc.status === 'approved' && (
                     <Badge className="bg-green-500">
-                      {t("application.documents.approved")}
+                      موافق عليه
                     </Badge>
                   )}
                 </div>
@@ -300,7 +296,7 @@ export const ApplicationsTable = ({
             {(!selectedApplication?.documents || selectedApplication.documents.length === 0) && (
               <div className="text-center p-6">
                 <FileText className="h-12 w-12 mx-auto text-unlimited-gray mb-2" />
-                <p>{t("application.documents.noDocuments")}</p>
+                <p>لا توجد مستندات</p>
               </div>
             )}
           </div>

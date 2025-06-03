@@ -16,7 +16,7 @@ interface Column {
   header: string;
   accessor: string;
   hideOnMobile?: boolean;
-  render?: (value: any) => React.ReactNode;
+  render?: (value: any, item: any) => React.ReactNode;
 }
 
 interface FilterableTableProps {
@@ -69,7 +69,7 @@ export function FilterableTable({
                     key={column.accessor}
                     className={column.hideOnMobile ? 'hidden md:table-cell' : undefined}
                   >
-                    {column.render ? column.render(item[column.accessor]) : item[column.accessor]}
+                    {column.render ? column.render(item[column.accessor], item) : item[column.accessor]}
                   </TableCell>
                 ))}
                 <TableCell>
@@ -109,7 +109,7 @@ export function FilterableTable({
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          className="text-unlimited-danger focus:text-unlimited-danger"
+                          className="text-red-600 focus:text-red-600"
                           onClick={() => onDelete(item)}
                         >
                           <Trash className="h-4 w-4 mr-2" />

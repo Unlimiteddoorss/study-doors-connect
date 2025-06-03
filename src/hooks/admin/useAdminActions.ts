@@ -2,86 +2,53 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-interface ActionOptions {
+interface UseAdminActionsProps {
   successMessage?: string;
   errorMessage?: string;
-  onSuccess?: () => void;
-  onError?: (error: Error) => void;
 }
 
-export function useAdminActions() {
+export const useAdminActions = (options: UseAdminActionsProps = {}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
-  const [pendingOptions, setPendingOptions] = useState<ActionOptions | null>(null);
   const { toast } = useToast();
 
   const handleAction = async (
     action: () => Promise<void>,
-    options: ActionOptions = {}
+    actionOptions?: {
+      successMessage?: string;
+      errorMessage?: string;
+      onSuccess?: () => void;
+      onError?: (error: any) => void;
+    }
   ) => {
+    setIsLoading(true);
+    
     try {
-      setIsLoading(true);
       await action();
       
-      if (options.successMessage) {
-        toast({
-          title: "نجح العمل",
-          description: options.successMessage,
-        });
-      }
-      
-      if (options.onSuccess) {
-        options.onSuccess();
-      }
-    } catch (error) {
-      console.error('Action failed:', error);
-      
-      const errorMessage = options.errorMessage || "حدث خطأ أثناء تنفيذ العملية";
       toast({
-        title: "خطأ",
-        description: errorMessage,
-        variant: "destructive",
+        title: "نجح",
+        description: actionOptions?.successMessage || options.successMessage || "تم تنفيذ العملية بنجاح",
+        variant: "default"
       });
       
-      if (options.onError && error instanceof Error) {
-        options.onError(error);
-      }
+      actionOptions?.onSuccess?.();
+    } catch (error) {
+      console.error('Admin action error:', error);
+      
+      toast({
+        title: "خطأ",
+        description: actionOptions?.errorMessage || options.errorMessage || "حدث خطأ أثناء تنفيذ العملية",
+        variant: "destructive"
+      });
+      
+      actionOptions?.onError?.(error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const confirmAction = (
-    action: () => Promise<void>,
-    options: ActionOptions = {}
-  ) => {
-    setPendingAction(() => action);
-    setPendingOptions(options);
-    setIsConfirmDialogOpen(true);
-  };
-
-  const executePendingAction = async () => {
-    if (pendingAction && pendingOptions) {
-      setIsConfirmDialogOpen(false);
-      await handleAction(pendingAction, pendingOptions);
-      setPendingAction(null);
-      setPendingOptions(null);
-    }
-  };
-
-  const cancelConfirmAction = () => {
-    setIsConfirmDialogOpen(false);
-    setPendingAction(null);
-    setPendingOptions(null);
-  };
-
   return {
     isLoading,
-    handleAction,
-    confirmAction,
-    isConfirmDialogOpen,
-    executePendingAction,
-    cancelConfirmAction,
+    handleAction
   };
-}
+};

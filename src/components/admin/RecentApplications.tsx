@@ -13,8 +13,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
-type ApplicationStatus = 'pending' | 'approved' | 'rejected' | 'processing' | 'completed' | 'archived' | 'review' | 'documents';
+type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'under_review' | 'cancelled';
 
 type Application = {
   id: string;
@@ -27,59 +28,12 @@ type Application = {
 };
 
 const statusConfig: Record<ApplicationStatus, { label: string; color: string }> = {
-  pending: { label: 'قيد الانتظار', color: 'bg-unlimited-warning text-white' },
-  review: { label: 'قيد المراجعة', color: 'bg-unlimited-warning text-white' },
-  approved: { label: 'مقبول', color: 'bg-unlimited-success text-white' },
-  rejected: { label: 'مرفوض', color: 'bg-unlimited-danger text-white' },
-  processing: { label: 'قيد المعالجة', color: 'bg-unlimited-info text-white' },
-  completed: { label: 'مكتمل', color: 'bg-unlimited-blue text-white' },
-  archived: { label: 'مؤرشف', color: 'bg-unlimited-gray text-white' },
-  documents: { label: 'بانتظار المستندات', color: 'bg-unlimited-info text-white' }
+  pending: { label: 'قيد الانتظار', color: 'bg-yellow-600 text-white' },
+  under_review: { label: 'قيد المراجعة', color: 'bg-blue-600 text-white' },
+  accepted: { label: 'مقبول', color: 'bg-green-600 text-white' },
+  rejected: { label: 'مرفوض', color: 'bg-red-600 text-white' },
+  cancelled: { label: 'ملغي', color: 'bg-gray-600 text-white' }
 };
-
-// Sample default applications
-const defaultApplications: Application[] = [
-  {
-    id: 'APP-2023-001',
-    studentName: 'أحمد محمد',
-    program: 'هندسة البرمجيات',
-    university: 'جامعة لندن',
-    date: '2023-04-01',
-    status: 'approved',
-  },
-  {
-    id: 'APP-2023-002',
-    studentName: 'سارة عبدالله',
-    program: 'علوم الحاسب',
-    university: 'جامعة تورنتو',
-    date: '2023-04-02',
-    status: 'pending',
-  },
-  {
-    id: 'APP-2023-003',
-    studentName: 'عمر خالد',
-    program: 'إدارة الأعمال',
-    university: 'جامعة ملبورن',
-    date: '2023-04-03',
-    status: 'processing',
-  },
-  {
-    id: 'APP-2023-004',
-    studentName: 'فاطمة علي',
-    program: 'الطب البشري',
-    university: 'جامعة برلين',
-    date: '2023-04-04',
-    status: 'rejected',
-  },
-  {
-    id: 'APP-2023-005',
-    studentName: 'محمد أحمد',
-    program: 'علوم البيانات',
-    university: 'جامعة طوكيو',
-    date: '2023-04-05',
-    status: 'approved',
-  }
-];
 
 export function RecentApplications() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -87,36 +41,61 @@ export function RecentApplications() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Load applications from localStorage
   useEffect(() => {
-    setIsLoading(true);
+    fetchRecentApplications();
+  }, []);
+
+  const fetchRecentApplications = async () => {
     try {
-      const adminAppsString = localStorage.getItem('adminApplications');
-      if (adminAppsString) {
-        const adminApps = JSON.parse(adminAppsString);
-        // Get only the most recent 5 applications
-        setApplications(adminApps.slice(0, 5));
-      } else {
-        // If no admin applications, check student applications
-        const studentAppsString = localStorage.getItem('studentApplications');
-        if (studentAppsString) {
-          const studentApps = JSON.parse(studentAppsString);
-          setApplications(studentApps.slice(0, 5));
-          // Also save these to admin applications
-          localStorage.setItem('adminApplications', JSON.stringify(studentApps));
-        } else {
-          // If no applications found, use default ones
-          setApplications(defaultApplications);
-          localStorage.setItem('adminApplications', JSON.stringify(defaultApplications));
-        }
-      }
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from('applications')
+        .select(`
+          *,
+          programs!inner(name, universities!inner(name)),
+          user_profiles!applications_student_id_fkey(full_name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      const formattedApplications: Application[] = data?.map(app => ({
+        id: app.id,
+        studentName: app.user_profiles?.full_name || 'طالب غير معروف',
+        program: app.programs?.name || 'برنامج غير معروف',
+        university: app.programs?.universities?.name || 'جامعة غير معروفة',
+        date: new Date(app.created_at).toLocaleDateString('ar-SA'),
+        status: app.status as ApplicationStatus
+      })) || [];
+
+      setApplications(formattedApplications);
     } catch (error) {
-      console.error("Error loading applications:", error);
-      setApplications(defaultApplications);
+      console.error("Error fetching recent applications:", error);
+      // استخدام البيانات التجريبية في حالة الخطأ
+      setApplications([
+        {
+          id: 'APP-001',
+          studentName: 'أحمد محمد',
+          program: 'هندسة البرمجيات',
+          university: 'جامعة إسطنبول التقنية',
+          date: new Date().toLocaleDateString('ar-SA'),
+          status: 'pending',
+        },
+        {
+          id: 'APP-002',
+          studentName: 'سارة عبدالله',
+          program: 'علوم الحاسب',
+          university: 'جامعة البوسفور',
+          date: new Date().toLocaleDateString('ar-SA'),
+          status: 'under_review',
+        }
+      ]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const handleViewApplication = (id: string) => {
     toast({

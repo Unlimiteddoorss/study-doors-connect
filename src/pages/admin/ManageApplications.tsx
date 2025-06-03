@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, CheckCircle, Clock, XCircle, Download, Edit, Eye, MoreHorizontal, Search, Filter, Calendar, User } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,7 @@ import { TablePagination } from '@/components/admin/TablePagination';
 import { TableSkeleton } from '@/components/admin/TableSkeleton';
 import { useAdminActions } from '@/hooks/admin/useAdminActions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Application {
   id: string;
@@ -46,79 +47,18 @@ interface Application {
   programName: string;
   universityName: string;
   submissionDate: string;
-  status: 'pending' | 'under_review' | 'accepted' | 'rejected' | 'waitlisted';
+  status: 'pending' | 'under_review' | 'accepted' | 'rejected' | 'cancelled';
   priority: 'high' | 'medium' | 'low';
   documents: number;
   agentName?: string;
 }
 
-const dummyApplications: Application[] = [
-  {
-    id: "APP001",
-    studentName: "أحمد محمد علي",
-    studentEmail: "ahmed@example.com",
-    programName: "علوم الحاسوب",
-    universityName: "جامعة إسطنبول التقنية",
-    submissionDate: "2024-01-15",
-    status: "pending",
-    priority: "high",
-    documents: 8,
-    agentName: "سارة أحمد"
-  },
-  {
-    id: "APP002",
-    studentName: "فاطمة حسن",
-    studentEmail: "fatima@example.com",
-    programName: "الهندسة الميكانيكية",
-    universityName: "جامعة الشرق الأوسط التقنية",
-    submissionDate: "2024-01-14",
-    status: "under_review",
-    priority: "medium",
-    documents: 7,
-    agentName: "محمد يوسف"
-  },
-  {
-    id: "APP003",
-    studentName: "عبدالله يوسف",
-    studentEmail: "abdullah@example.com",
-    programName: "الطب البشري",
-    universityName: "جامعة أنقرة",
-    submissionDate: "2024-01-13",
-    status: "accepted",
-    priority: "high",
-    documents: 9
-  },
-  {
-    id: "APP004",
-    studentName: "نور الدين",
-    studentEmail: "nour@example.com",
-    programName: "إدارة الأعمال",
-    universityName: "جامعة بيلكنت",
-    submissionDate: "2024-01-12",
-    status: "rejected",
-    priority: "low",
-    documents: 5,
-    agentName: "علي حسين"
-  },
-  {
-    id: "APP005",
-    studentName: "ليلى محمود",
-    studentEmail: "layla@example.com",
-    programName: "هندسة الحاسوب",
-    universityName: "جامعة كوتش",
-    submissionDate: "2024-01-11",
-    status: "waitlisted",
-    priority: "medium",
-    documents: 6
-  }
-];
-
 const itemsPerPage = 10;
 
 const ManageApplications = () => {
-  const [applications, setApplications] = useState<Application[]>(dummyApplications);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedApplicationId, setSelectedApplicationId] = useState<string | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -143,20 +83,75 @@ const ManageApplications = () => {
     ]
   );
 
+  // جلب البيانات من Supabase
+  useEffect(() => {
+    fetchApplications();
+  }, []);
+
+  const fetchApplications = async () => {
+    try {
+      setIsLoading(true);
+      
+      const { data: applicationsData, error } = await supabase
+        .from('applications')
+        .select(`
+          *,
+          programs!inner(name, universities!inner(name)),
+          user_profiles!applications_student_id_fkey(full_name, user_profiles!inner(*))
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // تحويل البيانات للشكل المطلوب
+      const formattedApplications: Application[] = applicationsData?.map(app => ({
+        id: app.id,
+        studentName: app.user_profiles?.full_name || 'طالب غير معروف',
+        studentEmail: 'student@example.com', // يمكن إضافة البريد الإلكتروني للملف الشخصي
+        programName: app.programs?.name || 'برنامج غير معروف',
+        universityName: app.programs?.universities?.name || 'جامعة غير معروفة',
+        submissionDate: new Date(app.created_at).toLocaleDateString('ar-SA'),
+        status: app.status as Application['status'],
+        priority: 'medium' as Application['priority'], // يمكن إضافة حقل الأولوية للجدول
+        documents: 0, // سيتم حسابها من جدول المستندات
+        agentName: undefined // سيتم جلبها من جدول الوكلاء
+      })) || [];
+
+      setApplications(formattedApplications);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في جلب البيانات",
+        variant: "destructive",
+      });
+      
+      // استخدام البيانات التجريبية في حالة الخطأ
+      setApplications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // حساب الإحصائيات
   const totalApplications = applications.length;
   const pendingApplications = applications.filter(app => app.status === 'pending').length;
   const underReviewApplications = applications.filter(app => app.status === 'under_review').length;
   const acceptedApplications = applications.filter(app => app.status === 'accepted').length;
   const rejectedApplications = applications.filter(app => app.status === 'rejected').length;
-  const waitlistedApplications = applications.filter(app => app.status === 'waitlisted').length;
 
   const updateApplicationStatus = (id: string, newStatus: Application['status']) => {
     handleAction(
       async () => {
-        await new Promise(resolve => setTimeout(resolve, 800));
-        setApplications(
-          applications.map((app) =>
+        const { error } = await supabase
+          .from('applications')
+          .update({ status: newStatus, updated_at: new Date().toISOString() })
+          .eq('id', id);
+
+        if (error) throw error;
+        
+        setApplications(prev =>
+          prev.map((app) =>
             app.id === id ? { ...app, status: newStatus } : app
           )
         );
@@ -177,7 +172,7 @@ const ManageApplications = () => {
     under_review: { label: 'قيد المراجعة', color: 'bg-blue-600 text-white' },
     accepted: { label: 'مقبول', color: 'bg-green-600 text-white' },
     rejected: { label: 'مرفوض', color: 'bg-red-600 text-white' },
-    waitlisted: { label: 'قائمة الانتظار', color: 'bg-purple-600 text-white' },
+    cancelled: { label: 'ملغي', color: 'bg-gray-600 text-white' },
   };
 
   const priorityConfig = {
@@ -222,7 +217,7 @@ const ManageApplications = () => {
         </div>
         
         {/* بطاقات الإحصائيات */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-unlimited-gray">إجمالي الطلبات</CardTitle>
@@ -270,30 +265,6 @@ const ManageApplications = () => {
               </div>
             </CardContent>
           </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-unlimited-gray">مرفوضة</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <XCircle className="h-4 w-4 text-red-600 mr-2" />
-                <span className="text-2xl font-bold text-red-600">{rejectedApplications}</span>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-unlimited-gray">قائمة الانتظار</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-4 w-4 text-purple-600 mr-2" />
-                <span className="text-2xl font-bold text-purple-600">{waitlistedApplications}</span>
-              </div>
-            </CardContent>
-          </Card>
         </div>
         
         {/* مرشحات البحث */}
@@ -319,19 +290,7 @@ const ManageApplications = () => {
                 <SelectItem value="under_review">قيد المراجعة</SelectItem>
                 <SelectItem value="accepted">مقبول</SelectItem>
                 <SelectItem value="rejected">مرفوض</SelectItem>
-                <SelectItem value="waitlisted">قائمة الانتظار</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={filters.priority} onValueChange={(value) => setFilters({...filters, priority: value})}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الأولوية" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">جميع الأولويات</SelectItem>
-                <SelectItem value="high">عالية</SelectItem>
-                <SelectItem value="medium">متوسطة</SelectItem>
-                <SelectItem value="low">منخفضة</SelectItem>
+                <SelectItem value="cancelled">ملغي</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -348,25 +307,22 @@ const ManageApplications = () => {
                 <TableHead>الجامعة</TableHead>
                 <TableHead>تاريخ التقديم</TableHead>
                 <TableHead>الحالة</TableHead>
-                <TableHead>الأولوية</TableHead>
-                <TableHead>المستندات</TableHead>
-                <TableHead>الوكيل</TableHead>
                 <TableHead>الإجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableSkeleton columns={10} rows={itemsPerPage} />
+                <TableSkeleton columns={7} rows={itemsPerPage} />
               ) : currentItems.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center h-40 text-unlimited-gray">
+                  <TableCell colSpan={7} className="text-center h-40 text-unlimited-gray">
                     لم يتم العثور على طلبات
                   </TableCell>
                 </TableRow>
               ) : (
                 currentItems.map((application) => (
                   <TableRow key={application.id}>
-                    <TableCell className="font-medium">{application.id}</TableCell>
+                    <TableCell className="font-medium">{application.id.slice(0, 8)}</TableCell>
                     <TableCell>
                       <div>
                         <p className="font-medium">{application.studentName}</p>
@@ -375,32 +331,11 @@ const ManageApplications = () => {
                     </TableCell>
                     <TableCell>{application.programName}</TableCell>
                     <TableCell>{application.universityName}</TableCell>
-                    <TableCell>{new Date(application.submissionDate).toLocaleDateString('ar-SA')}</TableCell>
+                    <TableCell>{application.submissionDate}</TableCell>
                     <TableCell>
                       <Badge className={statusConfig[application.status].color}>
                         {statusConfig[application.status].label}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={priorityConfig[application.priority].color}>
-                        {priorityConfig[application.priority].label}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <FileText className="h-4 w-4 mr-1" />
-                        {application.documents}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {application.agentName ? (
-                        <div className="flex items-center">
-                          <User className="h-4 w-4 mr-1" />
-                          {application.agentName}
-                        </div>
-                      ) : (
-                        <span className="text-unlimited-gray">-</span>
-                      )}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
@@ -430,9 +365,6 @@ const ManageApplications = () => {
                             <DropdownMenuItem onClick={() => updateApplicationStatus(application.id, 'rejected')}>
                               رفض
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateApplicationStatus(application.id, 'waitlisted')}>
-                              قائمة الانتظار
-                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -450,6 +382,8 @@ const ManageApplications = () => {
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
+              totalItems={filteredApplications.length}
+              itemsPerPage={itemsPerPage}
             />
           </div>
         )}
@@ -460,7 +394,7 @@ const ManageApplications = () => {
             open={isViewDialogOpen}
             onOpenChange={setIsViewDialogOpen}
             title="تفاصيل طلب القبول"
-            description={`طلب رقم: ${selectedApplication.id}`}
+            description={`طلب رقم: ${selectedApplication.id.slice(0, 8)}`}
             onSubmit={() => setIsViewDialogOpen(false)}
             submitLabel="إغلاق"
             isLoading={false}
@@ -491,35 +425,15 @@ const ManageApplications = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-unlimited-gray mb-1">تاريخ التقديم</label>
-                  <p>{new Date(selectedApplication.submissionDate).toLocaleDateString('ar-SA')}</p>
+                  <p>{selectedApplication.submissionDate}</p>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-unlimited-gray mb-1">عدد المستندات</label>
-                  <p>{selectedApplication.documents} مستند</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-unlimited-gray mb-1">الحالة</label>
                   <Badge className={statusConfig[selectedApplication.status].color}>
                     {statusConfig[selectedApplication.status].label}
                   </Badge>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-unlimited-gray mb-1">الأولوية</label>
-                  <Badge variant="outline" className={priorityConfig[selectedApplication.priority].color}>
-                    {priorityConfig[selectedApplication.priority].label}
-                  </Badge>
-                </div>
               </div>
-              
-              {selectedApplication.agentName && (
-                <div>
-                  <label className="block text-sm font-medium text-unlimited-gray mb-1">الوكيل المسؤول</label>
-                  <p>{selectedApplication.agentName}</p>
-                </div>
-              )}
             </div>
           </FormDialog>
         )}
