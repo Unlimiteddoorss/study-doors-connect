@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -62,7 +61,7 @@ const EnhancedAgentsManagement = () => {
   });
 
   const { toast } = useToast();
-  const { handleAsyncError, logInfo } = useErrorHandler();
+  const { handleAsyncError, logInfo, logError } = useErrorHandler();
 
   useEffect(() => {
     fetchData();
@@ -92,21 +91,30 @@ const EnhancedAgentsManagement = () => {
         `)
         .eq('role', 'agent');
 
-      if (agentsError) throw agentsError;
+      if (agentsError) {
+        logError(agentsError, { context: 'fetchData', operation: 'agents_query' });
+        throw agentsError;
+      }
 
       // جلب العمولات لكل وكيل
       const { data: commissionsData, error: commissionsError } = await supabase
         .from('commissions')
         .select('agent_id, amount, status');
 
-      if (commissionsError) throw commissionsError;
+      if (commissionsError) {
+        logError(commissionsError, { context: 'fetchData', operation: 'commissions_query' });
+        throw commissionsError;
+      }
 
       // جلب الطلاب المرتبطين بكل وكيل
       const { data: agentStudentsData, error: agentStudentsError } = await supabase
         .from('agent_students')
         .select('agent_id, student_id, is_active');
 
-      if (agentStudentsError) throw agentStudentsError;
+      if (agentStudentsError) {
+        logError(agentStudentsError, { context: 'fetchData', operation: 'agent_students_query' });
+        throw agentStudentsError;
+      }
 
       // ربط البيانات
       const agentsWithStats = agentsData.map(agent => {
@@ -197,9 +205,13 @@ const EnhancedAgentsManagement = () => {
   );
 
   const handleViewAgent = (agent) => {
-    setSelectedAgent(agent);
-    setIsDetailDialogOpen(true);
-    logInfo(`عرض تفاصيل الوكيل: ${agent.user_profiles?.full_name}`, { agentId: agent.user_id });
+    try {
+      setSelectedAgent(agent);
+      setIsDetailDialogOpen(true);
+      logInfo(`عرض تفاصيل الوكيل: ${agent.user_profiles?.full_name}`, { agentId: agent.user_id });
+    } catch (error) {
+      logError(error, { context: 'handleViewAgent', agentId: agent.user_id });
+    }
   };
 
   const getAgentStatusBadge = (agent) => {

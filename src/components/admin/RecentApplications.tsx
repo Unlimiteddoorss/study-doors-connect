@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Download, MoreHorizontal } from 'lucide-react';
@@ -41,7 +40,7 @@ export function RecentApplications() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { handleAsyncError, logInfo } = useErrorHandler();
+  const { handleAsyncError, logInfo, logError } = useErrorHandler();
 
   useEffect(() => {
     fetchRecentApplications();
@@ -61,7 +60,10 @@ export function RecentApplications() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error) throw error;
+      if (error) {
+        logError(error, { context: 'fetchRecentApplications', operation: 'supabase_query' });
+        throw error;
+      }
 
       const formattedApplications: Application[] = data?.map(app => ({
         id: app.id,
@@ -82,20 +84,27 @@ export function RecentApplications() {
   };
 
   const handleViewApplication = (id: string) => {
-    logInfo(`عرض تفاصيل الطلب: ${id}`, { applicationId: id });
-    toast({
-      title: "عرض الطلب",
-      description: `تم فتح الطلب رقم ${id}`,
-    });
-    navigate(`/admin/applications?id=${id}`);
+    try {
+      logInfo(`عرض تفاصيل الطلب: ${id}`, { applicationId: id });
+      toast({
+        title: "عرض الطلب",
+        description: `تم فتح الطلب رقم ${id}`,
+      });
+      navigate(`/admin/applications?id=${id}`);
+    } catch (error) {
+      logError(error, { context: 'handleViewApplication', applicationId: id });
+    }
   };
 
-  const handleDownloadDocuments = (id: string) => {
-    logInfo(`طلب تنزيل مستندات الطلب: ${id}`, { applicationId: id });
-    toast({
-      title: "تنزيل المستندات",
-      description: `جاري تنزيل مستندات الطلب رقم ${id}`,
-    });
+  const handleDownloadDocuments = async (id: string) => {
+    await handleAsyncError(async () => {
+      logInfo(`طلب تنزيل مستندات الطلب: ${id}`, { applicationId: id });
+      toast({
+        title: "تنزيل المستندات",
+        description: `جاري تنزيل مستندات الطلب رقم ${id}`,
+      });
+      // TODO: Implement actual download functionality
+    }, `خطأ في تنزيل مستندات الطلب ${id}`);
   };
 
   return (

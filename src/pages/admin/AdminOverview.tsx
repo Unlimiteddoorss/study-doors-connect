@@ -10,10 +10,17 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 const AdminOverview = () => {
   const { t } = useTranslation();
   const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('month');
-  const { logInfo } = useErrorHandler();
+  const { logInfo, logError } = useErrorHandler();
 
   const handleTabChange = (tabValue: string) => {
-    logInfo(`تم تغيير التبويب في لوحة المشرف إلى: ${tabValue}`, { tab: tabValue, timestamp: new Date().toISOString() });
+    try {
+      logInfo(`تم تغيير التبويب في لوحة المشرف إلى: ${tabValue}`, { 
+        tab: tabValue, 
+        timestamp: new Date().toISOString() 
+      });
+    } catch (error) {
+      logError(error, { context: 'handleTabChange', tabValue });
+    }
   };
   
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,7 +39,7 @@ interface DashboardStats {
 
 const EnhancedDashboard = () => {
   const { toast } = useToast();
-  const { handleAsyncError, logInfo } = useErrorHandler();
+  const { handleAsyncError, logInfo, logError } = useErrorHandler();
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalApplications: 0,
@@ -67,14 +66,20 @@ const EnhancedDashboard = () => {
         .select('user_id')
         .eq('role', 'student');
       
-      if (studentsError) throw studentsError;
+      if (studentsError) {
+        logError(studentsError, { context: 'fetchDashboardData', operation: 'students_query' });
+        throw studentsError;
+      }
 
       // جلب إحصائيات الطلبات
       const { data: applications, error: applicationsError } = await supabase
         .from('applications')
         .select('id, status');
       
-      if (applicationsError) throw applicationsError;
+      if (applicationsError) {
+        logError(applicationsError, { context: 'fetchDashboardData', operation: 'applications_query' });
+        throw applicationsError;
+      }
 
       // جلب إحصائيات الجامعات
       const { data: universities, error: universitiesError } = await supabase
@@ -82,7 +87,10 @@ const EnhancedDashboard = () => {
         .select('id')
         .eq('is_active', true);
       
-      if (universitiesError) throw universitiesError;
+      if (universitiesError) {
+        logError(universitiesError, { context: 'fetchDashboardData', operation: 'universities_query' });
+        throw universitiesError;
+      }
 
       // جلب إحصائيات الوكلاء
       const { data: agents, error: agentsError } = await supabase
@@ -90,7 +98,10 @@ const EnhancedDashboard = () => {
         .select('user_id')
         .eq('role', 'agent');
       
-      if (agentsError) throw agentsError;
+      if (agentsError) {
+        logError(agentsError, { context: 'fetchDashboardData', operation: 'agents_query' });
+        throw agentsError;
+      }
 
       // حساب الإحصائيات
       const pendingApps = applications?.filter(app => app.status === 'pending').length || 0;
@@ -118,8 +129,8 @@ const EnhancedDashboard = () => {
     }
   };
 
-  const handleRefresh = () => {
-    fetchDashboardData();
+  const handleRefresh = async () => {
+    await fetchDashboardData();
     toast({
       title: "تم التحديث",
       description: "تم تحديث بيانات لوحة التحكم بنجاح"
