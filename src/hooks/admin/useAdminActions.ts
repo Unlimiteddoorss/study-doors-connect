@@ -38,8 +38,6 @@ export const useAdminActions = (options: UseAdminActionsProps = {}) => {
       
       actionOptions?.onSuccess?.();
     } catch (error) {
-      console.error('Admin action error:', error);
-      
       toast({
         title: "خطأ",
         description: actionOptions?.errorMessage || options.errorMessage || "حدث خطأ أثناء تنفيذ العملية",

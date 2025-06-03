@@ -54,7 +54,6 @@ const ManageApplications = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error("Error fetching applications:", error);
         throw error;
       }
 
@@ -76,7 +75,12 @@ const ManageApplications = () => {
 
       setApplications(formattedApplications);
     } catch (error) {
-      console.error("Error fetching applications:", error);
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في تحميل بيانات الطلبات",
+        variant: "destructive"
+      });
+      
       // بيانات تجريبية في حالة الخطأ
       setApplications([
         {

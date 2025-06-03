@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -18,97 +19,112 @@ import UniversityReviewCard from '@/components/admin/universities/UniversityRevi
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
 import DateRangeSelector from '@/components/admin/DateRangeSelector';
+import { supabase } from '@/integrations/supabase/client';
 
-// بيانات تجريبية
-const dummyUniversities = [
-  {
-    id: "uni001",
-    nameAr: "جامعة الفلاح الدولية",
-    nameEn: "Al-Falah International University",
-    logo: undefined,
-    country: "الإمارات العربية المتحدة",
-    city: "دبي",
-    ranking: 420,
-    foundedYear: 2010,
-    studentsCount: 3800,
-    programsCount: 45,
-    rating: 4,
-    status: 'pending' as const
-  },
-  {
-    id: "uni002",
-    nameAr: "جامعة المستقبل التكنولوجية",
-    nameEn: "Future Technology University",
-    logo: undefined,
-    country: "المملكة العربية السعودية",
-    city: "الرياض",
-    ranking: 380,
-    foundedYear: 2005,
-    studentsCount: 5200,
-    programsCount: 62,
-    rating: 4.5,
-    status: 'pending' as const
-  },
-  {
-    id: "uni003",
-    nameAr: "جامعة الأندلس للعلوم",
-    nameEn: "Andalusia University of Sciences",
-    logo: undefined,
-    country: "مصر",
-    city: "القاهرة",
-    ranking: 550,
-    foundedYear: 1995,
-    studentsCount: 8500,
-    programsCount: 78,
-    rating: 3.5,
-    status: 'pending' as const
-  },
-  {
-    id: "uni004",
-    nameAr: "جامعة المعرفة الدولية",
-    nameEn: "Knowledge International University",
-    logo: undefined,
-    country: "الأردن",
-    city: "عمان",
-    ranking: 480,
-    foundedYear: 2008,
-    studentsCount: 4100,
-    programsCount: 53,
-    rating: 4,
-    status: 'approved' as const
-  },
-  {
-    id: "uni005",
-    nameAr: "جامعة الريادة",
-    nameEn: "Leadership University",
-    logo: undefined,
-    country: "قطر",
-    city: "الدوحة",
-    ranking: 320,
-    foundedYear: 2012,
-    studentsCount: 3200,
-    programsCount: 38,
-    rating: 4.2,
-    status: 'rejected' as const
-  }
-];
+interface University {
+  id: string;
+  nameAr: string;
+  nameEn: string;
+  logo?: string;
+  country: string;
+  city: string;
+  ranking?: number;
+  foundedYear?: number;
+  studentsCount: number;
+  programsCount: number;
+  rating?: number;
+  status: 'pending' | 'approved' | 'rejected';
+}
 
 const ReviewUniversities = () => {
-  const [universities, setUniversities] = useState(dummyUniversities);
-  const [filteredUniversities, setFilteredUniversities] = useState(dummyUniversities);
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [filteredUniversities, setFilteredUniversities] = useState<University[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [countryFilter, setCountryFilter] = useState('all');
   const [sortOption, setSortOption] = useState('newest');
   const [currentTab, setCurrentTab] = useState('all');
   const [selectedUniversityId, setSelectedUniversityId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { isLoading, confirmAction, isConfirmDialogOpen, executePendingAction, cancelConfirmAction } = useAdminActions();
+  const { isLoading: isActionLoading, confirmAction, isConfirmDialogOpen, executePendingAction, cancelConfirmAction } = useAdminActions();
   
   // حساب الإحصائيات
   const pendingCount = universities.filter(uni => uni.status === 'pending').length;
   const approvedCount = universities.filter(uni => uni.status === 'approved').length;
   const rejectedCount = universities.filter(uni => uni.status === 'rejected').length;
+  
+  useEffect(() => {
+    fetchUniversities();
+  }, []);
+  
+  const fetchUniversities = async () => {
+    try {
+      setIsLoading(true);
+      
+      const { data: universitiesData, error } = await supabase
+        .from('universities')
+        .select(`
+          id,
+          name,
+          name_ar,
+          country,
+          city,
+          founded_year,
+          image_url,
+          is_active,
+          programs (id)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      const formattedUniversities: University[] = universitiesData?.map(uni => ({
+        id: uni.id.toString(),
+        nameAr: uni.name_ar || uni.name,
+        nameEn: uni.name,
+        logo: uni.image_url || undefined,
+        country: uni.country,
+        city: uni.city,
+        ranking: Math.floor(Math.random() * 500) + 100, // تصنيف عشوائي للعرض
+        foundedYear: uni.founded_year || undefined,
+        studentsCount: Math.floor(Math.random() * 10000) + 1000, // عدد طلاب عشوائي
+        programsCount: uni.programs?.length || 0,
+        rating: Math.floor(Math.random() * 5) + 1,
+        status: uni.is_active ? 'approved' : 'pending' as 'pending' | 'approved' | 'rejected'
+      })) || [];
+
+      setUniversities(formattedUniversities);
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ في تحميل بيانات الجامعات",
+        variant: "destructive"
+      });
+      
+      // استخدام بيانات تجريبية في حالة الخطأ
+      const fallbackData: University[] = [
+        {
+          id: "1",
+          nameAr: "جامعة إسطنبول التقنية",
+          nameEn: "Istanbul Technical University",
+          country: "تركيا",
+          city: "إسطنبول",
+          ranking: 350,
+          foundedYear: 1773,
+          studentsCount: 35000,
+          programsCount: 45,
+          rating: 4.5,
+          status: 'pending'
+        }
+      ];
+      setUniversities(fallbackData);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   // تصفية الجامعات بناءً على الفلاتر
   useEffect(() => {
@@ -164,8 +180,12 @@ const ReviewUniversities = () => {
     
     confirmAction(
       async () => {
-        // في الواقع سنرسل طلب API هنا
-        await new Promise(resolve => setTimeout(resolve, 800));
+        const { error } = await supabase
+          .from('universities')
+          .update({ is_active: true })
+          .eq('id', parseInt(id));
+        
+        if (error) throw error;
         
         setUniversities(universities.map(uni => 
           uni.id === id ? { ...uni, status: 'approved' } : uni
@@ -183,8 +203,12 @@ const ReviewUniversities = () => {
     
     confirmAction(
       async () => {
-        // في الواقع سنرسل طلب API هنا
-        await new Promise(resolve => setTimeout(resolve, 800));
+        const { error } = await supabase
+          .from('universities')
+          .update({ is_active: false })
+          .eq('id', parseInt(id));
+        
+        if (error) throw error;
         
         setUniversities(universities.map(uni => 
           uni.id === id ? { ...uni, status: 'rejected' } : uni
@@ -204,7 +228,6 @@ const ReviewUniversities = () => {
   };
   
   const handleDateRangeChange = (range: { from: Date; to: Date }) => {
-    // سنستخدم هذا للتصفية حسب التاريخ في التنفيذ الحقيقي
     toast({
       description: `تم اختيار الفترة من ${range.from.toLocaleDateString()} إلى ${range.to.toLocaleDateString()}`
     });
@@ -222,6 +245,17 @@ const ReviewUniversities = () => {
       return `هل أنت متأكد من رفض جامعة "${university.nameAr}"؟ لن يتمكن الطلاب من رؤية هذه الجامعة.`;
     }
   };
+  
+  if (isLoading) {
+    return (
+      <DashboardLayout userRole="admin">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+          <span className="mr-3">جاري تحميل الجامعات...</span>
+        </div>
+      </DashboardLayout>
+    );
+  }
   
   return (
     <DashboardLayout userRole="admin">
@@ -338,97 +372,30 @@ const ReviewUniversities = () => {
             <TabsTrigger value="rejected">مرفوضة ({rejectedCount})</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="all" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filteredUniversities.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-unlimited-gray">
-                  <School className="h-12 w-12 mb-2 opacity-50" />
-                  <h3 className="text-lg font-medium">لا توجد جامعات</h3>
-                  <p className="text-sm">لم يتم العثور على جامعات تطابق معايير البحث</p>
-                </div>
-              ) : (
-                filteredUniversities.map(university => (
-                  <UniversityReviewCard
-                    key={university.id}
-                    university={university}
-                    onApprove={handleApproveUniversity}
-                    onReject={handleRejectUniversity}
-                    onViewDetails={handleViewDetails}
-                    isLoading={isLoading && selectedUniversityId === university.id}
-                  />
-                ))
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="pending" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filteredUniversities.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-unlimited-gray">
-                  <School className="h-12 w-12 mb-2 opacity-50" />
-                  <h3 className="text-lg font-medium">لا ��وجد جامعات قيد المراجعة</h3>
-                  <p className="text-sm">لم يتم العثور على جامعات تنتظر المراجعة</p>
-                </div>
-              ) : (
-                filteredUniversities.map(university => (
-                  <UniversityReviewCard
-                    key={university.id}
-                    university={university}
-                    onApprove={handleApproveUniversity}
-                    onReject={handleRejectUniversity}
-                    onViewDetails={handleViewDetails}
-                    isLoading={isLoading && selectedUniversityId === university.id}
-                  />
-                ))
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="approved" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filteredUniversities.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-unlimited-gray">
-                  <School className="h-12 w-12 mb-2 opacity-50" />
-                  <h3 className="text-lg font-medium">لا توجد جامعات معتمدة</h3>
-                  <p className="text-sm">لم يتم العثور على جامعات تمت الموافقة عليها</p>
-                </div>
-              ) : (
-                filteredUniversities.map(university => (
-                  <UniversityReviewCard
-                    key={university.id}
-                    university={university}
-                    onApprove={handleApproveUniversity}
-                    onReject={handleRejectUniversity}
-                    onViewDetails={handleViewDetails}
-                    isLoading={isLoading && selectedUniversityId === university.id}
-                  />
-                ))
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="rejected" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {filteredUniversities.length === 0 ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-unlimited-gray">
-                  <School className="h-12 w-12 mb-2 opacity-50" />
-                  <h3 className="text-lg font-medium">لا توجد جامعات مرفوضة</h3>
-                  <p className="text-sm">لم يتم العثور على جامعات تم رفضها</p>
-                </div>
-              ) : (
-                filteredUniversities.map(university => (
-                  <UniversityReviewCard
-                    key={university.id}
-                    university={university}
-                    onApprove={handleApproveUniversity}
-                    onReject={handleRejectUniversity}
-                    onViewDetails={handleViewDetails}
-                    isLoading={isLoading && selectedUniversityId === university.id}
-                  />
-                ))
-              )}
-            </div>
-          </TabsContent>
+          {['all', 'pending', 'approved', 'rejected'].map((tabValue) => (
+            <TabsContent key={tabValue} value={tabValue} className="mt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {filteredUniversities.length === 0 ? (
+                  <div className="col-span-full flex flex-col items-center justify-center py-12 text-unlimited-gray">
+                    <School className="h-12 w-12 mb-2 opacity-50" />
+                    <h3 className="text-lg font-medium">لا توجد جامعات</h3>
+                    <p className="text-sm">لم يتم العثور على جامعات تطابق معايير البحث</p>
+                  </div>
+                ) : (
+                  filteredUniversities.map(university => (
+                    <UniversityReviewCard
+                      key={university.id}
+                      university={university}
+                      onApprove={handleApproveUniversity}
+                      onReject={handleRejectUniversity}
+                      onViewDetails={handleViewDetails}
+                      isLoading={isActionLoading && selectedUniversityId === university.id}
+                    />
+                  ))
+                )}
+              </div>
+            </TabsContent>
+          ))}
         </Tabs>
         
         <ConfirmDialog
@@ -439,7 +406,7 @@ const ReviewUniversities = () => {
           description={getConfirmationText()}
           confirmLabel={actionType === 'approve' ? "موافقة" : "رفض"}
           cancelLabel="إلغاء"
-          isLoading={isLoading}
+          isLoading={isActionLoading}
           destructive={actionType !== 'approve'}
         />
       </motion.div>

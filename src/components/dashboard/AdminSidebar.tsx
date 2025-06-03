@@ -1,192 +1,132 @@
-
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   BarChart3,
-  BookOpen,
-  Building,
-  FileText,
-  GraduationCap,
-  Home,
-  MessageSquare,
-  Settings,
+  TrendingUp,
   Users,
-  UserCog,
-  Bell
+  FileText,
+  Building2,
+  BookOpen,
+  UserCheck,
+  MessageSquare,
+  Bell,
+  BarChart,
+  CheckCircle
 } from 'lucide-react';
-import Logo from '../shared/Logo';
-import { Badge } from '../ui/badge';
-import { useTranslation } from 'react-i18next';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
-const AdminSidebar = () => {
-  const { pathname } = useLocation();
-  const { t, i18n } = useTranslation();
-  const isRtl = i18n.language === 'ar';
+export const AdminSidebar = () => {
+  const location = useLocation();
+  const { logout } = useAuth();
+  const { toast } = useToast();
   
-  const isActive = (path: string) => {
-    return pathname === path || pathname.startsWith(`${path}/`);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "تم تسجيل الخروج",
+        description: "تم تسجيل الخروج بنجاح"
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ",
+        description: "حدث خطأ أثناء تسجيل الخروج",
+        variant: "destructive"
+      });
+    }
   };
-  
-  return (
-    <div className={`fixed inset-y-0 ${isRtl ? 'right-0 border-r' : 'left-0 border-l'} w-[250px] border-gray-200 bg-white z-30 flex flex-col`}>
-      <div className="p-4 bg-unlimited-dark-blue text-white">
-        <Logo />
-      </div>
-      
-      <div className="p-4 flex-1 overflow-auto">
-        <nav className="space-y-1">
-          <Link
-            to="/admin"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin') && !isActive('/admin/students') && !isActive('/admin/agents') && !isActive('/admin/universities') && !isActive('/admin/applications') && !isActive('/admin/programs')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <Home className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.dashboard')}</span>
-          </Link>
-          
-          <Link
-            to="/admin/students"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/students')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <Users className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.studentsManagement')}</span>
-          </Link>
-          
-          <Link
-            to="/admin/agents"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/agents')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <UserCog className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.agentsManagement')}</span>
-          </Link>
-          
-          <Link
-            to="/admin/universities"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/universities')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <Building className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.universitiesManagement')}</span>
-          </Link>
-          
-          <Link
-            to="/admin/programs"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/programs')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <BookOpen className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.programsManagement')}</span>
-          </Link>
-          
-          <Link
-            to="/admin/applications"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/applications')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <FileText className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.applicationsManagement')}</span>
-          </Link>
 
-          <div className="pt-4 mt-4 border-t border-gray-200">
-            <h3 className="px-3 text-xs font-semibold text-unlimited-gray uppercase tracking-wider">
-              {t('admin.communication')}
-            </h3>
-          </div>
-          
-          <Link
-            to="/admin/messages"
-            className={`flex items-center justify-between px-3 py-2 rounded-md ${
-              isActive('/admin/messages')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <div className="flex items-center">
-              <MessageSquare className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-              <span>{t('admin.sidebar.messagingSystem')}</span>
-            </div>
-            <Badge className="bg-unlimited-warning text-white">12</Badge>
-          </Link>
-          
-          <Link
-            to="/admin/notifications"
-            className={`flex items-center justify-between px-3 py-2 rounded-md ${
-              isActive('/admin/notifications')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <div className="flex items-center">
-              <Bell className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-              <span>{t('admin.sidebar.notifications')}</span>
-            </div>
-            <Badge className="bg-unlimited-danger text-white">5</Badge>
-          </Link>
-          
-          <div className="pt-4 mt-4 border-t border-gray-200">
-            <h3 className="px-3 text-xs font-semibold text-unlimited-gray uppercase tracking-wider">
-              {t('admin.additional')}
-            </h3>
-          </div>
-          
-          <Link
-            to="/admin/reports"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/reports')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <BarChart3 className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.reportsStatistics')}</span>
-          </Link>
-          
-          <Link
-            to="/admin/settings"
-            className={`flex items-center px-3 py-2 rounded-md ${
-              isActive('/admin/settings')
-                ? 'bg-unlimited-blue text-white'
-                : 'text-unlimited-gray hover:bg-unlimited-blue/10'
-            }`}
-          >
-            <Settings className={`h-5 w-5 ${isRtl ? 'ml-2' : 'mr-2'}`} />
-            <span>{t('admin.sidebar.settings')}</span>
-          </Link>
-        </nav>
-      </div>
-      
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center">
-          <div className="flex-shrink-0 h-8 w-8 rounded-full bg-unlimited-blue/20 flex items-center justify-center">
-            <GraduationCap className="h-5 w-5 text-unlimited-blue" />
-          </div>
-          <div className={`${isRtl ? 'mr-3' : 'ml-3'}`}>
-            <p className="text-sm font-medium text-unlimited-dark-blue">{t('admin.sidebar.adminPanel')}</p>
-            <p className="text-xs text-unlimited-gray">{t('site.name')}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+  const menuItems = [
+    {
+      title: "لوحة التحكم",
+      href: "/admin/dashboard",
+      icon: BarChart3,
+    },
+    {
+      title: "نظرة عامة",
+      href: "/admin/overview",
+      icon: TrendingUp,
+    },
+    {
+      title: "إدارة الطلاب",
+      href: "/admin/students",
+      icon: Users,
+    },
+    {
+      title: "إدارة الطلبات",
+      href: "/admin/applications",
+      icon: FileText,
+    },
+    {
+      title: "إدارة الجامعات",
+      href: "/admin/universities",
+      icon: Building2,
+    },
+    {
+      title: "مراجعة الجامعات",
+      href: "/admin/universities/review",
+      icon: CheckCircle,
+    },
+    {
+      title: "إدارة البرامج",
+      href: "/admin/programs",
+      icon: BookOpen,
+    },
+    {
+      title: "إدارة الوكلاء",
+      href: "/admin/agents",
+      icon: UserCheck,
+    },
+    {
+      title: "الرسائل",
+      href: "/admin/messages",
+      icon: MessageSquare,
+    },
+    {
+      title: "الإشعارات",
+      href: "/admin/notifications",
+      icon: Bell,
+    },
+    {
+      title: "التقارير",
+      href: "/admin/reports",
+      icon: BarChart,
+    },
+  ];
+
+  return (
+    <Sidebar className="bg-white border-r">
+      <SidebarHeader>
+        <a href="/" className="flex items-center space-x-2">
+          <img
+            src="/logo.svg"
+            alt="Unlimited Edu"
+            className="h-8 w-8"
+          />
+          <span className="font-bold text-xl">Unlimited Edu</span>
+        </a>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          {menuItems.map((item) => (
+            <SidebarMenuItem
+              key={item.title}
+              href={item.href}
+              active={location.pathname === item.href}
+            >
+              <item.icon className="h-4 w-4" />
+              <span>{item.title}</span>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter>
+        <button onClick={handleLogout} className="w-full py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-md">
+          تسجيل الخروج
+        </button>
+      </SidebarFooter>
+    </Sidebar>
   );
 };
-
-export default AdminSidebar;

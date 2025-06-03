@@ -28,6 +28,7 @@ import AdminOverview from '@/pages/admin/AdminOverview';
 import EnhancedStudentsManagement from '@/pages/admin/EnhancedStudentsManagement';
 import ManageApplications from '@/pages/admin/ManageApplications';
 import ManageUniversities from '@/pages/admin/ManageUniversities';
+import ReviewUniversities from '@/pages/admin/ReviewUniversities';
 import EnhancedProgramsManagement from '@/pages/admin/EnhancedProgramsManagement';
 import EnhancedAgentsManagement from '@/pages/admin/EnhancedAgentsManagement';
 import AdminMessages from '@/pages/admin/AdminMessages';
@@ -117,6 +118,7 @@ function App() {
               <Route path="students" element={<EnhancedStudentsManagement />} />
               <Route path="applications" element={<ManageApplications />} />
               <Route path="universities" element={<ManageUniversities />} />
+              <Route path="universities/review" element={<ReviewUniversities />} />
               <Route path="programs" element={<EnhancedProgramsManagement />} />
               <Route path="agents" element={<EnhancedAgentsManagement />} />
               <Route path="messages" element={<AdminMessages />} />
