@@ -34,6 +34,7 @@ interface Application {
   pinCode?: string;
   scholarshipStatus?: string;
   assignedTo?: string;
+  studentName?: string;
   documents: {
     name: string;
     status: 'uploaded' | 'required' | 'approved';
@@ -45,13 +46,15 @@ interface ApplicationsTableProps {
   handleViewApplication: (application: Application) => void;
   handleDeleteApplication?: (id: string | number) => void;
   handleUpdateStatus?: (id: string | number, status: string) => void;
+  isLoading?: boolean;
 }
 
 export const ApplicationsTable = ({ 
   applications,
   handleViewApplication,
   handleDeleteApplication,
-  handleUpdateStatus 
+  handleUpdateStatus,
+  isLoading = false
 }: ApplicationsTableProps) => {
   const { t, i18n } = useTranslation();
   const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
@@ -63,6 +66,7 @@ export const ApplicationsTable = ({
       case 'rejected':
         return <Badge className="bg-red-500">مرفوض</Badge>;
       case 'review':
+      case 'under_review':
         return <Badge className="bg-amber-500">قيد المراجعة</Badge>;
       case 'documents':
         return <Badge className="bg-blue-500">بانتظار المستندات</Badge>;
@@ -74,6 +78,10 @@ export const ApplicationsTable = ({
         return <Badge className="bg-emerald-500">مدفوع</Badge>;
       case 'registered':
         return <Badge className="bg-indigo-500">مسجل</Badge>;
+      case 'accepted':
+        return <Badge className="bg-green-500">مقبول</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-gray-500">ملغي</Badge>;
       default:
         return <Badge className="bg-gray-500">{status}</Badge>;
     }
@@ -88,6 +96,17 @@ export const ApplicationsTable = ({
     setSelectedApplication(application);
     window.location.hash = '#documents';
   };
+
+  if (isLoading) {
+    return (
+      <div className="rounded-md border">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue"></div>
+          <span className="mr-3">جاري التحميل...</span>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="rounded-md border">
@@ -95,6 +114,7 @@ export const ApplicationsTable = ({
         <TableHeader>
           <TableRow>
             <TableHead>رقم الطلب</TableHead>
+            <TableHead>اسم الطالب</TableHead>
             <TableHead>البرنامج</TableHead>
             <TableHead className="hidden md:table-cell">الجامعة</TableHead>
             <TableHead>الحالة</TableHead>
@@ -107,6 +127,7 @@ export const ApplicationsTable = ({
           {applications.map((app) => (
             <TableRow key={app.id} className="hover:bg-gray-50">
               <TableCell className="font-medium">{app.id}</TableCell>
+              <TableCell>{app.studentName || 'طالب غير معروف'}</TableCell>
               <TableCell>{app.program}</TableCell>
               <TableCell className="hidden md:table-cell">{app.university}</TableCell>
               <TableCell>{getStatusBadge(app.status)}</TableCell>
@@ -186,13 +207,10 @@ export const ApplicationsTable = ({
           
           {applications.length === 0 && (
             <TableRow>
-              <TableCell colSpan={7} className="h-32 text-center">
+              <TableCell colSpan={8} className="h-32 text-center">
                 <div className="flex flex-col items-center justify-center">
                   <FileText className="h-8 w-8 text-unlimited-gray mb-2" />
                   <p className="text-unlimited-gray">لا توجد طلبات</p>
-                  <Button variant="outline" className="mt-4">
-                    إضافة طلب جديد
-                  </Button>
                 </div>
               </TableCell>
             </TableRow>
