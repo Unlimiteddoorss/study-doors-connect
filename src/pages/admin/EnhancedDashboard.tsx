@@ -27,7 +27,7 @@ import SystemHealthWidget from '@/components/admin/SystemHealthWidget';
 
 // Fix imports - use named imports instead of default
 import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
-import RecentApplications from '@/components/admin/RecentApplications';
+import { RecentApplications } from '@/components/admin/RecentApplications';
 
 interface DashboardStats {
   totalStudents: number;
