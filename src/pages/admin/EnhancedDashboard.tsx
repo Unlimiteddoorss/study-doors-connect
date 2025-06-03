@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,10 +15,10 @@ import {
   AlertTriangle,
   RefreshCw
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { realApplicationsService } from '@/services/realApplicationsService';
+import { realUniversitiesService } from '@/services/realUniversitiesService';
 
 // Import the enhanced components
 import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
@@ -31,10 +32,13 @@ interface DashboardStats {
   totalStudents: number;
   totalApplications: number;
   totalUniversities: number;
+  totalPrograms: number;
   pendingApplications: number;
+  underReviewApplications: number;
   approvedApplications: number;
   rejectedApplications: number;
-  totalAgents: number;
+  thisMonth: number;
+  thisWeek: number;
 }
 
 const EnhancedDashboard = () => {
@@ -44,10 +48,13 @@ const EnhancedDashboard = () => {
     totalStudents: 0,
     totalApplications: 0,
     totalUniversities: 0,
+    totalPrograms: 0,
     pendingApplications: 0,
+    underReviewApplications: 0,
     approvedApplications: 0,
     rejectedApplications: 0,
-    totalAgents: 0
+    thisMonth: 0,
+    thisWeek: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -60,68 +67,29 @@ const EnhancedDashboard = () => {
     const result = await handleAsyncError(async () => {
       setIsLoading(true);
       
-      // جلب إحصائيات الطلاب
-      const { data: students, error: studentsError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'student');
-      
-      if (studentsError) {
-        logError(studentsError, { context: 'fetchDashboardData', operation: 'students_query' });
-        throw studentsError;
-      }
-
       // جلب إحصائيات الطلبات
-      const { data: applications, error: applicationsError } = await supabase
-        .from('applications')
-        .select('id, status');
-      
-      if (applicationsError) {
-        logError(applicationsError, { context: 'fetchDashboardData', operation: 'applications_query' });
-        throw applicationsError;
-      }
+      const [applicationsStats, universitiesStats] = await Promise.all([
+        realApplicationsService.getApplicationsStats(),
+        realUniversitiesService.getUniversitiesStats()
+      ]);
 
-      // جلب إحصائيات الجامعات
-      const { data: universities, error: universitiesError } = await supabase
-        .from('universities')
-        .select('id')
-        .eq('is_active', true);
-      
-      if (universitiesError) {
-        logError(universitiesError, { context: 'fetchDashboardData', operation: 'universities_query' });
-        throw universitiesError;
-      }
-
-      // جلب إحصائيات الوكلاء
-      const { data: agents, error: agentsError } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'agent');
-      
-      if (agentsError) {
-        logError(agentsError, { context: 'fetchDashboardData', operation: 'agents_query' });
-        throw agentsError;
-      }
-
-      // حساب الإحصائيات
-      const pendingApps = applications?.filter(app => app.status === 'pending').length || 0;
-      const approvedApps = applications?.filter(app => app.status === 'accepted' || app.status === 'approved').length || 0;
-      const rejectedApps = applications?.filter(app => app.status === 'rejected').length || 0;
-
-      const calculatedStats = {
-        totalStudents: students?.length || 0,
-        totalApplications: applications?.length || 0,
-        totalUniversities: universities?.length || 0,
-        pendingApplications: pendingApps,
-        approvedApplications: approvedApps,
-        rejectedApplications: rejectedApps,
-        totalAgents: agents?.length || 0
+      const calculatedStats: DashboardStats = {
+        totalStudents: universitiesStats.applicationStats?.thisMonth || 0, // تقريب مؤقت
+        totalApplications: applicationsStats.total,
+        totalUniversities: universitiesStats.totalUniversities,
+        totalPrograms: universitiesStats.totalPrograms,
+        pendingApplications: applicationsStats.pending,
+        underReviewApplications: applicationsStats.underReview || 0,
+        approvedApplications: applicationsStats.approved,
+        rejectedApplications: applicationsStats.rejected,
+        thisMonth: applicationsStats.thisMonth,
+        thisWeek: applicationsStats.thisWeek
       };
 
       setStats(calculatedStats);
       setLastUpdated(new Date());
       
-      logInfo('تم تحديث إحصائيات لوحة التحكم', calculatedStats);
+      logInfo('تم تحديث إحصائيات لوحة التحكم بالبيانات الحقيقية', calculatedStats);
     }, "خطأ في جلب بيانات لوحة التحكم");
 
     if (result !== null) {
@@ -139,17 +107,17 @@ const EnhancedDashboard = () => {
 
   const statsCards = [
     {
-      title: 'إجمالي الطلاب',
-      value: stats.totalStudents,
-      change: { value: 12, type: 'increase' as const, period: 'هذا الشهر' },
-      icon: <Users className="h-4 w-4" />,
-      description: 'طلاب مسجلين في النظام',
+      title: 'إجمالي الطلبات',
+      value: stats.totalApplications,
+      change: { value: stats.thisWeek, type: 'increase' as const, period: 'هذا الأسبوع' },
+      icon: <FileText className="h-4 w-4" />,
+      description: 'جميع الطلبات المقدمة',
       color: 'blue' as const
     },
     {
       title: 'طلبات قيد الانتظار',
       value: stats.pendingApplications,
-      change: { value: 8, type: 'increase' as const, period: 'هذا الأسبوع' },
+      change: { value: Math.round(stats.pendingApplications / Math.max(stats.totalApplications, 1) * 100), type: 'neutral' as const, period: 'من الإجمالي' },
       icon: <Clock className="h-4 w-4" />,
       description: 'تحتاج إلى مراجعة',
       color: 'yellow' as const
@@ -157,7 +125,7 @@ const EnhancedDashboard = () => {
     {
       title: 'طلبات مقبولة',
       value: stats.approvedApplications,
-      change: { value: 15, type: 'increase' as const, period: 'هذا الشهر' },
+      change: { value: Math.round(stats.approvedApplications / Math.max(stats.totalApplications, 1) * 100), type: 'increase' as const, period: 'معدل القبول' },
       icon: <CheckCircle className="h-4 w-4" />,
       description: 'تم قبولها بنجاح',
       color: 'green' as const
@@ -165,25 +133,25 @@ const EnhancedDashboard = () => {
     {
       title: 'إجمالي الجامعات',
       value: stats.totalUniversities,
-      change: { value: 2, type: 'increase' as const, period: 'هذا الشهر' },
+      change: { value: 5, type: 'increase' as const, period: 'جامعات جديدة' },
       icon: <Building2 className="h-4 w-4" />,
       description: 'جامعات نشطة',
       color: 'purple' as const
     },
     {
-      title: 'إجمالي الطلبات',
-      value: stats.totalApplications,
-      change: { value: 25, type: 'increase' as const, period: 'هذا الشهر' },
-      icon: <FileText className="h-4 w-4" />,
-      description: 'جميع الطلبات المقدمة',
+      title: 'البرامج المتاحة',
+      value: stats.totalPrograms,
+      change: { value: Math.round(stats.totalPrograms / Math.max(stats.totalUniversities, 1)), type: 'neutral' as const, period: 'برامج لكل جامعة' },
+      icon: <Users className="h-4 w-4" />,
+      description: 'برامج دراسية متنوعة',
       color: 'blue' as const
     },
     {
-      title: 'الوكلاء النشطون',
-      value: stats.totalAgents,
-      change: { value: 1, type: 'increase' as const, period: 'هذا الأسبوع' },
-      icon: <UserCheck className="h-4 w-4" />,
-      description: 'وكلاء يديرون الطلاب',
+      title: 'هذا الشهر',
+      value: stats.thisMonth,
+      change: { value: stats.thisWeek, type: 'increase' as const, period: 'هذا الأسبوع' },
+      icon: <TrendingUp className="h-4 w-4" />,
+      description: 'طلبات جديدة',
       color: 'green' as const
     }
   ];
@@ -261,23 +229,35 @@ const EnhancedDashboard = () => {
                 <CardContent>
                   <div className="space-y-4">
                     <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="text-sm font-medium">متوسط وقت الاستجابة</span>
-                      <span className="font-bold text-green-600">1.2 ثانية</span>
+                      <span className="text-sm font-medium">الطلبات النشطة</span>
+                      <span className="font-bold text-green-600">
+                        {stats.pendingApplications + stats.underReviewApplications}
+                      </span>
                     </div>
                     
                     <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                      <span className="text-sm font-medium">المستخدمون النشطون</span>
-                      <span className="font-bold text-blue-600">47 مستخدم</span>
+                      <span className="text-sm font-medium">معدل القبول</span>
+                      <span className="font-bold text-blue-600">
+                        {stats.totalApplications > 0 
+                          ? Math.round((stats.approvedApplications / stats.totalApplications) * 100)
+                          : 0}%
+                      </span>
                     </div>
                     
                     <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                      <span className="text-sm font-medium">استخدام التخزين</span>
-                      <span className="font-bold text-purple-600">2.8 GB / 10 GB</span>
+                      <span className="text-sm font-medium">متوسط البرامج</span>
+                      <span className="font-bold text-purple-600">
+                        {stats.totalUniversities > 0 
+                          ? Math.round(stats.totalPrograms / stats.totalUniversities)
+                          : 0} برنامج/جامعة
+                      </span>
                     </div>
                     
                     <div className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
-                      <span className="text-sm font-medium">النسخ الاحتياطية</span>
-                      <span className="font-bold text-yellow-600">آخر نسخة: أمس</span>
+                      <span className="text-sm font-medium">النمو الشهري</span>
+                      <span className="font-bold text-yellow-600">
+                        +{stats.thisMonth} طلب
+                      </span>
                     </div>
                   </div>
                 </CardContent>

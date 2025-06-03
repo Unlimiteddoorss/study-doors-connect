@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Download, MoreHorizontal } from 'lucide-react';
@@ -12,20 +13,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { realApplicationsService, RealApplication } from '@/services/realApplicationsService';
 
-type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'under_review' | 'cancelled';
-
-type Application = {
-  id: string;
-  studentName?: string;
-  program: string;
-  university: string;
-  date?: string;
-  createdDate?: string;
-  status: ApplicationStatus;
-};
+type ApplicationStatus = 'pending' | 'under_review' | 'accepted' | 'rejected' | 'cancelled';
 
 const statusConfig: Record<ApplicationStatus, { label: string; color: string }> = {
   pending: { label: 'قيد الانتظار', color: 'bg-yellow-600 text-white' },
@@ -36,7 +27,7 @@ const statusConfig: Record<ApplicationStatus, { label: string; color: string }> 
 };
 
 export function RecentApplications() {
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState<RealApplication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -50,32 +41,15 @@ export function RecentApplications() {
     const result = await handleAsyncError(async () => {
       setIsLoading(true);
       
-      const { data, error } = await supabase
-        .from('applications')
-        .select(`
-          *,
-          programs!inner(name, universities!inner(name)),
-          user_profiles!inner(full_name)
-        `)
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (error) {
-        logError(error, { context: 'fetchRecentApplications', operation: 'supabase_query' });
-        throw error;
-      }
-
-      const formattedApplications: Application[] = data?.map(app => ({
-        id: app.id,
-        studentName: app.user_profiles?.full_name || 'طالب غير معروف',
-        program: app.programs?.name || 'برنامج غير معروف',
-        university: app.programs?.universities?.name || 'جامعة غير معروفة',
-        date: new Date(app.created_at).toLocaleDateString('ar-SA'),
-        status: app.status as ApplicationStatus
-      })) || [];
-
-      setApplications(formattedApplications);
-      logInfo(`تم جلب ${formattedApplications.length} طلبات حديثة`, { count: formattedApplications.length });
+      const data = await realApplicationsService.getAllApplications();
+      
+      // أخذ آخر 5 طلبات فقط
+      const recentApplications = data.slice(0, 5);
+      setApplications(recentApplications);
+      
+      logInfo(`تم جلب ${recentApplications.length} طلبات حديثة`, { 
+        count: recentApplications.length 
+      });
     }, "خطأ في جلب الطلبات الحديثة");
 
     if (result !== null) {
@@ -86,11 +60,7 @@ export function RecentApplications() {
   const handleViewApplication = (id: string) => {
     try {
       logInfo(`عرض تفاصيل الطلب: ${id}`, { applicationId: id });
-      toast({
-        title: "عرض الطلب",
-        description: `تم فتح الطلب رقم ${id}`,
-      });
-      navigate(`/admin/applications?id=${id}`);
+      navigate(`/admin/applications/${id}`);
     } catch (error) {
       logError(error, { context: 'handleViewApplication', applicationId: id });
     }
@@ -101,10 +71,31 @@ export function RecentApplications() {
       logInfo(`طلب تنزيل مستندات الطلب: ${id}`, { applicationId: id });
       toast({
         title: "تنزيل المستندات",
-        description: `جاري تنزيل مستندات الطلب رقم ${id}`,
+        description: `سيتم تطوير وظيفة تنزيل مستندات الطلب ${id} قريباً`,
       });
-      // TODO: Implement actual download functionality
     }, `خطأ في تنزيل مستندات الطلب ${id}`);
+  };
+
+  const handleUpdateStatus = async (id: string, newStatus: ApplicationStatus) => {
+    await handleAsyncError(async () => {
+      await realApplicationsService.updateApplicationStatus(
+        id, 
+        newStatus, 
+        `تم تغيير الحالة إلى ${statusConfig[newStatus].label}`
+      );
+      
+      // تحديث الطلبات المحلية
+      setApplications(prev => 
+        prev.map(app => 
+          app.id === id ? { ...app, status: newStatus } : app
+        )
+      );
+      
+      toast({
+        title: "تم تحديث الحالة",
+        description: `تم تغيير حالة الطلب إلى ${statusConfig[newStatus].label}`,
+      });
+    }, `خطأ في تحديث حالة الطلب ${id}`);
   };
 
   return (
@@ -113,12 +104,17 @@ export function RecentApplications() {
         <div className="flex justify-center items-center h-20">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-unlimited-blue"></div>
         </div>
+      ) : applications.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-unlimited-gray">لا توجد طلبات حديثة</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-unlimited-blue/20">
                 <th className="text-right py-2 px-2">الطالب</th>
+                <th className="text-right py-2 px-2">البرنامج</th>
                 <th className="text-right py-2 px-2">الحالة</th>
                 <th className="text-right py-2 px-2">الإجراءات</th>
               </tr>
@@ -128,13 +124,23 @@ export function RecentApplications() {
                 <tr key={application.id} className="border-b border-gray-100">
                   <td className="py-2 px-2">
                     <div>
-                      <p className="font-medium">{application.studentName || 'طالب'}</p>
-                      <p className="text-xs text-unlimited-gray">{application.program}</p>
+                      <p className="font-medium">{application.studentName}</p>
+                      <p className="text-xs text-unlimited-gray">
+                        {application.studentCountry}
+                      </p>
                     </div>
                   </td>
                   <td className="py-2 px-2">
-                    <Badge className={statusConfig[application.status]?.color || 'bg-unlimited-gray text-white'}>
-                      {statusConfig[application.status]?.label || application.status}
+                    <div>
+                      <p className="font-medium">{application.programName}</p>
+                      <p className="text-xs text-unlimited-gray">
+                        {application.universityName}
+                      </p>
+                    </div>
+                  </td>
+                  <td className="py-2 px-2">
+                    <Badge className={statusConfig[application.status as ApplicationStatus]?.color || 'bg-unlimited-gray text-white'}>
+                      {statusConfig[application.status as ApplicationStatus]?.label || application.status}
                     </Badge>
                   </td>
                   <td className="py-2 px-2">
@@ -170,11 +176,16 @@ export function RecentApplications() {
                           <DropdownMenuItem onClick={() => handleViewApplication(application.id)}>
                             عرض التفاصيل
                           </DropdownMenuItem>
-                          <DropdownMenuItem>تغيير الحالة</DropdownMenuItem>
-                          <DropdownMenuItem>إرسال رسالة</DropdownMenuItem>
-                          <DropdownMenuItem>إضافة ملاحظة</DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-unlimited-danger">حذف</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'under_review')}>
+                            وضع قيد المراجعة
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'accepted')}>
+                            قبول الطلب
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleUpdateStatus(application.id, 'rejected')}>
+                            رفض الطلب
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
