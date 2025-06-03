@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,14 +19,14 @@ import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-// Import the new enhanced components
+// Import the enhanced components
 import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
 import QuickActionsWidget from '@/components/admin/QuickActionsWidget';
 import RecentActivityFeed from '@/components/admin/RecentActivityFeed';
 import SystemHealthWidget from '@/components/admin/SystemHealthWidget';
 
-// Keep existing imports
-import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
+// Fix imports - use named imports instead of default
+import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import RecentApplications from '@/components/admin/RecentApplications';
 
 interface DashboardStats {

@@ -24,6 +24,7 @@ import StudentMessages from '@/pages/students/StudentMessages';
 import Profile from '@/pages/students/Profile';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import EnhancedDashboard from '@/pages/admin/EnhancedDashboard';
+import SystemSettings from '@/pages/admin/SystemSettings';
 import AdminOverview from '@/pages/admin/AdminOverview';
 import EnhancedStudentsManagement from '@/pages/admin/EnhancedStudentsManagement';
 import ManageApplications from '@/pages/admin/ManageApplications';
@@ -41,6 +42,7 @@ import HomePage from '@/pages/HomePage';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SecureLoginForm from '@/components/auth/SecureLoginForm';
 import SecureRegisterForm from '@/components/auth/SecureRegisterForm';
+import EnhancedStudentDashboard from '@/pages/students/EnhancedStudentDashboard';
 
 function App() {
   return (
@@ -98,6 +100,11 @@ function App() {
             <Dashboard />
           </ProtectedRoute>
         } />
+        <Route path="/student-dashboard" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <EnhancedStudentDashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/student-messages" element={
           <ProtectedRoute allowedRoles={['student']}>
             <StudentMessages />
@@ -115,6 +122,7 @@ function App() {
             <Routes>
               <Route path="/" element={<AdminDashboard />} />
               <Route path="dashboard" element={<EnhancedDashboard />} />
+              <Route path="settings" element={<SystemSettings />} />
               <Route path="overview" element={<AdminOverview />} />
               <Route path="students" element={<EnhancedStudentsManagement />} />
               <Route path="applications" element={<ManageApplications />} />

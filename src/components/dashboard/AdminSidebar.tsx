@@ -12,7 +12,8 @@ import {
   MessageSquare,
   Bell,
   BarChart,
-  CheckCircle
+  CheckCircle,
+  Settings
 } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from '@/contexts/AuthContext';
@@ -94,6 +95,11 @@ const AdminSidebar = () => {
       title: "التقارير",
       href: "/admin/reports",
       icon: BarChart,
+    },
+    {
+      title: "الإعدادات",
+      href: "/admin/settings",
+      icon: Settings,
     },
   ];
 
