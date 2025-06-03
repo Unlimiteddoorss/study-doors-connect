@@ -1,16 +1,15 @@
 
+import React from 'react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Loader2 } from 'lucide-react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -22,50 +21,56 @@ interface ConfirmDialogProps {
   cancelLabel?: string;
   isLoading?: boolean;
   destructive?: boolean;
-  variant?: string; // Added variant prop
 }
 
-export function ConfirmDialog({
+export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   onClose,
   onConfirm,
   title,
   description,
-  confirmLabel = "حذف",
+  confirmLabel = "تأكيد",
   cancelLabel = "إلغاء",
   isLoading = false,
-  destructive = true,
-  variant = "destructive", // Default to destructive
-}: ConfirmDialogProps) {
-  // Determine the button class based on variant or destructive prop
-  const getButtonClass = () => {
-    if (variant === "destructive" || destructive) {
-      return "bg-unlimited-danger hover:bg-unlimited-danger/90";
-    }
-    return ""; // Default button style
-  };
-
+  destructive = false
+}) => {
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {destructive && <AlertTriangle className="h-5 w-5 text-red-500" />}
+            {title}
+          </DialogTitle>
+          <DialogDescription className="text-right">
             {description}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelLabel}</AlertDialogCancel>
+          </DialogDescription>
+        </DialogHeader>
+        
+        <DialogFooter className="gap-2">
           <Button
-            onClick={onConfirm}
-            className={getButtonClass()}
+            variant="outline"
+            onClick={onClose}
             disabled={isLoading}
           >
-            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-            {confirmLabel}
+            {cancelLabel}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+          <Button
+            variant={destructive ? "destructive" : "default"}
+            onClick={onConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                جاري التنفيذ...
+              </>
+            ) : (
+              confirmLabel
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
-}
+};

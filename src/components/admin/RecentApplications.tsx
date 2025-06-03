@@ -54,12 +54,15 @@ export function RecentApplications() {
         .select(`
           *,
           programs!inner(name, universities!inner(name)),
-          user_profiles!applications_student_id_fkey(full_name)
+          user_profiles!fk_applications_student_profiles(full_name)
         `)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching applications:", error);
+        throw error;
+      }
 
       const formattedApplications: Application[] = data?.map(app => ({
         id: app.id,
