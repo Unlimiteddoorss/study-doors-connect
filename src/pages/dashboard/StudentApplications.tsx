@@ -1,665 +1,319 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import StudentApplicationHeader from '@/components/student/StudentApplicationHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
-import { FileText, Search, Calendar, Download, Eye, X, Filter, Plus, FileCheck2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  FileText, 
+  Search, 
+  Filter, 
+  Eye, 
+  MessageSquare,
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Plus
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Progress } from '@/components/ui/progress';
+import { Link } from 'react-router-dom';
 
-// Interface for application data
 interface Application {
   id: string;
-  program: string;
   university: string;
-  date: string;
-  status: string;
-  formData?: any;
-  progress?: number;
-  timeline?: any[];
+  program: string;
+  degreeType: string;
+  status: 'pending' | 'approved' | 'rejected' | 'under_review';
+  submittedAt: string;
+  lastUpdated: string;
+  documentsStatus: 'complete' | 'incomplete' | 'pending';
+  universityResponse?: string;
 }
 
 const StudentApplications = () => {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { toast } = useToast();
-  const isRtl = i18n.language === 'ar';
-  
   const [applications, setApplications] = useState<Application[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedYear, setSelectedYear] = useState('2025-2026');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [applicationToDelete, setApplicationToDelete] = useState<string | null>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  
-  // Simulate fetching data from the server
+
   useEffect(() => {
-    loadApplications();
+    fetchApplications();
   }, []);
 
-  const loadApplications = () => {
-    setIsLoading(true);
-    
-    // In a real app, fetch from an API
-    setTimeout(() => {
-      try {
-        // Try to get applications from localStorage
-        const storedApplications = localStorage.getItem('studentApplications');
-        let apps: Application[] = [];
-        
-        if (storedApplications) {
-          apps = JSON.parse(storedApplications);
-          
-          // Calculate progress for each application if not already present
-          apps = apps.map(app => {
-            if (!app.progress && app.formData) {
-              // Simple progress calculation for demo
-              const progress = Math.min(
-                Math.floor(
-                  Object.keys(app.formData).filter(key => 
-                    app.formData[key] && 
-                    typeof app.formData[key] === 'object' && 
-                    Object.keys(app.formData[key]).length > 0
-                  ).length / 4 * 100
-                ), 
-                100
-              );
-              return { ...app, progress };
-            }
-            return app;
-          });
-        } else {
-          // If no apps found, create mock data
-          const mockApplications: Application[] = [
-            {
-              id: 'APP-001',
-              program: 'بكالوريوس هندسة البرمجيات',
-              university: 'جامعة إسطنبول التقنية',
-              date: '2025-04-10',
-              status: 'review',
-              progress: 75
-            },
-            {
-              id: 'APP-002',
-              program: 'ماجستير إدارة الأعمال',
-              university: 'جامعة أنقرة',
-              date: '2025-03-22',
-              status: 'documents',
-              progress: 60
-            },
-            {
-              id: 'APP-003',
-              program: 'بكالوريوس العلوم الطبية',
-              university: 'جامعة إسطنبول',
-              date: '2025-02-15',
-              status: 'approved',
-              progress: 100
-            },
-            {
-              id: 'APP-004',
-              program: 'بكالوريوس الهندسة المعمارية',
-              university: 'جامعة البسفور',
-              date: '2025-01-30',
-              status: 'rejected',
-              progress: 90
-            },
-            {
-              id: 'APP-005',
-              program: 'ماجستير تقنية المعلومات',
-              university: 'جامعة أنقرة',
-              date: '2025-04-15',
-              status: 'conditional',
-              progress: 85
-            },
-          ];
-
-          // Save mock applications to localStorage
-          localStorage.setItem('studentApplications', JSON.stringify(mockApplications));
-          apps = mockApplications;
-        }
-
-        setApplications(apps);
-        setFilteredApplications(apps);
-      } catch (error) {
-        console.error('Error loading applications:', error);
-        toast({
-          title: t('error.loading', 'خطأ في التحميل'),
-          description: t('error.tryAgain', 'حدث خطأ أثناء تحميل البيانات. يرجى المحاولة مرة أخرى.'),
-          variant: 'destructive'
-        });
-      } finally {
-        setIsLoading(false);
-        setIsRefreshing(false);
-      }
-    }, 800);
-  };
-
-  // Apply filters to the list
-  useEffect(() => {
-    let result = [...applications];
-    
-    // Search filter
-    if (searchTerm) {
-      result = result.filter(app => 
-        app.program.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        app.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.id.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    // Status filter
-    if (selectedStatus !== 'all') {
-      result = result.filter(app => app.status === selectedStatus);
-    }
-    
-    setFilteredApplications(result);
-  }, [searchTerm, selectedStatus, applications]);
-
-  // Get status details (color and label)
-  const getStatusDetails = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return { 
-          color: 'bg-yellow-100 text-yellow-800', 
-          label: t('application.status.pending', 'قيد الانتظار') 
-        };
-      case 'review':
-        return { 
-          color: 'bg-blue-100 text-blue-800', 
-          label: t('application.status.review', 'قيد المراجعة') 
-        };
-      case 'documents':
-        return { 
-          color: 'bg-purple-100 text-purple-800', 
-          label: t('application.status.documents', 'بانتظار المستندات') 
-        };
-      case 'approved':
-        return { 
-          color: 'bg-green-100 text-green-800', 
-          label: t('application.status.approved', 'مقبول') 
-        };
-      case 'rejected':
-        return { 
-          color: 'bg-red-100 text-red-800', 
-          label: t('application.status.rejected', 'مرفوض') 
-        };
-      case 'conditional':
-        return { 
-          color: 'bg-indigo-100 text-indigo-800', 
-          label: t('application.status.conditional', 'قبول مشروط') 
-        };
-      case 'paid':
-        return { 
-          color: 'bg-green-100 text-green-800', 
-          label: t('application.status.paid', 'مدفوع') 
-        };
-      case 'registered':
-        return { 
-          color: 'bg-teal-100 text-teal-800', 
-          label: t('application.status.registered', 'مسجل') 
-        };
-      case 'draft':
-        return {
-          color: 'bg-gray-100 text-gray-800',
-          label: t('application.status.draft', 'مسودة')
-        };
-      default:
-        return { 
-          color: 'bg-gray-100 text-gray-800', 
-          label: status 
-        };
-    }
-  };
-
-  // Export data to Excel
-  const handleExport = () => {
-    toast({
-      title: t('application.export.started', 'جاري التصدير'),
-      description: t('application.export.preparing', 'جاري إعداد ملف Excel للتحميل'),
-    });
-    
-    // Simulate export delay
-    setTimeout(() => {
-      toast({
-        title: t('application.export.success', 'تم التصدير بنجاح'),
-        description: t('application.export.downloadStarted', 'بدأ تحميل الملف'),
-      });
-    }, 1500);
-  };
-
-  // Navigate to application details
-  const viewApplicationDetails = (applicationId: string) => {
-    navigate(`/dashboard/applications/${applicationId}`);
-  };
-  
-  // Refresh applications list
-  const refreshApplications = () => {
-    setIsRefreshing(true);
-    loadApplications();
-  };
-  
-  // Create new application
-  const createNewApplication = () => {
-    navigate('/apply');
-  };
-  
-  // Delete application
-  const handleDeleteApplication = () => {
-    if (!applicationToDelete) return;
-    
+  const fetchApplications = async () => {
     try {
-      // Get existing applications
-      const storedApplications = localStorage.getItem('studentApplications');
-      if (!storedApplications) {
-        setShowDeleteDialog(false);
-        setApplicationToDelete(null);
-        return;
-      }
+      setIsLoading(true);
+      // محاكاة جلب البيانات
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Filter out the application to be deleted
-      const apps = JSON.parse(storedApplications);
-      const updatedApps = apps.filter((app: Application) => app.id !== applicationToDelete);
+      const mockApplications: Application[] = [
+        {
+          id: '1',
+          university: 'جامعة إسطنبول',
+          program: 'هندسة الحاسوب',
+          degreeType: 'بكالوريوس',
+          status: 'under_review',
+          submittedAt: '2024-01-15',
+          lastUpdated: '2024-01-20',
+          documentsStatus: 'complete'
+        },
+        {
+          id: '2',
+          university: 'جامعة البوسفور',
+          program: 'إدارة الأعمال',
+          degreeType: 'ماجستير',
+          status: 'approved',
+          submittedAt: '2024-01-10',
+          lastUpdated: '2024-01-25',
+          documentsStatus: 'complete',
+          universityResponse: 'تم قبولك في البرنامج. يرجى إكمال إجراءات التسجيل.'
+        },
+        {
+          id: '3',
+          university: 'جامعة أنقرة',
+          program: 'الطب',
+          degreeType: 'بكالوريوس',
+          status: 'pending',
+          submittedAt: '2024-02-01',
+          lastUpdated: '2024-02-01',
+          documentsStatus: 'incomplete'
+        }
+      ];
       
-      // Save updated applications list
-      localStorage.setItem('studentApplications', JSON.stringify(updatedApps));
-      
-      // Update state
-      setApplications(updatedApps);
-      setFilteredApplications(updatedApps);
-      
-      // Show success toast
-      toast({
-        title: t('application.delete.success', 'تم حذف الطلب'),
-        description: t('application.delete.description', 'تم حذف الطلب بنجاح'),
-      });
+      setApplications(mockApplications);
     } catch (error) {
-      console.error('Error deleting application:', error);
       toast({
-        title: t('error.title', 'خطأ'),
-        description: t('error.delete', 'حدث خطأ أثناء حذف الطلب'),
-        variant: 'destructive'
+        title: "خطأ في تحميل البيانات",
+        description: "حدث خطأ أثناء تحميل طلباتك",
+        variant: "destructive"
       });
     } finally {
-      setShowDeleteDialog(false);
-      setApplicationToDelete(null);
+      setIsLoading(false);
     }
   };
-  
-  // Confirm application deletion
-  const confirmDelete = (applicationId: string) => {
-    setApplicationToDelete(applicationId);
-    setShowDeleteDialog(true);
+
+  const getStatusBadge = (status: Application['status']) => {
+    switch (status) {
+      case 'approved':
+        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />مقبول</Badge>;
+      case 'rejected':
+        return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />مرفوض</Badge>;
+      case 'under_review':
+        return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 mr-1" />قيد المراجعة</Badge>;
+      case 'pending':
+        return <Badge className="bg-blue-100 text-blue-800"><AlertCircle className="h-3 w-3 mr-1" />في الانتظار</Badge>;
+      default:
+        return <Badge variant="secondary">غير محدد</Badge>;
+    }
+  };
+
+  const getDocumentsStatusBadge = (status: Application['documentsStatus']) => {
+    switch (status) {
+      case 'complete':
+        return <Badge className="bg-green-100 text-green-800">مكتملة</Badge>;
+      case 'incomplete':
+        return <Badge className="bg-red-100 text-red-800">ناقصة</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-100 text-yellow-800">قيد المراجعة</Badge>;
+      default:
+        return <Badge variant="secondary">غير محدد</Badge>;
+    }
+  };
+
+  const filteredApplications = applications.filter(app => {
+    const matchesSearch = app.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         app.program.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterStatus === 'all' || app.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
+  const getApplicationsByStatus = (status: string) => {
+    return applications.filter(app => app.status === status).length;
   };
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto">
-        <StudentApplicationHeader showNewButton />
-        
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-              <div>
-                <CardTitle>{t("application.myApplications.title", "طلباتي")}</CardTitle>
-                <CardDescription>{t("application.myApplications.subtitle", "قائمة طلبات التقديم الخاصة بك")}</CardDescription>
-              </div>
-              
-              <div className="flex flex-wrap items-center gap-2">
-                <Button 
-                  variant="default" 
-                  size="sm" 
-                  onClick={createNewApplication}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  {t('application.buttons.newApplication', 'طلب جديد')}
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={refreshApplications}
-                  disabled={isRefreshing}
-                  className="flex items-center gap-2"
-                >
-                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  {isRefreshing 
-                    ? t('application.buttons.refreshing', 'جاري التحديث...') 
-                    : t('application.buttons.refresh', 'تحديث')
-                  }
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleExport}
-                  className="flex items-center gap-2"
-                >
-                  <Download className="h-4 w-4" />
-                  {t('application.export.toExcel', 'تصدير إلى Excel')}
-                </Button>
-              </div>
-            </div>
-          </CardHeader>
-          
-          <CardContent>
-            <Tabs defaultValue="all" className="mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
-                <TabsList className="mb-0">
-                  <TabsTrigger value="all">{t('application.tabs.all', 'جميع الطلبات')}</TabsTrigger>
-                  <TabsTrigger value="pending">{t('application.status.pending', 'قيد الانتظار')}</TabsTrigger>
-                  <TabsTrigger value="documents">{t('application.status.documents', 'المستندات')}</TabsTrigger>
-                  <TabsTrigger value="conditional">{t('application.status.conditional', 'مشروط')}</TabsTrigger>
-                  <TabsTrigger value="approved">{t('application.status.approved', 'مقبول')}</TabsTrigger>
-                  <TabsTrigger value="draft">{t('application.status.draft', 'مسودة')}</TabsTrigger>
-                </TabsList>
-                
-                <div className="flex items-center gap-2">
-                  <Select
-                    value={selectedYear}
-                    onValueChange={setSelectedYear}
-                  >
-                    <SelectTrigger className="w-[160px]">
-                      <SelectValue placeholder="2025-2026" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="2025-2026">2025-2026</SelectItem>
-                      <SelectItem value="2024-2025">2024-2025</SelectItem>
-                      <SelectItem value="2023-2024">2023-2024</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <div className="relative">
-                    <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder={t('application.search.applications', 'بحث في الطلبات')}
-                      className="pl-9 w-full md:w-[300px]"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    {searchTerm && (
-                      <button 
-                        className="absolute right-3 top-2.5"
-                        onClick={() => setSearchTerm('')}
-                      >
-                        <X className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                    )}
-                  </div>
+    <DashboardLayout userRole="student">
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-unlimited-dark-blue">
+              طلباتي
+            </h1>
+            <p className="text-unlimited-gray mt-2">
+              تابع حالة طلباتك وإدارة المستندات
+            </p>
+          </div>
+          <Link to="/apply">
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              طلب جديد
+            </Button>
+          </Link>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <FileText className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">إجمالي الطلبات</p>
+                  <p className="text-2xl font-bold">{applications.length}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <TabsContent value="all" className="mt-0">
-                {isLoading ? (
-                  <div className="py-20 flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
-                  </div>
-                ) : filteredApplications.length > 0 ? (
-                  <div className="space-y-3 mt-4">
-                    {filteredApplications.map((app) => {
-                      const status = getStatusDetails(app.status);
-                      return (
-                        <div key={app.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between">
-                            <div className="flex items-start gap-3">
-                              <div className="bg-unlimited-blue/10 p-2 rounded-full hidden sm:flex">
-                                <FileText className="h-5 w-5 text-unlimited-blue" />
-                              </div>
-                              <div>
-                                <h3 className="font-medium text-unlimited-dark-blue">{app.program}</h3>
-                                <p className="text-sm text-unlimited-gray">{app.university}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <Badge variant="outline" className="text-xs">{app.id}</Badge>
-                                  <div className="flex items-center gap-1 text-xs text-gray-500">
-                                    <Calendar className="h-3 w-3" />
-                                    <span>{app.date}</span>
-                                  </div>
-                                </div>
-                                
-                                {app.progress !== undefined && (
-                                  <div className="mt-2 w-full max-w-[200px]">
-                                    <div className="flex justify-between text-xs mb-1">
-                                      <span>{t('application.progress', 'تقدم الطلب')}</span>
-                                      <span>{app.progress}%</span>
-                                    </div>
-                                    <Progress 
-                                      value={app.progress} 
-                                      className={`h-1.5 ${
-                                        app.progress >= 90 ? 'bg-green-500' : 
-                                        app.progress >= 70 ? 'bg-unlimited-blue' : 
-                                        app.progress >= 40 ? 'bg-yellow-500' : 'bg-red-400'
-                                      }`} 
-                                    />
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center gap-3 mt-3 md:mt-0">
-                              <Badge className={status.color}>
-                                {status.label}
-                              </Badge>
-                              
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="flex items-center gap-1"
-                                  >
-                                    <Eye className="h-4 w-4" />
-                                    <span className="hidden sm:inline">{t('application.actions.options', 'خيارات')}</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>{t('application.actions.title', 'إجراءات الطلب')}</DropdownMenuLabel>
-                                  <DropdownMenuSeparator />
-                                  
-                                  <DropdownMenuItem onClick={() => viewApplicationDetails(app.id)}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    {t('application.actions.view', 'عرض التفاصيل')}
-                                  </DropdownMenuItem>
-                                  
-                                  {app.status === 'draft' && (
-                                    <DropdownMenuItem onClick={() => navigate(`/apply/${app.id}`)}>
-                                      <FileCheck2 className="h-4 w-4 mr-2" />
-                                      {t('application.actions.continue', 'متابعة التعبئة')}
-                                    </DropdownMenuItem>
-                                  )}
-                                  
-                                  <DropdownMenuItem onClick={() => confirmDelete(app.id)}>
-                                    <AlertCircle className="h-4 w-4 mr-2 text-red-500" />
-                                    <span className="text-red-500">{t('application.actions.delete', 'حذف الطلب')}</span>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </div>
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">مقبولة</p>
+                  <p className="text-2xl font-bold">{getApplicationsByStatus('approved')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-yellow-100 rounded-lg">
+                  <Clock className="h-5 w-5 text-yellow-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">قيد المراجعة</p>
+                  <p className="text-2xl font-bold">{getApplicationsByStatus('under_review')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <AlertCircle className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">في الانتظار</p>
+                  <p className="text-2xl font-bold">{getApplicationsByStatus('pending')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search and Filter */}
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="البحث في الطلبات..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+                >
+                  <option value="all">جميع الحالات</option>
+                  <option value="pending">في الانتظار</option>
+                  <option value="under_review">قيد المراجعة</option>
+                  <option value="approved">مقبولة</option>
+                  <option value="rejected">مرفوضة</option>
+                </select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Applications List */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-unlimited-blue mx-auto"></div>
+              <p className="mt-2 text-gray-600">جاري تحميل الطلبات...</p>
+            </div>
+          ) : filteredApplications.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد طلبات</h3>
+                <p className="text-gray-600 mb-4">لم تقم بتقديم أي طلبات بعد</p>
+                <Link to="/apply">
+                  <Button>قدم طلبك الأول</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredApplications.map((application) => (
+              <Card key={application.id}>
+                <CardContent className="p-6">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold">{application.university}</h3>
+                        {getStatusBadge(application.status)}
+                      </div>
+                      <p className="text-gray-600 mb-1">{application.program} - {application.degreeType}</p>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          تاريخ التقديم: {new Date(application.submittedAt).toLocaleDateString('ar-SA')}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          آخر تحديث: {new Date(application.lastUpdated).toLocaleDateString('ar-SA')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-sm text-gray-600">حالة المستندات:</span>
+                        {getDocumentsStatusBadge(application.documentsStatus)}
+                      </div>
+                      {application.universityResponse && (
+                        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <p className="text-sm text-green-800">{application.universityResponse}</p>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="py-20 text-center">
-                    <p className="text-unlimited-gray mb-4">{t('application.noApplications.message', 'لا توجد طلبات مقدمة بعد')}</p>
-                    <Button 
-                      variant="default" 
-                      onClick={createNewApplication}
-                      className="flex items-center gap-2 mx-auto"
-                    >
-                      <Plus className="h-4 w-4" />
-                      {t('application.buttons.createFirst', 'إنشاء أول طلب')}
-                    </Button>
-                  </div>
-                )}
-              </TabsContent>
-              
-              {/* Repeat same content for other tabs with filtered data */}
-              {['pending', 'documents', 'conditional', 'approved', 'draft', 'rejected'].map((tab) => (
-                <TabsContent key={tab} value={tab} className="mt-0">
-                  {isLoading ? (
-                    <div className="py-20 flex justify-center items-center">
-                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-unlimited-blue"></div>
+                      )}
                     </div>
-                  ) : filteredApplications.filter(app => app.status === tab).length > 0 ? (
-                    <div className="space-y-3 mt-4">
-                      {filteredApplications
-                        .filter(app => app.status === tab)
-                        .map((app) => {
-                          const status = getStatusDetails(app.status);
-                          return (
-                            <div key={app.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                              <div className="flex flex-col md:flex-row md:items-center justify-between">
-                                <div className="flex items-start gap-3">
-                                  <div className="bg-unlimited-blue/10 p-2 rounded-full hidden sm:flex">
-                                    <FileText className="h-5 w-5 text-unlimited-blue" />
-                                  </div>
-                                  <div>
-                                    <h3 className="font-medium text-unlimited-dark-blue">{app.program}</h3>
-                                    <p className="text-sm text-unlimited-gray">{app.university}</p>
-                                    <div className="flex items-center gap-2 mt-2">
-                                      <Badge variant="outline" className="text-xs">{app.id}</Badge>
-                                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                                        <Calendar className="h-3 w-3" />
-                                        <span>{app.date}</span>
-                                      </div>
-                                    </div>
-                                    
-                                    {app.progress !== undefined && (
-                                      <div className="mt-2 w-full max-w-[200px]">
-                                        <div className="flex justify-between text-xs mb-1">
-                                          <span>{t('application.progress', 'تقدم الطلب')}</span>
-                                          <span>{app.progress}%</span>
-                                        </div>
-                                        <Progress 
-                                          value={app.progress} 
-                                          className={`h-1.5 ${
-                                            app.progress >= 90 ? 'bg-green-500' : 
-                                            app.progress >= 70 ? 'bg-unlimited-blue' : 
-                                            app.progress >= 40 ? 'bg-yellow-500' : 'bg-red-400'
-                                          }`} 
-                                        />
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-3 mt-3 md:mt-0">
-                                  <Badge className={status.color}>
-                                    {status.label}
-                                  </Badge>
-                                  
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        className="flex items-center gap-1"
-                                      >
-                                        <Eye className="h-4 w-4" />
-                                        <span className="hidden sm:inline">{t('application.actions.options', 'خيارات')}</span>
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuLabel>{t('application.actions.title', 'إجراءات الطلب')}</DropdownMenuLabel>
-                                      <DropdownMenuSeparator />
-                                      
-                                      <DropdownMenuItem onClick={() => viewApplicationDetails(app.id)}>
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        {t('application.actions.view', 'عرض التفاصيل')}
-                                      </DropdownMenuItem>
-                                      
-                                      {app.status === 'draft' && (
-                                        <DropdownMenuItem onClick={() => navigate(`/apply/${app.id}`)}>
-                                          <FileCheck2 className="h-4 w-4 mr-2" />
-                                          {t('application.actions.continue', 'متابعة التعبئة')}
-                                        </DropdownMenuItem>
-                                      )}
-                                      
-                                      <DropdownMenuItem onClick={() => confirmDelete(app.id)}>
-                                        <AlertCircle className="h-4 w-4 mr-2 text-red-500" />
-                                        <span className="text-red-500">{t('application.actions.delete', 'حذف الطلب')}</span>
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  ) : (
-                    <div className="py-20 text-center">
-                      <p className="text-unlimited-gray mb-4">{t(`application.no${tab}Applications.message`, 'لا توجد طلبات في هذه الحالة')}</p>
-                      <Button 
-                        variant="default" 
-                        onClick={createNewApplication}
-                        className="flex items-center gap-2 mx-auto"
-                      >
-                        <Plus className="h-4 w-4" />
-                        {t('application.buttons.createNew', 'إنشاء طلب جديد')}
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-1" />
+                        عرض
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        رسائل
                       </Button>
                     </div>
-                  )}
-                </TabsContent>
-              ))}
-            </Tabs>
-          </CardContent>
-
-          <CardFooter className="border-t flex justify-between pt-4">
-            <div className="text-sm text-unlimited-gray">
-              {t('application.totalCount', 'إجمالي الطلبات')}: {applications.length}
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={createNewApplication}
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {t('application.buttons.newApplication', 'طلب جديد')}
-            </Button>
-          </CardFooter>
-        </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
       </div>
-
-      {/* Confirmation Dialog for Deleting Applications */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              {t('application.delete.confirmTitle', 'تأكيد حذف الطلب')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('application.delete.confirmMessage', 'هل أنت متأكد من رغبتك في حذف هذا الطلب؟ هذا الإجراء لا يمكن التراجع عنه.')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t('application.delete.cancel', 'إلغاء')}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-500 hover:bg-red-600"
-              onClick={handleDeleteApplication}
-            >
-              {t('application.delete.confirm', 'نعم، حذف الطلب')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </DashboardLayout>
   );
 };

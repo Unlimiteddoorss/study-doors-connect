@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -11,7 +10,7 @@ const suggestedPages = [
   { title: "الصفحة الرئيسية", url: "/" },
   { title: "استكشف الجامعات", url: "/universities" },
   { title: "التخصصات المتاحة", url: "/programs" },
-  { title: "التقديم للجامعات التركية", url: "/turkish-applications" },
+  { title: "التقديم للجامعات", url: "/apply" },
   { title: "المنح الدراسية", url: "/scholarships" },
   { title: "تواصل معنا", url: "/contact" },
 ];

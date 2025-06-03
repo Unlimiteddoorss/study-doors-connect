@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -43,6 +42,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SecureLoginForm from '@/components/auth/SecureLoginForm';
 import SecureRegisterForm from '@/components/auth/SecureRegisterForm';
 import EnhancedStudentDashboard from '@/pages/students/EnhancedStudentDashboard';
+import ApplicationForm from '@/pages/ApplicationForm';
 
 function App() {
   return (
@@ -67,6 +67,9 @@ function App() {
         <Route path="/turkish-universities" element={<TurkishUniversities />} />
         <Route path="/not-found" element={<NotFound />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        
+        {/* Application Form Route */}
+        <Route path="/apply" element={<ApplicationForm />} />
         
         {/* Authentication routes */}
         <Route path="/login" element={
@@ -103,6 +106,16 @@ function App() {
         <Route path="/student-dashboard" element={
           <ProtectedRoute allowedRoles={['student']}>
             <EnhancedStudentDashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/applications" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentApplications />
+          </ProtectedRoute>
+        } />
+        <Route path="/dashboard/profile" element={
+          <ProtectedRoute allowedRoles={['student']}>
+            <StudentProfile />
           </ProtectedRoute>
         } />
         <Route path="/student-messages" element={

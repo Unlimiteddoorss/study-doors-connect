@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import {
   BarChart3,
   TrendingUp,
@@ -106,28 +106,28 @@ const AdminSidebar = () => {
   return (
     <Sidebar className="bg-white border-r">
       <SidebarHeader>
-        <a href="/" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2">
           <img
             src="/logo.svg"
             alt="Unlimited Edu"
             className="h-8 w-8"
           />
           <span className="font-bold text-xl">Unlimited Edu</span>
-        </a>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <a 
-                href={item.href}
+              <Link 
+                to={item.href}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2 text-gray-500 transition-all hover:text-gray-900 ${
                   location.pathname === item.href ? 'bg-gray-100 text-gray-900' : ''
                 }`}
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
