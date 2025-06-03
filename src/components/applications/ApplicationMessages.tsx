@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import MessagesContainer from './messages/MessagesContainer';
 import { useToast } from '@/hooks/use-toast';

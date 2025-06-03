@@ -72,7 +72,7 @@ const ApplicationDetails = () => {
         setApplication({
           id: data.id,
           studentName: data.user_profiles?.full_name || 'طالب غير معروف',
-          studentEmail: 'student@example.com', // يجب جلبها من auth.users
+          studentEmail: 'student@example.com',
           programName: data.programs?.name || 'برنامج غير معروف',
           universityName: data.programs?.universities?.name || 'جامعة غير معروفة',
           status: data.status,
@@ -377,7 +377,11 @@ const ApplicationDetails = () => {
           </TabsContent>
 
           <TabsContent value="messages">
-            <ApplicationMessages applicationId={application.id} />
+            <ApplicationMessages 
+              applicationId={application.id}
+              programName={application.programName}
+              universityName={application.universityName}
+            />
           </TabsContent>
         </Tabs>
       </motion.div>
