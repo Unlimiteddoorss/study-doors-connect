@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 type ApplicationStatus = 'pending' | 'accepted' | 'rejected' | 'under_review' | 'cancelled';
 
@@ -40,13 +41,14 @@ export function RecentApplications() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { handleAsyncError, logInfo } = useErrorHandler();
 
   useEffect(() => {
     fetchRecentApplications();
   }, []);
 
   const fetchRecentApplications = async () => {
-    try {
+    const result = await handleAsyncError(async () => {
       setIsLoading(true);
       
       const { data, error } = await supabase
@@ -54,15 +56,12 @@ export function RecentApplications() {
         .select(`
           *,
           programs!inner(name, universities!inner(name)),
-          user_profiles!fk_applications_student_profiles(full_name)
+          user_profiles!inner(full_name)
         `)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error) {
-        console.error("Error fetching applications:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       const formattedApplications: Application[] = data?.map(app => ({
         id: app.id,
@@ -74,33 +73,16 @@ export function RecentApplications() {
       })) || [];
 
       setApplications(formattedApplications);
-    } catch (error) {
-      console.error("Error fetching recent applications:", error);
-      // استخدام البيانات التجريبية في حالة الخطأ
-      setApplications([
-        {
-          id: 'APP-001',
-          studentName: 'أحمد محمد',
-          program: 'هندسة البرمجيات',
-          university: 'جامعة إسطنبول التقنية',
-          date: new Date().toLocaleDateString('ar-SA'),
-          status: 'pending',
-        },
-        {
-          id: 'APP-002',
-          studentName: 'سارة عبدالله',
-          program: 'علوم الحاسب',
-          university: 'جامعة البوسفور',
-          date: new Date().toLocaleDateString('ar-SA'),
-          status: 'under_review',
-        }
-      ]);
-    } finally {
+      logInfo(`تم جلب ${formattedApplications.length} طلبات حديثة`, { count: formattedApplications.length });
+    }, "خطأ في جلب الطلبات الحديثة");
+
+    if (result !== null) {
       setIsLoading(false);
     }
   };
 
   const handleViewApplication = (id: string) => {
+    logInfo(`عرض تفاصيل الطلب: ${id}`, { applicationId: id });
     toast({
       title: "عرض الطلب",
       description: `تم فتح الطلب رقم ${id}`,
@@ -109,6 +91,7 @@ export function RecentApplications() {
   };
 
   const handleDownloadDocuments = (id: string) => {
+    logInfo(`طلب تنزيل مستندات الطلب: ${id}`, { applicationId: id });
     toast({
       title: "تنزيل المستندات",
       description: `جاري تنزيل مستندات الطلب رقم ${id}`,

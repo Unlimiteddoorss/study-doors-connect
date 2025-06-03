@@ -44,6 +44,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 const EnhancedAgentsManagement = () => {
   const [agents, setAgents] = useState([]);
@@ -61,6 +62,7 @@ const EnhancedAgentsManagement = () => {
   });
 
   const { toast } = useToast();
+  const { handleAsyncError, logInfo } = useErrorHandler();
 
   useEffect(() => {
     fetchData();
@@ -71,7 +73,7 @@ const EnhancedAgentsManagement = () => {
   }, [agents, searchTerm, selectedStatus]);
 
   const fetchData = async () => {
-    try {
+    const result = await handleAsyncError(async () => {
       setIsLoading(true);
       
       // جلب الوكلاء مع معلوماتهم الشخصية
@@ -143,14 +145,15 @@ const EnhancedAgentsManagement = () => {
         totalStudents
       });
 
-    } catch (error) {
-      console.error('خطأ في جلب البيانات:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ في جلب البيانات",
-        variant: "destructive",
+      logInfo('تم جلب بيانات الوكلاء بنجاح', { 
+        agentsCount: totalAgents, 
+        activeAgents,
+        totalCommissions,
+        totalStudents 
       });
-    } finally {
+    }, "خطأ في جلب بيانات الوكلاء");
+
+    if (result !== null) {
       setIsLoading(false);
     }
   };
@@ -196,6 +199,7 @@ const EnhancedAgentsManagement = () => {
   const handleViewAgent = (agent) => {
     setSelectedAgent(agent);
     setIsDetailDialogOpen(true);
+    logInfo(`عرض تفاصيل الوكيل: ${agent.user_profiles?.full_name}`, { agentId: agent.user_id });
   };
 
   const getAgentStatusBadge = (agent) => {

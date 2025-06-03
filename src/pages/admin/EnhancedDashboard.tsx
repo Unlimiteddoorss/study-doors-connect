@@ -18,14 +18,13 @@ import {
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 // Import the enhanced components
 import EnhancedStatsCard from '@/components/admin/EnhancedStatsCard';
 import QuickActionsWidget from '@/components/admin/QuickActionsWidget';
 import RecentActivityFeed from '@/components/admin/RecentActivityFeed';
 import SystemHealthWidget from '@/components/admin/SystemHealthWidget';
-
-// Fix imports - use named imports instead of default
 import { AnalyticsDashboard } from '@/components/admin/AnalyticsDashboard';
 import { RecentApplications } from '@/components/admin/RecentApplications';
 
@@ -41,6 +40,7 @@ interface DashboardStats {
 
 const EnhancedDashboard = () => {
   const { toast } = useToast();
+  const { handleAsyncError, logInfo } = useErrorHandler();
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalApplications: 0,
@@ -58,15 +58,16 @@ const EnhancedDashboard = () => {
   }, []);
 
   const fetchDashboardData = async () => {
-    try {
+    const result = await handleAsyncError(async () => {
       setIsLoading(true);
       
-      // جلب إحصائيات المستخدمين
-      const { data: profiles, error: profilesError } = await supabase
-        .from('user_profiles')
-        .select('id');
+      // جلب إحصائيات الطلاب
+      const { data: students, error: studentsError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'student');
       
-      if (profilesError) throw profilesError;
+      if (studentsError) throw studentsError;
 
       // جلب إحصائيات الطلبات
       const { data: applications, error: applicationsError } = await supabase
@@ -83,42 +84,36 @@ const EnhancedDashboard = () => {
       
       if (universitiesError) throw universitiesError;
 
+      // جلب إحصائيات الوكلاء
+      const { data: agents, error: agentsError } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('role', 'agent');
+      
+      if (agentsError) throw agentsError;
+
       // حساب الإحصائيات
       const pendingApps = applications?.filter(app => app.status === 'pending').length || 0;
-      const approvedApps = applications?.filter(app => app.status === 'approved').length || 0;
+      const approvedApps = applications?.filter(app => app.status === 'accepted' || app.status === 'approved').length || 0;
       const rejectedApps = applications?.filter(app => app.status === 'rejected').length || 0;
 
-      setStats({
-        totalStudents: profiles?.length || 156,
-        totalApplications: applications?.length || 89,
-        totalUniversities: universities?.length || 24,
-        pendingApplications: pendingApps || 32,
-        approvedApplications: approvedApps || 45,
-        rejectedApplications: rejectedApps || 12,
-        totalAgents: 8 // قيمة ثابتة للعرض
-      });
+      const calculatedStats = {
+        totalStudents: students?.length || 0,
+        totalApplications: applications?.length || 0,
+        totalUniversities: universities?.length || 0,
+        pendingApplications: pendingApps,
+        approvedApplications: approvedApps,
+        rejectedApplications: rejectedApps,
+        totalAgents: agents?.length || 0
+      };
 
+      setStats(calculatedStats);
       setLastUpdated(new Date());
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
       
-      // استخدام بيانات تجريبية في حالة الخطأ
-      setStats({
-        totalStudents: 156,
-        totalApplications: 89,
-        totalUniversities: 24,
-        pendingApplications: 32,
-        approvedApplications: 45,
-        rejectedApplications: 12,
-        totalAgents: 8
-      });
-      
-      toast({
-        title: "تحذير",
-        description: "تم تحميل بيانات تجريبية. يرجى التحقق من اتصال قاعدة البيانات.",
-        variant: "destructive"
-      });
-    } finally {
+      logInfo('تم تحديث إحصائيات لوحة التحكم', calculatedStats);
+    }, "خطأ في جلب بيانات لوحة التحكم");
+
+    if (result !== null) {
       setIsLoading(false);
     }
   };
