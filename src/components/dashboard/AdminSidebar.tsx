@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
@@ -18,26 +17,22 @@ import {
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem } from "@/components/ui/sidebar"
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 const AdminSidebar = () => {
   const location = useLocation();
   const { signOut } = useAuth();
   const { toast } = useToast();
+  const { handleAsyncError } = useErrorHandler();
   
   const handleLogout = async () => {
-    try {
+    await handleAsyncError(async () => {
       await signOut();
       toast({
         title: "تم تسجيل الخروج",
         description: "تم تسجيل الخروج بنجاح"
       });
-    } catch (error) {
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ أثناء تسجيل الخروج",
-        variant: "destructive"
-      });
-    }
+    }, "حدث خطأ أثناء تسجيل الخروج");
   };
 
   const menuItems = [

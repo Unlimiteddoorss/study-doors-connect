@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, DollarSign, TrendingUp, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 
@@ -17,13 +17,14 @@ const AgentDashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { logError, handleAsyncError } = useErrorHandler();
 
   useEffect(() => {
     fetchAgentStats();
   }, []);
 
   const fetchAgentStats = async () => {
-    try {
+    const result = await handleAsyncError(async () => {
       setIsLoading(true);
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -37,14 +38,9 @@ const AgentDashboard = () => {
         totalEarnings: 15500,
         thisMonthApplications: 23
       });
-    } catch (error) {
-      console.error('Error fetching agent stats:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ في جلب إحصائيات الوكيل",
-        variant: "destructive",
-      });
-    } finally {
+    }, "حدث خطأ في جلب إحصائيات الوكيل");
+
+    if (result !== null) {
       setIsLoading(false);
     }
   };

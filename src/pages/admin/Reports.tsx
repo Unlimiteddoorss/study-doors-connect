@@ -16,8 +16,15 @@ import { ApplicationsChart } from '@/components/admin/reports/ApplicationsChart'
 import { StudentsByCountry } from '@/components/admin/reports/StudentsByCountry';
 import { UniversityStats } from '@/components/admin/reports/UniversityStats';
 import { ReportActions } from '@/components/admin/reports/ReportActions';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 const Reports = () => {
+  const { logInfo } = useErrorHandler();
+
+  const handleReportGeneration = (reportType: string) => {
+    logInfo(`تم إنشاء تقرير: ${reportType}`, { reportType, timestamp: new Date().toISOString() });
+  };
+
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-6">

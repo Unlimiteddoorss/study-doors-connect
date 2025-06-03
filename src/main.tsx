@@ -6,14 +6,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { HelmetProvider } from 'react-helmet-async';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import App from './App';
 import './index.css';
 import './i18n';
-
-// Error boundary component
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
-  return children;
-};
 
 const queryClient = new QueryClient({
   defaultOptions: {

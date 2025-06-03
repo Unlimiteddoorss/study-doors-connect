@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, FileText, GraduationCap, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 
@@ -18,13 +18,14 @@ const AdminDashboard = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const { logError, handleAsyncError } = useErrorHandler();
 
   useEffect(() => {
     fetchDashboardStats();
   }, []);
 
   const fetchDashboardStats = async () => {
-    try {
+    const result = await handleAsyncError(async () => {
       setIsLoading(true);
 
       // Fetch students count
@@ -64,14 +65,9 @@ const AdminDashboard = () => {
         pendingApplications: pendingCount || 0,
         totalRevenue: 125000 // Mock data for now
       });
-    } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
-      toast({
-        title: "خطأ",
-        description: "حدث خطأ في جلب إحصائيات لوحة التحكم",
-        variant: "destructive",
-      });
-    } finally {
+    }, "حدث خطأ في جلب إحصائيات لوحة التحكم");
+
+    if (result !== null) {
       setIsLoading(false);
     }
   };

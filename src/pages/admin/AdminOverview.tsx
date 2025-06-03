@@ -5,10 +5,16 @@ import { KPIDashboardWidget, AnalyticsDashboard, AdminTasksOverview } from '@/co
 import { QuickActionsPanel } from '@/components/admin/exports';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useTranslation } from 'react-i18next';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 const AdminOverview = () => {
   const { t } = useTranslation();
   const [period, setPeriod] = useState<'day' | 'week' | 'month' | 'year'>('month');
+  const { logInfo } = useErrorHandler();
+
+  const handleTabChange = (tabValue: string) => {
+    logInfo(`تم تغيير التبويب في لوحة المشرف إلى: ${tabValue}`, { tab: tabValue, timestamp: new Date().toISOString() });
+  };
   
   return (
     <DashboardLayout userRole="admin">
@@ -24,7 +30,7 @@ const AdminOverview = () => {
         
         <KPIDashboardWidget />
         
-        <Tabs defaultValue="analytics" className="space-y-8">
+        <Tabs defaultValue="analytics" className="space-y-8" onValueChange={handleTabChange}>
           <TabsList className="w-full bg-white p-1 border rounded-lg mb-6">
             <TabsTrigger value="analytics" className="flex-1">{t('admin.overview.analytics', 'التحليلات')}</TabsTrigger>
             <TabsTrigger value="tasks" className="flex-1">{t('admin.overview.tasks', 'المهام')}</TabsTrigger>
