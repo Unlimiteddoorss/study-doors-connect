@@ -3,23 +3,20 @@ import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { FilterableTable } from '@/components/admin/FilterableTable';
+import { EnhancedFilterableTable } from '@/components/admin/EnhancedFilterableTable';
 import { useToast } from '@/hooks/use-toast';
 import { 
-  Search, 
-  Filter, 
-  Download, 
+  Clock, 
   Eye, 
-  Edit, 
   CheckCircle, 
   XCircle,
-  Clock,
   FileText,
-  Plus
+  Plus,
+  TrendingUp,
+  Users,
+  AlertCircle
 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNavigate } from 'react-router-dom';
 
 interface Application {
@@ -33,30 +30,22 @@ interface Application {
   lastUpdate: string;
   documents: number;
   priority: 'high' | 'medium' | 'low';
+  country: string;
 }
 
 const ManageApplications = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [applications, setApplications] = useState<Application[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
 
   useEffect(() => {
     fetchApplications();
   }, []);
 
-  useEffect(() => {
-    filterApplications();
-  }, [applications, searchQuery, statusFilter, priorityFilter]);
-
   const fetchApplications = async () => {
     setIsLoading(true);
     try {
-      // محاكاة جلب البيانات
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const mockApplications: Application[] = [
@@ -70,7 +59,8 @@ const ManageApplications = () => {
           submittedAt: '2024-01-15',
           lastUpdate: '2024-01-20',
           documents: 8,
-          priority: 'high'
+          priority: 'high',
+          country: 'saudi'
         },
         {
           id: '2',
@@ -82,7 +72,8 @@ const ManageApplications = () => {
           submittedAt: '2024-01-10',
           lastUpdate: '2024-01-18',
           documents: 6,
-          priority: 'medium'
+          priority: 'medium',
+          country: 'uae'
         },
         {
           id: '3',
@@ -94,7 +85,34 @@ const ManageApplications = () => {
           submittedAt: '2024-01-05',
           lastUpdate: '2024-01-22',
           documents: 10,
-          priority: 'high'
+          priority: 'high',
+          country: 'kuwait'
+        },
+        {
+          id: '4',
+          studentName: 'سارة خالد',
+          studentEmail: 'sara@example.com',
+          universityName: 'جامعة بوغازيتشي',
+          programName: 'الهندسة المدنية',
+          status: 'rejected',
+          submittedAt: '2024-01-08',
+          lastUpdate: '2024-01-25',
+          documents: 7,
+          priority: 'low',
+          country: 'qatar'
+        },
+        {
+          id: '5',
+          studentName: 'عبدالله أحمد',
+          studentEmail: 'abdullah@example.com',
+          universityName: 'جامعة الشرق الأوسط التقنية',
+          programName: 'علوم الحاسب',
+          status: 'completed',
+          submittedAt: '2024-01-01',
+          lastUpdate: '2024-01-30',
+          documents: 9,
+          priority: 'medium',
+          country: 'bahrain'
         }
       ];
       
@@ -108,29 +126,6 @@ const ManageApplications = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const filterApplications = () => {
-    let filtered = applications;
-
-    if (searchQuery) {
-      filtered = filtered.filter(app => 
-        app.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.studentEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.universityName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        app.programName.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(app => app.status === statusFilter);
-    }
-
-    if (priorityFilter !== 'all') {
-      filtered = filtered.filter(app => app.priority === priorityFilter);
-    }
-
-    setFilteredApplications(filtered);
   };
 
   const getStatusBadge = (status: string) => {
@@ -172,6 +167,7 @@ const ManageApplications = () => {
       title: "تعديل الطلب",
       description: `جاري فتح صفحة تعديل طلب ${application.studentName}`
     });
+    // يمكن إضافة التنقل لصفحة التعديل هنا
   };
 
   const handleDelete = (application: Application) => {
@@ -180,47 +176,89 @@ const ManageApplications = () => {
       description: `تم حذف طلب ${application.studentName}`,
       variant: "destructive"
     });
+    // يمكن إضافة منطق الحذف هنا
   };
 
-  const handleExport = () => {
-    toast({
-      title: "تصدير البيانات",
-      description: "جاري تحضير ملف Excel..."
-    });
+  const handleBulkAction = (action: string, items: string[]) => {
+    console.log('Bulk action:', action, 'Items:', items);
+    
+    switch (action) {
+      case 'approve':
+        toast({
+          title: "تم قبول الطلبات",
+          description: `تم قبول ${items.length} طلب بنجاح`
+        });
+        break;
+      case 'reject':
+        toast({
+          title: "تم رفض الطلبات", 
+          description: `تم رفض ${items.length} طلب`,
+          variant: "destructive"
+        });
+        break;
+      case 'export':
+        toast({
+          title: "جاري التصدير",
+          description: `جاري تصدير ${items.length} طلب...`
+        });
+        break;
+      case 'send_email':
+        toast({
+          title: "جاري إرسال البريد الإلكتروني",
+          description: `جاري إرسال بريد إلكتروني لـ ${items.length} طالب`
+        });
+        break;
+      case 'delete':
+        // تحديث البيانات المحلية
+        setApplications(prev => prev.filter(app => !items.includes(app.id)));
+        toast({
+          title: "تم الحذف",
+          description: `تم حذف ${items.length} طلب بنجاح`,
+          variant: "destructive"
+        });
+        break;
+    }
   };
 
   const columns = [
     {
       header: 'اسم الطالب',
-      accessor: 'studentName'
+      accessor: 'studentName',
+      sortable: true
     },
     {
       header: 'البريد الإلكتروني',
       accessor: 'studentEmail',
-      hideOnMobile: true
+      hideOnMobile: true,
+      sortable: true
     },
     {
       header: 'الجامعة',
       accessor: 'universityName',
-      hideOnMobile: true
+      hideOnMobile: true,
+      sortable: true
     },
     {
       header: 'البرنامج',
-      accessor: 'programName'
+      accessor: 'programName',
+      sortable: true
     },
     {
       header: 'الحالة',
       accessor: 'status',
+      sortable: true,
       render: (value: string) => getStatusBadge(value)
     },
     {
       header: 'الأولوية',
       accessor: 'priority',
+      sortable: true,
       render: (value: string) => getPriorityBadge(value)
     },
     {
       header: 'المستندات',
       accessor: 'documents',
+      sortable: true,
       render: (value: number) => (
         <div className="flex items-center gap-1">
           <FileText className="h-4 w-4 text-unlimited-blue" />
@@ -231,9 +269,22 @@ const ManageApplications = () => {
     {
       header: 'تاريخ التقديم',
       accessor: 'submittedAt',
-      hideOnMobile: true
+      hideOnMobile: true,
+      sortable: true
     }
   ];
+
+  const getStatistics = () => {
+    return {
+      pending: applications.filter(a => a.status === 'pending').length,
+      under_review: applications.filter(a => a.status === 'under_review').length,
+      accepted: applications.filter(a => a.status === 'accepted').length,
+      rejected: applications.filter(a => a.status === 'rejected').length,
+      total: applications.length
+    };
+  };
+
+  const stats = getStatistics();
 
   return (
     <DashboardLayout userRole="admin">
@@ -244,14 +295,10 @@ const ManageApplications = () => {
               إدارة الطلبات
             </h1>
             <p className="text-unlimited-gray mt-2">
-              إدارة ومتابعة جميع طلبات الطلاب
+              إدارة ومتابعة جميع طلبات الطلاب ({stats.total} طلب)
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              تصدير
-            </Button>
             <Button onClick={() => navigate('/apply')}>
               <Plus className="h-4 w-4 mr-2" />
               طلب جديد
@@ -260,15 +307,25 @@ const ManageApplications = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-8 w-8 text-unlimited-blue" />
+                <div>
+                  <p className="text-2xl font-bold text-unlimited-blue">{stats.total}</p>
+                  <p className="text-sm text-gray-600">إجمالي الطلبات</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
                 <Clock className="h-8 w-8 text-yellow-600" />
                 <div>
-                  <p className="text-2xl font-bold text-yellow-600">
-                    {applications.filter(a => a.status === 'pending').length}
-                  </p>
+                  <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
                   <p className="text-sm text-gray-600">قيد الانتظار</p>
                 </div>
               </div>
@@ -280,9 +337,7 @@ const ManageApplications = () => {
               <div className="flex items-center gap-2">
                 <Eye className="h-8 w-8 text-blue-600" />
                 <div>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {applications.filter(a => a.status === 'under_review').length}
-                  </p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.under_review}</p>
                   <p className="text-sm text-gray-600">قيد المراجعة</p>
                 </div>
               </div>
@@ -294,9 +349,7 @@ const ManageApplications = () => {
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-8 w-8 text-green-600" />
                 <div>
-                  <p className="text-2xl font-bold text-green-600">
-                    {applications.filter(a => a.status === 'accepted').length}
-                  </p>
+                  <p className="text-2xl font-bold text-green-600">{stats.accepted}</p>
                   <p className="text-sm text-gray-600">مقبولة</p>
                 </div>
               </div>
@@ -308,9 +361,7 @@ const ManageApplications = () => {
               <div className="flex items-center gap-2">
                 <XCircle className="h-8 w-8 text-red-600" />
                 <div>
-                  <p className="text-2xl font-bold text-red-600">
-                    {applications.filter(a => a.status === 'rejected').length}
-                  </p>
+                  <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
                   <p className="text-sm text-gray-600">مرفوضة</p>
                 </div>
               </div>
@@ -318,73 +369,27 @@ const ManageApplications = () => {
           </Card>
         </div>
 
-        {/* Filters and Search */}
+        {/* Enhanced Table */}
         <Card>
           <CardHeader>
-            <CardTitle>البحث والفلترة</CardTitle>
+            <CardTitle>قائمة الطلبات</CardTitle>
             <CardDescription>
-              استخدم الأدوات التالية للبحث وفلترة الطلبات
+              إدارة شاملة لجميع الطلبات مع إمكانيات البحث والفلترة والإجراءات المجمعة
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute right-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="بحث في الطلبات..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pr-8"
-                />
-              </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="حالة الطلب" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">جميع الحالات</SelectItem>
-                  <SelectItem value="pending">قيد الانتظار</SelectItem>
-                  <SelectItem value="under_review">قيد المراجعة</SelectItem>
-                  <SelectItem value="accepted">مقبول</SelectItem>
-                  <SelectItem value="rejected">مرفوض</SelectItem>
-                  <SelectItem value="completed">مكتمل</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="الأولوية" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">جميع الأولويات</SelectItem>
-                  <SelectItem value="high">عالية</SelectItem>
-                  <SelectItem value="medium">متوسطة</SelectItem>
-                  <SelectItem value="low">منخفضة</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button variant="outline" className="w-full">
-                <Filter className="h-4 w-4 mr-2" />
-                فلاتر متقدمة
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Applications Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle>قائمة الطلبات ({filteredApplications.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <FilterableTable
-              data={filteredApplications}
+            <EnhancedFilterableTable
+              data={applications}
               columns={columns}
               isLoading={isLoading}
               onViewDetails={handleViewDetails}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onBulkAction={handleBulkAction}
+              searchPlaceholder="البحث في الطلبات..."
+              enableBulkActions={true}
+              enableSearch={true}
+              enableExport={true}
             />
           </CardContent>
         </Card>
