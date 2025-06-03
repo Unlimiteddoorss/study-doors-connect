@@ -129,18 +129,18 @@ const StudentProfile = () => {
     if (!profile) return;
     
     if (section) {
-      setProfile(prev => ({
-        ...prev!,
+      setProfile(prev => prev ? {
+        ...prev,
         [section]: {
-          ...prev![section as keyof StudentProfile],
+          ...(prev[section as keyof StudentProfile] as Record<string, any>),
           [field]: value
         }
-      }));
+      } : null);
     } else {
-      setProfile(prev => ({
-        ...prev!,
+      setProfile(prev => prev ? {
+        ...prev,
         [field]: value
-      }));
+      } : null);
     }
   };
 

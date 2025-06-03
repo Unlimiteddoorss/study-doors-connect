@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -43,6 +44,8 @@ import SecureLoginForm from '@/components/auth/SecureLoginForm';
 import SecureRegisterForm from '@/components/auth/SecureRegisterForm';
 import EnhancedStudentDashboard from '@/pages/students/EnhancedStudentDashboard';
 import ApplicationForm from '@/pages/ApplicationForm';
+import StudentApplications from '@/pages/dashboard/StudentApplications';
+import StudentProfile from '@/pages/dashboard/StudentProfile';
 
 function App() {
   return (
