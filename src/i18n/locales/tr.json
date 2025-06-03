@@ -16,7 +16,15 @@
     "login": "Giriş",
     "register": "Kayıt Ol",
     "myAccount": "Hesabım",
-    "logout": "Çıkış"
+    "logout": "Çıkış",
+    "profile": "Profil",
+    "viewProfile": "Profili Görüntüle",
+    "settings": "Ayarlar",
+    "userNames": {
+      "admin": "Yönetici",
+      "agent": "Temsilci",
+      "student": "Öğrenci"
+    }
   },
   "admin": {
     "sidebar": {
@@ -33,7 +41,10 @@
       "adminPanel": "Yönetici Paneli"
     },
     "communication": "İletişim",
-    "additional": "Ek"
+    "additional": "Ek",
+    "dashboard": {
+      "title": "Yönetici Paneli"
+    }
   },
   "dashboard": {
     "home": "Ana Sayfa",
@@ -55,5 +66,22 @@
   },
   "language": {
     "select": "Dil Seçin"
+  },
+  "student": {
+    "dashboard": {
+      "title": "Öğrenci Paneli"
+    }
+  },
+  "agent": {
+    "dashboard": {
+      "title": "Temsilci Paneli"
+    }
+  },
+  "application": {
+    "myApplications": {
+      "title": "Başvurularım",
+      "subtitle": "Tüm üniversite başvurularınızı takip edin",
+      "newApplication": "Yeni Başvuru"
+    }
   }
 }

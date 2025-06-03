@@ -14,9 +14,17 @@
   },
   "auth": {
     "login": "Connexion",
-    "register": "Inscription",
+    "register": "S'inscrire",
     "myAccount": "Mon Compte",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "profile": "Profil",
+    "viewProfile": "Voir le profil",
+    "settings": "Paramètres",
+    "userNames": {
+      "admin": "Administrateur",
+      "agent": "Agent",
+      "student": "Étudiant"
+    }
   },
   "admin": {
     "sidebar": {
@@ -33,7 +41,10 @@
       "adminPanel": "Panneau d'administration"
     },
     "communication": "Communication",
-    "additional": "Supplémentaire"
+    "additional": "Supplémentaire",
+    "dashboard": {
+      "title": "Tableau de bord administrateur"
+    }
   },
   "dashboard": {
     "home": "Accueil",
@@ -43,17 +54,34 @@
   },
   "notifications": {
     "title": "Notifications",
-    "markAllRead": "Tout marquer comme lu",
+    "markAllRead": "Marquer tout comme lu",
     "markRead": "Marquer comme lu",
-    "all": "Toutes",
-    "unread": "Non lues",
-    "starred": "Marquées",
+    "all": "Tout",
+    "unread": "Non lu",
+    "starred": "Favoris",
     "noNotifications": "Aucune notification",
     "noUnreadNotifications": "Aucune notification non lue",
-    "noStarredNotifications": "Aucune notification marquée",
+    "noStarredNotifications": "Aucune notification favorite",
     "viewAllNotifications": "Voir toutes les notifications"
   },
   "language": {
     "select": "Sélectionner la langue"
+  },
+  "student": {
+    "dashboard": {
+      "title": "Tableau de bord étudiant"
+    }
+  },
+  "agent": {
+    "dashboard": {
+      "title": "Tableau de bord agent"
+    }
+  },
+  "application": {
+    "myApplications": {
+      "title": "Mes candidatures",
+      "subtitle": "Suivez toutes vos candidatures universitaires",
+      "newApplication": "Nouvelle candidature"
+    }
   }
 }

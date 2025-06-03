@@ -1,12 +1,12 @@
 
-import React, { ReactNode } from 'react';
+import React from 'react';
 import Header from './Header';
 import Footer from './Footer';
-import { AdminToggle } from '@/components/admin/AdminToggle';
 import { AdminProvider } from '@/contexts/AdminContext';
+import { AdminToggle } from '@/components/admin/AdminToggle';
 
 interface MainLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {

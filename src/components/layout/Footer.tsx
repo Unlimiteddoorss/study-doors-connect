@@ -1,201 +1,100 @@
 
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin, Globe2, Send } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { changeLanguage } from '@/i18n/config';
-import Logo from '../shared/Logo';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { Facebook, Twitter, Instagram, Youtube, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   const { t, i18n } = useTranslation();
-  const { toast } = useToast();
-  const currentYear = new Date().getFullYear();
-  const currentLanguage = i18n.language;
-
-  const contactInfo = {
-    phone: "+90 55 24 212 214",
-    email: "unlimiteddoorss@gmail.com",
-    address: "اسطنبول Bahçelievler تركيا"
-  };
-
-  const socialLinks = [
-    { icon: Youtube, href: "https://youtube.com", label: "Youtube" },
-    { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
-    { icon: Twitter, href: "https://twitter.com", label: "Twitter" },
-    { icon: Facebook, href: "https://facebook.com", label: "Facebook" }
-  ];
-
-  const programLinks = [
-    { href: "/programs/bachelor", label: t('footer.bachelorPrograms') },
-    { href: "/programs/master", label: t('footer.masterPrograms') },
-    { href: "/programs/phd", label: t('footer.phdPrograms') },
-    { href: "/programs/diploma", label: t('footer.diplomaPrograms') },
-    { href: "/programs/language", label: t('footer.languagePrograms') }
-  ];
-
-  const quickLinks = [
-    { href: "/", label: t('footer.home') },
-    { href: "/about", label: t('footer.about') },
-    { href: "/universities", label: t('footer.universities') },
-    { href: "/programs", label: t('footer.programs') },
-    { href: "/contact", label: t('footer.contact') }
-  ];
-
-  const handleLanguageChange = () => {
-    const newLanguage = currentLanguage === 'ar' ? 'en' : 'ar';
-    changeLanguage(newLanguage);
-  };
-
-  const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    
-    if (email) {
-      toast({
-        title: currentLanguage === 'ar' ? "تم الاشتراك بنجاح" : "Subscription Successful",
-        description: currentLanguage === 'ar' ? 
-          "شكراً لاشتراكك في نشرتنا الإخبارية" : 
-          "Thank you for subscribing to our newsletter",
-        variant: "default",
-      });
-      (e.target as HTMLFormElement).reset();
-    }
-  };
+  const isRtl = i18n.language === 'ar';
 
   return (
-    <footer className="bg-unlimited-dark-blue text-white">
-      <div className="container mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className={`bg-unlimited-dark-blue text-white py-12 ${isRtl ? 'rtl' : 'ltr'}`}>
+      <div className="container mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <Logo variant="light" />
-            <p className="text-gray-300 leading-relaxed">
-              {t('footer.companyDescription')}
+            <h3 className="text-xl font-bold text-white">
+              {t('site.name', 'أبواب بلا حدود')}
+            </h3>
+            <p className="text-gray-300 text-sm">
+              {t('site.tagline', 'أبواب بلا حدود التعليمية - منذ 1992')}
             </p>
             <div className="flex space-x-4 rtl:space-x-reverse">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-unlimited-light-blue transition-colors p-2 rounded-full hover:bg-white/10"
-                  aria-label={social.label}
-                >
-                  <social.icon size={20} />
-                </a>
-              ))}
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <Twitter className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <Instagram className="h-5 w-5" />
+              </a>
+              <a href="#" className="text-gray-300 hover:text-white transition-colors">
+                <Youtube className="h-5 w-5" />
+              </a>
             </div>
           </div>
 
-          {/* Programs */}
-          <div>
-            <h3 className="text-xl font-bold mb-6">{t('footer.programs')}</h3>
-            <ul className="space-y-3">
-              {programLinks.map((link) => (
-                <li key={link.href}>
-                  <Link 
-                    to={link.href}
-                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 rtl:hover:-translate-x-1 inline-block"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Quick Links */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold">روابط سريعة</h4>
+            <div className="space-y-2">
+              <Link to="/about" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                حولنا
+              </Link>
+              <Link to="/services" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                خدماتنا
+              </Link>
+              <Link to="/programs" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                البرامج
+              </Link>
+              <Link to="/universities" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                الجامعات
+              </Link>
+            </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-xl font-bold mb-6">{t('footer.quickLinks')}</h3>
-            <ul className="space-y-3">
-              {quickLinks.map((link) => (
-                <li key={link.href}>
-                  <Link 
-                    to={link.href}
-                    className="hover:text-unlimited-light-blue transition-colors text-gray-300 hover:translate-x-1 rtl:hover:-translate-x-1 inline-block"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Support */}
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold">الدعم</h4>
+            <div className="space-y-2">
+              <Link to="/contact" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                اتصل بنا
+              </Link>
+              <Link to="/faq" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                الأسئلة الشائعة
+              </Link>
+              <Link to="/support" className="block text-gray-300 hover:text-white transition-colors text-sm">
+                المساعدة
+              </Link>
+            </div>
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="text-xl font-bold mb-6">{t('footer.contactUs')}</h3>
-            <ul className="space-y-4 mb-6">
-              <li className="flex items-start gap-3 text-gray-300">
-                <MapPin className="h-5 w-5 flex-shrink-0 mt-1" />
-                <span>{contactInfo.address}</span>
-              </li>
-              <li className="flex items-center gap-3 text-gray-300">
-                <Phone className="h-5 w-5 flex-shrink-0" />
-                <span dir="ltr">{contactInfo.phone}</span>
-              </li>
-              <li className="flex items-center gap-3 text-gray-300">
-                <Mail className="h-5 w-5 flex-shrink-0" />
-                <span>{contactInfo.email}</span>
-              </li>
-              <li className="flex items-center gap-3 text-gray-300">
-                <Globe2 className="h-5 w-5 flex-shrink-0" />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={handleLanguageChange}
-                  className="text-gray-300 hover:text-unlimited-light-blue p-0 h-auto font-normal"
-                >
-                  {currentLanguage === 'ar' ? 'English' : 'العربية'}
-                </Button>
-              </li>
-            </ul>
-            
-            {/* Newsletter Subscription */}
-            <form onSubmit={handleSubscribe} className="mt-4">
-              <h4 className="text-sm font-semibold mb-2">{t('footer.newsletter')}</h4>
-              <div className="flex">
-                <Input
-                  type="email"
-                  name="email"
-                  placeholder={t('footer.emailPlaceholder')}
-                  className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 rounded-r-none rtl:rounded-r-md rtl:rounded-l-none"
-                  required
-                />
-                <Button 
-                  type="submit" 
-                  variant="unlimited" 
-                  className="rounded-l-none rtl:rounded-l-md rtl:rounded-r-none"
-                >
-                  <Send size={16} />
-                </Button>
+          <div className="space-y-4">
+            <h4 className="text-lg font-semibold">تواصل معنا</h4>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <Phone className="h-4 w-4 text-gray-300" />
+                <span className="text-gray-300 text-sm">+90 552 421 2214</span>
               </div>
-            </form>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <Mail className="h-4 w-4 text-gray-300" />
+                <span className="text-gray-300 text-sm">info@unlimiteddoors.com</span>
+              </div>
+              <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                <MapPin className="h-4 w-4 text-gray-300" />
+                <span className="text-gray-300 text-sm">إسطنبول، تركيا</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <hr className="border-gray-700 my-8" />
-
-        {/* Bottom Footer */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">
-            &copy; {currentYear} Unlimited Education. {t('footer.allRightsReserved')}
+        <div className="border-t border-gray-600 mt-8 pt-8 text-center">
+          <p className="text-gray-300 text-sm">
+            © 2024 {t('site.name', 'أبواب بلا حدود')}. جميع الحقوق محفوظة.
           </p>
-          <div className="flex gap-6">
-            <Link to="/privacy" className="text-gray-400 hover:text-unlimited-light-blue text-sm transition-colors">
-              {t('footer.privacy')}
-            </Link>
-            <Link to="/terms" className="text-gray-400 hover:text-unlimited-light-blue text-sm transition-colors">
-              {t('footer.terms')}
-            </Link>
-            <Link to="/cookies" className="text-gray-400 hover:text-unlimited-light-blue text-sm transition-colors">
-              {t('footer.cookies')}
-            </Link>
-          </div>
         </div>
       </div>
     </footer>

@@ -1,50 +1,49 @@
 
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
-import App from './App.tsx'
-import './index.css'
-import './i18n'
-import { ThemeProvider } from '@/components/theme/ThemeProvider'
-import { AuthProvider } from '@/contexts/AuthContext'
-import ErrorBoundary from '@/components/shared/ErrorBoundary'
-import { Toaster } from '@/components/ui/toaster'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/toaster';
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { HelmetProvider } from 'react-helmet-async';
+import App from './App';
+import './index.css';
+import './i18n';
 
-// Register service worker for PWA functionality
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('SW registered: ', registration);
-      })
-      .catch(error => {
-        console.log('SW registration failed: ', error);
-      });
-  });
+// Error boundary component
+const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+  return children;
+};
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
 }
 
-// Get the root element
-const rootElement = document.getElementById("root");
+const root = createRoot(rootElement);
 
-// Create a root for React to render into
-if (rootElement) {
-  createRoot(rootElement).render(
-    <React.StrictMode>
-      <ErrorBoundary>
-        <BrowserRouter>
-          <HelmetProvider>
-            <ThemeProvider defaultTheme="light">
-              <AuthProvider>
-                <App />
-                <Toaster />
-              </AuthProvider>
-            </ThemeProvider>
-          </HelmetProvider>
-        </BrowserRouter>
-      </ErrorBoundary>
-    </React.StrictMode>
-  );
-} else {
-  console.error("Root element not found");
-}
+root.render(
+  <StrictMode>
+    <ErrorBoundary>
+      <HelmetProvider>
+        <ThemeProvider defaultTheme="light">
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <App />
+              <Toaster />
+            </BrowserRouter>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </HelmetProvider>
+    </ErrorBoundary>
+  </StrictMode>
+);

@@ -1,12 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, GraduationCap, School, FileText, TrendingUp, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Users, FileText, GraduationCap, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { motion } from 'framer-motion';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -15,9 +14,7 @@ const AdminDashboard = () => {
     totalUniversities: 0,
     totalPrograms: 0,
     pendingApplications: 0,
-    approvedApplications: 0,
-    rejectedApplications: 0,
-    monthlyRevenue: 0
+    totalRevenue: 0
   });
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
@@ -29,45 +26,35 @@ const AdminDashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setIsLoading(true);
-      
-      // جلب إحصائيات الطلاب
+
+      // Fetch students count
       const { count: studentsCount } = await supabase
         .from('user_roles')
         .select('*', { count: 'exact' })
         .eq('role', 'student');
 
-      // جلب إحصائيات الطلبات
+      // Fetch applications count
       const { count: applicationsCount } = await supabase
         .from('applications')
         .select('*', { count: 'exact' });
 
-      // جلب إحصائيات الجامعات
-      const { count: universitiesCount } = await supabase
-        .from('universities')
-        .select('*', { count: 'exact' })
-        .eq('is_active', true);
-
-      // جلب إحصائيات البرامج
-      const { count: programsCount } = await supabase
-        .from('programs')
-        .select('*', { count: 'exact' })
-        .eq('is_active', true);
-
-      // جلب إحصائيات الطلبات حسب الحالة
+      // Fetch pending applications
       const { count: pendingCount } = await supabase
         .from('applications')
         .select('*', { count: 'exact' })
         .eq('status', 'pending');
 
-      const { count: approvedCount } = await supabase
-        .from('applications')
+      // Fetch universities count
+      const { count: universitiesCount } = await supabase
+        .from('universities')
         .select('*', { count: 'exact' })
-        .eq('status', 'accepted');
+        .eq('is_active', true);
 
-      const { count: rejectedCount } = await supabase
-        .from('applications')
+      // Fetch programs count
+      const { count: programsCount } = await supabase
+        .from('programs')
         .select('*', { count: 'exact' })
-        .eq('status', 'rejected');
+        .eq('is_active', true);
 
       setStats({
         totalStudents: studentsCount || 0,
@@ -75,15 +62,13 @@ const AdminDashboard = () => {
         totalUniversities: universitiesCount || 0,
         totalPrograms: programsCount || 0,
         pendingApplications: pendingCount || 0,
-        approvedApplications: approvedCount || 0,
-        rejectedApplications: rejectedCount || 0,
-        monthlyRevenue: 0 // سيتم حسابه لاحقاً مع نظام المدفوعات
+        totalRevenue: 125000 // Mock data for now
       });
     } catch (error) {
-      console.error('خطأ في جلب الإحصائيات:', error);
+      console.error('Error fetching dashboard stats:', error);
       toast({
         title: "خطأ",
-        description: "حدث خطأ في جلب الإحصائيات",
+        description: "حدث خطأ في جلب إحصائيات لوحة التحكم",
         variant: "destructive",
       });
     } finally {
@@ -91,244 +76,144 @@ const AdminDashboard = () => {
     }
   };
 
-  const StatCard = ({ title, value, icon, change, changeType }: any) => (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-unlimited-gray">{title}</CardTitle>
-        {icon}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-unlimited-dark-blue">
-          {isLoading ? '...' : value.toLocaleString('ar-EG')}
-        </div>
-        {change && (
-          <p className={`text-xs mt-1 ${changeType === 'positive' ? 'text-green-600' : 'text-red-600'}`}>
-            {change}
-          </p>
-        )}
-      </CardContent>
-    </Card>
+  const StatCard = ({ title, value, icon, color = 'blue', change }: any) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+          <div className={`text-${color}-600`}>{icon}</div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-gray-900">
+            {isLoading ? '...' : value.toLocaleString()}
+          </div>
+          {change && (
+            <p className="text-xs text-gray-500 mt-1">
+              <span className={`inline-flex items-center ${change > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <TrendingUp className="h-3 w-3 mr-1" />
+                {change > 0 ? '+' : ''}{change}% من الشهر الماضي
+              </span>
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   return (
     <DashboardLayout userRole="admin">
       <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-unlimited-dark-blue">لوحة تحكم المشرف</h1>
-            <p className="text-unlimited-gray">مرحباً بك في لوحة التحكم الرئيسية</p>
-          </div>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم الإدارية</h1>
+          <p className="text-gray-600">نظرة شاملة على إحصائيات النظام</p>
         </div>
 
-        {/* بطاقات الإحصائيات الرئيسية */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <StatCard
-              title="إجمالي الطلاب"
-              value={stats.totalStudents}
-              icon={<Users className="h-4 w-4 text-unlimited-blue" />}
-              change="+12% من الشهر الماضي"
-              changeType="positive"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-          >
-            <StatCard
-              title="إجمالي الطلبات"
-              value={stats.totalApplications}
-              icon={<FileText className="h-4 w-4 text-unlimited-blue" />}
-              change="+8% من الشهر الماضي"
-              changeType="positive"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <StatCard
-              title="الجامعات النشطة"
-              value={stats.totalUniversities}
-              icon={<School className="h-4 w-4 text-unlimited-blue" />}
-              change="+2 جامعات جديدة"
-              changeType="positive"
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <StatCard
-              title="البرامج المتاحة"
-              value={stats.totalPrograms}
-              icon={<GraduationCap className="h-4 w-4 text-unlimited-blue" />}
-              change="+15 برنامج جديد"
-              changeType="positive"
-            />
-          </motion.div>
+        {/* Statistics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StatCard
+            title="إجمالي الطلاب"
+            value={stats.totalStudents}
+            icon={<Users className="h-4 w-4" />}
+            color="blue"
+            change={12}
+          />
+          <StatCard
+            title="إجمالي الطلبات"
+            value={stats.totalApplications}
+            icon={<FileText className="h-4 w-4" />}
+            color="green"
+            change={8}
+          />
+          <StatCard
+            title="الطلبات المعلقة"
+            value={stats.pendingApplications}
+            icon={<AlertCircle className="h-4 w-4" />}
+            color="orange"
+            change={-5}
+          />
+          <StatCard
+            title="الجامعات النشطة"
+            value={stats.totalUniversities}
+            icon={<GraduationCap className="h-4 w-4" />}
+            color="purple"
+            change={2}
+          />
+          <StatCard
+            title="البرامج المتاحة"
+            value={stats.totalPrograms}
+            icon={<GraduationCap className="h-4 w-4" />}
+            color="indigo"
+            change={15}
+          />
+          <StatCard
+            title="إجمالي الإيرادات"
+            value={stats.totalRevenue}
+            icon={<DollarSign className="h-4 w-4" />}
+            color="green"
+            change={22}
+          />
         </div>
 
-        {/* بطاقات حالة الطلبات */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <StatCard
-              title="طلبات قيد الانتظار"
-              value={stats.pendingApplications}
-              icon={<Clock className="h-4 w-4 text-yellow-600" />}
-            />
-          </motion.div>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>الإجراءات السريعة</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <a href="/admin/students" className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <Users className="h-6 w-6 text-blue-600 mb-2" />
+                  <div className="text-sm font-medium">إدارة الطلاب</div>
+                </a>
+                <a href="/admin/applications" className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <FileText className="h-6 w-6 text-green-600 mb-2" />
+                  <div className="text-sm font-medium">إدارة الطلبات</div>
+                </a>
+                <a href="/admin/universities" className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <GraduationCap className="h-6 w-6 text-purple-600 mb-2" />
+                  <div className="text-sm font-medium">إدارة الجامعات</div>
+                </a>
+                <a href="/admin/programs" className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                  <GraduationCap className="h-6 w-6 text-indigo-600 mb-2" />
+                  <div className="text-sm font-medium">إدارة البرامج</div>
+                </a>
+              </div>
+            </CardContent>
+          </Card>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <StatCard
-              title="طلبات مقبولة"
-              value={stats.approvedApplications}
-              icon={<CheckCircle className="h-4 w-4 text-green-600" />}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-          >
-            <StatCard
-              title="طلبات مرفوضة"
-              value={stats.rejectedApplications}
-              icon={<XCircle className="h-4 w-4 text-red-600" />}
-            />
-          </motion.div>
-        </div>
-
-        {/* التبويبات الرئيسية */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="analytics">التحليلات</TabsTrigger>
-            <TabsTrigger value="activities">الأنشطة الأخيرة</TabsTrigger>
-            <TabsTrigger value="reports">التقارير</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>الطلبات الأخيرة</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium">أحمد محمد علي</p>
-                        <p className="text-sm text-unlimited-gray">علوم الحاسوب - جامعة إسطنبول التقنية</p>
-                      </div>
-                      <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
-                        قيد المراجعة
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium">فاطمة حسن</p>
-                        <p className="text-sm text-unlimited-gray">الهندسة الطبية - جامعة أنقرة</p>
-                      </div>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
-                        مقبول
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>الإحصائيات السريعة</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>معدل القبول</span>
-                      <span className="text-green-600 font-bold">78%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>متوسط وقت المعالجة</span>
-                      <span className="font-bold">5 أيام</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>الوكلاء النشطون</span>
-                      <span className="font-bold">12</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>التحليلات والرسوم البيانية</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-unlimited-gray">سيتم إضافة الرسوم البيانية التفاعلية هنا</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="activities">
-            <Card>
-              <CardHeader>
-                <CardTitle>الأنشطة الأخيرة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm">تم قبول طلب أحمد محمد علي</p>
-                      <p className="text-xs text-unlimited-gray">منذ 5 دقائق</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <div>
-                      <p className="text-sm">تم إضافة برنامج جديد في جامعة إسطنبول</p>
-                      <p className="text-xs text-unlimited-gray">منذ ساعة</p>
+          <Card>
+            <CardHeader>
+              <CardTitle>التنبيهات الهامة</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-4 w-4 text-yellow-600 ml-2" />
+                    <div className="text-sm">
+                      <div className="font-medium text-yellow-800">طلبات تحتاج مراجعة</div>
+                      <div className="text-yellow-700">{stats.pendingApplications} طلب في انتظار المراجعة</div>
                     </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="reports">
-            <Card>
-              <CardHeader>
-                <CardTitle>التقارير المتقدمة</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-unlimited-gray">سيتم إضافة نظام التقارير المتقدم هنا</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center">
+                    <Users className="h-4 w-4 text-blue-600 ml-2" />
+                    <div className="text-sm">
+                      <div className="font-medium text-blue-800">طلاب جدد</div>
+                      <div className="text-blue-700">تم تسجيل 25 طالب جديد هذا الأسبوع</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
