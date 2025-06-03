@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { DateRangeSelector } from '@/components/admin/DateRangeSelector';
+import DateRangeSelector from '@/components/admin/DateRangeSelector';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -47,6 +46,7 @@ const AuditLogs = () => {
   const [selectedSeverity, setSelectedSeverity] = useState('all');
   const [selectedTable, setSelectedTable] = useState('all');
   const [selectedUser, setSelectedUser] = useState('all');
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date } | null>(null);
 
   // بيانات تجريبية لسجلات النظام
   const [auditLogs] = useState<AuditLog[]>([
@@ -133,10 +133,22 @@ const AuditLogs = () => {
   };
 
   const handleExportLogs = () => {
-    toast({
-      title: "تم التصدير",
-      description: "تم تصدير سجلات النظام بنجاح"
-    });
+    try {
+      toast({
+        title: "تم التصدير",
+        description: "تم تصدير سجلات النظام بنجاح"
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في التصدير",
+        description: "حدث خطأ أثناء تصدير السجلات",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDateRangeChange = (range: { from: Date; to: Date }) => {
+    setDateRange(range);
   };
 
   const filteredLogs = auditLogs.filter(log => {
@@ -186,7 +198,7 @@ const AuditLogs = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">البحث</label>
                     <div className="relative">
@@ -198,6 +210,11 @@ const AuditLogs = () => {
                         className="pl-8"
                       />
                     </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">فترة التاريخ</label>
+                    <DateRangeSelector onRangeChange={handleDateRangeChange} />
                   </div>
                   
                   <div className="space-y-2">
