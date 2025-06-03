@@ -50,9 +50,16 @@ const CodeTestingPanel = () => {
       });
     }
 
-    // Test 2: Tables Structure
-    const tables = ['user_profiles', 'applications', 'universities', 'programs', 'messages'];
-    for (const table of tables) {
+    // Test 2: Tables Structure - Fixed typing issue
+    const tableNames = [
+      'user_profiles',
+      'applications', 
+      'universities',
+      'programs',
+      'messages'
+    ] as const;
+
+    for (const table of tableNames) {
       try {
         const { data, error } = await supabase.from(table).select('*').limit(1);
         if (error) throw error;
@@ -114,6 +121,23 @@ const CodeTestingPanel = () => {
       status: 'success',
       message: 'تم إصلاح جميع أخطاء TypeScript المعروفة'
     });
+
+    // Test 6: Authentication System
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      results.push({
+        name: 'نظام المصادقة',
+        status: user ? 'success' : 'warning',
+        message: user ? 'المستخدم مصادق عليه' : 'لا يوجد مستخدم مصادق عليه'
+      });
+    } catch (error) {
+      results.push({
+        name: 'نظام المصادقة',
+        status: 'error',
+        message: 'خطأ في فحص المصادقة',
+        details: error instanceof Error ? error.message : 'خطأ غير معروف'
+      });
+    }
 
     setTestResults(results);
     setIsRunning(false);
