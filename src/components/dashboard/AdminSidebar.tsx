@@ -97,6 +97,16 @@ const AdminSidebar = () => {
       icon: BarChart,
     },
     {
+      title: "الأذونات والصلاحيات",
+      href: "/admin/permissions",
+      icon: Settings,
+    },
+    {
+      title: "النسخ الاحتياطي",
+      href: "/admin/backup",
+      icon: Settings,
+    },
+    {
       title: "الإعدادات",
       href: "/admin/settings",
       icon: Settings,

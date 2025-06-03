@@ -36,6 +36,8 @@ import EnhancedAgentsManagement from '@/pages/admin/EnhancedAgentsManagement';
 import AdminMessages from '@/pages/admin/AdminMessages';
 import AdminNotifications from '@/pages/admin/AdminNotifications';
 import Reports from '@/pages/admin/Reports';
+import PermissionsManagement from '@/pages/admin/PermissionsManagement';
+import BackupManagement from '@/pages/admin/BackupManagement';
 import AgentDashboard from '@/pages/agent/AgentDashboard';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import HomePage from '@/pages/HomePage';
@@ -150,6 +152,16 @@ function App() {
               <Route path="messages" element={<AdminMessages />} />
               <Route path="notifications" element={<AdminNotifications />} />
               <Route path="reports" element={<Reports />} />
+              <Route path="permissions" element={
+                <ProtectedRoute requiredRole="admin">
+                  <PermissionsManagement />
+                </ProtectedRoute>
+              } />
+              <Route path="backup" element={
+                <ProtectedRoute requiredRole="admin">
+                  <BackupManagement />
+                </ProtectedRoute>
+              } />
             </Routes>
           </ProtectedRoute>
         } />
