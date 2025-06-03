@@ -73,7 +73,8 @@ export const useErrorHandler = (): UseErrorHandlerReturn => {
     try {
       return await asyncFn();
     } catch (error) {
-      logError(error instanceof Error ? error : new Error(errorMessage), { originalError: error }, showToast);
+      const errorMsg = error instanceof Error ? error.message : errorMessage;
+      logError(errorMsg, { originalError: error }, showToast);
       return null;
     }
   }, [logError]);

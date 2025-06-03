@@ -29,8 +29,8 @@ class ErrorHandler {
       message: error instanceof Error ? error.message : error,
       context,
       userId: this.getCurrentUserId(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
     };
 
     this.errorLogs.push(errorEntry);
@@ -42,7 +42,7 @@ class ErrorHandler {
 
     // Send to monitoring service in production
     if (process.env.NODE_ENV === 'production') {
-      this.sendToMonitoringService(errorEntry);
+      this.sendToMonitoringService(errorEntry).catch(console.warn);
     }
   }
 
@@ -53,8 +53,8 @@ class ErrorHandler {
       message,
       context,
       userId: this.getCurrentUserId(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
     };
 
     this.errorLogs.push(warningEntry);
@@ -71,8 +71,8 @@ class ErrorHandler {
       message,
       context,
       userId: this.getCurrentUserId(),
-      userAgent: navigator.userAgent,
-      url: window.location.href,
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+      url: typeof window !== 'undefined' ? window.location.href : undefined,
     };
 
     this.errorLogs.push(infoEntry);
@@ -91,8 +91,9 @@ class ErrorHandler {
   }
 
   private getCurrentUserId(): string | undefined {
-    // Get user ID from authentication context
     try {
+      if (typeof localStorage === 'undefined') return undefined;
+      
       const authData = localStorage.getItem('auth-user');
       if (authData) {
         const user = JSON.parse(authData);
@@ -124,19 +125,21 @@ class ErrorHandler {
 export const errorHandler = ErrorHandler.getInstance();
 
 // Global error handler
-window.addEventListener('error', (event) => {
-  errorHandler.logError(event.error || event.message, {
-    filename: event.filename,
-    lineno: event.lineno,
-    colno: event.colno,
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (event) => {
+    errorHandler.logError(event.error || event.message, {
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    });
   });
-});
 
-// Unhandled promise rejection handler
-window.addEventListener('unhandledrejection', (event) => {
-  errorHandler.logError(event.reason, {
-    type: 'unhandledrejection',
+  // Unhandled promise rejection handler
+  window.addEventListener('unhandledrejection', (event) => {
+    errorHandler.logError(event.reason, {
+      type: 'unhandledrejection',
+    });
   });
-});
+}
 
 export default ErrorHandler;

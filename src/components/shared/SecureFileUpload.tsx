@@ -1,28 +1,39 @@
 
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Upload, X, FileText, AlertCircle } from 'lucide-react';
+import { Upload, X, FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { validateFile } from '@/utils/validation';
+import { validateFile, validateFileType } from '@/utils/validation';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/components/auth/RealAuthProvider';
 
 interface SecureFileUploadProps {
   onFilesSelected: (files: File[]) => void;
+  onUploadComplete?: (urls: string[]) => void;
   maxFiles?: number;
   maxSizeMB?: number;
   acceptedTypes?: string[];
   className?: string;
+  bucketName?: string;
+  autoUpload?: boolean;
 }
 
 const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
   onFilesSelected,
+  onUploadComplete,
   maxFiles = 5,
   maxSizeMB = 5,
   acceptedTypes = ['application/pdf', 'image/jpeg', 'image/png'],
-  className = ''
+  className = '',
+  bucketName = 'documents',
+  autoUpload = false
 }) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleFileValidation = useCallback((files: FileList) => {
     const validFiles: File[] = [];
@@ -31,7 +42,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
     Array.from(files).forEach((file) => {
       const validation = validateFile(file, maxSizeMB);
       
-      if (!acceptedTypes.includes(file.type)) {
+      if (!validateFileType(file, acceptedTypes)) {
         errors.push(`${file.name}: نوع الملف غير مدعوم`);
         return;
       }
@@ -52,7 +63,39 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
     return { validFiles, errors };
   }, [acceptedTypes, maxFiles, maxSizeMB, selectedFiles.length]);
 
-  const handleFileSelection = useCallback((files: FileList) => {
+  const uploadFileToSupabase = async (file: File): Promise<string | null> => {
+    if (!user) {
+      throw new Error('يجب تسجيل الدخول لرفع الملفات');
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+    try {
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from(bucketName)
+        .getPublicUrl(data.path);
+
+      return urlData.publicUrl;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+  };
+
+  const handleFileSelection = useCallback(async (files: FileList) => {
     const { validFiles, errors } = handleFileValidation(files);
     
     if (errors.length > 0) {
@@ -67,7 +110,54 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
     const newFiles = [...selectedFiles, ...validFiles];
     setSelectedFiles(newFiles);
     onFilesSelected(newFiles);
-  }, [handleFileValidation, selectedFiles, onFilesSelected, toast]);
+
+    if (autoUpload && validFiles.length > 0) {
+      await handleUpload(validFiles);
+    }
+  }, [handleFileValidation, selectedFiles, onFilesSelected, autoUpload, toast]);
+
+  const handleUpload = async (filesToUpload?: File[]) => {
+    const files = filesToUpload || selectedFiles;
+    if (files.length === 0) return;
+
+    setUploading(true);
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (const file of files) {
+        setUploadProgress(prev => ({ ...prev, [file.name]: 0 }));
+        
+        const url = await uploadFileToSupabase(file);
+        
+        if (url) {
+          uploadedUrls.push(url);
+          setUploadProgress(prev => ({ ...prev, [file.name]: 100 }));
+        } else {
+          throw new Error(`فشل في رفع الملف: ${file.name}`);
+        }
+      }
+
+      toast({
+        title: 'تم الرفع بنجاح',
+        description: `تم رفع ${files.length} ملف بنجاح`,
+      });
+
+      if (onUploadComplete) {
+        onUploadComplete(uploadedUrls);
+      }
+
+    } catch (error) {
+      console.error('Upload failed:', error);
+      toast({
+        title: 'خطأ في الرفع',
+        description: error instanceof Error ? error.message : 'حدث خطأ أثناء رفع الملفات',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+      setUploadProgress({});
+    }
+  };
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -128,19 +218,46 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
           onChange={handleFileInput}
           className="hidden"
           id="file-upload"
+          disabled={uploading}
         />
         <Button
           type="button"
           variant="outline"
           onClick={() => document.getElementById('file-upload')?.click()}
+          disabled={uploading}
         >
-          اختيار الملفات
+          {uploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              جاري المعالجة...
+            </>
+          ) : (
+            'اختيار الملفات'
+          )}
         </Button>
       </div>
 
       {selectedFiles.length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-medium">الملفات المحددة:</h4>
+          <div className="flex justify-between items-center">
+            <h4 className="font-medium">الملفات المحددة:</h4>
+            {!autoUpload && (
+              <Button
+                onClick={() => handleUpload()}
+                disabled={uploading || selectedFiles.length === 0}
+                size="sm"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    جاري الرفع...
+                  </>
+                ) : (
+                  'رفع الملفات'
+                )}
+              </Button>
+            )}
+          </div>
           {selectedFiles.map((file, index) => (
             <div
               key={index}
@@ -153,6 +270,14 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
                   <p className="text-xs text-gray-500">
                     {(file.size / 1024 / 1024).toFixed(2)} ميجابايت
                   </p>
+                  {uploadProgress[file.name] !== undefined && (
+                    <div className="w-24 bg-gray-200 rounded-full h-1 mt-1">
+                      <div 
+                        className="bg-unlimited-blue h-1 rounded-full transition-all"
+                        style={{ width: `${uploadProgress[file.name]}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
               <Button
@@ -161,6 +286,7 @@ const SecureFileUpload: React.FC<SecureFileUploadProps> = ({
                 size="sm"
                 onClick={() => removeFile(index)}
                 className="text-red-500 hover:text-red-700"
+                disabled={uploading}
               >
                 <X className="h-4 w-4" />
               </Button>

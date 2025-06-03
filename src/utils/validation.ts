@@ -44,3 +44,45 @@ export const applicationSchema = z.object({
     startDate: z.string().min(1, 'تاريخ البدء مطلوب'),
   }),
 });
+
+// File validation function
+export interface FileValidationResult {
+  isValid: boolean;
+  errors: string[];
+}
+
+export const validateFile = (file: File, maxSizeMB: number = 5): FileValidationResult => {
+  const errors: string[] = [];
+  
+  // Check file size
+  const maxSizeBytes = maxSizeMB * 1024 * 1024;
+  if (file.size > maxSizeBytes) {
+    errors.push(`حجم الملف كبير جداً. الحد الأقصى ${maxSizeMB} ميجابايت`);
+  }
+  
+  // Check if file is empty
+  if (file.size === 0) {
+    errors.push('الملف فارغ');
+  }
+  
+  // Check file name
+  if (!file.name || file.name.trim() === '') {
+    errors.push('اسم الملف غير صحيح');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
+// Additional file validation functions
+export const validateFileType = (file: File, allowedTypes: string[]): boolean => {
+  return allowedTypes.includes(file.type);
+};
+
+export const validateFileName = (fileName: string): boolean => {
+  // Check for invalid characters
+  const invalidChars = /[<>:"/\\|?*]/;
+  return !invalidChars.test(fileName);
+};
