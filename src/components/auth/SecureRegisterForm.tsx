@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, User, Mail, Phone, ShieldCheck, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/components/auth/RealAuthProvider';
 import { registerSchema } from '@/utils/validation';
 import { z } from 'zod';
 
@@ -19,6 +19,8 @@ const SecureRegisterForm = () => {
     password: '',
     confirmPassword: '',
     userType: 'student',
+    country: '',
+    city: '',
     agreeTerms: false,
   });
   
@@ -73,15 +75,16 @@ const SecureRegisterForm = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signUp(formData.email, formData.password, {
+      await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
         phone: formData.phone,
         role: formData.userType,
+        country: formData.country,
+        city: formData.city,
       });
       
-      if (!error) {
-        navigate('/dashboard');
-      }
+      // Navigate to dashboard after successful registration
+      navigate('/dashboard');
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
@@ -147,6 +150,31 @@ const SecureRegisterForm = () => {
         {errors.phone && (
           <p className="text-sm text-red-600">{errors.phone}</p>
         )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="country">البلد</Label>
+          <Input
+            id="country"
+            name="country"
+            placeholder="أدخل بلدك"
+            value={formData.country}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="city">المدينة</Label>
+          <Input
+            id="city"
+            name="city"
+            placeholder="أدخل مدينتك"
+            value={formData.city}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
       
       <div className="space-y-2">

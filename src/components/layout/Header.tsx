@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from '@/components/auth/RealAuthProvider';
 
 import Logo from '../shared/Logo';
 import DarkModeToggle from '@/components/shared/DarkModeToggle';
@@ -18,11 +20,20 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { pathname } = useLocation();
   const { t, i18n } = useTranslation();
-  const isLoggedIn = false;
-  const isAdmin = true;
+  const { user, userRole, signOut } = useAuth();
+  const isLoggedIn = !!user;
+  const isAdmin = userRole === 'admin';
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   const navigation = [
@@ -126,7 +137,7 @@ const Header = () => {
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-500">
+                  <DropdownMenuItem className="text-red-500" onClick={handleSignOut}>
                     <LogOut className="h-4 w-4 mr-2" />
                     <span>تسجيل الخروج</span>
                   </DropdownMenuItem>
@@ -184,7 +195,26 @@ const Header = () => {
               </Button>
             </div>
 
-            {!isLoggedIn && (
+            {isLoggedIn ? (
+              <div className="pt-2 border-t border-white/20 space-y-2">
+                <Button asChild variant="ghost" className="w-full justify-start text-white">
+                  <Link to="/dashboard">لوحة التحكم</Link>
+                </Button>
+                {isAdmin && (
+                  <Button asChild variant="ghost" className="w-full justify-start text-white">
+                    <Link to="/admin">لوحة الإدارة</Link>
+                  </Button>
+                )}
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start text-red-300"
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  تسجيل الخروج
+                </Button>
+              </div>
+            ) : (
               <div className="pt-2 flex flex-col space-y-2">
                 <Button asChild variant="outline" className="border-white text-white">
                   <Link to="/login">{t('auth.login')}</Link>

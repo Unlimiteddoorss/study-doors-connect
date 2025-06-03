@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { HelmetProvider } from 'react-helmet-async';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
+import { RealAuthProvider } from '@/components/auth/RealAuthProvider';
 import App from './App';
 import './index.css';
 import './i18n';
@@ -33,10 +34,12 @@ root.render(
       <HelmetProvider>
         <ThemeProvider defaultTheme="light">
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <App />
-              <Toaster />
-            </BrowserRouter>
+            <RealAuthProvider>
+              <BrowserRouter>
+                <App />
+                <Toaster />
+              </BrowserRouter>
+            </RealAuthProvider>
           </QueryClientProvider>
         </ThemeProvider>
       </HelmetProvider>

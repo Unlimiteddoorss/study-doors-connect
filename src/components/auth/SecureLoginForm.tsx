@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/components/auth/RealAuthProvider';
 import { loginSchema } from '@/utils/validation';
 import { z } from 'zod';
 
@@ -53,10 +53,11 @@ const SecureLoginForm = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await signIn(formData.email, formData.password);
+      await signIn(formData.email, formData.password);
       
-      if (!error) {
-        // Redirect based on user role
+      // Navigation will be handled by the auth state change
+      // But we can add a small delay to ensure the role is loaded
+      setTimeout(() => {
         if (userRole === 'admin') {
           navigate('/admin');
         } else if (userRole === 'agent') {
@@ -64,7 +65,7 @@ const SecureLoginForm = () => {
         } else {
           navigate('/dashboard');
         }
-      }
+      }, 100);
     } catch (error) {
       console.error('Login error:', error);
     } finally {
