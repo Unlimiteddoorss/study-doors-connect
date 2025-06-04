@@ -171,23 +171,15 @@ export const realApplicationsService = {
       if (note) {
         try {
           const { data: user } = await supabase.auth.getUser();
-          supabase
+          await supabase
             .from('timeline')
             .insert({
               application_id: id,
               status,
               note,
               created_by: user.user?.id
-            })
-            .then(() => {
-              errorHandler.logInfo('تم إضافة مدخل الجدول الزمني', { applicationId: id });
-            })
-            .catch(timelineError => {
-              errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني', { 
-                applicationId: id, 
-                error: timelineError 
-              });
             });
+          errorHandler.logInfo('تم إضافة مدخل الجدول الزمني', { applicationId: id });
         } catch (timelineError) {
           errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني', { 
             applicationId: id, 
@@ -206,22 +198,14 @@ export const realApplicationsService = {
           'cancelled': 'تم إلغاء طلبك'
         };
 
-        supabase.rpc('create_notification', {
+        await supabase.rpc('create_notification', {
           p_user_id: data.student_id,
           p_title: 'تحديث حالة الطلب',
           p_message: statusMessages[status as keyof typeof statusMessages] || 'تم تحديث حالة طلبك',
           p_type: status === 'accepted' ? 'success' : status === 'rejected' ? 'error' : 'info',
           p_action_url: `/dashboard/applications/${id}`
-        })
-        .then(() => {
-          errorHandler.logInfo('تم إرسال الإشعار', { applicationId: id });
-        })
-        .catch(notificationError => {
-          errorHandler.logWarning('فشل في إرسال الإشعار', { 
-            applicationId: id, 
-            error: notificationError 
-          });
         });
+        errorHandler.logInfo('تم إرسال الإشعار', { applicationId: id });
       } catch (notificationError) {
         errorHandler.logWarning('فشل في إرسال الإشعار', { 
           applicationId: id, 
@@ -336,41 +320,39 @@ export const realApplicationsService = {
       cache.delete('applications-stats');
 
       // إضافة مدخل أولي في الجدول الزمني (غير متزامن)
-      supabase
-        .from('timeline')
-        .insert({
-          application_id: data.id,
-          status: 'pending',
-          note: 'تم تقديم الطلب بنجاح',
-          created_by: data.student_id
-        })
-        .then(() => {
-          errorHandler.logInfo('تم إضافة مدخل الجدول الزمني للطلب الجديد', { applicationId: data.id });
-        })
-        .catch(timelineError => {
-          errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني للطلب الجديد', { 
-            applicationId: data.id, 
-            error: timelineError 
+      try {
+        await supabase
+          .from('timeline')
+          .insert({
+            application_id: data.id,
+            status: 'pending',
+            note: 'تم تقديم الطلب بنجاح',
+            created_by: data.student_id
           });
+        errorHandler.logInfo('تم إضافة مدخل الجدول الزمني للطلب الجديد', { applicationId: data.id });
+      } catch (timelineError) {
+        errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني للطلب الجديد', { 
+          applicationId: data.id, 
+          error: timelineError 
         });
+      }
 
       // إرسال إشعار للطالب (غير متزامن)
-      supabase.rpc('create_notification', {
-        p_user_id: data.student_id,
-        p_title: 'تم تقديم الطلب بنجاح',
-        p_message: `تم تقديم طلبك لبرنامج ${program.name} بنجاح`,
-        p_type: 'success',
-        p_action_url: `/dashboard/applications/${data.id}`
-      })
-      .then(() => {
+      try {
+        await supabase.rpc('create_notification', {
+          p_user_id: data.student_id,
+          p_title: 'تم تقديم الطلب بنجاح',
+          p_message: `تم تقديم طلبك لبرنامج ${program.name} بنجاح`,
+          p_type: 'success',
+          p_action_url: `/dashboard/applications/${data.id}`
+        });
         errorHandler.logInfo('تم إرسال إشعار الطلب الجديد', { applicationId: data.id });
-      })
-      .catch(notificationError => {
+      } catch (notificationError) {
         errorHandler.logWarning('فشل في إرسال إشعار الطلب الجديد', { 
           applicationId: data.id, 
           error: notificationError 
         });
-      });
+      }
 
       errorHandler.logInfo(`تم إنشاء طلب جديد: ${data.id}`, { 
         applicationId: data.id,
