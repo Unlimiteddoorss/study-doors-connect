@@ -21,10 +21,33 @@ export interface RealApplication {
   studentCountry?: string;
 }
 
+// Cache للبيانات المُحمّلة مؤخراً
+const cache = new Map<string, { data: any; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 دقائق
+
+const getCachedData = (key: string) => {
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+  return null;
+};
+
+const setCachedData = (key: string, data: any) => {
+  cache.set(key, { data, timestamp: Date.now() });
+};
+
 export const realApplicationsService = {
-  // جلب جميع الطلبات مع تفاصيل كاملة
+  // جلب جميع الطلبات مع تفاصيل كاملة - محسّن مع Cache
   async getAllApplications() {
     try {
+      const cacheKey = 'all-applications';
+      const cachedData = getCachedData(cacheKey);
+      if (cachedData) {
+        errorHandler.logInfo('تم استخدام البيانات المخزنة مؤقتاً', { source: 'cache' });
+        return cachedData;
+      }
+
       const { data, error } = await supabase
         .from('applications')
         .select(`
@@ -55,6 +78,7 @@ export const realApplicationsService = {
         universityName: app.programs?.universities?.name || 'غير محدد'
       })) || [];
 
+      setCachedData(cacheKey, result);
       errorHandler.logInfo(`تم جلب ${result.length} طلبات بنجاح`, { count: result.length });
       return result;
     } catch (error) {
@@ -63,9 +87,15 @@ export const realApplicationsService = {
     }
   },
 
-  // جلب طلب محدد مع جميع التفاصيل
+  // جلب طلب محدد مع جميع التفاصيل - محسّن
   async getApplicationById(id: string) {
     try {
+      const cacheKey = `application-${id}`;
+      const cachedData = getCachedData(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+
       const { data, error } = await supabase
         .from('applications')
         .select(`
@@ -105,6 +135,7 @@ export const realApplicationsService = {
         universityWebsite: data.programs?.universities?.website
       };
 
+      setCachedData(cacheKey, result);
       errorHandler.logInfo(`تم جلب تفاصيل الطلب: ${id}`, { applicationId: id });
       return result;
     } catch (error) {
@@ -113,9 +144,13 @@ export const realApplicationsService = {
     }
   },
 
-  // تحديث حالة الطلب مع إشعارات
+  // تحديث حالة الطلب مع إشعارات - محسّن
   async updateApplicationStatus(id: string, status: string, note?: string) {
     try {
+      // مسح Cache عند التحديث
+      cache.delete(`application-${id}`);
+      cache.delete('all-applications');
+
       // تحديث حالة الطلب
       const { data, error } = await supabase
         .from('applications')
@@ -132,17 +167,26 @@ export const realApplicationsService = {
         throw error;
       }
 
-      // إضافة مدخل في الجدول الزمني
+      // إضافة مدخل في الجدول الزمني (محسّن - غير متزامن)
       if (note) {
         try {
           const { data: user } = await supabase.auth.getUser();
-          await supabase
+          supabase
             .from('timeline')
             .insert({
               application_id: id,
               status,
               note,
               created_by: user.user?.id
+            })
+            .then(() => {
+              errorHandler.logInfo('تم إضافة مدخل الجدول الزمني', { applicationId: id });
+            })
+            .catch(timelineError => {
+              errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني', { 
+                applicationId: id, 
+                error: timelineError 
+              });
             });
         } catch (timelineError) {
           errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني', { 
@@ -152,7 +196,7 @@ export const realApplicationsService = {
         }
       }
 
-      // إرسال إشعار للطالب
+      // إرسال إشعار للطالب (محسّن - غير متزامن)
       try {
         const statusMessages = {
           'pending': 'طلبك قيد المراجعة',
@@ -162,12 +206,21 @@ export const realApplicationsService = {
           'cancelled': 'تم إلغاء طلبك'
         };
 
-        await supabase.rpc('create_notification', {
+        supabase.rpc('create_notification', {
           p_user_id: data.student_id,
           p_title: 'تحديث حالة الطلب',
           p_message: statusMessages[status as keyof typeof statusMessages] || 'تم تحديث حالة طلبك',
           p_type: status === 'accepted' ? 'success' : status === 'rejected' ? 'error' : 'info',
           p_action_url: `/dashboard/applications/${id}`
+        })
+        .then(() => {
+          errorHandler.logInfo('تم إرسال الإشعار', { applicationId: id });
+        })
+        .catch(notificationError => {
+          errorHandler.logWarning('فشل في إرسال الإشعار', { 
+            applicationId: id, 
+            error: notificationError 
+          });
         });
       } catch (notificationError) {
         errorHandler.logWarning('فشل في إرسال الإشعار', { 
@@ -188,9 +241,15 @@ export const realApplicationsService = {
     }
   },
 
-  // إحصائيات الطلبات المحسنة
+  // إحصائيات الطلبات المحسنة مع Cache
   async getApplicationsStats() {
     try {
+      const cacheKey = 'applications-stats';
+      const cachedData = getCachedData(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+
       const { data, error } = await supabase
         .from('applications')
         .select('status, created_at');
@@ -223,6 +282,7 @@ export const realApplicationsService = {
         }).length || 0
       };
 
+      setCachedData(cacheKey, stats);
       errorHandler.logInfo('تم حساب إحصائيات الطلبات', stats);
       return stats;
     } catch (error) {
@@ -231,7 +291,7 @@ export const realApplicationsService = {
     }
   },
 
-  // إنشاء طلب جديد مع التحقق
+  // إنشاء طلب جديد مع التحقق المحسّن
   async createApplication(applicationData: {
     student_id: string;
     university_id: number;
@@ -271,38 +331,46 @@ export const realApplicationsService = {
         throw error;
       }
 
-      // إضافة مدخل أولي في الجدول الزمني
-      try {
-        await supabase
-          .from('timeline')
-          .insert({
-            application_id: data.id,
-            status: 'pending',
-            note: 'تم تقديم الطلب بنجاح',
-            created_by: data.student_id
-          });
-      } catch (timelineError) {
-        errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني للطلب الجديد', { 
-          applicationId: data.id, 
-          error: timelineError 
-        });
-      }
+      // مسح Cache
+      cache.delete('all-applications');
+      cache.delete('applications-stats');
 
-      // إرسال إشعار للطالب
-      try {
-        await supabase.rpc('create_notification', {
-          p_user_id: data.student_id,
-          p_title: 'تم تقديم الطلب بنجاح',
-          p_message: `تم تقديم طلبك لبرنامج ${program.name} بنجاح`,
-          p_type: 'success',
-          p_action_url: `/dashboard/applications/${data.id}`
+      // إضافة مدخل أولي في الجدول الزمني (غير متزامن)
+      supabase
+        .from('timeline')
+        .insert({
+          application_id: data.id,
+          status: 'pending',
+          note: 'تم تقديم الطلب بنجاح',
+          created_by: data.student_id
+        })
+        .then(() => {
+          errorHandler.logInfo('تم إضافة مدخل الجدول الزمني للطلب الجديد', { applicationId: data.id });
+        })
+        .catch(timelineError => {
+          errorHandler.logWarning('فشل في إضافة مدخل الجدول الزمني للطلب الجديد', { 
+            applicationId: data.id, 
+            error: timelineError 
+          });
         });
-      } catch (notificationError) {
+
+      // إرسال إشعار للطالب (غير متزامن)
+      supabase.rpc('create_notification', {
+        p_user_id: data.student_id,
+        p_title: 'تم تقديم الطلب بنجاح',
+        p_message: `تم تقديم طلبك لبرنامج ${program.name} بنجاح`,
+        p_type: 'success',
+        p_action_url: `/dashboard/applications/${data.id}`
+      })
+      .then(() => {
+        errorHandler.logInfo('تم إرسال إشعار الطلب الجديد', { applicationId: data.id });
+      })
+      .catch(notificationError => {
         errorHandler.logWarning('فشل في إرسال إشعار الطلب الجديد', { 
           applicationId: data.id, 
           error: notificationError 
         });
-      }
+      });
 
       errorHandler.logInfo(`تم إنشاء طلب جديد: ${data.id}`, { 
         applicationId: data.id,
@@ -313,5 +381,11 @@ export const realApplicationsService = {
       errorHandler.logError(error, { context: 'createApplication', applicationData });
       throw error;
     }
+  },
+
+  // مسح Cache يدوياً
+  clearCache() {
+    cache.clear();
+    errorHandler.logInfo('تم مسح جميع البيانات المخزنة مؤقتاً');
   }
 };

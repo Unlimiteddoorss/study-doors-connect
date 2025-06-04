@@ -32,6 +32,7 @@ const Sidebar = ({ userRole = 'student' }: SidebarProps) => {
         { name: 'الوكلاء', href: '/admin/agents', icon: UserCheck },
         { name: 'التقارير', href: '/admin/reports', icon: BarChart3 },
         { name: 'الرسائل', href: '/admin/messages', icon: MessageSquare },
+        { name: 'الاختبار والتحسين', href: '/admin/testing', icon: Settings },
         { name: 'الإعدادات', href: '/admin/settings', icon: Settings },
       ];
     } else if (userRole === 'agent') {
