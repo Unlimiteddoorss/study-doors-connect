@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,24 +13,25 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
 import { ArrowLeft, Mail, Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import Logo from '@/components/shared/Logo';
-import Footer from '@/components/layout/Footer';
 import MainLayout from '@/components/layout/MainLayout';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ForgotPasswordFormValues {
   email: string;
   verificationCode?: string;
+  newPassword?: string;
+  confirmPassword?: string;
 }
 
 const ForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<'email' | 'verification' | 'newPassword'>('email');
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { resetPassword } = useAuth();
+  const navigate = useNavigate();
   
   const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<ForgotPasswordFormValues>();
   
@@ -38,20 +39,21 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call to send reset email
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await resetPassword(data.email);
       toast({
-        title: t('forgotPassword.emailSentTitle'),
-        description: t('forgotPassword.emailSentDescription'),
+        title: "تم إرسال الرابط",
+        description: "تحقق من بريدك الإلكتروني لإعادة تعيين كلمة المرور",
       });
       
-      setStep('verification');
+      // في التطبيق الحقيقي، سيتم إعادة توجيه المستخدم لصفحة التأكيد
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
     } catch (error) {
       console.error('Error sending reset email:', error);
       toast({
-        title: t('forgotPassword.errorTitle'),
-        description: t('forgotPassword.errorSendingEmail'),
+        title: "خطأ في الإرسال",
+        description: "حدث خطأ في إرسال رابط إعادة التعيين",
         variant: 'destructive',
       });
     } finally {
@@ -63,20 +65,20 @@ const ForgotPassword = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call to verify code
+      // محاكاة التحقق من الكود
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
-        title: t('forgotPassword.codeVerifiedTitle'),
-        description: t('forgotPassword.codeVerifiedDescription'),
+        title: "تم التحقق من الكود",
+        description: "يمكنك الآن إدخال كلمة المرور الجديدة",
       });
       
       setStep('newPassword');
     } catch (error) {
       console.error('Error verifying code:', error);
       toast({
-        title: t('forgotPassword.errorTitle'),
-        description: t('forgotPassword.errorVerifyingCode'),
+        title: "خطأ في التحقق",
+        description: "الكود المدخل غير صحيح",
         variant: 'destructive',
       });
     } finally {
@@ -84,24 +86,30 @@ const ForgotPassword = () => {
     }
   };
   
-  const onSubmitNewPassword = async () => {
+  const onSubmitNewPassword = async (data: ForgotPasswordFormValues) => {
     setIsLoading(true);
     
     try {
-      // Simulate API call to set new password
+      if (data.newPassword !== data.confirmPassword) {
+        throw new Error('كلمات المرور غير متطابقة');
+      }
+
+      // محاكاة إعادة تعيين كلمة المرور
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       toast({
-        title: t('forgotPassword.passwordResetTitle'),
-        description: t('forgotPassword.passwordResetDescription'),
+        title: "تم تغيير كلمة المرور",
+        description: "تم تغيير كلمة المرور بنجاح، سيتم توجيهك لصفحة تسجيل الدخول",
       });
       
-      // In a real app, redirect to login page
-    } catch (error) {
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (error: any) {
       console.error('Error resetting password:', error);
       toast({
-        title: t('forgotPassword.errorTitle'),
-        description: t('forgotPassword.errorResettingPassword'),
+        title: "خطأ في التغيير",
+        description: error.message || "حدث خطأ في تغيير كلمة المرور",
         variant: 'destructive',
       });
     } finally {
@@ -120,25 +128,25 @@ const ForgotPassword = () => {
           <form onSubmit={handleSubmit(onSubmitEmail)}>
             <CardContent className="space-y-4 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="email">{t('forgotPassword.emailLabel')}</Label>
+                <Label htmlFor="email">البريد الإلكتروني</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-unlimited-gray h-4 w-4" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                     id="email"
                     type="email"
-                    placeholder={t('forgotPassword.emailPlaceholder')}
+                    placeholder="أدخل بريدك الإلكتروني"
                     className="pl-10"
                     {...register('email', {
-                      required: t('forgotPassword.emailRequired'),
+                      required: 'البريد الإلكتروني مطلوب',
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: t('forgotPassword.emailInvalid'),
+                        message: 'البريد الإلكتروني غير صالح',
                       },
                     })}
                   />
                 </div>
                 {errors.email && (
-                  <p className="text-sm text-unlimited-danger">{errors.email.message}</p>
+                  <p className="text-sm text-red-500">{errors.email.message}</p>
                 )}
               </div>
             </CardContent>
@@ -147,10 +155,10 @@ const ForgotPassword = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('forgotPassword.sendingLink')}
+                    جاري الإرسال...
                   </>
                 ) : (
-                  t('forgotPassword.sendResetLink')
+                  'إرسال رابط إعادة التعيين'
                 )}
               </Button>
             </CardFooter>
@@ -162,13 +170,13 @@ const ForgotPassword = () => {
           <form onSubmit={handleSubmit(onSubmitVerification)}>
             <CardContent className="space-y-4 pt-6">
               <div className="space-y-2 text-center">
-                <p className="text-unlimited-gray">
-                  {t('forgotPassword.codeSentTo')} <strong>{watch('email')}</strong>
+                <p className="text-gray-600">
+                  تم إرسال الكود إلى <strong>{watch('email')}</strong>
                 </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="verification-code">{t('forgotPassword.verificationCodeLabel')}</Label>
+                <Label htmlFor="verification-code">كود التحقق</Label>
                 <div className="flex justify-center py-2">
                   <InputOTP
                     maxLength={6}
@@ -186,7 +194,7 @@ const ForgotPassword = () => {
                 
                 <div className="text-center">
                   <Button variant="link" type="button" className="text-unlimited-blue">
-                    {t('forgotPassword.resendCode')}
+                    إعادة إرسال الكود
                   </Button>
                 </div>
               </div>
@@ -196,10 +204,10 @@ const ForgotPassword = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('forgotPassword.verifying')}
+                    جاري التحقق...
                   </>
                 ) : (
-                  t('forgotPassword.verifyCode')
+                  'تحقق من الكود'
                 )}
               </Button>
               <Button 
@@ -209,7 +217,7 @@ const ForgotPassword = () => {
                 onClick={() => setStep('email')}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                {t('forgotPassword.backToEmail')}
+                العودة للبريد الإلكتروني
               </Button>
             </CardFooter>
           </form>
@@ -220,21 +228,37 @@ const ForgotPassword = () => {
           <form onSubmit={handleSubmit(onSubmitNewPassword)}>
             <CardContent className="space-y-4 pt-6">
               <div className="space-y-2">
-                <Label htmlFor="new-password">{t('forgotPassword.newPasswordLabel')}</Label>
+                <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
                 <Input
                   id="new-password"
                   type="password"
-                  placeholder={t('forgotPassword.newPasswordPlaceholder')}
+                  placeholder="أدخل كلمة المرور الجديدة"
+                  {...register('newPassword', {
+                    required: 'كلمة المرور مطلوبة',
+                    minLength: {
+                      value: 6,
+                      message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
+                    }
+                  })}
                 />
+                {errors.newPassword && (
+                  <p className="text-sm text-red-500">{errors.newPassword.message}</p>
+                )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="confirm-password">{t('forgotPassword.confirmPasswordLabel')}</Label>
+                <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
                 <Input
                   id="confirm-password"
                   type="password"
-                  placeholder={t('forgotPassword.confirmPasswordPlaceholder')}
+                  placeholder="أعد إدخال كلمة المرور"
+                  {...register('confirmPassword', {
+                    required: 'تأكيد كلمة المرور مطلوب'
+                  })}
                 />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>
+                )}
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
@@ -242,10 +266,10 @@ const ForgotPassword = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('forgotPassword.resettingPassword')}
+                    جاري التغيير...
                   </>
                 ) : (
-                  t('forgotPassword.resetPassword')
+                  'تغيير كلمة المرور'
                 )}
               </Button>
             </CardFooter>
@@ -260,15 +284,17 @@ const ForgotPassword = () => {
         <div className="w-full max-w-md">
           <Card className="border-2 shadow-md">
             <CardHeader>
-              <CardTitle>{t('forgotPassword.title')}</CardTitle>
-              <CardDescription>{t('forgotPassword.description')}</CardDescription>
+              <CardTitle>إعادة تعيين كلمة المرور</CardTitle>
+              <CardDescription>
+                أدخل بريدك الإلكتروني لإعادة تعيين كلمة المرور
+              </CardDescription>
             </CardHeader>
             {renderStep()}
             <CardFooter className="flex flex-col pt-0">
               <p className="text-sm text-center mt-4">
-                {t('forgotPassword.rememberPassword')}{' '}
+                تذكرت كلمة المرور؟{' '}
                 <Link to="/login" className="text-unlimited-blue hover:underline">
-                  {t('forgotPassword.backToLogin')}
+                  العودة لتسجيل الدخول
                 </Link>
               </p>
             </CardFooter>

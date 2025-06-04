@@ -1,160 +1,139 @@
 
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useAuth } from '@/components/auth/RealAuthProvider';
-import { loginSchema } from '@/utils/validation';
-import { z } from 'zod';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+
+interface LoginFormValues {
+  email: string;
+  password: string;
+}
 
 const SecureLoginForm = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const { signIn } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const { signIn, userRole } = useAuth();
+  
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-    
-    try {
-      // Validate input
-      loginSchema.parse(formData);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            fieldErrors[err.path[0] as string] = err.message;
-          }
-        });
-        setErrors(fieldErrors);
-        return;
-      }
-    }
-    
+  const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    
     try {
-      await signIn(formData.email, formData.password);
-      
-      // Navigation will be handled by the auth state change
-      // But we can add a small delay to ensure the role is loaded
-      setTimeout(() => {
-        if (userRole === 'admin') {
-          navigate('/admin');
-        } else if (userRole === 'agent') {
-          navigate('/agent');
-        } else {
-          navigate('/dashboard');
-        }
-      }, 100);
-    } catch (error) {
+      await signIn(data.email, data.password);
+      navigate('/dashboard');
+    } catch (error: any) {
       console.error('Login error:', error);
+      toast({
+        title: "خطأ في تسجيل الدخول",
+        description: error.message || "حدث خطأ غير متوقع",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleLogin} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="email">البريد الإلكتروني</Label>
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder="أدخل بريدك الإلكتروني"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className={errors.email ? 'border-red-500' : ''}
-        />
-        {errors.email && (
-          <p className="text-sm text-red-600">{errors.email}</p>
-        )}
-      </div>
-      
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">كلمة المرور</Label>
-          <Link 
-            to="/forgot-password" 
-            className="text-sm text-unlimited-blue hover:underline"
-          >
-            نسيت كلمة المرور؟
-          </Link>
-        </div>
-        <div className="relative">
-          <Input
-            id="password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="أدخل كلمة المرور"
-            value={formData.password}
-            onChange={handleChange}
-            required
-            className={errors.password ? 'border-red-500' : ''}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
-          >
-            {showPassword ? (
-              <EyeOff className="h-5 w-5" />
-            ) : (
-              <Eye className="h-5 w-5" />
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="text-center">تسجيل الدخول</CardTitle>
+      </CardHeader>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">البريد الإلكتروني</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="أدخل بريدك الإلكتروني"
+                className="pl-10"
+                {...register('email', {
+                  required: 'البريد الإلكتروني مطلوب',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'البريد الإلكتروني غير صالح'
+                  }
+                })}
+              />
+            </div>
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
             )}
-          </button>
-        </div>
-        {errors.password && (
-          <p className="text-sm text-red-600">{errors.password}</p>
-        )}
-      </div>
-      
-      <Button 
-        type="submit" 
-        className="w-full bg-unlimited-blue hover:bg-unlimited-blue/90" 
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            جاري تسجيل الدخول...
-          </>
-        ) : (
-          'تسجيل الدخول'
-        )}
-      </Button>
-      
-      <p className="text-center text-unlimited-gray text-sm">
-        ليس لديك حساب؟{' '}
-        <Link 
-          to="/register" 
-          className="text-unlimited-blue hover:underline font-medium"
-        >
-          إنشاء حساب جديد
-        </Link>
-      </p>
-    </form>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">كلمة المرور</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="أدخل كلمة المرور"
+                className="pl-10 pr-10"
+                {...register('password', {
+                  required: 'كلمة المرور مطلوبة',
+                  minLength: {
+                    value: 6,
+                    message: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
+                  }
+                })}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            )}
+          </div>
+
+          <div className="text-right">
+            <Link
+              to="/forgot-password"
+              className="text-sm text-unlimited-blue hover:underline"
+            >
+              نسيت كلمة المرور؟
+            </Link>
+          </div>
+        </CardContent>
+
+        <CardFooter className="flex flex-col space-y-4">
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                جاري تسجيل الدخول...
+              </>
+            ) : (
+              'تسجيل الدخول'
+            )}
+          </Button>
+
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              ليس لديك حساب؟{' '}
+              <Link to="/register" className="text-unlimited-blue hover:underline">
+                إنشاء حساب جديد
+              </Link>
+            </p>
+          </div>
+        </CardFooter>
+      </form>
+    </Card>
   );
 };
 

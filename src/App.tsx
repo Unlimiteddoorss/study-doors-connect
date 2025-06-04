@@ -40,6 +40,7 @@ import PermissionsManagement from '@/pages/admin/PermissionsManagement';
 import BackupManagement from '@/pages/admin/BackupManagement';
 import AuditLogs from '@/pages/admin/AuditLogs';
 import FileManagement from '@/pages/admin/FileManagement';
+import TestingDashboard from '@/pages/admin/TestingDashboard';
 import AgentDashboard from '@/pages/agent/AgentDashboard';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import HomePage from '@/pages/HomePage';
@@ -50,6 +51,7 @@ import EnhancedStudentDashboard from '@/pages/students/EnhancedStudentDashboard'
 import ApplicationForm from '@/pages/ApplicationForm';
 import StudentApplications from '@/pages/dashboard/StudentApplications';
 import StudentProfile from '@/pages/dashboard/StudentProfile';
+import ForgotPassword from '@/pages/ForgotPassword';
 
 function App() {
   return (
@@ -103,6 +105,8 @@ function App() {
             </div>
           </MainLayout>
         } />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ForgotPassword />} />
         
         {/* Protected student routes */}
         <Route path="/dashboard" element={
@@ -154,6 +158,7 @@ function App() {
               <Route path="messages" element={<AdminMessages />} />
               <Route path="notifications" element={<AdminNotifications />} />
               <Route path="reports" element={<Reports />} />
+              <Route path="testing" element={<TestingDashboard />} />
               <Route path="permissions" element={
                 <ProtectedRoute requiredRole="admin">
                   <PermissionsManagement />
