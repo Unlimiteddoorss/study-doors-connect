@@ -4,13 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Database, Users, FileText, Settings, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Database, Users, FileText, Settings, CheckCircle, AlertCircle, UserPlus } from 'lucide-react';
 import { demoDataService, demoAccounts } from '@/services/demoDataService';
+import { useAuth } from '@/components/auth/RealAuthProvider';
 
 const DemoDataGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCreatingAccounts, setIsCreatingAccounts] = useState(false);
   const [generationStatus, setGenerationStatus] = useState<any>(null);
+  const [accountsStatus, setAccountsStatus] = useState<any>(null);
   const { toast } = useToast();
+  const { createDemoAccount } = useAuth();
 
   const handleGenerateDemoData = async () => {
     setIsGenerating(true);
@@ -43,8 +47,128 @@ const DemoDataGenerator = () => {
     }
   };
 
+  const handleCreateDemoAccounts = async () => {
+    setIsCreatingAccounts(true);
+    try {
+      const results = [];
+      
+      for (const account of demoAccounts) {
+        try {
+          await createDemoAccount(
+            account.email,
+            account.password,
+            account.role,
+            account.profile
+          );
+          results.push({ email: account.email, success: true });
+        } catch (error: any) {
+          console.error(`فشل في إنشاء حساب ${account.email}:`, error);
+          results.push({ 
+            email: account.email, 
+            success: false, 
+            error: error.message 
+          });
+        }
+      }
+
+      const successCount = results.filter(r => r.success).length;
+      const totalCount = results.length;
+
+      setAccountsStatus({
+        success: successCount > 0,
+        message: `تم إنشاء ${successCount} من أصل ${totalCount} حسابات`,
+        details: results
+      });
+
+      if (successCount > 0) {
+        toast({
+          title: "تم إنشاء الحسابات التجريبية",
+          description: `تم إنشاء ${successCount} حساب بنجاح`,
+        });
+      } else {
+        toast({
+          title: "فشل في إنشاء الحسابات",
+          description: "لم يتم إنشاء أي حساب. ربما الحسابات موجودة مسبقاً",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Demo accounts creation error:', error);
+      toast({
+        title: "خطأ في النظام",
+        description: "حدث خطأ غير متوقع",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCreatingAccounts(false);
+    }
+  };
+
   return (
     <div className="grid gap-6">
+      {/* بطاقة إنشاء الحسابات التجريبية */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            إنشاء الحسابات التجريبية
+          </CardTitle>
+          <CardDescription>
+            إنشاء حسابات المصادقة التجريبية في Supabase (مدير، طلاب، وكيل)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Button 
+            onClick={handleCreateDemoAccounts}
+            disabled={isCreatingAccounts}
+            className="w-full"
+            size="lg"
+            variant="secondary"
+          >
+            {isCreatingAccounts ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                جاري إنشاء الحسابات...
+              </>
+            ) : (
+              <>
+                <UserPlus className="mr-2 h-4 w-4" />
+                إنشاء حسابات المصادقة التجريبية
+              </>
+            )}
+          </Button>
+
+          {accountsStatus && (
+            <div className="mt-4 p-4 border rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                {accountsStatus.success ? (
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                ) : (
+                  <AlertCircle className="h-5 w-5 text-red-500" />
+                )}
+                <span className="font-medium">
+                  {accountsStatus.success ? 'تم بنجاح' : 'فشل'}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 mb-3">{accountsStatus.message}</p>
+              
+              {accountsStatus.details && (
+                <div className="space-y-2">
+                  {accountsStatus.details.map((result: any, index: number) => (
+                    <div key={index} className="flex items-center justify-between text-xs">
+                      <span>{result.email}</span>
+                      <Badge variant={result.success ? "default" : "destructive"}>
+                        {result.success ? 'نجح' : 'فشل'}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* بطاقة إنشاء البيانات التجريبية */}
       <Card>
         <CardHeader>
@@ -184,6 +308,39 @@ const DemoDataGenerator = () => {
                 <li>• إعدادات العمولات</li>
                 <li>• إعدادات الإشعارات</li>
                 <li>• إعدادات الملفات</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* تعليمات الاستخدام */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="h-5 w-5" />
+            تعليمات الاستخدام
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4 text-sm">
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-medium text-blue-800 mb-2">خطوات البدء:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-blue-700">
+                <li>اضغط على "إنشاء حسابات المصادقة التجريبية" أولاً</li>
+                <li>ثم اضغط على "إنشاء البيانات التجريبية"</li>
+                <li>انتقل إلى صفحة تسجيل الدخول</li>
+                <li>استخدم إحدى الحسابات التجريبية للدخول</li>
+              </ol>
+            </div>
+            
+            <div className="p-4 bg-green-50 rounded-lg">
+              <h4 className="font-medium text-green-800 mb-2">ملاحظات مهمة:</h4>
+              <ul className="list-disc list-inside space-y-1 text-green-700">
+                <li>إذا ظهرت رسالة "الحسابات موجودة مسبقاً" فهذا طبيعي</li>
+                <li>يمكن استخدام الحسابات مباشرة حتى لو فشل إنشائها</li>
+                <li>جميع كلمات المرور هي: Demo123!</li>
+                <li>يتم إنشاء ملفات شخصية وأدوار تلقائياً</li>
               </ul>
             </div>
           </div>

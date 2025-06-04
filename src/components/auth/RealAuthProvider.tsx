@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -16,6 +15,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   updateProfile: (updates: any) => Promise<void>;
+  createDemoAccount: (email: string, password: string, role: string, profileData: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -78,7 +78,7 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchUserData = async (userId: string) => {
     try {
-      // Fetch user role
+      // Fetch user role with fallback to 'student'
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -87,11 +87,28 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (roleError && roleError.code !== 'PGRST116') {
         errorHandler.logError(roleError, { context: 'fetchUserRole', userId });
-      } else {
-        setUserRole(roleData?.role || 'student');
+      }
+      
+      // Set role with fallback to 'student' if no role found
+      const role = roleData?.role || 'student';
+      setUserRole(role);
+
+      // If no role exists, create one
+      if (!roleData && roleError?.code === 'PGRST116') {
+        try {
+          await supabase
+            .from('user_roles')
+            .insert({
+              user_id: userId,
+              role: 'student'
+            });
+          errorHandler.logInfo('تم إنشاء دور افتراضي للمستخدم', { userId, role: 'student' });
+        } catch (createRoleError) {
+          errorHandler.logError(createRoleError, { context: 'createDefaultRole', userId });
+        }
       }
 
-      // Fetch user profile
+      // Fetch user profile with fallback creation
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
         .select('*')
@@ -100,17 +117,97 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (profileError && profileError.code !== 'PGRST116') {
         errorHandler.logError(profileError, { context: 'fetchUserProfile', userId });
-      } else {
-        setUserProfile(profileData);
+      }
+
+      setUserProfile(profileData);
+
+      // If no profile exists, create one
+      if (!profileData && profileError?.code === 'PGRST116') {
+        try {
+          const { data: newProfile } = await supabase
+            .from('user_profiles')
+            .insert({
+              id: userId,
+              user_id: userId,
+              full_name: 'مستخدم جديد'
+            })
+            .select()
+            .single();
+          
+          setUserProfile(newProfile);
+          errorHandler.logInfo('تم إنشاء ملف شخصي افتراضي', { userId });
+        } catch (createProfileError) {
+          errorHandler.logError(createProfileError, { context: 'createDefaultProfile', userId });
+        }
       }
 
       errorHandler.logInfo('تم جلب بيانات المستخدم', { 
         userId, 
-        role: roleData?.role,
+        role,
         hasProfile: !!profileData 
       });
     } catch (error) {
       errorHandler.logError(error, { context: 'fetchUserData', userId });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createDemoAccount = async (email: string, password: string, role: string, profileData: any) => {
+    try {
+      setLoading(true);
+      
+      // Create user account
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: profileData.full_name,
+            role: role
+          }
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('already registered')) {
+          // User already exists, try to sign in
+          await signIn(email, password);
+          return;
+        }
+        throw error;
+      }
+
+      if (data.user) {
+        // Create user profile
+        await supabase
+          .from('user_profiles')
+          .insert({
+            id: data.user.id,
+            user_id: data.user.id,
+            full_name: profileData.full_name,
+            phone: profileData.phone,
+            country: profileData.country,
+            city: profileData.city
+          });
+
+        // Create user role
+        await supabase
+          .from('user_roles')
+          .insert({
+            user_id: data.user.id,
+            role: role
+          });
+
+        errorHandler.logInfo('تم إنشاء حساب تجريبي جديد', { 
+          userId: data.user.id,
+          email: data.user.email,
+          role: role
+        });
+      }
+    } catch (error: any) {
+      errorHandler.logError(error, { context: 'createDemoAccount', email, role });
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -158,7 +255,6 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       
-      // Create user account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -176,7 +272,6 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (data.user) {
-        // Create user profile
         try {
           await supabase
             .from('user_profiles')
@@ -195,7 +290,6 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           });
         }
 
-        // Create user role
         try {
           await supabase
             .from('user_roles')
@@ -303,7 +397,6 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setLoading(true);
 
-      // Update user profile
       const { error: profileError } = await supabase
         .from('user_profiles')
         .update({
@@ -317,7 +410,6 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         throw profileError;
       }
 
-      // Refresh user data
       await fetchUserData(user.id);
 
       errorHandler.logInfo('تم تحديث ملف المستخدم', { userId: user.id, updates });
@@ -348,7 +440,8 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signUp,
     signOut,
     resetPassword,
-    updateProfile
+    updateProfile,
+    createDemoAccount
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

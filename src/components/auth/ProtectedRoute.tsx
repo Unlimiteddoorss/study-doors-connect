@@ -21,7 +21,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">جاري التحقق من الصلاحيات...</p>
+        </div>
       </div>
     );
   }
@@ -30,12 +33,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // إذا لم يكن هناك دور محدد، استخدم الدور الافتراضي
+  const currentRole = userRole || 'student';
+
   // Check role-based access
-  if (requiredRole && userRole !== requiredRole) {
+  if (requiredRole && currentRole !== requiredRole) {
+    console.log('Role mismatch:', { required: requiredRole, current: currentRole });
     return <Navigate to="/unauthorized" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userRole || '')) {
+  if (allowedRoles && !allowedRoles.includes(currentRole)) {
+    console.log('Role not in allowed list:', { allowed: allowedRoles, current: currentRole });
     return <Navigate to="/unauthorized" replace />;
   }
 
