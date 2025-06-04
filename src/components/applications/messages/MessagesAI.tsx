@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,12 +21,14 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+type MessageCategory = 'general' | 'university' | 'documents' | 'visa' | 'fees';
+
 interface AIMessage {
   id: string;
   content: string;
   isUser: boolean;
   timestamp: Date;
-  category?: 'general' | 'university' | 'documents' | 'visa' | 'fees';
+  category?: MessageCategory;
 }
 
 interface MessagesAIProps {
@@ -44,12 +45,12 @@ const MessagesAI = ({ applicationId }: MessagesAIProps) => {
 
   // الرسائل التوجيهية
   const quickQuestions = [
-    { icon: University, text: 'ما هي متطلبات القبول؟', category: 'university' },
-    { icon: FileText, text: 'ما هي المستندات المطلوبة؟', category: 'documents' },
-    { icon: Globe, text: 'كيف أحصل على تأشيرة الدراسة؟', category: 'visa' },
-    { icon: DollarSign, text: 'ما هي تكاليف الدراسة؟', category: 'fees' },
-    { icon: MapPin, text: 'معلومات عن السكن الجامعي', category: 'general' },
-    { icon: BookOpen, text: 'متى يبدأ العام الدراسي؟', category: 'university' }
+    { icon: University, text: 'ما هي متطلبات القبول؟', category: 'university' as MessageCategory },
+    { icon: FileText, text: 'ما هي المستندات المطلوبة؟', category: 'documents' as MessageCategory },
+    { icon: Globe, text: 'كيف أحصل على تأشيرة الدراسة؟', category: 'visa' as MessageCategory },
+    { icon: DollarSign, text: 'ما هي تكاليف الدراسة؟', category: 'fees' as MessageCategory },
+    { icon: MapPin, text: 'معلومات عن السكن الجامعي', category: 'general' as MessageCategory },
+    { icon: BookOpen, text: 'متى يبدأ العام الدراسي؟', category: 'university' as MessageCategory }
   ];
 
   useEffect(() => {
@@ -110,7 +111,7 @@ const MessagesAI = ({ applicationId }: MessagesAIProps) => {
     }, 2000 + Math.random() * 2000);
   };
 
-  const generateAIResponse = (question: string): { content: string; category: string } => {
+  const generateAIResponse = (question: string): { content: string; category: MessageCategory } => {
     const lowerQuestion = question.toLowerCase();
 
     if (lowerQuestion.includes('متطلبات') || lowerQuestion.includes('قبول')) {
@@ -235,7 +236,7 @@ const MessagesAI = ({ applicationId }: MessagesAIProps) => {
     };
   };
 
-  const getCategoryIcon = (category?: string) => {
+  const getCategoryIcon = (category?: MessageCategory) => {
     switch (category) {
       case 'university': return <University className="h-4 w-4" />;
       case 'documents': return <FileText className="h-4 w-4" />;
@@ -245,7 +246,7 @@ const MessagesAI = ({ applicationId }: MessagesAIProps) => {
     }
   };
 
-  const getCategoryColor = (category?: string) => {
+  const getCategoryColor = (category?: MessageCategory) => {
     switch (category) {
       case 'university': return 'text-blue-600 bg-blue-50';
       case 'documents': return 'text-green-600 bg-green-50';

@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, FileText, Download } from 'lucide-react';
+import { Printer, FileText, Download, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
 
 interface PrintUtilityProps {
   data: any[];
@@ -12,9 +13,19 @@ interface PrintUtilityProps {
     accessor: string;
     render?: (value: any) => string;
   }>;
+  orientation?: 'portrait' | 'landscape';
+  includeHeader?: boolean;
+  includeFooter?: boolean;
 }
 
-export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
+export const PrintUtility = ({ 
+  data, 
+  title, 
+  columns,
+  orientation = 'portrait',
+  includeHeader = true,
+  includeFooter = true
+}: PrintUtilityProps) => {
   const { toast } = useToast();
 
   const handlePrint = () => {
@@ -33,7 +44,6 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
     printWindow.document.close();
     printWindow.focus();
     
-    // انتظار تحميل المحتوى ثم الطباعة
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
@@ -59,6 +69,10 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
           @media print {
             body { margin: 0; }
             .no-print { display: none !important; }
+            @page { 
+              size: A4 ${orientation}; 
+              margin: 15mm;
+            }
           }
           
           body {
@@ -66,6 +80,7 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
             margin: 20px;
             color: #333;
             direction: rtl;
+            font-size: 12px;
           }
           
           .header {
@@ -90,24 +105,28 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
           .table-container {
             width: 100%;
             margin-top: 20px;
+            overflow-x: auto;
           }
           
           table {
             width: 100%;
             border-collapse: collapse;
             border: 1px solid #ddd;
+            font-size: 11px;
           }
           
           th, td {
             border: 1px solid #ddd;
-            padding: 8px 12px;
+            padding: 6px 8px;
             text-align: right;
+            vertical-align: top;
           }
           
           th {
             background-color: #f8f9fa;
             font-weight: bold;
             color: #1e40af;
+            font-size: 12px;
           }
           
           tr:nth-child(even) {
@@ -117,10 +136,10 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
           .footer {
             margin-top: 30px;
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             color: #666;
             border-top: 1px solid #ddd;
-            padding-top: 20px;
+            padding-top: 15px;
           }
           
           .summary {
@@ -134,19 +153,36 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
           .summary h3 {
             margin: 0 0 10px 0;
             color: #1e40af;
+            font-size: 16px;
+          }
+          
+          .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 48px;
+            color: rgba(0,0,0,0.05);
+            z-index: -1;
+            font-weight: bold;
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <h1>${title}</h1>
-          <div class="date">تاريخ الطباعة: ${currentDate}</div>
-        </div>
+        <div class="watermark">أبواب بلا حدود</div>
+        
+        ${includeHeader ? `
+          <div class="header">
+            <h1>${title}</h1>
+            <div class="date">تاريخ الطباعة: ${currentDate}</div>
+          </div>
+        ` : ''}
         
         <div class="summary">
           <h3>ملخص البيانات</h3>
-          <p>إجمالي السجلات: ${data.length}</p>
-          <p>تم إنشاء هذا التقرير بواسطة نظام إدارة الطلبات</p>
+          <p><strong>إجمالي السجلات:</strong> ${data.length}</p>
+          <p><strong>تاريخ الإنشاء:</strong> ${currentDate}</p>
+          <p><strong>المصدر:</strong> نظام إدارة الطلبات - أبواب بلا حدود</p>
         </div>
         
         <div class="table-container">
@@ -170,39 +206,122 @@ export const PrintUtility = ({ data, title, columns }: PrintUtilityProps) => {
           </table>
         </div>
         
-        <div class="footer">
-          <p>تم إنشاء هذا التقرير من نظام إدارة الطلبات - ${currentDate}</p>
-          <p>© 2024 جميع الحقوق محفوظة</p>
-        </div>
+        ${includeFooter ? `
+          <div class="footer">
+            <p>تم إنشاء هذا التقرير من نظام إدارة الطلبات - أبواب بلا حدود</p>
+            <p>التاريخ: ${currentDate} | الصفحة 1 من 1</p>
+            <p>© 2024 أبواب بلا حدود - جميع الحقوق محفوظة</p>
+          </div>
+        ` : ''}
       </body>
       </html>
     `;
   };
 
-  const handleExportPDF = () => {
-    toast({
-      title: "جاري التصدير",
-      description: "جاري تحضير ملف PDF...",
-    });
+  const handleExportPDF = async () => {
+    try {
+      toast({
+        title: "جاري التصدير",
+        description: "جاري تحضير ملف PDF...",
+      });
 
-    // محاكاة عملية التصدير
-    setTimeout(() => {
+      const doc = new jsPDF({
+        orientation: orientation,
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      // إعداد الخط العربي
+      doc.setFont('helvetica');
+      
+      // العنوان
+      doc.setFontSize(20);
+      doc.text(title, 105, 20, { align: 'center' });
+      
+      // التاريخ
+      const currentDate = new Date().toLocaleDateString('ar-SA');
+      doc.setFontSize(12);
+      doc.text(`تاريخ الطباعة: ${currentDate}`, 105, 35, { align: 'center' });
+      
+      // الملخص
+      doc.setFontSize(14);
+      doc.text('ملخص البيانات', 20, 55);
+      doc.setFontSize(10);
+      doc.text(`إجمالي السجلات: ${data.length}`, 20, 65);
+      
+      // الجدول
+      let yPosition = 80;
+      const rowHeight = 10;
+      const colWidth = (doc.internal.pageSize.width - 40) / columns.length;
+      
+      // رؤوس الجدول
+      doc.setFontSize(10);
+      doc.setFillColor(240, 240, 240);
+      columns.forEach((col, index) => {
+        doc.rect(20 + (index * colWidth), yPosition, colWidth, rowHeight, 'F');
+        doc.text(col.header, 25 + (index * colWidth), yPosition + 7);
+      });
+      
+      yPosition += rowHeight;
+      
+      // بيانات الجدول
+      data.forEach((item) => {
+        if (yPosition > doc.internal.pageSize.height - 30) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        columns.forEach((col, index) => {
+          const value = item[col.accessor];
+          const displayValue = col.render ? col.render(value) : String(value || '-');
+          doc.rect(20 + (index * colWidth), yPosition, colWidth, rowHeight);
+          doc.text(displayValue.substring(0, 15), 25 + (index * colWidth), yPosition + 7);
+        });
+        
+        yPosition += rowHeight;
+      });
+      
+      // التذييل
+      doc.setFontSize(8);
+      doc.text('© 2024 أبواب بلا حدود - جميع الحقوق محفوظة', 105, doc.internal.pageSize.height - 10, { align: 'center' });
+      
+      doc.save(`${title}_${currentDate}.pdf`);
+      
       toast({
         title: "تم التصدير بنجاح",
         description: "تم تحميل ملف PDF بنجاح"
       });
-    }, 2000);
+      
+    } catch (error) {
+      toast({
+        title: "خطأ في التصدير",
+        description: "حدث خطأ أثناء إنشاء ملف PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAdvancedPrint = () => {
+    // فتح نافذة إعدادات الطباعة المتقدمة
+    toast({
+      title: "إعدادات الطباعة المتقدمة",
+      description: "سيتم تطوير هذه الميزة قريباً"
+    });
   };
 
   return (
     <div className="flex gap-2">
       <Button variant="outline" onClick={handlePrint}>
         <Printer className="h-4 w-4 mr-2" />
-        طباعة
+        طباعة سريعة
       </Button>
       <Button variant="outline" onClick={handleExportPDF}>
         <FileText className="h-4 w-4 mr-2" />
         تصدير PDF
+      </Button>
+      <Button variant="outline" onClick={handleAdvancedPrint}>
+        <Settings className="h-4 w-4 mr-2" />
+        إعدادات متقدمة
       </Button>
     </div>
   );
