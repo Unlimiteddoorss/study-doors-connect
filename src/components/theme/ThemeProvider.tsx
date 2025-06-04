@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useContext, createContext } from "react";
+import React, { useState, useEffect, useContext, createContext, ReactNode } from "react";
 
 type Theme = "light" | "dark" | "system";
 
 interface ThemeProviderProps {
-  children: React.ReactNode;
+  children: ReactNode;
   defaultTheme?: Theme;
 }
 

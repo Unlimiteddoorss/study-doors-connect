@@ -41,6 +41,7 @@ import BackupManagement from '@/pages/admin/BackupManagement';
 import AuditLogs from '@/pages/admin/AuditLogs';
 import FileManagement from '@/pages/admin/FileManagement';
 import TestingDashboard from '@/pages/admin/TestingDashboard';
+import DemoDataPage from '@/pages/admin/DemoDataPage';
 import AgentDashboard from '@/pages/agent/AgentDashboard';
 import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import HomePage from '@/pages/HomePage';
@@ -159,6 +160,7 @@ function App() {
               <Route path="notifications" element={<AdminNotifications />} />
               <Route path="reports" element={<Reports />} />
               <Route path="testing" element={<TestingDashboard />} />
+              <Route path="demo-data" element={<DemoDataPage />} />
               <Route path="permissions" element={
                 <ProtectedRoute requiredRole="admin">
                   <PermissionsManagement />
