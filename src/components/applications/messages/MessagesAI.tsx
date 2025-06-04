@@ -1,331 +1,383 @@
-import { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { MessageSquare, Bot, Book, Search, ArrowRight, User, Sparkles, SendHorizontal, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { Progress } from '@/components/ui/progress';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Bot, 
+  Send, 
+  MessageSquare, 
+  Lightbulb, 
+  FileText, 
+  University, 
+  Globe,
+  BookOpen,
+  MapPin,
+  Clock,
+  DollarSign,
+  User
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+interface AIMessage {
+  id: string;
+  content: string;
+  isUser: boolean;
+  timestamp: Date;
+  category?: 'general' | 'university' | 'documents' | 'visa' | 'fees';
+}
 
 interface MessagesAIProps {
   applicationId: string;
 }
 
-interface AIMessage {
-  id: string;
-  role: 'ai' | 'user' | 'system';
-  content: string;
-  timestamp: Date;
-  thinking?: boolean;
-  links?: {
-    title: string;
-    url: string;
-  }[];
-}
-
 const MessagesAI = ({ applicationId }: MessagesAIProps) => {
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = useState(true);
   const [messages, setMessages] = useState<AIMessage[]>([]);
-  const [inputValue, setInputValue] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(true);
+  const [inputMessage, setInputMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
-  // Predefined suggestions
-  const suggestions = [
-    "ما هي المستندات المطلوبة لطلبي؟",
-    "متى يمكنني توقع الحصول على رد نهائي؟",
-    "ما هي الخطوة التالية في عملية التقديم؟",
-    "هل يمكنني تعديل بعض المعلومات في طلبي؟"
+
+  // الرسائل التوجيهية
+  const quickQuestions = [
+    { icon: University, text: 'ما هي متطلبات القبول؟', category: 'university' },
+    { icon: FileText, text: 'ما هي المستندات المطلوبة؟', category: 'documents' },
+    { icon: Globe, text: 'كيف أحصل على تأشيرة الدراسة؟', category: 'visa' },
+    { icon: DollarSign, text: 'ما هي تكاليف الدراسة؟', category: 'fees' },
+    { icon: MapPin, text: 'معلومات عن السكن الجامعي', category: 'general' },
+    { icon: BookOpen, text: 'متى يبدأ العام الدراسي؟', category: 'university' }
   ];
-  
+
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-      
-      // Add welcome message
-      setMessages([
-        {
-          id: '1',
-          role: 'system',
-          content: 'تم تفعيل المساعد الذكي لطلبك. يمكنك طرح أي أسئلة متعلقة بطلب القبول الخاص بك.',
-          timestamp: new Date(),
-        },
-        {
-          id: '2',
-          role: 'ai',
-          content: `مرحباً! أنا المساعد الذكي الخاص بمنصة أبواب بلا حدود. يمكنني مساعدتك في أي استفسارات متعلقة بطلب القبول الخاص بك رقم (${applicationId}). ماذا تريد أن تعرف؟`,
-          timestamp: new Date(),
-        }
-      ]);
-    }, 1500);
+    // رسالة ترحيب من المساعد الذكي
+    const welcomeMessage: AIMessage = {
+      id: 'welcome',
+      content: 'مرحباً بك! أنا المساعد الذكي لمنصة أبواب بلا حدود. يمكنني مساعدتك في:\n\n• الإجابة على استفساراتك حول الجامعات والبرامج\n• توضيح متطلبات القبول والمستندات\n• شرح إجراءات التأشيرة والسفر\n• معلومات عن التكاليف والمنح\n• أي استفسارات أخرى متعلقة بدراستك\n\nاختر سؤالاً من الأسئلة السريعة أدناه أو اكتب استفسارك مباشرة.',
+      isUser: false,
+      timestamp: new Date(),
+      category: 'general'
+    };
     
-    return () => clearTimeout(timer);
-  }, [applicationId]);
-  
+    setMessages([welcomeMessage]);
+  }, []);
+
   useEffect(() => {
-    // Scroll to bottom when new messages arrive
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    scrollToBottom();
   }, [messages]);
-  
-  const handleSendMessage = (text: string = inputValue) => {
-    if (!text.trim()) return;
-    
-    // Add user message
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleSendMessage = async (messageText?: string) => {
+    const content = messageText || inputMessage.trim();
+    if (!content) return;
+
     const userMessage: AIMessage = {
       id: Date.now().toString(),
-      role: 'user',
-      content: text,
+      content,
+      isUser: true,
       timestamp: new Date()
     };
-    
-    setMessages([...messages, userMessage]);
-    setIsThinking(true);
-    setInputValue('');
-    setShowSuggestions(false);
-    
-    // Simulate AI thinking and response
-    const thinkingMessage: AIMessage = {
-      id: `thinking-${Date.now()}`,
-      role: 'ai',
-      content: '',
-      timestamp: new Date(),
-      thinking: true
-    };
-    
-    setMessages(prev => [...prev, thinkingMessage]);
-    
-    // Simulate AI response after a delay
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setIsTyping(true);
+    setIsLoading(true);
+
+    // محاكاة رد المساعد الذكي
     setTimeout(() => {
-      setIsThinking(false);
-      
-      // Replace thinking message with actual response
-      setMessages(prev => {
-        const filtered = prev.filter(m => !m.thinking);
-        
-        let response: AIMessage;
-        
-        // Generate different responses based on query content
-        if (text.includes('مستندات') || text.includes('وثائق')) {
-          response = {
-            id: Date.now().toString(),
-            role: 'ai',
-            content: 'للتقديم على هذا البرنامج، ستحتاج إلى المستندات التالية: \n\n1. جواز السفر ساري المفعول \n2. شهادة الثانوية العامة مترجمة ومصدقة \n3. كشف الدرجات \n4. صورتان شخصيتان بخلفية بيضاء \n5. شهادة إجادة اللغة الإنجليزية (إن وجدت) \n\nهل تحتاج مساعدة بخصوص أي من هذه المستندات؟',
-            timestamp: new Date(),
-            links: [
-              {
-                title: 'قائمة المستندات المطلوبة',
-                url: `/applications/${applicationId}/documents`
-              },
-              {
-                title: 'نماذج الترجمة المعتمدة',
-                url: '/resources/translation-templates'
-              }
-            ]
-          };
-        } else if (text.includes('متى') || text.includes('موعد')) {
-          response = {
-            id: Date.now().toString(),
-            role: 'ai',
-            content: 'وفقًا لجدول الطلبات الحالي، من المتوقع أن يتم مراجعة طلبك في موعد أقصاه 15 مايو 2025. عادةً ما تستغرق عملية المراجعة النهائية من 7 إلى 14 يومًا، وسيتم إخطارك فور صدور القرار النهائي عبر البريد الإلكتروني والإشعارات داخل المنصة.',
-            timestamp: new Date(),
-            links: [
-              {
-                title: 'جدول مواعيد القبول',
-                url: '/admission-timeline'
-              }
-            ]
-          };
-        } else if (text.includes('تعديل') || text.includes('تغيير')) {
-          response = {
-            id: Date.now().toString(),
-            role: 'ai',
-            content: 'يمكنك تعديل المعلومات في طلبك طالما أن حالة الطلب "قيد المراجعة الأولية". بعد بدء المراجعة النهائية، لن تتمكن من تعديل البيانات الأساسية، ولكن يمكنك دائمًا إرسال مستندات إضافية أو معلومات توضيحية عبر نظام المراسلات. للتعديل، يرجى الانتقال إلى صفحة تفاصيل الطلب والضغط على زر "تعديل الطلب".',
-            timestamp: new Date(),
-            links: [
-              {
-                title: 'تعديل الطلب',
-                url: `/applications/${applicationId}/edit`
-              }
-            ]
-          };
-        } else {
-          response = {
-            id: Date.now().toString(),
-            role: 'ai',
-            content: `شكرًا على سؤالك. بناءً على طلبك رقم (${applicationId})، يمكنني إخبارك أن طلبك حاليًا في مرحلة المراجعة الأولية. تم استلام جميع مستنداتك الأساسية، لكن قد تحتاج إلى تقديم شهادة إجادة اللغة الإنجليزية لاستكمال متطلبات القبول. هل ترغب في معرفة المزيد عن متطلبات اللغة أو أي جانب آخر من جوانب طلبك؟`,
-            timestamp: new Date()
-          };
-        }
-        
-        return [...filtered, response];
+      const aiResponse = generateAIResponse(content);
+      const aiMessage: AIMessage = {
+        id: (Date.now() + 1).toString(),
+        content: aiResponse.content,
+        isUser: false,
+        timestamp: new Date(),
+        category: aiResponse.category
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      setIsTyping(false);
+      setIsLoading(false);
+
+      toast({
+        description: "تم استلام رد المساعد الذكي"
       });
-    }, 2000);
+    }, 2000 + Math.random() * 2000);
   };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+
+  const generateAIResponse = (question: string): { content: string; category: string } => {
+    const lowerQuestion = question.toLowerCase();
+
+    if (lowerQuestion.includes('متطلبات') || lowerQuestion.includes('قبول')) {
+      return {
+        content: `متطلبات القبول تختلف حسب الجامعة والبرنامج، ولكن المتطلبات العامة تشمل:
+
+📋 **المستندات الأساسية:**
+• شهادة الثانوية العامة أو ما يعادلها
+• كشف درجات مصدق ومترجم
+• جواز سفر ساري المفعول
+• صور شخصية
+
+📊 **المتطلبات الأكاديمية:**
+• معدل لا يقل عن 70% للبرامج العادية
+• معدل لا يقل عن 85% للبرامج الطبية
+• اختبار اللغة (TOEFL/IELTS) لبعض البرامج
+
+هل تريد معلومات محددة عن برنامج معين؟`,
+        category: 'university'
+      };
+    }
+
+    if (lowerQuestion.includes('مستندات') || lowerQuestion.includes('أوراق')) {
+      return {
+        content: `المستندات المطلوبة للتقديم:
+
+📑 **المستندات الأساسية:**
+• شهادة الثانوية العامة الأصلية
+• كشف درجات مصدق من وزارة التعليم
+• ترجمة معتمدة للشهادات (إنجليزي/تركي)
+• تصديق من وزارة الخارجية
+
+🆔 **المستندات الشخصية:**
+• جواز سفر ساري (6 أشهر على الأقل)
+• 4 صور شخصية حديثة
+• صورة من بطاقة الهوية
+
+💼 **مستندات إضافية:**
+• خطاب نوايا (Statement of Purpose)
+• خطابات توصية (إن وجدت)
+• شهادات أنشطة أو خبرات
+
+يمكنني مساعدتك في معرفة المستندات المحددة لجامعتك.`,
+        category: 'documents'
+      };
+    }
+
+    if (lowerQuestion.includes('تأشيرة') || lowerQuestion.includes('فيزا')) {
+      return {
+        content: `إجراءات الحصول على تأشيرة الدراسة:
+
+✅ **خطوات التأشيرة:**
+1. الحصول على قبول جامعي نهائي
+2. تجهيز المستندات المطلوبة
+3. تحديد موعد في القنصلية
+4. تقديم الطلب ودفع الرسوم
+5. انتظار القرار (15-30 يوم)
+
+📋 **المستندات للتأشيرة:**
+• خطاب القبول الجامعي
+• إثبات القدرة المالية
+• تأمين صحي
+• حجز طيران مبدئي
+• إثبات السكن
+
+💰 **الرسوم:**
+• رسوم التأشيرة: حوالي 60-110 دولار
+• رسوم إضافية حسب الجنسية
+
+هل تحتاج معلومات عن متطلبات بلد معين؟`,
+        category: 'visa'
+      };
+    }
+
+    if (lowerQuestion.includes('تكلفة') || lowerQuestion.includes('رسوم') || lowerQuestion.includes('مصاريف')) {
+      return {
+        content: `تكاليف الدراسة والمعيشة:
+
+🎓 **الرسوم الدراسية السنوية:**
+• الجامعات الحكومية: 2,000 - 8,000 دولار
+• الجامعات الخاصة: 8,000 - 25,000 دولار
+• البرامج الطبية: 15,000 - 45,000 دولار
+
+🏠 **تكاليف المعيشة الشهرية:**
+• السكن: 200 - 600 دولار
+• الطعام: 150 - 300 دولار
+• المواصلات: 50 - 100 دولار
+• أخرى: 100 - 200 دولار
+
+💳 **المجموع السنوي:**
+• الحد الأدنى: 8,000 - 12,000 دولار
+• المتوسط: 15,000 - 25,000 دولار
+
+💡 **فرص توفير المال:**
+• المنح الدراسية الجزئية
+• العمل الجزئي للطلاب
+• السكن المشترك
+
+تختلف التكاليف حسب المدينة والجامعة. هل تريد معلومات عن جامعة محددة؟`,
+        category: 'fees'
+      };
+    }
+
+    // رد عام
+    return {
+      content: `شكراً لسؤالك! 
+
+أنا هنا لمساعدتك في جميع الاستفسارات المتعلقة بالدراسة في الخارج. يمكنني تقديم معلومات مفصلة عن:
+
+🎯 **خدماتي تشمل:**
+• معلومات عن الجامعات والبرامج
+• متطلبات القبول والتقديم
+• إجراءات التأشيرة والسفر
+• التكاليف والمنح الدراسية
+• السكن والمعيشة
+• نصائح للطلاب الجدد
+
+لا تتردد في طرح أي سؤال محدد أو استخدم الأسئلة السريعة لاستكشاف المواضيع المختلفة.
+
+كيف يمكنني مساعدتك اليوم؟`,
+      category: 'general'
+    };
+  };
+
+  const getCategoryIcon = (category?: string) => {
+    switch (category) {
+      case 'university': return <University className="h-4 w-4" />;
+      case 'documents': return <FileText className="h-4 w-4" />;
+      case 'visa': return <Globe className="h-4 w-4" />;
+      case 'fees': return <DollarSign className="h-4 w-4" />;
+      default: return <Lightbulb className="h-4 w-4" />;
     }
   };
-  
+
+  const getCategoryColor = (category?: string) => {
+    switch (category) {
+      case 'university': return 'text-blue-600 bg-blue-50';
+      case 'documents': return 'text-green-600 bg-green-50';
+      case 'visa': return 'text-purple-600 bg-purple-50';
+      case 'fees': return 'text-orange-600 bg-orange-50';
+      default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full">
-      {isLoading ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <MessageSquare className="h-12 w-12 text-unlimited-blue mb-4" />
-          <h3 className="text-lg font-medium mb-2">جاري تحميل المساعد الذكي...</h3>
-          <Progress value={65} className="w-[250px] mb-6" />
-          <p className="text-unlimited-gray text-center max-w-md">
-            المساعد الذكي هو تقنية جديدة تم إطلاقها في مايو 2025 لمساعدة الطلاب في الإجابة عن استفساراتهم بشكل فوري.
-          </p>
-        </div>
-      ) : (
-        <>
-          <div className="flex-1 overflow-auto p-4">
-            <div className="space-y-4">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex",
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  )}
-                >
-                  {message.role !== "user" && (
-                    <div className="w-8 h-8 rounded-full bg-unlimited-light-blue flex items-center justify-center ml-2">
-                      {message.role === "ai" ? (
-                        <MessageSquare className="h-4 w-4 text-unlimited-blue" />
-                      ) : (
-                        <Bot className="h-4 w-4 text-unlimited-gray" />
-                      )}
-                    </div>
-                  )}
-                  
-                  <div
-                    className={cn(
-                      "max-w-[80%] p-3 rounded-lg",
-                      message.role === "user"
-                        ? "bg-unlimited-blue text-white rounded-br-none"
-                        : message.role === "system"
-                        ? "bg-gray-100 text-gray-700"
-                        : "bg-unlimited-light-blue/20 text-unlimited-dark-blue rounded-bl-none"
-                    )}
-                  >
-                    {message.thinking ? (
-                      <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <div className="w-2 h-2 rounded-full bg-unlimited-blue animate-bounce [animation-delay:-0.3s]"></div>
-                        <div className="w-2 h-2 rounded-full bg-unlimited-blue animate-bounce [animation-delay:-0.15s]"></div>
-                        <div className="w-2 h-2 rounded-full bg-unlimited-blue animate-bounce"></div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="whitespace-pre-wrap">{message.content}</div>
-                        
-                        {message.links && message.links.length > 0 && (
-                          <div className="mt-3 space-y-2">
-                            <p className="text-sm font-medium">روابط مفيدة:</p>
-                            {message.links.map((link, index) => (
-                              <a
-                                key={index}
-                                href={link.url}
-                                className="flex items-center text-sm bg-white/60 hover:bg-white/80 p-2 rounded transition-colors"
-                              >
-                                <ArrowRight className="h-3 w-3 ml-1" />
-                                {link.title}
-                              </a>
-                            ))}
-                          </div>
-                        )}
-                        
-                        <div className="text-xs mt-1 text-unlimited-gray/70 text-right">
-                          {format(message.timestamp, 'HH:mm', { locale: ar })}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  
-                  {message.role === "user" && (
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
-                      <User className="h-4 w-4 text-unlimited-gray" />
-                    </div>
-                  )}
-                </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b bg-gradient-to-r from-unlimited-blue to-unlimited-light-blue text-white">
+        <div className="flex items-center gap-2">
+          <Bot className="h-6 w-6" />
+          <div>
+            <h3 className="font-semibold">المساعد الذكي</h3>
+            <p className="text-sm opacity-90">متاح 24/7 للإجابة على استفساراتك</p>
           </div>
-          
-          {showSuggestions && !isThinking && (
-            <div className="p-4 bg-gray-50 border-t">
-              <p className="text-sm font-medium mb-3 flex items-center gap-1">
-                <Sparkles className="h-4 w-4 text-unlimited-blue" />
-                اقتراحات أسئلة شائعة
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {suggestions.map((suggestion, index) => (
-                  <Button
-                    key={index}
-                    variant="outline"
-                    size="sm"
-                    className="justify-start overflow-hidden text-overflow-ellipsis"
-                    onClick={() => handleSendMessage(suggestion)}
-                  >
-                    <Search className="h-3 w-3 ml-2 flex-shrink-0" />
-                    <span className="truncate">{suggestion}</span>
-                  </Button>
-                ))}
+        </div>
+      </div>
+
+      {/* Messages */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex ${message.isUser ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[80%] p-3 rounded-lg ${
+                  message.isUser
+                    ? 'bg-unlimited-blue text-white rounded-br-none'
+                    : 'bg-gray-100 text-gray-800 rounded-bl-none'
+                }`}
+              >
+                {!message.isUser && message.category && (
+                  <div className="flex items-center gap-1 mb-2">
+                    <Badge variant="outline" className={`text-xs ${getCategoryColor(message.category)}`}>
+                      {getCategoryIcon(message.category)}
+                      <span className="mr-1">
+                        {message.category === 'university' && 'جامعات'}
+                        {message.category === 'documents' && 'مستندات'}
+                        {message.category === 'visa' && 'تأشيرة'}
+                        {message.category === 'fees' && 'رسوم'}
+                        {message.category === 'general' && 'عام'}
+                      </span>
+                    </Badge>
+                  </div>
+                )}
+                <div className="whitespace-pre-line text-sm">{message.content}</div>
+                <div className={`text-xs mt-1 opacity-70`}>
+                  {message.timestamp.toLocaleTimeString('ar-SA', { 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                  })}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="bg-gray-100 p-3 rounded-lg rounded-bl-none max-w-[80%]">
+                <div className="flex items-center gap-1">
+                  <Bot className="h-4 w-4 text-unlimited-blue" />
+                  <span className="text-sm text-gray-600">المساعد يكتب</span>
+                  <div className="flex gap-1">
+                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
-          
-          <div className="p-4 border-t">
-            <div className="flex gap-2">
-              <Textarea
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="اكتب سؤالك هنا..."
-                className="resize-none"
-                disabled={isThinking}
-              />
-              <div className="flex flex-col gap-2">
+        </div>
+        <div ref={messagesEndRef} />
+      </ScrollArea>
+
+      {/* Quick Questions */}
+      {messages.length <= 1 && (
+        <div className="p-4 border-t bg-gray-50">
+          <h4 className="text-sm font-medium mb-3 text-gray-700">أسئلة سريعة:</h4>
+          <div className="grid grid-cols-2 gap-2">
+            {quickQuestions.map((question, index) => {
+              const IconComponent = question.icon;
+              return (
                 <Button
-                  onClick={() => handleSendMessage()}
-                  disabled={!inputValue.trim() || isThinking}
-                >
-                  {isThinking ? (
-                    <RefreshCw className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <SendHorizontal className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
+                  key={index}
                   variant="outline"
-                  size="icon"
-                  onClick={() => setShowSuggestions(prev => !prev)}
-                  title={showSuggestions ? "إخفاء الاقتراحات" : "إظهار الاقتراحات"}
+                  size="sm"
+                  onClick={() => handleSendMessage(question.text)}
+                  className="justify-start text-xs h-auto p-2 whitespace-normal"
+                  disabled={isLoading}
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <IconComponent className="h-3 w-3 ml-1 flex-shrink-0" />
+                  {question.text}
                 </Button>
-              </div>
-            </div>
-            <div className="mt-2 text-xs text-unlimited-gray text-center">
-              <div className="flex items-center justify-center gap-1">
-                <Sparkles className="h-3 w-3" />
-                تم تحديث المساعد الذكي بتاريخ 8 مايو 2025 - الإصدار 2.5
-              </div>
-            </div>
+              );
+            })}
           </div>
-        </>
+        </div>
       )}
+
+      {/* Input */}
+      <div className="p-4 border-t">
+        <div className="flex gap-2">
+          <Textarea
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            placeholder="اكتب استفسارك هنا..."
+            className="resize-none"
+            rows={2}
+            disabled={isLoading}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+          />
+          <Button 
+            onClick={() => handleSendMessage()} 
+            disabled={!inputMessage.trim() || isLoading}
+            className="self-end"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
