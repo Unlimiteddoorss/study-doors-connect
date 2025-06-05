@@ -48,6 +48,19 @@ const ProgramDetails = () => {
 
     try {
       setIsLoading(true);
+      const programId = parseInt(id);
+      
+      if (isNaN(programId)) {
+        console.error('Invalid program ID:', id);
+        toast({
+          title: "خطأ",
+          description: "رقم البرنامج غير صحيح",
+          variant: "destructive",
+        });
+        navigate('/programs');
+        return;
+      }
+
       const { data, error } = await supabase
         .from('programs')
         .select(`
@@ -60,7 +73,7 @@ const ProgramDetails = () => {
             image_url
           )
         `)
-        .eq('id', id)
+        .eq('id', programId)
         .single();
 
       if (error) {

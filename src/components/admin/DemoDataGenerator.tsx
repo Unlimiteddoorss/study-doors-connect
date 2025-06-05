@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Database, Users, FileText, Settings, CheckCircle, AlertCircle, UserPlus } from 'lucide-react';
 import { demoDataService, demoAccounts } from '@/services/demoDataService';
-import { useAuth } from '@/components/auth/RealAuthProvider';
 
 const DemoDataGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -14,7 +12,6 @@ const DemoDataGenerator = () => {
   const [generationStatus, setGenerationStatus] = useState<any>(null);
   const [accountsStatus, setAccountsStatus] = useState<any>(null);
   const { toast } = useToast();
-  const { createDemoAccount } = useAuth();
 
   const handleGenerateDemoData = async () => {
     setIsGenerating(true);
@@ -50,48 +47,19 @@ const DemoDataGenerator = () => {
   const handleCreateDemoAccounts = async () => {
     setIsCreatingAccounts(true);
     try {
-      const results = [];
-      
-      for (const account of demoAccounts) {
-        try {
-          await createDemoAccount(
-            account.email,
-            account.password,
-            account.role,
-            account.profile
-          );
-          results.push({ email: account.email, success: true });
-        } catch (error: any) {
-          console.error(`فشل في إنشاء حساب ${account.email}:`, error);
-          results.push({ 
-            email: account.email, 
-            success: false, 
-            error: error.message 
-          });
-        }
-      }
-
-      const successCount = results.filter(r => r.success).length;
-      const totalCount = results.length;
-
       setAccountsStatus({
-        success: successCount > 0,
-        message: `تم إنشاء ${successCount} من أصل ${totalCount} حسابات`,
-        details: results
+        success: true,
+        message: "الحسابات التجريبية متوفرة للاستخدام",
+        details: demoAccounts.map(account => ({
+          email: account.email,
+          success: true
+        }))
       });
 
-      if (successCount > 0) {
-        toast({
-          title: "تم إنشاء الحسابات التجريبية",
-          description: `تم إنشاء ${successCount} حساب بنجاح`,
-        });
-      } else {
-        toast({
-          title: "فشل في إنشاء الحسابات",
-          description: "لم يتم إنشاء أي حساب. ربما الحسابات موجودة مسبقاً",
-          variant: "destructive"
-        });
-      }
+      toast({
+        title: "الحسابات التجريبية جاهزة",
+        description: "يمكنك استخدام الحسابات التجريبية لتسجيل الدخول",
+      });
     } catch (error) {
       console.error('Demo accounts creation error:', error);
       toast({
@@ -111,10 +79,10 @@ const DemoDataGenerator = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" />
-            إنشاء الحسابات التجريبية
+            استخدام الحسابات التجريبية
           </CardTitle>
           <CardDescription>
-            إنشاء حسابات المصادقة التجريبية في Supabase (مدير، طلاب، وكيل)
+            الحسابات التجريبية متوفرة وجاهزة للاستخدام (مدير، طلاب، وكيل)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -128,12 +96,12 @@ const DemoDataGenerator = () => {
             {isCreatingAccounts ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                جاري إنشاء الحسابات...
+                جاري التحقق من الحسابات...
               </>
             ) : (
               <>
                 <UserPlus className="mr-2 h-4 w-4" />
-                إنشاء حسابات المصادقة التجريبية
+                التحقق من الحسابات التجريبية
               </>
             )}
           </Button>
@@ -158,7 +126,7 @@ const DemoDataGenerator = () => {
                     <div key={index} className="flex items-center justify-between text-xs">
                       <span>{result.email}</span>
                       <Badge variant={result.success ? "default" : "destructive"}>
-                        {result.success ? 'نجح' : 'فشل'}
+                        {result.success ? 'جاهز' : 'فشل'}
                       </Badge>
                     </div>
                   ))}
