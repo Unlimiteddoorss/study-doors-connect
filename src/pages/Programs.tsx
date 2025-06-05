@@ -1,316 +1,217 @@
-import React, { useState, useEffect } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import SectionTitle from '@/components/shared/SectionTitle';
-import ProgramCard from '@/components/programs/ProgramCard';
-import ProgramsGrid from '@/components/programs/ProgramsGrid';
-import ProgramSearch from '@/components/programs/ProgramSearch';
-import ProgramFilters, { ProgramFiltersValues } from '@/components/programs/ProgramFilters';
-import { Button } from '@/components/ui/button';
-import { ModeToggle } from '@/components/shared/ModeToggle';
-import { Search, SlidersHorizontal } from 'lucide-react';
-import { dummyPrograms, availableCountries, convertToProgramInfo, ProgramInfo } from '@/data/programsData';
-import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Skeleton } from '@/components/ui/skeleton';
-import ProgramSEO from '@/components/seo/ProgramSEO';
 
-// Define a type for the filter toggle function
-type FilterToggleFunction = (filterValue: string) => void;
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { realUniversitiesService, RealProgram } from '@/services/realUniversitiesService';
+import { Search, MapPin, Clock, DollarSign, Users, Globe, Loader2, GraduationCap } from 'lucide-react';
 
 const Programs = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('all');
-  const [selectedDegree, setSelectedDegree] = useState('all');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
-  const [filteredPrograms, setFilteredPrograms] = useState(dummyPrograms);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // State for advanced filters
-  const [advancedFilters, setAdvancedFilters] = useState<ProgramFiltersValues>({
-    search: '',
-    country: [],
-    degreeType: [],
-    language: [],
-    duration: [1, 6],
-    tuitionRange: [0, 50000],
-    hasScholarship: false,
-    isPopular: false,
-  });
-
-  // Function to handle advanced filter application
-  const handleApplyFilters = (filters: ProgramFiltersValues) => {
-    setAdvancedFilters(filters);
-  };
-
-  // Toggle functions for advanced filters
-  const toggleCountryFilter: FilterToggleFunction = (country: string) => {
-    setAdvancedFilters(prev => ({
-      ...prev,
-      country: prev.country.includes(country)
-        ? prev.country.filter(c => c !== country)
-        : [...prev.country, country],
-    }));
-  };
-
-  const toggleLevelFilter: FilterToggleFunction = (level: string) => {
-    setAdvancedFilters(prev => ({
-      ...prev,
-      degreeType: prev.degreeType.includes(level)
-        ? prev.degreeType.filter(l => l !== level)
-        : [...prev.degreeType, level],
-    }));
-  };
-
-  const toggleSpecialtyFilter: FilterToggleFunction = (specialty: string) => {
-    setAdvancedFilters(prev => ({
-      ...prev,
-      // Assuming you want to store specialties in some state, modify accordingly
-      // Example: specialty: prev.specialty.includes(specialty) ? prev.specialty.filter(s => s !== specialty) : [...prev.specialty, specialty],
-    }));
-  };
-
-  const toggleLanguageFilter: FilterToggleFunction = (language: string) => {
-    setAdvancedFilters(prev => ({
-      ...prev,
-      language: prev.language.includes(language)
-        ? prev.language.filter(l => l !== language)
-        : [...prev.language, language],
-    }));
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast({
-      title: "تم البحث",
-      description: `تم البحث عن: ${searchTerm || 'جميع البرامج'}`,
-    });
-  };
-
-  const resetFilters = () => {
-    setSearchTerm('');
-    setSelectedCountry('all');
-    setSelectedDegree('all');
-    setSelectedSpecialty('all');
-    setAdvancedFilters({
-      search: '',
-      country: [],
-      degreeType: [],
-      language: [],
-      duration: [1, 6],
-      tuitionRange: [0, 50000],
-      hasScholarship: false,
-      isPopular: false,
-    });
-    toast({
-      title: "تم إعادة ضبط التصفية",
-      description: "تم مسح جميع عوامل التصفية والبحث",
-    });
-  };
+  
+  const [programs, setPrograms] = useState<RealProgram[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [selectedDegreeType, setSelectedDegreeType] = useState(searchParams.get('degree') || '');
+  const [selectedLanguage, setSelectedLanguage] = useState(searchParams.get('language') || '');
 
   useEffect(() => {
-    setIsLoading(true);
-    let results = [...dummyPrograms];
+    fetchPrograms();
+  }, [searchTerm, selectedDegreeType, selectedLanguage]);
 
-    // Apply search filter
-    if (searchTerm) {
-      results = results.filter(program =>
-        program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        program.university.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Apply country filter
-    if (selectedCountry !== 'all') {
-      results = results.filter(program => program.country.includes(selectedCountry));
-    }
-
-    // Apply degree filter
-    if (selectedDegree !== 'all') {
-      results = results.filter(program => selectedDegree === 'Bachelor' ? program.name.toLowerCase().includes('bachelor') : program.name.toLowerCase().includes(selectedDegree.toLowerCase()));
-    }
-
-    // Apply specialty filter
-    if (selectedSpecialty !== 'all') {
-      results = results.filter(program => program.name.toLowerCase().includes(selectedSpecialty.toLowerCase()));
-    }
-
-    // Apply advanced filters
-    if (advancedFilters.search) {
-      results = results.filter(program =>
-        program.name.toLowerCase().includes(advancedFilters.search.toLowerCase()) ||
-        program.university.toLowerCase().includes(advancedFilters.search.toLowerCase())
-      );
-    }
-
-    if (advancedFilters.country.length > 0) {
-      results = results.filter(program => advancedFilters.country.some(country => program.country.includes(country)));
-    }
-
-    if (advancedFilters.degreeType.length > 0) {
-      results = results.filter(program => advancedFilters.degreeType.some(degree => program.name.toLowerCase().includes(degree.toLowerCase())));
-    }
-
-    if (advancedFilters.language.length > 0) {
-      results = results.filter(program => {
-        if (Array.isArray(program.language)) {
-          return program.language.some(lang => advancedFilters.language.includes(lang));
-        }
-        return advancedFilters.language.includes(program.language);
+  const fetchPrograms = async () => {
+    try {
+      setIsLoading(true);
+      
+      let data: RealProgram[];
+      
+      if (searchTerm || selectedDegreeType || selectedLanguage) {
+        data = await realUniversitiesService.searchPrograms(searchTerm, {
+          degreeType: selectedDegreeType,
+          language: selectedLanguage
+        });
+      } else {
+        data = await realUniversitiesService.getAllPrograms();
+      }
+      
+      setPrograms(data);
+    } catch (error) {
+      console.error('Error fetching programs:', error);
+      toast({
+        title: "خطأ",
+        description: "فشل في جلب بيانات البرامج",
+        variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    results = results.filter(program => {
-      const duration = typeof program.duration === 'number'
-        ? program.duration
-        : typeof program.duration === 'string'
-          ? parseInt(program.duration)
-          : 0;
-      return duration >= advancedFilters.duration[0] && duration <= advancedFilters.duration[1];
-    });
+  const handleProgramClick = (programId: number) => {
+    navigate(`/programs/${programId}`);
+  };
 
-    results = results.filter(program => {
-      const fee = typeof program.tuition_fee === 'number'
-        ? program.tuition_fee
-        : 0;
-      return fee >= advancedFilters.tuitionRange[0] && fee <= advancedFilters.tuitionRange[1];
-    });
-
-    if (advancedFilters.hasScholarship) {
-      results = results.filter(program => program.has_scholarship);
-    }
-
-    if (advancedFilters.isPopular) {
-      results = results.filter(program => program.is_popular);
-    }
-
-    setFilteredPrograms(results);
-    setIsLoading(false);
-  }, [searchTerm, selectedCountry, selectedDegree, selectedSpecialty, advancedFilters]);
-
-  // Convert Legacy Program type to ProgramInfo type for rendering
-  const programsToDisplay = filteredPrograms
-    .map(program => convertToProgramInfo(program));
+  const handleApplyClick = (programId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/apply?program=${programId}`);
+  };
 
   return (
     <MainLayout>
-      <ProgramSEO
-        title="برامج الجامعات - ابحث عن برنامجك المثالي"
-        description="تصفح مجموعتنا الواسعة من البرامج الأكاديمية للعثور على البرنامج الذي يناسب اهتماماتك وأهدافك المهنية. اكتشف البرامج والجامعات الرائدة اليوم."
-        keywords={["برامج جامعية", "بحث عن برنامج", "برامج أكاديمية", "دراسة جامعية", "تعليم عالي"]}
-      />
       <div className="container mx-auto px-4 py-12">
-        <div className="flex justify-between items-center mb-6">
-          <SectionTitle
-            title="البرامج الدراسية"
-            subtitle="استكشف مجموعة واسعة من البرامج الأكاديمية من أفضل الجامعات."
-          />
-          <ModeToggle />
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-unlimited-dark-blue mb-4">
+            البرامج الدراسية
+          </h1>
+          <p className="text-xl text-unlimited-gray max-w-2xl mx-auto">
+            اكتشف البرامج الدراسية المتميزة في أفضل الجامعات
+          </p>
         </div>
 
-        {isMobile ? (
-          <>
-            <Button onClick={() => setIsFilterOpen(true)} className="mb-4">
-              <SlidersHorizontal className="w-4 h-4 ml-2" />
-              {isFilterOpen ? 'إخفاء الفلاتر' : 'عرض الفلاتر'}
-            </Button>
-
-            {isFilterOpen && (
-              <ProgramFilters
-                onApplyFilters={handleApplyFilters}
-                countries={availableCountries}
-                languages={['English', 'Arabic', 'Turkish']}
-                initialFilters={advancedFilters}
-                className="mb-8"
-                isMobileFilterOpen={isFilterOpen}
-                onCloseMobileFilter={() => setIsFilterOpen(false)}
-                filters={{
-                  countries: [],
-                  levels: [],
-                  specialties: [],
-                  languages: []
-                }}
-                toggleCountryFilter={toggleCountryFilter}
-                toggleLevelFilter={toggleLevelFilter}
-                toggleSpecialtyFilter={toggleSpecialtyFilter}
-                toggleLanguageFilter={toggleLanguageFilter}
-                resetFilters={resetFilters}
-              />
-            )}
-
-            <ProgramSearch
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedCountry={selectedCountry}
-              setSelectedCountry={setSelectedCountry}
-              selectedDegree={selectedDegree}
-              setSelectedDegree={setSelectedDegree}
-              selectedSpecialty={selectedSpecialty}
-              setSelectedSpecialty={setSelectedSpecialty}
-              handleSearch={handleSearch}
-              resetFilters={resetFilters}
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="ابحث عن البرامج..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
             />
-          </>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="md:col-span-1">
-              <ProgramFilters
-                onApplyFilters={handleApplyFilters}
-                countries={availableCountries}
-                languages={['English', 'Arabic', 'Turkish']}
-                initialFilters={advancedFilters}
-                className="mb-8"
-                filters={{
-                  countries: [],
-                  levels: [],
-                  specialties: [],
-                  languages: []
-                }}
-                toggleCountryFilter={toggleCountryFilter}
-                toggleLevelFilter={toggleLevelFilter}
-                toggleSpecialtyFilter={toggleSpecialtyFilter}
-                toggleLanguageFilter={toggleLanguageFilter}
-                resetFilters={resetFilters}
-              />
+          </div>
+          
+          <select
+            value={selectedDegreeType}
+            onChange={(e) => setSelectedDegreeType(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+          >
+            <option value="">جميع الدرجات</option>
+            <option value="Bachelor">البكالوريوس</option>
+            <option value="Master">الماجستير</option>
+            <option value="PhD">الدكتوراه</option>
+          </select>
+          
+          <select
+            value={selectedLanguage}
+            onChange={(e) => setSelectedLanguage(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+          >
+            <option value="">جميع اللغات</option>
+            <option value="English">الإنجليزية</option>
+            <option value="Turkish">التركية</option>
+            <option value="Arabic">العربية</option>
+          </select>
+        </div>
+
+        {/* Programs Grid */}
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-gray-600">جاري تحميل البرامج...</p>
             </div>
-            <div className="md:col-span-3">
-              <ProgramSearch
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                selectedCountry={selectedCountry}
-                setSelectedCountry={setSelectedCountry}
-                selectedDegree={selectedDegree}
-                setSelectedDegree={setSelectedDegree}
-                selectedSpecialty={selectedSpecialty}
-                setSelectedSpecialty={setSelectedSpecialty}
-                handleSearch={handleSearch}
-                resetFilters={resetFilters}
-              />
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="space-y-3">
-                      <Skeleton className="h-48 w-full" />
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
+          </div>
+        ) : programs.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-xl text-unlimited-gray mb-4">
+              لم يتم العثور على برامج تطابق بحثك
+            </p>
+            <Button onClick={() => {
+              setSearchTerm('');
+              setSelectedDegreeType('');
+              setSelectedLanguage('');
+            }}>
+              إعادة ضبط البحث
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {programs.map((program) => (
+              <Card 
+                key={program.id}
+                className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue cursor-pointer"
+                onClick={() => handleProgramClick(program.id)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <Badge variant="outline" className="bg-unlimited-blue/10">
+                      {program.degree_type}
+                    </Badge>
+                    <Badge variant="outline">
+                      {program.language}
+                    </Badge>
+                  </div>
+                  
+                  <h3 className="font-bold text-xl mb-2">
+                    {program.name_ar || program.name}
+                  </h3>
+                  
+                  <div className="flex items-center text-unlimited-gray mb-4">
+                    <MapPin className="h-4 w-4 ml-2" />
+                    <span>{program.universityName}</span>
+                  </div>
+                  
+                  {program.description_ar || program.description ? (
+                    <p className="text-gray-700 text-sm mb-4 line-clamp-2">
+                      {program.description_ar || program.description}
+                    </p>
+                  ) : null}
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm mb-4">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-4 w-4 text-unlimited-gray" />
+                      <div>
+                        <p className="text-unlimited-gray">المدة:</p>
+                        <p className="font-medium">{program.duration} سنوات</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <ProgramsGrid
-                  programs={programsToDisplay}
-                  currentPage={1}
-                  totalPages={1}
-                  onPageChange={() => {}}
-                  isLoading={isLoading}
-                  onResetFilters={resetFilters}
-                />
-              )}
-            </div>
+                    
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="h-4 w-4 text-unlimited-gray" />
+                      <div>
+                        <p className="text-unlimited-gray">الرسوم:</p>
+                        <p className="font-medium text-unlimited-blue">
+                          ${program.tuition_fee.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    {program.quota && (
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4 text-unlimited-gray" />
+                        <div>
+                          <p className="text-unlimited-gray">المقاعد:</p>
+                          <p className="font-medium">{program.quota}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      className="flex-1 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+                      onClick={() => handleProgramClick(program.id)}
+                    >
+                      <GraduationCap className="h-4 w-4 mr-2" />
+                      عرض التفاصيل
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={(e) => handleApplyClick(program.id, e)}
+                    >
+                      تقدم الآن
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         )}
       </div>

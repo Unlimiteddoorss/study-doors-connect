@@ -74,6 +74,7 @@ const ProgramDetails = () => {
           )
         `)
         .eq('id', programId)
+        .eq('is_active', true)
         .single();
 
       if (error) {
