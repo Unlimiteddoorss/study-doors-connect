@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -46,7 +47,6 @@ import UnauthorizedPage from '@/pages/UnauthorizedPage';
 import HomePage from '@/pages/HomePage';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import SecureLoginForm from '@/components/auth/SecureLoginForm';
-import SecureRegisterForm from '@/components/auth/SecureRegisterForm';
 import EnhancedStudentDashboard from '@/pages/students/EnhancedStudentDashboard';
 import ApplicationForm from '@/pages/ApplicationForm';
 import StudentApplications from '@/pages/dashboard/StudentApplications';
@@ -54,6 +54,7 @@ import StudentProfile from '@/pages/dashboard/StudentProfile';
 import ForgotPassword from '@/pages/ForgotPassword';
 import Register from '@/pages/Register';
 import EmailConfirmation from '@/pages/EmailConfirmation';
+import TestAuth from '@/pages/TestAuth';
 
 function App() {
   return (
@@ -78,6 +79,7 @@ function App() {
         <Route path="/turkish-universities" element={<TurkishUniversities />} />
         <Route path="/not-found" element={<NotFound />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/test-auth" element={<TestAuth />} />
         
         {/* Application Form Route */}
         <Route path="/apply" element={<ApplicationForm />} />
@@ -152,26 +154,10 @@ function App() {
               <Route path="reports" element={<Reports />} />
               <Route path="testing" element={<TestingDashboard />} />
               <Route path="demo-data" element={<DemoDataPage />} />
-              <Route path="permissions" element={
-                <ProtectedRoute requiredRole="admin">
-                  <PermissionsManagement />
-                </ProtectedRoute>
-              } />
-              <Route path="backup" element={
-                <ProtectedRoute requiredRole="admin">
-                  <BackupManagement />
-                </ProtectedRoute>
-              } />
-              <Route path="audit-logs" element={
-                <ProtectedRoute requiredRole="admin">
-                  <AuditLogs />
-                </ProtectedRoute>
-              } />
-              <Route path="file-management" element={
-                <ProtectedRoute requiredRole="admin">
-                  <FileManagement />
-                </ProtectedRoute>
-              } />
+              <Route path="permissions" element={<PermissionsManagement />} />
+              <Route path="backup" element={<BackupManagement />} />
+              <Route path="audit-logs" element={<AuditLogs />} />
+              <Route path="file-management" element={<FileManagement />} />
             </Routes>
           </ProtectedRoute>
         } />
