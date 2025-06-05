@@ -4,9 +4,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Eye, EyeOff, User, Mail, Phone, ShieldCheck, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Phone, ShieldCheck, Loader2, AlertCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/components/auth/RealAuthProvider';
 import { registerSchema } from '@/utils/validation';
 import { z } from 'zod';
@@ -28,6 +29,7 @@ const SecureRegisterForm = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   
   const navigate = useNavigate();
   const { signUp } = useAuth();
@@ -83,14 +85,40 @@ const SecureRegisterForm = () => {
         city: formData.city,
       });
       
-      // Navigate to dashboard after successful registration
-      navigate('/dashboard');
+      // Show success message instead of redirecting immediately
+      setRegistrationSuccess(true);
     } catch (error) {
       console.error('Registration error:', error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (registrationSuccess) {
+    return (
+      <div className="space-y-6">
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            تم إنشاء حسابك بنجاح! تحقق من بريدك الإلكتروني للحصول على رابط التأكيد.
+            بعد النقر على الرابط، ستتمكن من تسجيل الدخول إلى حسابك.
+          </AlertDescription>
+        </Alert>
+        
+        <div className="text-center space-y-4">
+          <p className="text-sm text-gray-600">
+            لم تستلم الرسالة؟ تحقق من مجلد الرسائل غير المرغوب فيها.
+          </p>
+          <Button 
+            onClick={() => navigate('/login')} 
+            className="w-full"
+          >
+            العودة إلى تسجيل الدخول
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleRegister} className="space-y-6">

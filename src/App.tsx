@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
@@ -53,6 +52,8 @@ import ApplicationForm from '@/pages/ApplicationForm';
 import StudentApplications from '@/pages/dashboard/StudentApplications';
 import StudentProfile from '@/pages/dashboard/StudentProfile';
 import ForgotPassword from '@/pages/ForgotPassword';
+import Register from '@/pages/Register';
+import EmailConfirmation from '@/pages/EmailConfirmation';
 
 function App() {
   return (
@@ -94,20 +95,10 @@ function App() {
             </div>
           </MainLayout>
         } />
-        <Route path="/register" element={
-          <MainLayout>
-            <div className="container mx-auto px-4 py-12">
-              <div className="max-w-md mx-auto">
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl font-bold">إنشاء حساب جديد</h1>
-                </div>
-                <SecureRegisterForm />
-              </div>
-            </div>
-          </MainLayout>
-        } />
+        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ForgotPassword />} />
+        <Route path="/email-confirmation" element={<EmailConfirmation />} />
         
         {/* Protected student routes */}
         <Route path="/dashboard" element={

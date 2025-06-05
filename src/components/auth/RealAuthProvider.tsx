@@ -66,6 +66,14 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setLoading(false);
         }
 
+        // Handle email confirmation
+        if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
+          toast({
+            title: "تم تأكيد البريد الإلكتروني",
+            description: "مرحباً بك في النظام",
+          });
+        }
+
         errorHandler.logInfo(`مصادقة المستخدم: ${event}`, { 
           event, 
           userId: session?.user?.id 
@@ -262,7 +270,8 @@ export const RealAuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           data: {
             full_name: userData.full_name,
             role: userData.role || 'student'
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/email-confirmation`
         }
       });
 
