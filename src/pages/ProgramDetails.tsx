@@ -6,94 +6,58 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2, MapPin, Clock, DollarSign, Users, GraduationCap, Globe, ArrowRight } from 'lucide-react';
-
-interface Program {
-  id: number;
-  name: string;
-  name_ar: string;
-  degree_type: string;
-  language: string;
-  duration: number;
-  tuition_fee: number;
-  description: string;
-  description_ar: string;
-  quota: number;
-  universities: {
-    name: string;
-    name_ar: string;
-    country: string;
-    city: string;
-    image_url: string;
-  };
-}
+import { realUniversitiesService } from '@/services/realUniversitiesService';
+import { 
+  Clock, 
+  DollarSign, 
+  Users, 
+  Globe, 
+  MapPin, 
+  GraduationCap, 
+  BookOpen,
+  Calendar,
+  ArrowRight,
+  Loader2
+} from 'lucide-react';
 
 const ProgramDetails = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [program, setProgram] = useState<Program | null>(null);
+  
+  const [program, setProgram] = useState<any>(null);
+  const [university, setUniversity] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchProgramDetails();
+    if (id) {
+      fetchProgramDetails();
+    }
   }, [id]);
 
   const fetchProgramDetails = async () => {
-    if (!id) {
-      navigate('/programs');
-      return;
-    }
-
     try {
       setIsLoading(true);
-      const programId = parseInt(id, 10);
       
-      if (isNaN(programId)) {
-        console.error('Invalid program ID:', id);
-        toast({
-          title: "خطأ",
-          description: "رقم البرنامج غير صحيح",
-          variant: "destructive",
-        });
-        navigate('/programs');
-        return;
+      // محاكاة جلب بيانات البرنامج
+      const programs = await realUniversitiesService.getAllPrograms();
+      const foundProgram = programs.find(p => p.id === parseInt(id!));
+      
+      if (!foundProgram) {
+        throw new Error('البرنامج غير موجود');
       }
-
-      const { data, error } = await supabase
-        .from('programs')
-        .select(`
-          *,
-          universities (
-            name,
-            name_ar,
-            country,
-            city,
-            image_url
-          )
-        `)
-        .eq('id', programId)
-        .eq('is_active', true)
-        .single();
-
-      if (error) {
-        console.error('Error fetching program:', error);
-        toast({
-          title: "خطأ",
-          description: "فشل في جلب تفاصيل البرنامج",
-          variant: "destructive",
-        });
-        navigate('/programs');
-        return;
-      }
-
-      setProgram(data);
+      
+      setProgram(foundProgram);
+      
+      // جلب بيانات الجامعة
+      const universityData = await realUniversitiesService.getUniversityWithPrograms(foundProgram.university_id);
+      setUniversity(universityData);
+      
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error fetching program details:', error);
       toast({
         title: "خطأ",
-        description: "حدث خطأ غير متوقع",
+        description: "فشل في جلب بيانات البرنامج",
         variant: "destructive",
       });
     } finally {
@@ -108,10 +72,12 @@ const ProgramDetails = () => {
   if (isLoading) {
     return (
       <MainLayout>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">جاري تحميل تفاصيل البرنامج...</p>
+        <div className="container mx-auto px-4 py-12">
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-gray-600">جاري تحميل تفاصيل البرنامج...</p>
+            </div>
           </div>
         </div>
       </MainLayout>
@@ -122,8 +88,10 @@ const ProgramDetails = () => {
     return (
       <MainLayout>
         <div className="container mx-auto px-4 py-12">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">البرنامج غير موجود</h1>
+          <div className="text-center py-20">
+            <h1 className="text-2xl font-bold text-gray-800 mb-4">
+              البرنامج غير موجود
+            </h1>
             <Button onClick={() => navigate('/programs')}>
               العودة إلى البرامج
             </Button>
@@ -136,144 +104,225 @@ const ProgramDetails = () => {
   return (
     <MainLayout>
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-              <span>الرئيسية</span>
-              <ArrowRight className="h-4 w-4" />
-              <span>البرامج</span>
-              <ArrowRight className="h-4 w-4" />
-              <span className="text-blue-500">{program.name_ar || program.name}</span>
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+            <span>البرامج</span>
+            <ArrowRight className="h-4 w-4" />
+            <span className="text-blue-600">{program.name_ar || program.name}</span>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                {program.name_ar || program.name}
+              </h1>
+              
+              {university && (
+                <div className="flex items-center gap-2 text-gray-600 mb-4">
+                  <MapPin className="h-5 w-5" />
+                  <span className="text-lg">{university.name_ar || university.name}</span>
+                  <span>•</span>
+                  <span>{university.city}, {university.country}</span>
+                </div>
+              )}
+              
+              <div className="flex flex-wrap gap-3 mb-6">
+                <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                  <GraduationCap className="h-4 w-4 mr-1" />
+                  {program.degree_type}
+                </Badge>
+                <Badge variant="outline" className="bg-green-50 text-green-700">
+                  <Globe className="h-4 w-4 mr-1" />
+                  {program.language}
+                </Badge>
+                <Badge variant="outline" className="bg-purple-50 text-purple-700">
+                  <Clock className="h-4 w-4 mr-1" />
+                  {program.duration} سنوات
+                </Badge>
+              </div>
             </div>
             
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-blue-800 mb-2">
-                  {program.name_ar || program.name}
-                </h1>
-                <div className="flex items-center gap-4 text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    <span>{program.universities.name_ar || program.universities.name}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Globe className="h-4 w-4" />
-                    <span>{program.universities.country}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <Button onClick={handleApply} size="lg">
-                <GraduationCap className="h-4 w-4 mr-2" />
-                التقديم للبرنامج
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Description */}
+            <div className="lg:w-80">
               <Card>
-                <CardHeader>
-                  <CardTitle>نبذة عن البرنامج</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-700 leading-relaxed">
-                    {program.description_ar || program.description || 'لا يوجد وصف متاح للبرنامج حالياً.'}
-                  </p>
+                <CardContent className="p-6">
+                  <div className="text-center mb-6">
+                    <div className="text-3xl font-bold text-blue-600 mb-2">
+                      ${program.tuition_fee?.toLocaleString()}
+                    </div>
+                    <div className="text-gray-600">الرسوم الدراسية السنوية</div>
+                  </div>
+                  
+                  <Button onClick={handleApply} className="w-full bg-blue-600 hover:bg-blue-700">
+                    تقدم الآن
+                  </Button>
                 </CardContent>
               </Card>
+            </div>
+          </div>
+        </div>
 
-              {/* University Info */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* المحتوى الرئيسي */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* وصف البرنامج */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BookOpen className="h-5 w-5" />
+                  نبذة عن البرنامج
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">
+                  {program.description_ar || program.description || 'لا يوجد وصف متاح للبرنامج حالياً.'}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* تفاصيل الجامعة */}
+            {university && (
               <Card>
                 <CardHeader>
-                  <CardTitle>الجامعة</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5" />
+                    عن الجامعة
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4">
-                    {program.universities.image_url && (
-                      <img
-                        src={program.universities.image_url}
-                        alt={program.universities.name}
-                        className="w-16 h-16 rounded-lg object-cover"
+                  <div className="flex items-start gap-4 mb-4">
+                    {university.image_url && (
+                      <img 
+                        src={university.image_url}
+                        alt={university.name_ar || university.name}
+                        className="w-20 h-20 object-cover rounded-lg"
                       />
                     )}
                     <div>
-                      <h3 className="font-semibold text-lg">
-                        {program.universities.name_ar || program.universities.name}
+                      <h3 className="font-bold text-lg mb-2">
+                        {university.name_ar || university.name}
                       </h3>
-                      <p className="text-gray-600">
-                        {program.universities.city}, {program.universities.country}
-                      </p>
+                      <div className="text-gray-600 mb-2">
+                        {university.city}, {university.country}
+                      </div>
+                      {university.founded_year && (
+                        <div className="text-sm text-gray-500">
+                          تأسست عام {university.founded_year}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Program Info */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>معلومات البرنامج</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">نوع الدرجة:</span>
-                    <Badge variant="outline">{program.degree_type}</Badge>
-                  </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">لغة التدريس:</span>
-                    <span className="font-medium">{program.language}</span>
-                  </div>
+                  {university.description_ar || university.description ? (
+                    <p className="text-gray-700">
+                      {university.description_ar || university.description}
+                    </p>
+                  ) : null}
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      المدة:
-                    </span>
-                    <span className="font-medium">{program.duration} سنوات</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600 flex items-center gap-1">
-                      <DollarSign className="h-4 w-4" />
-                      الرسوم:
-                    </span>
-                    <span className="font-medium text-blue-500">
-                      ${program.tuition_fee.toLocaleString()}
-                    </span>
-                  </div>
-                  
-                  {program.quota && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600 flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        المقاعد:
-                      </span>
-                      <span className="font-medium">{program.quota}</span>
+                  {university.website && (
+                    <div className="mt-4">
+                      <a 
+                        href={university.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                      >
+                        <Globe className="h-4 w-4" />
+                        زيارة موقع الجامعة
+                      </a>
                     </div>
                   )}
                 </CardContent>
               </Card>
+            )}
+          </div>
 
-              {/* Apply Button */}
-              <Card>
-                <CardContent className="pt-6">
-                  <Button onClick={handleApply} className="w-full" size="lg">
-                    <GraduationCap className="h-4 w-4 mr-2" />
-                    التقديم للبرنامج
+          {/* الشريط الجانبي */}
+          <div className="space-y-6">
+            {/* معلومات البرنامج */}
+            <Card>
+              <CardHeader>
+                <CardTitle>تفاصيل البرنامج</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-gray-600" />
+                    <span className="text-gray-600">المدة</span>
+                  </div>
+                  <span className="font-medium">{program.duration} سنوات</span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-gray-600" />
+                    <span className="text-gray-600">لغة التدريس</span>
+                  </div>
+                  <span className="font-medium">{program.language}</span>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4 text-gray-600" />
+                    <span className="text-gray-600">الرسوم السنوية</span>
+                  </div>
+                  <span className="font-medium text-blue-600">
+                    ${program.tuition_fee?.toLocaleString()}
+                  </span>
+                </div>
+                
+                {program.quota && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-gray-600" />
+                      <span className="text-gray-600">المقاعد المتاحة</span>
+                    </div>
+                    <span className="font-medium">{program.quota}</span>
+                  </div>
+                )}
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-gray-600" />
+                    <span className="text-gray-600">الدرجة العلمية</span>
+                  </div>
+                  <span className="font-medium">{program.degree_type}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* إجراءات سريعة */}
+            <Card>
+              <CardHeader>
+                <CardTitle>إجراءات سريعة</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button 
+                  onClick={handleApply}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  تقدم للبرنامج
+                </Button>
+                
+                {university && (
+                  <Button 
+                    variant="outline"
+                    onClick={() => navigate(`/universities/${university.id}`)}
+                    className="w-full"
+                  >
+                    عرض الجامعة
                   </Button>
-                  <p className="text-sm text-gray-600 mt-3 text-center">
-                    ابدأ رحلتك الأكاديمية معنا
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                )}
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => navigate('/programs')}
+                  className="w-full"
+                >
+                  برامج أخرى
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

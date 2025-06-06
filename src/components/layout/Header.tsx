@@ -28,6 +28,12 @@ const Header = () => {
             <Link to="/programs" className="text-gray-700 hover:text-blue-600">
               البرامج
             </Link>
+            <Link to="/about" className="text-gray-700 hover:text-blue-600">
+              من نحن
+            </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-blue-600">
+              اتصل بنا
+            </Link>
           </nav>
 
           {/* User Actions */}
@@ -44,7 +50,7 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link to="/auth">
+                <Link to="/login">
                   <Button variant="outline" size="sm">
                     <User className="h-4 w-4 mr-2" />
                     تسجيل الدخول

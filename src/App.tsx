@@ -9,6 +9,7 @@ import Contact from '@/pages/Contact';
 import SupportPage from '@/pages/SupportPage';
 import FAQ from '@/pages/FAQ';
 import ProgramsPage from '@/pages/ProgramsPage';
+import Programs from '@/pages/Programs';
 import ProgramDetails from '@/pages/ProgramDetails';
 import Universities from '@/pages/Universities';
 import UniversityDetails from '@/pages/UniversityDetails';
@@ -67,7 +68,8 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/faq" element={<FAQ />} />
-        <Route path="/programs" element={<ProgramsPage />} />
+        <Route path="/programs-page" element={<ProgramsPage />} />
+        <Route path="/programs" element={<Programs />} />
         <Route path="/programs/:id" element={<ProgramDetails />} />
         <Route path="/universities" element={<Universities />} />
         <Route path="/universities/:id" element={<UniversityDetails />} />
