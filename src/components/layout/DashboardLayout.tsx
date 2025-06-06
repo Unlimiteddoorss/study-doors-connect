@@ -11,7 +11,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children, userRole = 'student' }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header userRole={userRole} userName="محمد أحمد" />
+      <Header />
       <div className="flex">
         <Sidebar userRole={userRole} />
         <main className="flex-1 p-6">
