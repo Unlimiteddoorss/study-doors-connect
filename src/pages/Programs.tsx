@@ -67,10 +67,10 @@ const Programs = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-unlimited-dark-blue mb-4">
+          <h1 className="text-4xl font-bold text-blue-800 mb-4">
             البرامج الدراسية
           </h1>
-          <p className="text-xl text-unlimited-gray max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             اكتشف البرامج الدراسية المتميزة في أفضل الجامعات
           </p>
         </div>
@@ -90,7 +90,7 @@ const Programs = () => {
           <select
             value={selectedDegreeType}
             onChange={(e) => setSelectedDegreeType(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">جميع الدرجات</option>
             <option value="Bachelor">البكالوريوس</option>
@@ -101,7 +101,7 @@ const Programs = () => {
           <select
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">جميع اللغات</option>
             <option value="English">الإنجليزية</option>
@@ -120,7 +120,7 @@ const Programs = () => {
           </div>
         ) : programs.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-xl text-unlimited-gray mb-4">
+            <p className="text-xl text-gray-600 mb-4">
               لم يتم العثور على برامج تطابق بحثك
             </p>
             <Button onClick={() => {
@@ -136,12 +136,12 @@ const Programs = () => {
             {programs.map((program) => (
               <Card 
                 key={program.id}
-                className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue cursor-pointer"
+                className="overflow-hidden transition-all hover:shadow-lg hover:border-blue-500 cursor-pointer"
                 onClick={() => handleProgramClick(program.id)}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
-                    <Badge variant="outline" className="bg-unlimited-blue/10">
+                    <Badge variant="outline" className="bg-blue-50">
                       {program.degree_type}
                     </Badge>
                     <Badge variant="outline">
@@ -153,7 +153,7 @@ const Programs = () => {
                     {program.name_ar || program.name}
                   </h3>
                   
-                  <div className="flex items-center text-unlimited-gray mb-4">
+                  <div className="flex items-center text-gray-600 mb-4">
                     <MapPin className="h-4 w-4 ml-2" />
                     <span>{program.universityName}</span>
                   </div>
@@ -166,18 +166,18 @@ const Programs = () => {
                   
                   <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                     <div className="flex items-center gap-1">
-                      <Clock className="h-4 w-4 text-unlimited-gray" />
+                      <Clock className="h-4 w-4 text-gray-600" />
                       <div>
-                        <p className="text-unlimited-gray">المدة:</p>
+                        <p className="text-gray-600">المدة:</p>
                         <p className="font-medium">{program.duration} سنوات</p>
                       </div>
                     </div>
                     
                     <div className="flex items-center gap-1">
-                      <DollarSign className="h-4 w-4 text-unlimited-gray" />
+                      <DollarSign className="h-4 w-4 text-gray-600" />
                       <div>
-                        <p className="text-unlimited-gray">الرسوم:</p>
-                        <p className="font-medium text-unlimited-blue">
+                        <p className="text-gray-600">الرسوم:</p>
+                        <p className="font-medium text-blue-500">
                           ${program.tuition_fee.toLocaleString()}
                         </p>
                       </div>
@@ -185,9 +185,9 @@ const Programs = () => {
                     
                     {program.quota && (
                       <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4 text-unlimited-gray" />
+                        <Users className="h-4 w-4 text-gray-600" />
                         <div>
-                          <p className="text-unlimited-gray">المقاعد:</p>
+                          <p className="text-gray-600">المقاعد:</p>
                           <p className="font-medium">{program.quota}</p>
                         </div>
                       </div>
@@ -196,7 +196,7 @@ const Programs = () => {
                   
                   <div className="flex gap-2">
                     <Button 
-                      className="flex-1 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+                      className="flex-1 bg-blue-500 hover:bg-blue-800"
                       onClick={() => handleProgramClick(program.id)}
                     >
                       <GraduationCap className="h-4 w-4 mr-2" />

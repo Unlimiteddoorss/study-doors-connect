@@ -63,10 +63,10 @@ const Universities = () => {
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-unlimited-dark-blue mb-4">
+          <h1 className="text-4xl font-bold text-blue-800 mb-4">
             الجامعات المتاحة
           </h1>
-          <p className="text-xl text-unlimited-gray max-w-2xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             اكتشف أفضل الجامعات وابدأ رحلتك الأكاديمية معنا
           </p>
         </div>
@@ -85,7 +85,7 @@ const Universities = () => {
           <select
             value={selectedCountry}
             onChange={(e) => setSelectedCountry(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unlimited-blue"
+            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="">جميع البلدان</option>
             <option value="Turkey">تركيا</option>
@@ -102,7 +102,7 @@ const Universities = () => {
           </div>
         ) : universities.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-xl text-unlimited-gray mb-4">
+            <p className="text-xl text-gray-600 mb-4">
               لم يتم العثور على جامعات تطابق بحثك
             </p>
             <Button onClick={() => {
@@ -117,7 +117,7 @@ const Universities = () => {
             {universities.map((university) => (
               <Card 
                 key={university.id}
-                className="overflow-hidden transition-all hover:shadow-lg hover:border-unlimited-blue cursor-pointer"
+                className="overflow-hidden transition-all hover:shadow-lg hover:border-blue-500 cursor-pointer"
                 onClick={() => handleUniversityClick(university.id)}
               >
                 <div className="relative h-48 overflow-hidden">
@@ -139,7 +139,7 @@ const Universities = () => {
                     {university.name_ar || university.name}
                   </h3>
                   
-                  <div className="flex items-center text-unlimited-gray mb-4">
+                  <div className="flex items-center text-gray-600 mb-4">
                     <MapPin className="h-4 w-4 ml-2" />
                     <span>{university.city}, {university.country}</span>
                   </div>
@@ -153,9 +153,9 @@ const Universities = () => {
                   <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                     {university.founded_year && (
                       <div className="flex items-center gap-1">
-                        <Globe className="h-4 w-4 text-unlimited-gray" />
+                        <Globe className="h-4 w-4 text-gray-600" />
                         <div>
-                          <p className="text-unlimited-gray">تأسست:</p>
+                          <p className="text-gray-600">تأسست:</p>
                           <p className="font-medium">{university.founded_year}</p>
                         </div>
                       </div>
@@ -163,9 +163,9 @@ const Universities = () => {
                     
                     {university.programCount && (
                       <div className="flex items-center gap-1">
-                        <GraduationCap className="h-4 w-4 text-unlimited-gray" />
+                        <GraduationCap className="h-4 w-4 text-gray-600" />
                         <div>
-                          <p className="text-unlimited-gray">البرامج:</p>
+                          <p className="text-gray-600">البرامج:</p>
                           <p className="font-medium">{university.programCount} برنامج</p>
                         </div>
                       </div>
@@ -174,7 +174,7 @@ const Universities = () => {
                   
                   <div className="flex gap-2">
                     <Button 
-                      className="flex-1 bg-unlimited-blue hover:bg-unlimited-dark-blue"
+                      className="flex-1 bg-blue-500 hover:bg-blue-800"
                       onClick={() => handleUniversityClick(university.id)}
                     >
                       عرض التفاصيل

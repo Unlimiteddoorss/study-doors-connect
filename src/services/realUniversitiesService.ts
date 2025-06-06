@@ -16,7 +16,6 @@ export interface RealUniversity {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  programs?: RealProgram[];
   programCount?: number;
 }
 
@@ -41,7 +40,7 @@ export interface RealProgram {
 
 export const realUniversitiesService = {
   // جلب جميع الجامعات مع عدد البرامج
-  async getAllUniversities() {
+  async getAllUniversities(): Promise<RealUniversity[]> {
     try {
       const { data, error } = await supabase
         .from('universities')
@@ -59,7 +58,8 @@ export const realUniversitiesService = {
 
       const result = data?.map(university => ({
         ...university,
-        programCount: university.programs?.[0]?.count || 0
+        programCount: university.programs?.[0]?.count || 0,
+        programs: undefined // Remove programs array to match interface
       })) || [];
       
       errorHandler.logInfo(`تم جلب ${result.length} جامعة`, { count: result.length });
@@ -91,7 +91,6 @@ export const realUniversitiesService = {
         throw error;
       }
 
-      // إضافة عدد الطلبات لكل برنامج
       if (data.programs) {
         data.programs = data.programs.map((program: any) => ({
           ...program,
@@ -110,44 +109,8 @@ export const realUniversitiesService = {
     }
   },
 
-  // جلب البرامج لجامعة محددة مع الإحصائيات
-  async getUniversityPrograms(universityId: number) {
-    try {
-      const { data, error } = await supabase
-        .from('programs')
-        .select(`
-          *,
-          universities!university_id(name, name_ar),
-          applications!program_id(count)
-        `)
-        .eq('university_id', universityId)
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) {
-        errorHandler.logError(error, { context: 'getUniversityPrograms', universityId });
-        throw error;
-      }
-
-      const result = data?.map(program => ({
-        ...program,
-        universityName: program.universities?.name,
-        applicationCount: program.applications?.[0]?.count || 0
-      })) || [];
-      
-      errorHandler.logInfo(`تم جلب ${result.length} برنامج للجامعة: ${universityId}`, { 
-        universityId, 
-        programsCount: result.length 
-      });
-      return result;
-    } catch (error) {
-      errorHandler.logError(error, { context: 'getUniversityPrograms', universityId });
-      throw error;
-    }
-  },
-
   // جلب جميع البرامج مع تفاصيل الجامعات
-  async getAllPrograms() {
+  async getAllPrograms(): Promise<RealProgram[]> {
     try {
       const { data, error } = await supabase
         .from('programs')
@@ -167,8 +130,6 @@ export const realUniversitiesService = {
       const result = data?.map(program => ({
         ...program,
         universityName: program.universities?.name,
-        universityCountry: program.universities?.country,
-        universityCity: program.universities?.city,
         applicationCount: program.applications?.[0]?.count || 0
       })) || [];
       
@@ -180,8 +141,8 @@ export const realUniversitiesService = {
     }
   },
 
-  // البحث في الجامعات والبرامج
-  async searchUniversities(searchTerm: string, country?: string, degreeType?: string) {
+  // البحث في الجامعات
+  async searchUniversities(searchTerm: string, country?: string): Promise<RealUniversity[]> {
     try {
       let query = supabase
         .from('universities')
@@ -206,29 +167,15 @@ export const realUniversitiesService = {
         throw error;
       }
 
-      let result = data?.map(university => ({
+      const result = data?.map(university => ({
         ...university,
-        programCount: university.programs?.[0]?.count || 0
+        programCount: university.programs?.[0]?.count || 0,
+        programs: undefined
       })) || [];
-
-      // تصفية حسب نوع الدرجة إذا تم تحديدها
-      if (degreeType) {
-        const universityIds = result.map(u => u.id);
-        const { data: programs } = await supabase
-          .from('programs')
-          .select('university_id')
-          .in('university_id', universityIds)
-          .eq('degree_type', degreeType)
-          .eq('is_active', true);
-
-        const filteredIds = new Set(programs?.map(p => p.university_id));
-        result = result.filter(u => filteredIds.has(u.id));
-      }
       
       errorHandler.logInfo(`تم البحث في الجامعات: "${searchTerm}"`, { 
         searchTerm, 
         country,
-        degreeType,
         resultsCount: result.length
       });
       return result;
@@ -240,12 +187,9 @@ export const realUniversitiesService = {
 
   // البحث في البرامج
   async searchPrograms(searchTerm: string, filters?: {
-    country?: string;
     degreeType?: string;
     language?: string;
-    minFee?: number;
-    maxFee?: number;
-  }) {
+  }): Promise<RealProgram[]> {
     try {
       let query = supabase
         .from('programs')
@@ -268,14 +212,6 @@ export const realUniversitiesService = {
         query = query.eq('language', filters.language);
       }
 
-      if (filters?.minFee) {
-        query = query.gte('tuition_fee', filters.minFee);
-      }
-
-      if (filters?.maxFee) {
-        query = query.lte('tuition_fee', filters.maxFee);
-      }
-
       const { data, error } = await query.order('name');
 
       if (error) {
@@ -283,18 +219,11 @@ export const realUniversitiesService = {
         throw error;
       }
 
-      let result = data?.map(program => ({
+      const result = data?.map(program => ({
         ...program,
         universityName: program.universities?.name,
-        universityCountry: program.universities?.country,
-        universityCity: program.universities?.city,
         applicationCount: program.applications?.[0]?.count || 0
       })) || [];
-
-      // تصفية حسب البلد إذا تم تحديده
-      if (filters?.country) {
-        result = result.filter(p => p.universityCountry === filters.country);
-      }
       
       errorHandler.logInfo(`تم البحث في البرامج: "${searchTerm}"`, { 
         searchTerm, 
@@ -304,76 +233,6 @@ export const realUniversitiesService = {
       return result;
     } catch (error) {
       errorHandler.logError(error, { context: 'searchPrograms', searchTerm, filters });
-      throw error;
-    }
-  },
-
-  // إحصائيات الجامعات والبرامج المحسنة
-  async getUniversitiesStats() {
-    try {
-      const [universitiesResult, programsResult, applicationsResult] = await Promise.all([
-        supabase.from('universities').select('id, country, is_active'),
-        supabase.from('programs').select('id, university_id, degree_type, language, is_active'),
-        supabase.from('applications').select('id, program_id, status, created_at')
-      ]);
-
-      if (universitiesResult.error) {
-        errorHandler.logError(universitiesResult.error, { context: 'getUniversitiesStats', operation: 'universities_query' });
-        throw universitiesResult.error;
-      }
-      
-      if (programsResult.error) {
-        errorHandler.logError(programsResult.error, { context: 'getUniversitiesStats', operation: 'programs_query' });
-        throw programsResult.error;
-      }
-
-      if (applicationsResult.error) {
-        errorHandler.logError(applicationsResult.error, { context: 'getUniversitiesStats', operation: 'applications_query' });
-        throw applicationsResult.error;
-      }
-
-      const universities = universitiesResult.data || [];
-      const programs = programsResult.data || [];
-      const applications = applicationsResult.data || [];
-
-      const activeUniversities = universities.filter(uni => uni.is_active);
-      const activePrograms = programs.filter(prog => prog.is_active);
-
-      const stats = {
-        totalUniversities: activeUniversities.length,
-        totalPrograms: activePrograms.length,
-        totalApplications: applications.length,
-        countries: [...new Set(universities.map(uni => uni.country))].length,
-        averageProgramsPerUniversity: activeUniversities.length ? 
-          Math.round(activePrograms.length / activeUniversities.length) : 0,
-        degreeTypes: {
-          bachelor: programs.filter(p => p.degree_type === 'Bachelor').length,
-          master: programs.filter(p => p.degree_type === 'Master').length,
-          phd: programs.filter(p => p.degree_type === 'PhD').length
-        },
-        languages: {
-          english: programs.filter(p => p.language === 'English').length,
-          turkish: programs.filter(p => p.language === 'Turkish').length,
-          arabic: programs.filter(p => p.language === 'Arabic').length
-        },
-        applicationStats: {
-          thisMonth: applications.filter(app => {
-            const appDate = new Date(app.created_at);
-            const now = new Date();
-            return appDate.getMonth() === now.getMonth() && 
-                   appDate.getFullYear() === now.getFullYear();
-          }).length,
-          pending: applications.filter(app => app.status === 'pending').length,
-          approved: applications.filter(app => 
-            app.status === 'accepted' || app.status === 'approved'
-          ).length
-        }
-      };
-
-      errorHandler.logInfo('تم حساب إحصائيات الجامعات المحسنة', stats);
-      return stats;
-    } catch (error) {
-      errorHandler.logError(error, { context: 'getUniversitiesStats' });
       throw error;
     }
   }

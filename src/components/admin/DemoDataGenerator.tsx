@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Database, Users, FileText, Settings, CheckCircle, AlertCircle, UserPlus } from 'lucide-react';
+import { Loader2, Database, Users, CheckCircle, AlertCircle, UserPlus } from 'lucide-react';
 import { demoAccounts } from '@/services/demoDataService';
 import { realDemoDataService } from '@/services/realDemoDataService';
 

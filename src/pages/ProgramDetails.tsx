@@ -30,7 +30,7 @@ interface Program {
 }
 
 const ProgramDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [program, setProgram] = useState<Program | null>(null);
@@ -48,7 +48,7 @@ const ProgramDetails = () => {
 
     try {
       setIsLoading(true);
-      const programId = parseInt(id);
+      const programId = parseInt(id, 10);
       
       if (isNaN(programId)) {
         console.error('Invalid program ID:', id);
@@ -144,12 +144,12 @@ const ProgramDetails = () => {
               <ArrowRight className="h-4 w-4" />
               <span>البرامج</span>
               <ArrowRight className="h-4 w-4" />
-              <span className="text-unlimited-blue">{program.name_ar || program.name}</span>
+              <span className="text-blue-500">{program.name_ar || program.name}</span>
             </div>
             
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-unlimited-dark-blue mb-2">
+                <h1 className="text-3xl font-bold text-blue-800 mb-2">
                   {program.name_ar || program.name}
                 </h1>
                 <div className="flex items-center gap-4 text-gray-600">
@@ -244,7 +244,7 @@ const ProgramDetails = () => {
                       <DollarSign className="h-4 w-4" />
                       الرسوم:
                     </span>
-                    <span className="font-medium text-unlimited-blue">
+                    <span className="font-medium text-blue-500">
                       ${program.tuition_fee.toLocaleString()}
                     </span>
                   </div>
